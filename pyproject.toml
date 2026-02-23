@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools_scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gn_module_individuals"
+dynamic = ["version"]
+description = "Module individus GeoNature"
+readme = { file = "README.md", content-type = "text/markdown" }
+maintainers = [
+  { name = "Parc National de la Vanoise", email = "equipe.si@vanoise-parcnational.fr" },
+]
+license = { file = "LICENSE.txt" }
+dependencies = ["geonature >= 2.16"]
+urls = { Repository = "https://github.com/PnVanoise/gn_module_individuals/" }
+requires-python = ">=3.9"
+
+[project.entry-points.gn_module]
+code = "gn_module_individuals:MODULE_CODE"
+label = "gn_module_individuals:MODULE_LABEL"
+picto = "gn_module_individuals:MODULE_PICTO"
+blueprint = "gn_module_individuals.blueprint:blueprint"
+config_schema = "gn_module_individuals.conf_schema:GnModuleSchemaConf"
+migrations = "gn_module_individuals:migrations"
+alembic_branch = "gn_module_individuals:ALEMBIC_BRANCH"
+
+[tool.setuptools]
+package-dir = { "" = "backend" }
+
+[tool.setuptools.dynamic]
+version = { file = "VERSION" }
+
+[tool.setuptools.packages.find]
+where = ["backend"]
+
+[tool.setuptools.package-data]
+"gn_module_individuals" = ["templates/**", "static/**"]
+"gn_module_individuals.migrations" = ["data/*.sql"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["backend"]
+
+[tool.coverage.run]
+source = ["gn_module_individuals"]
+omit = ["*/tests/*", "*/migrations/*"]
+
+[tool.black]
+line-length = 99
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | node_modules
+    | venv
+    | dependencies
+  )/
+)
+'''
