@@ -14,7 +14,7 @@ export class TabComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('Config:', this.config);
+    console.log('Config:', this.config["INDIVIDUALS"]["TEST_VAR"]);
   }
 
 }

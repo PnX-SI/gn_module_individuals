@@ -2,6 +2,7 @@
 frontend/app/module.config.ts
 frontend/tsconfig.json
 frontend/node_modules/
+*_config.toml
 
 # Python
 *.egg-info

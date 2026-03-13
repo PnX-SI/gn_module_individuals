@@ -1,6 +1,36 @@
 # Doc du PNV pour le developement dans l'environnement de GeoNature
 
-L'idée de cette doc est de servir de mémo, de lister différentes astuces ...
+> L'idée de cette doc est de servir de mémo, de lister différentes astuces à destination des développeurs du module "individus".
+
+- [Doc du PNV pour le developement dans l'environnement de GeoNature](#doc-du-pnv-pour-le-developement-dans-lenvironnement-de-geonature)
+  - [Git / github](#git--github)
+    - [`git stash`](#git-stash)
+    - [Associer une branche à un dépôt distant](#associer-une-branche-à-un-dépôt-distant)
+    - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
+    - [Cloner une branche spécifique](#cloner-une-branche-spécifique)
+    - [Renommer une branche](#renommer-une-branche)
+  - [Backend](#backend)
+    - [Accès aux variables de configuration du module](#accès-aux-variables-de-configuration-du-module)
+    - [Logs](#logs)
+    - [Alembic](#alembic)
+      - [Etat des migrations](#etat-des-migrations)
+      - [Générer un nouveau fichier de version](#générer-un-nouveau-fichier-de-version)
+      - [Soumettre ou retirer une révision](#soumettre-ou-retirer-une-révision)
+    - [SQLAlchemy](#sqlalchemy)
+      - [`scalars()`](#scalars)
+      - [`@hybrid_property`](#hybrid_property)
+    - [Sérialiser](#sérialiser)
+      - [Sans marshmallow](#sans-marshmallow)
+      - [Avec marshmallow](#avec-marshmallow)
+        - [Exemple de sérialisation avec un schéma marshmallow](#exemple-de-sérialisation-avec-un-schéma-marshmallow)
+        - [Utilisation de `Method()` dans le schema](#utilisation-de-method-dans-le-schema)
+        - [Validation d'une donnée dans le schéma](#validation-dune-donnée-dans-le-schéma)
+        - [Mixin or not ?](#mixin-or-not-)
+  - [Frontend](#frontend)
+    - [Utilisation des variables de configuration du module](#utilisation-des-variables-de-configuration-du-module)
+    - [Mécanisme de traduction](#mécanisme-de-traduction)
+      - [Configuration de `gnModule.module.ts`](#configuration-de-gnmodulemodulets)
+      - [Utilisation du pipe de traduction](#utilisation-du-pipe-de-traduction)
 
 ## Git / github
 
@@ -67,7 +97,42 @@ Clone directement de la branche concernée
 git clone -b <branche> --single-branch <URL_DEPOT>
 ```
 
+### Renommer une branche
+
+Renommer en local :
+
+```sh
+git branch -m <old_branch> <new_branch>
+```
+
+Supprimer la branche qui avait été poussée
+
+```sh
+git push origin --delete <old_branch>
+```
+
+Repousser la nouvelle branche, qui sera créée sur le répo distant :
+
+```sh
+git push --set-upstream origin <new_branch>
+```
+
 ## Backend
+
+### Accès aux variables de configuration du module
+
+Le fichier de configuration, `individuals_config.toml` doit soit être place dans `~/geonature/config` (pour la prod), soit un lien symbolique doit être créé dans ce dossier depuis `~/gn_module_individuals/individuals_config.toml` (plus pratique pour le dev).
+
+Le fichier `~/gn_module_individuals/backend/conf_shema.py` doit être créé et doit déclarer toutes les variables possibles pour le modul
+
+```python
+from marshmallow import Schema, fields
+
+class GnModuleSchemaConf(Schema):
+    TEST_VAR = fields.String(load_default="Bonjour")
+```
+
+Les variables non déclarées ici ne pourront pas être surcouchées via le fichier `.toml`.
 
 ### Logs
 
@@ -104,7 +169,7 @@ L'option `--head` indique à partir de quel endroit de l'arbre des révisions do
 
 Cette commande crée donc le fichier `.../revisions/<serial>_<revision_name>.py`.
 
-> [!NOTE] 
+> [!NOTE]
 > Pour la 1ère révision d'un modèle, il est impératif de préciser l'option `--branch-label <nom_branche>` afin que la variable `branch_labels` du fichier de migration soit renseigné (cela pouvant être fait à postériori directement dans le fichier avant de soumettre la migration à alembic).
 
 #### Soumettre ou retirer une révision
@@ -368,6 +433,29 @@ def list_indiv():
 ```
 
 ## Frontend
+
+### Utilisation des variables de configuration du module
+
+Pour cela il faut initialiser le contructeur du composant principal comme cela :
+
+```typescript
+import { ConfigService } from '@geonature/services/config.service';
+
+export class TabComponent implements OnInit {
+  
+    constructor(
+        private config: ConfigService,
+    ) {}
+}
+```
+
+Puis appeler la variable souhaitée, comme par exemple :
+
+```typescript
+ngOnInit() {
+    console.log('Config:', this.config["INDIVIDUALS"]["TEST_VAR"]);
+}
+```
 
 ### Mécanisme de traduction
 
