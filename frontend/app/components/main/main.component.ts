@@ -1,13 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-
 import { ConfigService } from '@geonature/services/config.service';
 
 @Component({
-  selector: 'ng-individuals-tab',
-  templateUrl: 'tab.component.html',
-  styleUrls: ['tab.component.scss'],
+  selector: 'gn-module-main',
+  templateUrl: 'main.component.html',
+  styleUrls: ['main.component.scss'],
 })
-export class TabComponent implements OnInit {
+export class MainComponent implements OnInit {
   
   constructor(
     private config: ConfigService,

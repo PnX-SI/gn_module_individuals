@@ -1,0 +1,17 @@
+<div class="list-container">
+  <div 
+    class="col-12 padding-sm-occ"
+    [ngStyle]="{ 'min-height.px': contentHeight }"
+  >
+    <ngx-datatable
+        class="material striped margin-top-xs table-size expandable"
+        [columnMode]="'force'"
+        [columns]=""
+    ></ngx-datatable>
+  </div>
+</div>
+
+<!-- Sur datatable-body-cell pour centrer le contenu des lignes du tableau :
+display: flex;
+align-items: center; /* centre verticalement */
+justify-content: flex-start; /* alignement horizontal inchangé */ -->

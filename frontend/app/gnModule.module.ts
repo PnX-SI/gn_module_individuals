@@ -14,21 +14,20 @@ import { CustomTranslateLoader } from '@geonature/shared/translate/custom-loader
 import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { I18nService } from '@geonature/shared/translate/i18n-service';
 
-import { TabComponent } from './components/tab/tab.component';
-
-
-export const routes: Routes = [
-  {
-    path: "",
-    component: TabComponent,
-  },
-];
+import { routes } from './module.routes';
+import { MainComponent } from './components/main/main.component';
+import { MapListComponent } from './components/map-list/map-list.component';
+import { ListComponent } from './components/list/list.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
 }
 @NgModule({
-  declarations: [TabComponent], // Not standalone
+  declarations: [
+    MainComponent,
+    MapListComponent,
+    ListComponent
+  ], // Not standalone
   imports: [
     HttpClientXsrfModule.withOptions({
       cookieName: 'token',
