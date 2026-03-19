@@ -1,0 +1,25 @@
+<div class="map-list-container">
+
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
+    [ngStyle]="{ 'min-height.px': contentHeight }"
+  >
+    <pnx-map-list
+      [idName]="mapListService.idName"
+      height="100%"
+    ></pnx-map-list>
+  </div>
+  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
+    [ngStyle]="{ 'min-height.px': contentHeight }"
+  >
+    <ngx-datatable
+        class="material striped margin-top-xs table-size expandable"
+        [columnMode]="'force'"
+        [columns]="mapListService.displayColumns"
+    ></ngx-datatable>
+  </div>
+</div>
+
+<!-- Sur datatable-body-cell pour centrer le contenu des lignes du tableau :
+display: flex;
+align-items: center; /* centre verticalement */
+justify-content: flex-start; /* alignement horizontal inchangé */ -->
