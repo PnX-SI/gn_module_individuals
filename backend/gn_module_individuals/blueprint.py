@@ -1,13 +1,14 @@
 """
-Définition des routes du module export
+Définition des routes du module individus
 """
 
 # import logging
 
+from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import joinedload
 
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify,g
 from werkzeug.exceptions import NotFound, BadRequest
 
 from geonature.core.gn_permissions import decorators as permissions
@@ -16,6 +17,8 @@ from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
 from . import MODULE_CODE
+from .schemas import TrackingDevicesSchema
+from .models import TrackingDevices
 
 # A utiliser pour stocker les logs dans le fichier de log
 # logger = logging.getLogger(__name__)
@@ -127,169 +130,54 @@ def list_captures():
 @login_required
 @json_resp
 def list_devices():
-    per_page = request.args.get("per_page", type=int, default=5)
-    page = request.args.get("page", type=int, default=1)
-    items = [
-                {
-                    "comment": "Test balise GPS/Lotek",
-                    "id_digitiser": 5,
-                    "id_nomenclature_device_type": 628,
-                    "id_referer": 4,
-                    "id_tracking_device": 5,
-                    "meta_create_date": "10-03-2025",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Partenaire",
-                    "referer_name": "test Agent",
-                    "nomenclature_device_type_name": "Balise GPS",
-                    "provider_device_id": "18256-9G",
-                    "provider_name": "Lotek",
-                    "last_individual_equipped_name": "Tartampion (Bouquetin des Alpes)",
-                },
-                {
-                    "comment": "Test balise GPS/GSM",
-                    "id_digitiser": 4,
-                    "id_nomenclature_device_type": 628,
-                    "id_referer": 3,
-                    "id_tracking_device": 6,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Agent",
-                    "referer_name": "test Administrateur",
-                    "nomenclature_device_type_name": "Balise GPS",
-                    "provider_device_id": "182A256ATXG",
-                    "provider_name": "GSM Provider",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GPS",
-                    "id_digitiser": 4,
-                    "id_nomenclature_device_type": 628,
-                    "id_referer": 4,
-                    "id_tracking_device": 7,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Agent",
-                    "referer_name": "test Agent",
-                    "nomenclature_device_type_name": "Balise GPS",
-                    "provider_device_id": "182243",
-                    "provider_name": "Ornitela",
-                    "last_individual_equipped_name": "Starbuck (Tétras Lyre)",
-                },
-                {
-                    "comment": "Test balise GPS/Lotek",
-                    "id_digitiser": 5,
-                    "id_nomenclature_device_type": 628,
-                    "id_referer": 4,
-                    "id_tracking_device": 8,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Partenaire",
-                    "referer_name": "test Agent",
-                    "nomenclature_device_type_name": "Balise GPS",
-                    "provider_device_id": "121256-AZ",
-                    "provider_name": "Lotek",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GPS/GSM",
-                    "id_digitiser": 4,
-                    "id_nomenclature_device_type": 628,
-                    "id_referer": 3,
-                    "id_tracking_device": 9,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Agent",
-                    "referer_name": "test Administrateur",
-                    "nomenclature_device_type_name": "Balise GPS",
-                    "provider_device_id": "182A256ARG",
-                    "provider_name": "GSM Provider",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GPS",
-                    "id_digitiser": 4,
-                    "id_nomenclature_device_type": 628,
-                    "id_referer": 4,
-                    "id_tracking_device": 10,
-                    "meta_create_date": "11-03-2023",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Agent",
-                    "referer_name": "test Agent",
-                    "nomenclature_device_type_name": "Balise GPS",
-                    "provider_device_id": "182243",
-                    "provider_name": "Ornitela",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GSM/Ornitela",
-                    "id_digitiser": 4,
-                    "id_nomenclature_device_type": 629,
-                    "id_referer": 6,
-                    "id_tracking_device": 11,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "test Agent",
-                    "referer_name": "Pierre Paul",
-                    "nomenclature_device_type_name": "Balise GSM",
-                    "provider_device_id": "182A9P6ARP-6",
-                    "provider_name": "Ornitela",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GSM/Lotek",
-                    "id_digitiser": 6,
-                    "id_nomenclature_device_type": 629,
-                    "id_referer": 3,
-                    "id_tracking_device": 12,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "Pierre Paul",
-                    "referer_name": "test Administrateur",
-                    "nomenclature_device_type_name": "Balise GSM",
-                    "provider_device_id": "18256-9G",
-                    "provider_name": "Lotek",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GSM",
-                    "id_digitiser": 6,
-                    "id_nomenclature_device_type": 629,
-                    "id_referer": 4,
-                    "id_tracking_device": 13,
-                    "meta_create_date": "10-03-2026",
-                    "meta_update_date": "21-03-2026",
-                    "digitiser_name": "Pierre Paul",
-                    "referer_name": "test Agent",
-                    "nomenclature_device_type_name": "Balise GSM",
-                    "provider_device_id": "182A256POX",
-                    "provider_name": "GSM Provider",
-                    "last_individual_equipped_name":[]
-                },
-                {
-                    "comment": "Test balise GSM/Ornitela",
-                    "id_digitiser": 4,
-                    "id_nomenclature_device_type": 629,
-                    "id_referer": 6,
-                    "id_tracking_device": 14,
-                    "meta_create_date": "31-03-2026",
-                    "meta_update_date": None,
-                    "digitiser_name": "Pascal Véronique",
-                    "referer_name": "Pascal Véronique",
-                    "nomenclature_device_type_name": "Balise GSM",
-                    "provider_device_id": "182A256ARG",
-                    "provider_name": "Ornitela",
-                    "last_individual_equipped_name":[]
-                }
-            ]
-    
+
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
+    schema = TrackingDevicesSchema(many=True)
+
+    query = (
+         db.select(TrackingDevices)
+         .options(
+             joinedload(TrackingDevices.nomenclature_device_type),
+             joinedload(TrackingDevices.digitiser),
+             joinedload(TrackingDevices.referer),
+         )
+    )
+   
+    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
     return {
-        "items": items[per_page * (page - 1):per_page * page],
-        "has_next": True if page * per_page < len(items) else False,
-        "has_prev": False if page == 1 else True,
-        "next_num": page + 1 if page * per_page < len(items) else None,
-        "page": page,
-        "pages": (len(items) + per_page - 1) // per_page,
-        "per_page": per_page,
-        "prev_num": page - 1 if page > 1 else None,
-        "total": len(items),
+        "items": schema.dump(pagination.items),
+        "pagination": {
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "pages": pagination.pages,
+            "prev_num": pagination.prev_num,
+            "next_num": pagination.next_num,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev,
+        }
     }
+
+
+@blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
+@login_required
+@json_resp
+def device(id_tracking_device):
+    query = (
+        db.select(TrackingDevices)
+        .options(
+            joinedload(TrackingDevices.nomenclature_device_type),
+            joinedload(TrackingDevices.digitiser),
+            joinedload(TrackingDevices.referer),
+        )
+        .where(TrackingDevices.id_tracking_device == id_tracking_device)
+    )
+
+    device = db.session.execute(query).unique().scalar_one_or_none()
+
+    if device is None:
+        return None, 404
+    return TrackingDevicesSchema().dump(device)
+   
