@@ -96,8 +96,6 @@ def upgrade():
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
     """)
 
-    op.
-
     op.execute(
         sa.text(
             f"""
