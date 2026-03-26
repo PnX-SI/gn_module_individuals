@@ -178,6 +178,6 @@ def device(id_tracking_device):
     device = db.session.execute(query).unique().scalar_one_or_none()
 
     if device is None:
-        return None, 404
+        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
     return TrackingDevicesSchema().dump(device)
    
