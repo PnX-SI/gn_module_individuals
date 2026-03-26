@@ -12,6 +12,7 @@ from pypnusershub.tests.fixtures import teardown_logout_user
 from gn_module_individuals import MODULE_CODE, MODULE_LABEL, MODULE_PICTO
 from gn_module_individuals.blueprint import blueprint as indiv_blueprint
 from gn_module_individuals.models import TrackingDevices
+from gn_module_individuals.tests.fixtures import *
 
 pytest.endpoint = ""
 
@@ -27,14 +28,7 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture
-def devices():
-    next_id = db.session.scalar(select(func.coalesce(func.max(TrackingDevices.id_tracking_device), 0))) + 1
-    with db.session.begin_nested():
-        instance = TrackingDevices(id_tracking_device=next_id)
-        db.session.add(instance)
-        db.session.flush()
-    return instance
+
 
 
 @pytest.fixture(scope="session", autouse=True)
