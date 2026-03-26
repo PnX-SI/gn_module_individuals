@@ -1,8 +1,14 @@
 """
-Spécification du schéma toml des paramètres de configurations
+Toml Schema Specification for Configuration Parameters
 """
 
 from marshmallow import Schema, fields
 
+class DevicesSchema(Schema):
+    DEFAULT_DISPLAYED_COLUMNS = fields.List(
+        fields.String(),
+        load_default=[]
+    )
+
 class GnModuleSchemaConf(Schema):
-  TEST_VAR = fields.String(load_default="Bonjour")
+  DEVICES = fields.Nested(DevicesSchema, load_default={})

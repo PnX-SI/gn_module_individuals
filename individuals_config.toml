@@ -1,1 +1,13 @@
-TEST_VAR = "hello"
+# Individuals configuration
+[INDIVIDUALS]
+
+# Observations configuration
+[OBSERVATIONS]
+
+# Captures configuration
+[CAPTURE]
+
+# Tracking devices configuration
+[DEVICES]
+    # The default columns name have to be those of the corresponding db table field
+    DEFAULT_DISPLAYED_COLUMNS=["id_nomenclature_device_type", "provider_name", "provider_device_id", "id_referer"]

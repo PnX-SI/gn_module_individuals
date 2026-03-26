@@ -13,7 +13,6 @@ export class MainComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    console.log('Config:', this.config["INDIVIDUALS"]["TEST_VAR"]);
   }
 
 }
