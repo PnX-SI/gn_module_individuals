@@ -1,13 +1,14 @@
 """
-Définition des routes du module export
+Définition des routes du module individus
 """
 
 # import logging
 
+from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import joinedload
 
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify,g
 from werkzeug.exceptions import NotFound, BadRequest
 
 from geonature.core.gn_permissions import decorators as permissions
@@ -16,6 +17,8 @@ from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
 from . import MODULE_CODE
+from .schemas import TrackingDevicesSchema
+from .models import TrackingDevices
 
 # A utiliser pour stocker les logs dans le fichier de log
 # logger = logging.getLogger(__name__)
@@ -127,47 +130,54 @@ def list_captures():
 @login_required
 @json_resp
 def list_devices():
-    return [
-        {
-            "items": 
-            [
-                {
-                    "id_tracking_device": 1,
-                    "id_nomenclature_device_type": 1,
-                    "provider_name": "Ornitela",
-                    "provider_device_id": "RG2345",
-                    "id_referer": 123,
-                    "comment": "Commentaire sur le dispositif",
-                    "id_digitiser" : 123,
-                    "meta_create_date" : "12-12-2026",
-                    "meta_update_date" : "12-12-2026",
-                    "nomenclature_device_type": {},
-                    "referer_name": "Jackson Feblard",
-                    "digitiser_name": "Jean Dupont",
-                },
-                {
-                    "id_tracking_device": 2,
-                    "id_nomenclature_device_type": 1,
-                    "provider_name": "Ornitela",
-                    "provider_device_id": "RG2147",
-                    "id_referer": 123,
-                    "comment": "Commentaire sur le dispositif",
-                    "id_digitiser" : 123,
-                    "meta_create_date" : "12-12-2026",
-                    "meta_update_date" : "12-12-2026",
-                    "nomenclature_device_type": {},
-                    "referer_name": "Jackson Feblard",
-                    "digitiser_name": "Jean Dupont",
-                },
-            ],
-            "page": 0,
-            "pages": 1,
-            "per_page": 0,
-            "prev_num": 0,
-            "total": 0,
-            "prev_num": 0,
-            "next_num": 0,
-            "has_next": 0,
-            "has_prev": 0,
+
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
+    schema = TrackingDevicesSchema(many=True)
+
+    query = (
+         db.select(TrackingDevices)
+         .options(
+             joinedload(TrackingDevices.nomenclature_device_type),
+             joinedload(TrackingDevices.digitiser),
+             joinedload(TrackingDevices.referer),
+         )
+    )
+   
+    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+    return {
+        "items": schema.dump(pagination.items),
+        "pagination": {
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "pages": pagination.pages,
+            "prev_num": pagination.prev_num,
+            "next_num": pagination.next_num,
+            "has_next": pagination.has_next,
+            "has_prev": pagination.has_prev,
         }
-    ]
+    }
+
+
+@blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
+@login_required
+@json_resp
+def device(id_tracking_device):
+    query = (
+        db.select(TrackingDevices)
+        .options(
+            joinedload(TrackingDevices.nomenclature_device_type),
+            joinedload(TrackingDevices.digitiser),
+            joinedload(TrackingDevices.referer),
+        )
+        .where(TrackingDevices.id_tracking_device == id_tracking_device)
+    )
+
+    device = db.session.execute(query).unique().scalar_one_or_none()
+
+    if device is None:
+        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
+    return TrackingDevicesSchema().dump(device)
+   
