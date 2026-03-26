@@ -2,7 +2,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { GN2CommonModule } from '@geonature_common/GN2Common.module';
 
 import { HttpClient } from '@angular/common/http';
@@ -27,7 +27,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     MainComponent,
     MapListComponent,
     ListComponent
-  ], // Not standalone
+  ],
   imports: [
     HttpClientXsrfModule.withOptions({
       cookieName: 'token',

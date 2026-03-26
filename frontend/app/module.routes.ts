@@ -12,7 +12,8 @@ export const routes: Routes = [
             { 
                 path: '', 
                 redirectTo: 'devices', // Next will be 'individuals'
-                pathMatch: 'full' },
+                pathMatch: 'full'
+            },
             {
                 path: 'individuals',
                 component: MapListComponent, // To change
