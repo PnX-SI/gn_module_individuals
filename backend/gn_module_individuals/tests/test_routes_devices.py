@@ -25,8 +25,18 @@ def test_get_device_not_found(client, users):
         response = client.get(url_for("individuals.device", id_tracking_device=-1))
     assert response.status_code == 404
 
-def test_get_device_returns_payload(client, users, devices):
+def test_get_device_returns_payload(client, users, device):
     with logged_user(client, users["admin_user"]):
-        response = client.get(url_for("individuals.device", id_tracking_device=devices.id_tracking_device))
+        response = client.get(url_for("individuals.device", id_tracking_device=device.id_tracking_device))
     assert response.status_code == 200
-    assert response.get_json()["id_tracking_device"] == devices.id_tracking_device
+    assert response.get_json()["id_tracking_device"] == device.id_tracking_device
+
+def test_get_device_forbidden(client, users, device):
+    with logged_user(client, users["noright_user"]):
+        response = client.get(url_for("individuals.device", id_tracking_device=device.id_tracking_device))
+    assert response.status_code == 403
+
+def test_get_devices_filtering(client, users, devices):
+    with logged_user(client, users["admin_user"]):
+        response = client.get(url_for("individuals.list_devices", per_page=1))
+    payload = response.get_json()
