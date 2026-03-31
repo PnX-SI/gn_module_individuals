@@ -7,10 +7,10 @@ from geonature.tests.utils import get_id_nomenclature
 
 from gn_module_individuals.models import TrackingDevices
 
-devices_example=[(('TYPE_CAPTEUR',1), "Ornitela", "Balise 56", "2023-01-01", "2023-12-31", "admin_user", "admin_user", "commentaire test"),
-                 (('TYPE_CAPTEUR',2), "Lotek", "Balise 57", "2023-01-01", "2023-12-31", "self_user", "admin_user", "commentaire test"),
-                 (('TYPE_CAPTEUR',3), "Vifly", "Balise 58", "2023-01-01", "2023-12-31", "self_user", "self_user", "commentaire test"),
-                 (('TYPE_CAPTEUR',4), "Ornitela", "Balise 59", "2023-01-01", "2023-12-31", "admin_user", "self_user", "commentaire test")]
+devices_example=[(('TYPE_DISPO_SUIVI',1), "Ornitela", "Balise 56", "2023-01-01", "2023-12-31", "admin_user", "admin_user", "commentaire test"),
+                 (('TYPE_DISPO_SUIVI',2), "Lotek", "Balise 57", "2023-01-01", "2023-12-31", "self_user", "admin_user", "commentaire test"),
+                 (('TYPE_DISPO_SUIVI',3), "Vifly", "Balise 58", "2023-01-01", "2023-12-31", "self_user", "self_user", "commentaire test"),
+                 (('TYPE_DISPO_SUIVI',4), "Ornitela", "Balise 59", "2023-01-01", "2023-12-31", "admin_user", "self_user", "commentaire test")]
 
 @pytest.fixture
 def devices(users):

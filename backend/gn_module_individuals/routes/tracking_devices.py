@@ -20,7 +20,7 @@ from ..blueprint import blueprint
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def list_devices():
+def list_devices(scope):
 
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
@@ -56,7 +56,7 @@ def list_devices():
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
-def device(id_tracking_device):
+def device(id_tracking_device, scope):
     query = (
         db.select(TrackingDevices)
         .options(
