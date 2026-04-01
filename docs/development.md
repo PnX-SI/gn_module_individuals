@@ -5,6 +5,7 @@
 - [Doc du PNV pour le developement dans l'environnement de GeoNature](#doc-du-pnv-pour-le-developement-dans-lenvironnement-de-geonature)
   - [Git / github](#git--github)
     - [`git stash`](#git-stash)
+    - [Ajouter une modification au précédent commit](#ajouter-une-modification-au-précédent-commit)
     - [Associer une branche à un dépôt distant](#associer-une-branche-à-un-dépôt-distant)
     - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
     - [Cloner une branche spécifique](#cloner-une-branche-spécifique)
@@ -52,6 +53,15 @@ Pour récupérer les dernières modificaions stockées dans le stash :
 
 ```shell
 git stash pop
+```
+
+### Ajouter une modification au précédent commit
+
+Cela évite de refaire un commit lorsque c'est un oubli de sauvegarde ou modification qui concerne le précédent commit :
+
+```sh
+git commit --amend --no-edit
+git push --force-with-lease <remote-alias> <branch>
 ```
 
 ### Associer une branche à un dépôt distant
