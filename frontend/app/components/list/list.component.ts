@@ -1,49 +1,49 @@
-import { Component, OnInit, AfterViewInit, HostListener } from '@angular/core';
+import { ViewEncapsulation, Component, OnInit, ViewChild, AfterViewInit, HostListener } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 
-import { combineLatest } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
+import { switchMap, shareReplay, tap } from 'rxjs/operators';
+
+import { DatatableComponent } from '@swimlane/ngx-datatable';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Column, Device } from '../../module.models';
+import { ContentConfig, DataTableConfig } from '../../module.config';
+import { Device, DEVICE_COLUMNS, DevicesAPIParams } from '../../models/devices.models';
+import { Column, SimplePagination, PaginatedItemCollection } from '../../models/common.models';
 
-const DEVICE_COLUMNS: Record<keyof Device, true> = {
-  id_tracking_device: true,
-  id_nomenclature_device_type: true,
-  provider_name: true,
-  provider_device_id: true,
-  id_referer: true,
-  comment: true,
-  id_digitiser: true,
-  meta_create_date: true,
-  meta_update_date: true,
-  nomenclature_device_type_name: true,
-  referer_name: true,
-  digitiser_name: true
-};
+import { DevicesService } from '../../services/devices.service';  
 
 @Component({
   selector: 'gn-individuals-list',
   templateUrl: 'list.component.html',
   styleUrls: ['list.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ListComponent implements OnInit, AfterViewInit {
+  //@ViewChild('dataTable') dataTable: DatatableComponent;
   public userCruved: any;
-  public contentHeight: number;
-  public currentTabCode: string;
-  public apiEndPoint: string;
+  public contentHeight: number = ContentConfig.MIN_HEIGHT;
+  public rowHeight: number = DataTableConfig.TABLE_ROW_HEIGHT;
+  public headerFooterHeight = DataTableConfig.TABLE_ROW_HEIGHT < 50 ? 50 : DataTableConfig.TABLE_ROW_HEIGHT;
+  public rowNumber: number = DataTableConfig.PER_PAGE_OPTION;
   public displayedColumns: Column<Device>[] = []
   public availableColumns: Column<Device>[] = []
-
+  private _pagination$ = new BehaviorSubject<SimplePagination>({
+    page: 1,
+    limit: DataTableConfig.PER_PAGE_OPTION,
+  });
+  public dataTable$: Observable<PaginatedItemCollection<Device>>;
+  
   constructor(
     public config: ConfigService,
     private _moduleService: ModuleService,
-    private _translate: TranslateService
+    private _translate: TranslateService,
+    private _devicesService: DevicesService
   ) {}
 
-  ngOnInit() {
+  ngOnInit() : void {
     // Get current module and current user CRUVED
     const currentModule = this._moduleService.currentModule;
     this.userCruved = currentModule.cruved;
@@ -77,28 +77,57 @@ export class ListComponent implements OnInit, AfterViewInit {
           ({ ...col, name: this.availableColumns.find(c => c.prop === col.prop)?.name || '' })
         );
       });
+
+    // Calculate the height of the content and the number of rows to display in the table, based on the viewport height
+    this.contentHeight = this.calcContentHeight();
+    this.rowNumber = this.calcRowNumber();
+
+    this.dataTable$ = this._pagination$.pipe(
+      // Transform the emitted value (pagination) into an API call
+      switchMap(({ page, limit }) => 
+        this._devicesService.getDevices({page, per_page: limit})
+      ),
+      tap(data => console.log('Devices JSON:', data)),
+      // Set in cache the last emitted value, If the same is called,
+      // no need to call the API again
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
-  ngAfterViewInit() {
+  ngAfterViewInit() : void {
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
-  @HostListener('window:resize', ['$event'])
-  onResize(event) {
-    this.calcContentHeight();
-  }
+  // @HostListener('window:resize', ['$event'])
+  // onResize(event) : void {
+  //   this.contentHeight = this.calcContentHeight();
+  // }
 
-  // Fonction that return the size of the content of the card, to set the height of the map
-  calcContentHeight() {
+  // Fonction that sets the size of the content of the card, to set the height of the map
+  // and calculate the number of rows to display in the table based on the viewport height
+  calcContentHeight() : number {
     let windowH = window.innerHeight;
-    let toolbarH = document.getElementById('individuals-tab')
-      ? document.getElementById('individuals-tab').getBoundingClientRect().top
+    const toolbarElement = document.getElementById('individuals-tab');
+    let toolbarH = toolbarElement
+      ? toolbarElement.getBoundingClientRect().top
       : 0;
     let height = windowH - (toolbarH + 80);
 
-    this.contentHeight = height >= 350 ? height : 350;
-    
-    // Resize list after resize container
+    return height >= ContentConfig.MIN_HEIGHT ? height : ContentConfig.MIN_HEIGHT;
+  }
+
+  calcRowNumber() : number {
+    let num = Math.trunc(this.contentHeight / DataTableConfig.TABLE_ROW_HEIGHT);
+    num = num > DataTableConfig.PER_PAGE_OPTION ? DataTableConfig.PER_PAGE_OPTION : num;
+    return num;
+  }
+
+  onPage($event: any) : void {
+    console.log('Page event:', $event);
+    this._pagination$.next({
+      page: Number($event.offset ?? 0) + 1,
+      limit: Number($event.limit ?? this._pagination$.getValue().limit),
+    });
   }
 }
 
