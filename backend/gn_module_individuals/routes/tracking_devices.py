@@ -1,6 +1,6 @@
 from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload,selectinload  
 
 from flask import request, jsonify,g
 from werkzeug.exceptions import NotFound, BadRequest
@@ -12,7 +12,7 @@ from utils_flask_sqla.response import json_resp
 
 from .. import MODULE_CODE
 from ..schemas import TrackingDevicesSchema
-from ..models import TrackingDevices
+from ..models import TrackingDevices,IndividualDeployments
 
 from ..blueprint import blueprint
 
@@ -22,24 +22,40 @@ from ..blueprint import blueprint
 @json_resp
 def list_devices(scope):
 
-    page = request.args.get("page", 1, type=int)
-    per_page = request.args.get("per_page", 10, type=int)
+    device_type    = request.args.get("type", type=int)
+    provider_name  = request.args.get("providerName", type=str)
+    provider_id    = request.args.get("providerDeviceId", type=str)
 
-    schema = TrackingDevicesSchema(many=True)
+    page     = request.args.get("page", type=int)
+    per_page = request.args.get("per_page", type=int)
+
+    paginated = page is not None and per_page is not None
+
+    schema = TrackingDevicesSchema(exclude=("deployments",), many=True)
 
     query = (
-         db.select(TrackingDevices)
-         .options(
-             joinedload(TrackingDevices.nomenclature_device_type),
-             joinedload(TrackingDevices.digitiser),
-             joinedload(TrackingDevices.referer),
-         )
+        db.select(TrackingDevices)
+        .options(
+            joinedload(TrackingDevices.nomenclature_device_type),
+            selectinload(TrackingDevices.digitiser),
+            selectinload(TrackingDevices.referer),
+            joinedload(TrackingDevices.deployments)
+                .joinedload(IndividualDeployments.individual),
+        )
+        .order_by(TrackingDevices.meta_create_date.desc())
     )
-   
-    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
-    return {
-        "items": schema.dump(pagination.items),
-        "pagination": {
+
+    if device_type is not None:
+        query = query.where(TrackingDevices.id_nomenclature_device_type == device_type)
+    if provider_name:
+        query = query.where(TrackingDevices.provider_name.ilike(f"%{provider_name}%"))
+    if provider_id:
+        query = query.where(TrackingDevices.provider_device_id.ilike(f"%{provider_id}%"))
+
+    if paginated:
+        pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
+        return {
+            "items": schema.dump(pagination.items),
             "page": pagination.page,
             "per_page": pagination.per_page,
             "total": pagination.total,
@@ -49,7 +65,9 @@ def list_devices(scope):
             "has_next": pagination.has_next,
             "has_prev": pagination.has_prev,
         }
-    }
+    else:
+        items = db.session.execute(query).unique().scalars().all()
+        return schema.dump(items)
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
@@ -61,8 +79,10 @@ def device(id_tracking_device, scope):
         db.select(TrackingDevices)
         .options(
             joinedload(TrackingDevices.nomenclature_device_type),
-            joinedload(TrackingDevices.digitiser),
-            joinedload(TrackingDevices.referer),
+            selectinload(TrackingDevices.digitiser),
+            selectinload(TrackingDevices.referer),
+            joinedload(TrackingDevices.deployments)
+                .joinedload(IndividualDeployments.individual)
         )
         .where(TrackingDevices.id_tracking_device == id_tracking_device)
     )
