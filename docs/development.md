@@ -5,7 +5,7 @@
 - [Doc du PNV pour le developement dans l'environnement de GeoNature](#doc-du-pnv-pour-le-developement-dans-lenvironnement-de-geonature)
   - [Git / github](#git--github)
     - [`git stash`](#git-stash)
-    - [Mettre à jour les infos du remote](#mettre-a-jour-les-infos-du-remote)
+    - [Mettre à jour les infos du remote](#mettre-%C3%A0-jour-les-infos-du-remote)
     - [Ajouter une modification au précédent commit](#ajouter-une-modification-au-précédent-commit)
     - [Associer une branche à un dépôt distant](#associer-une-branche-à-un-dépôt-distant)
     - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
