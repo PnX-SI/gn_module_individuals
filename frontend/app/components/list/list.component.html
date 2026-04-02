@@ -3,10 +3,20 @@
     class="col-12 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
-    <ngx-datatable
+    <ngx-datatable *ngIf="dataTable$ | async as deviceCollection"
+        #dataTable
         class="material striped margin-top-xs table-size expandable"
         [columnMode]="'force'"
         [columns]="displayedColumns"
+        [rowHeight]="rowHeight"
+        [headerHeight]="headerFooterHeight"
+        [footerHeight]="headerFooterHeight"
+        [externalPaging]="true"
+        [count]="deviceCollection.total"
+        [limit]="rowNumber"
+        [offset]="deviceCollection.page - 1"
+        [rows]="deviceCollection.items"
+        (page)="onPage($event)"
     ></ngx-datatable>
   </div>
 </div>

@@ -18,6 +18,7 @@ import { routes } from './module.routes';
 import { MainComponent } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
+import { DevicesService } from './services/devices.service';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -47,7 +48,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     }),
     
   ],
-  providers: [],
+  providers: [DevicesService],
 })
 export class GeonatureModule {
   constructor(
