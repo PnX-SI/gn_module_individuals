@@ -5,6 +5,7 @@
 - [Doc du PNV pour le developement dans l'environnement de GeoNature](#doc-du-pnv-pour-le-developement-dans-lenvironnement-de-geonature)
   - [Git / github](#git--github)
     - [`git stash`](#git-stash)
+    - [Mettre à jour les infos du remote](#mettre-a-jour-les-infos-du-remote)
     - [Ajouter une modification au précédent commit](#ajouter-une-modification-au-précédent-commit)
     - [Associer une branche à un dépôt distant](#associer-une-branche-à-un-dépôt-distant)
     - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
@@ -53,6 +54,13 @@ Pour récupérer les dernières modificaions stockées dans le stash :
 
 ```shell
 git stash pop
+```
+### Mettre à jour les infos du remote
+
+Cette commande permet de mettre à jour les infos du remote en supprimant les références locales aux branches distantes qui n’existent plus
+
+```sh
+git fetch --prune
 ```
 
 ### Ajouter une modification au précédent commit
