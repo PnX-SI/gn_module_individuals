@@ -135,6 +135,35 @@ Repousser la nouvelle branche, qui sera créée sur le répo distant :
 git push --set-upstream origin <new_branch>
 ```
 
+### "Merge" sur la branche de confiance
+
+Pour l'exemple, `develop` est la branche de confiance et `feat/dev` la branche à merger.
+
+Mise à jour de la branch develop en local :
+
+```sh
+git fetch origin
+git checkout develop
+git pull
+```
+
+Merge de la branche `feat/dev`
+
+```sh
+git merge feat/dev
+git push
+
+```
+
+Rebase de la branche `feat/dev` :
+
+```sh
+git checkout feat/dev`
+git pull
+git rebase develop
+git push
+```
+
 ## Backend
 
 ### Accès aux variables de configuration du module
