@@ -71,9 +71,9 @@ JOIN ref_nomenclatures.t_nomenclatures n
             INSERT INTO gn_monitoring.t_individuals
             (individual_name, cd_nom, id_nomenclature_sex, active, "comment", id_digitiser)
             VALUES
-            ('Cynthia',2948, ref_nomenclatures.get_id_nomenclature('SEXE','2'),TRUE,'Jolie petite femelle lagopède',4 ),
+            ('Cynthia',459629, ref_nomenclatures.get_id_nomenclature('SEXE','2'),TRUE,'Jolie petite femelle lagopède',4 ),
             ('Claire',2962, ref_nomenclatures.get_id_nomenclature('SEXE','2'),TRUE,'Magnifique femelle tétras',6 ),
-            ('Dominique',2948, ref_nomenclatures.get_id_nomenclature('SEXE','3'),TRUE,'Mâle lagopède acrobate',3 ),
+            ('Dominique',459629, ref_nomenclatures.get_id_nomenclature('SEXE','3'),TRUE,'Mâle lagopède acrobate',3 ),
             ('Christophe',2962, ref_nomenclatures.get_id_nomenclature('SEXE','3'),TRUE,'Chef de tous les tétras',4 ),
             ('Tempête',61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'),TRUE,'Bouquetin marqué',6 ),
             ('Patastrophe',61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'),TRUE,'Bouquetin marqué',3 ),
@@ -156,9 +156,35 @@ def downgrade():
     op.execute(
         sa.text(
             f"""
-            DELETE FROM gn_individual.t_individual_deployments;
-            DELETE FROM gn_individual.bib_tracking_devices;
-            DELETE FROM gn_monitoring.t_individuals;
+            DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.tables 
+        WHERE table_schema = 'gn_individual' 
+        AND table_name = 't_individual_deployments'
+    ) THEN
+        DELETE FROM gn_individual.t_individual_deployments;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.tables 
+        WHERE table_schema = 'gn_individual' 
+        AND table_name = 'bib_tracking_devices'
+    ) THEN
+        DELETE FROM gn_individual.bib_tracking_devices;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 
+        FROM information_schema.tables 
+        WHERE table_schema = 'gn_monitoring' 
+        AND table_name = 't_individuals'
+    ) THEN
+        DELETE FROM gn_monitoring.t_individuals;
+    END IF;
+END $$;
             """
         )
     )

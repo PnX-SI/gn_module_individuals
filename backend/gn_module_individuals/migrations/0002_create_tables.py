@@ -291,6 +291,8 @@ def downgrade():
     op.execute(f"DROP TRIGGER IF EXISTS tr_meta_dates_bib_tracking_devices ON {SCHEMA_NAME}.bib_tracking_devices;")
     op.execute(f"DROP TRIGGER IF EXISTS tr_meta_dates_individual_deployments ON {SCHEMA_NAME}.t_individual_deployments;")
     op.execute(f"DROP FUNCTION IF EXISTS {SCHEMA_NAME}.set_meta_dates();")
+    op.drop_table("t_individual_deployments", schema=SCHEMA_NAME,if_exists=True)
+    op.drop_table("bib_tracking_devices", schema=SCHEMA_NAME,if_exists=True)
     op.execute(
         f"""DELETE FROM ref_nomenclatures.t_nomenclatures t
             USING ref_nomenclatures.bib_nomenclatures_types b
@@ -299,5 +301,3 @@ def downgrade():
         """
     )
     op.execute(f"DELETE FROM ref_nomenclatures.bib_nomenclatures_types WHERE mnemonique = 'TYPE_DISPO_SUIVI';")
-    op.drop_table("t_individual_deployments", schema=SCHEMA_NAME,if_exists=True)
-    op.drop_table("bib_tracking_devices", schema=SCHEMA_NAME,if_exists=True)
