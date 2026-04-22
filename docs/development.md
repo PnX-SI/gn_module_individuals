@@ -5,12 +5,13 @@
 - [Doc du PNV pour le developement dans l'environnement de GeoNature](#doc-du-pnv-pour-le-developement-dans-lenvironnement-de-geonature)
   - [Git / github](#git--github)
     - [`git stash`](#git-stash)
-    - [Mettre à jour les infos du remote](#mettre-%C3%A0-jour-les-infos-du-remote)
+    - [Mettre à jour les infos du remote](#mettre-à-jour-les-infos-du-remote)
     - [Ajouter une modification au précédent commit](#ajouter-une-modification-au-précédent-commit)
     - [Associer une branche à un dépôt distant](#associer-une-branche-à-un-dépôt-distant)
     - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
     - [Cloner une branche spécifique](#cloner-une-branche-spécifique)
     - [Renommer une branche](#renommer-une-branche)
+    - ["Merge" sur la branche de confiance](#merge-sur-la-branche-de-confiance)
   - [Backend](#backend)
     - [Accès aux variables de configuration du module](#accès-aux-variables-de-configuration-du-module)
     - [Logs](#logs)
@@ -139,7 +140,7 @@ git push --set-upstream origin <new_branch>
 
 Pour l'exemple, `develop` est la branche de confiance et `feat/dev` la branche à merger.
 
-Mise à jour de la branch develop en local :
+Mise à jour de la branche develop en local :
 
 ```sh
 git fetch origin
@@ -147,7 +148,9 @@ git checkout develop
 git pull
 ```
 
-Merge de la branche `feat/dev`
+Ensuite 2 possibilités :
+
+- Merge de la branche `feat/dev`
 
 ```sh
 git merge feat/dev
@@ -155,7 +158,7 @@ git push
 
 ```
 
-Rebase de la branche `feat/dev` :
+- Rebase de la branche `feat/dev` :
 
 ```sh
 git checkout feat/dev`
