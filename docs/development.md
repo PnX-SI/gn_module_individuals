@@ -158,14 +158,17 @@ git push
 
 ```
 
-- Rebase de la branche `feat/dev` :
+- Le matin : Rebase de la branche `feat/dev` pour la mettre à jour par rapport à `develop`
 
 ```sh
-git checkout feat/dev`
+git fetch origin develop
+git checkout feat/dev
 git pull
-git rebase develop
+git rebase origin/develop
 git push
 ```
+
+- Pour merger une modification fonctionnelle : Merge de `feat/dev` vers `develop` via une PR dans l'idéal.
 
 ## Backend
 
