@@ -18,7 +18,9 @@ import { routes } from './module.routes';
 import { MainComponent } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
+import { DevicesListComponent } from './components/devices-list/devices-list.component';
 import { DevicesService } from './services/devices.service';
+import { DevicesResolver } from './resolvers/devices.resolver';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -27,7 +29,8 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
   declarations: [
     MainComponent,
     MapListComponent,
-    ListComponent
+    ListComponent,
+    DevicesListComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
@@ -48,7 +51,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     }),
     
   ],
-  providers: [DevicesService],
+  providers: [DevicesService, DevicesResolver],
 })
 export class GeonatureModule {
   constructor(
