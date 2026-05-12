@@ -3,20 +3,22 @@
     class="col-12 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
-    <ngx-datatable *ngIf="dataTable$ | async as deviceCollection"
+    <ngx-datatable *ngIf="dataTable$ | async as dataTable"
         #dataTable
         class="material striped margin-top-xs table-size expandable"
         [columnMode]="'force'"
         [columns]="displayedColumns"
         [rowHeight]="rowHeight"
-        [headerHeight]="headerFooterHeight"
-        [footerHeight]="headerFooterHeight"
+        [headerHeight]="rowHeight"
+        [footerHeight]="rowHeight"
         [externalPaging]="true"
-        [count]="deviceCollection.total"
-        [limit]="rowNumber"
-        [offset]="deviceCollection.page - 1"
-        [rows]="deviceCollection.items"
+        [count]="dataTable.total"
+        [limit]="nbRowsToDisplay"
+        [offset]="dataTable.page - 1"
+        [rows]="dataTable.items"
         (page)="onPage($event)"
+        [sorts]="sorts"
+        (sort)="onSort($event)"
     ></ngx-datatable>
   </div>
 </div>

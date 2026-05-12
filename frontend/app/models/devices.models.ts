@@ -32,7 +32,7 @@ export const DEVICE_COLUMNS: Record<keyof Device, true> = {
 
 export interface DevicesAPIParams {
   page?: number,
-  per_page?: number,
+  limit?: number,
   // id_tracking_device?: number,
   // id_nomenclature_device_type?: number,
   // provider_name?: string,

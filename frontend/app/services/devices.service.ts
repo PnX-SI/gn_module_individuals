@@ -6,7 +6,7 @@ import { ModuleService } from '@geonature/services/module.service';
 
 import { Device, DevicesAPIParams } from '../models/devices.models';
 import { PaginatedItemCollection } from '../models/common.models';
-import { DataTableConfig } from '../module.config';
+import { DATA_TABLE_CONFIG } from '..//utils/constants.util';
 
 @Injectable()
 export class DevicesService {
@@ -24,7 +24,8 @@ export class DevicesService {
     let httpParams = new HttpParams();
    
     params.page ??= 1
-    params.per_page ??= DataTableConfig.PER_PAGE_OPTION
+    params.limit ??= DATA_TABLE_CONFIG.PER_PAGE_OPTION
+    console.log('DevicesService getDevices called with params :', params);  
 
     Object.keys(params).forEach(key => {
       const value = params[key as keyof DevicesAPIParams];

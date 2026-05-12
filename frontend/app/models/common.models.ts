@@ -4,9 +4,17 @@ export interface Column<T> {
   name: string;
 }
 
+export interface Sort {
+  prop: string;
+  dir: string;
+}
+
 export interface SimplePagination {
   page: number;
   limit: number; // Alias for per_page, to be used in the frontend for consistency with other modules
+}
+
+export interface SimplePaginationWithSort extends SimplePagination, Sort {
 }
 
 export interface PaginatedItemCollection<T> extends SimplePagination {
