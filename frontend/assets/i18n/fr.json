@@ -21,6 +21,9 @@
             "digitiser_name" : "Nom du digitaliseur",
             "last_individual_equipped_name" : "Dernier individu équipé"
         },
+        "DevicesTexts": {
+            "DeviceInfoTitle" : "Dispositif de suivi n°"
+        },
         "Error": {
             "Required" : "Ce champs est requis.",
             "MinLength" : "Vous devez choisir au moins une valeur."
@@ -42,6 +45,7 @@
             "Add" : "Ajouter ",
             "Validate" : "Valider",
             "Cancel" : "Annuler",
+            "Back" : "Retour",
             "Delete" : "Supprimer",
             "Summary" : "Afficher / Cacher le résumé",
             "Informations" : "Détail complet",

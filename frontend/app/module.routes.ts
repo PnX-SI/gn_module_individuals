@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { MainComponent,  } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
+import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 import { DevicesResolver } from './resolvers/devices.resolver';
 
 export const routes: Routes = [
@@ -30,8 +31,13 @@ export const routes: Routes = [
             {
                 path: 'devices',
                 component: DevicesListComponent,
-                resolve:{ data: DevicesResolver }
+                resolve:{ data: DevicesResolver },  
             },
+
+            {
+                path: 'devices/info/:id_tracking_device',
+                component: DevicesInfoComponent,
+            }
         ]
     }
 ];

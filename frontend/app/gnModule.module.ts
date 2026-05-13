@@ -21,6 +21,7 @@ import { ListComponent } from './components/list/list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
 import { DevicesService } from './services/devices.service';
 import { DevicesResolver } from './resolvers/devices.resolver';
+import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -31,6 +32,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     MapListComponent,
     ListComponent,
     DevicesListComponent,
+    DevicesInfoComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
