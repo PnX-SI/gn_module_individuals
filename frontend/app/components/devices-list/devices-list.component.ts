@@ -17,17 +17,14 @@ import { DevicesService } from '../../services/devices.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class DevicesListComponent implements OnInit, AfterViewInit {
-  // ViewChild : To be visible dynamicaly in the parent component linked with the #dataTable reference in the child template
-  // @ViewChild("dataTable") dataTable: DatatableComponent | undefined;
   public availableColumnsParams: Record<keyof Device, true> = DEVICE_COLUMNS;
   public displayedColumnsParams: Array<String> = [];
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<PaginatedItemCollection<Device>>();
   public sorts: Array<Sort> = [{ prop: "id_tracking_device", dir: "asc" }];
+  public idName: string = "id_tracking_device";
 
   constructor(
     public config: ConfigService,
-    // private _moduleService: ModuleService,
-    // private _translate: TranslateService,
     private _devicesService: DevicesService,
     private activatedRoute: ActivatedRoute,
   ) {}
@@ -38,45 +35,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
        this.dataTable$ = of(data);
     });
 
-    // Columns initialization with prop and empty name, to be filled with translations after
-    // this.availableColumns = (Object.keys(DEVICE_COLUMNS) as (keyof Device)[])
-    //   .map(prop => ({ prop, name: '' }));
-
-    // this.displayedColumns = this.availableColumns.filter(column =>
-    //   this.config.INDIVIDUALS.DEVICES.DEFAULT_DISPLAYED_COLUMNS.includes(column.prop)
-    // );
     this.displayedColumnsParams = this.config.INDIVIDUALS.DEVICES.DEFAULT_DISPLAYED_COLUMNS;
-    
-    // Build an array of translation observables for each column name
-    // const translateTab$ = (Object.keys(DEVICE_COLUMNS) as (keyof Device)[])
-    //   .map(
-    //     // An observable is returned which emits the translation of this key
-    //     prop => this._translate.get(`Individuals.AvailableFields.${prop}`)
-    //   );
-
-    // Translation with CombineLatest will wait for all translations to be loaded before updating 
-    // the column names, avoiding multiple updates and ensuring all names are translated at once.
-    // combineLatest(translateTab$)
-    //   .subscribe(translations => {
-    //     this.availableColumns = this.availableColumns.map((col, index) => ({
-    //       ...col,
-    //       name: translations[index]
-    //     }));
-        
-    //     // Update displayedColumns with the translated names
-    //     this.displayedColumns = this.displayedColumns.map(col =>
-    //       ({ ...col, name: this.availableColumns.find(c => c.prop === col.prop)?.name || '' })
-    //     );
-    //   });
-
-    // Calculate the height of the content and the number of rows to display in the table, based on the viewport height
-    // this.contentHeight = this.calcContentHeight();
-    // this.rowNumber = this.calcRowNumber();
-
-    // this.dataTable$ = this._pagination$.pipe(
-    //   switchMap(params => this._devicesService.getDevices(params)),
-    //   shareReplay(1)
-    // );
   }
 
   ngAfterViewInit() : void {
@@ -103,13 +62,21 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
     this.sorts = $event.sorts;
   }
 
+  onRowSelect($event: any) : void {
+    console.log('Row selected:', $event.selected[0]["id_tracking_device"]);
+    // if (row instanceof Object && row.selected.length > 0) {
+    //   this.tableSelected.next(row.selected[0][this.idName]);
+    // } else {
+    //   this.tableSelected.next(row);
+    // }
+  }
+
   onNbRowsReceived(nbRowsPerPage: number) {
-    console.log('nbRows reçu:', nbRowsPerPage);
-        let params: SimplePaginationWithSort = {
-        page: 1,
-        limit: nbRowsPerPage,
-        prop: this.sorts[0].prop,
-        dir: this.sorts[0].dir,
+    let params: SimplePaginationWithSort = {
+      page: 1,
+      limit: nbRowsPerPage,
+      prop: this.sorts[0].prop,
+      dir: this.sorts[0].dir,
     }; 
     this.dataTable$ = this._devicesService.getDevices(params);
   } 
