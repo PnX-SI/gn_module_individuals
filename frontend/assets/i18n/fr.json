@@ -6,7 +6,7 @@
             "Captures": "Captures",
             "TrackingDevices": "Dispositifs de suivi"
         },
-        "AvailableFields": {
+        "DevicesFields": {
             "id_tracking_device" : "ID du dispositif",
             "id_nomenclature_device_type" : "ID du type de dispositif",
             "provider_name" : "Fournisseur",
@@ -43,6 +43,9 @@
             "Validate" : "Valider",
             "Cancel" : "Annuler",
             "Delete" : "Supprimer",
+            "Summary" : "Afficher / Cacher le résumé",
+            "Informations" : "Détail complet",
+            "Edit" : "Modifier",
             "Done" : "",
             "Deleted" : ""
         }

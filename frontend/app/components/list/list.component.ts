@@ -1,11 +1,12 @@
-import { ViewEncapsulation, Component, OnInit, ViewChild, AfterViewInit, HostListener, EventEmitter, Output, Input} from '@angular/core';
+import { ViewEncapsulation, Component, OnInit, ViewChild, AfterViewInit, EventEmitter, Output, Input, TemplateRef} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { Observable, combineLatest, of } from 'rxjs';
 
+import { DatatableComponent } from '@swimlane/ngx-datatable';
+
 import { ConfigService } from '@geonature/services/config.service';
-import { ModuleService } from '@geonature/services/module.service';
 
 import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
 import { Column, PaginatedItemCollection } from '../../models/common.models';
@@ -17,23 +18,29 @@ import { Column, PaginatedItemCollection } from '../../models/common.models';
   encapsulation: ViewEncapsulation.None,
 })
 export class ListComponent implements OnInit, AfterViewInit {
-  @Output() pagination: EventEmitter<any> = new EventEmitter()
-  @Output() sort: EventEmitter<any> = new EventEmitter()
+  // ViewChild : To be visible dynamicaly in the parent component linked with the #dataTable reference in the child template
+  @ViewChild("dataTable") dataTable: DatatableComponent | undefined;
+  @Output() pagination: EventEmitter<any> = new EventEmitter();
+  @Output() sort: EventEmitter<any> = new EventEmitter();
   @Output() rows: EventEmitter<any> = new EventEmitter();
+  @Output() select: EventEmitter<any> = new EventEmitter();
   @Input() availableColumnsParams!: Record<keyof any, true>;
   @Input() displayedColumnsParams!: Array<String>;
   @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<PaginatedItemCollection<unknown>>();
   @Input() sorts: Array<Object> = [];
+  @Input() idName: string = "";
+  @Input() summaryTemplate!: TemplateRef<any>;
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
   public nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  public actionColumnsWidth: number = DATA_TABLE_CONFIG.ACTION_COLUMNS_WIDTH;
+  public columnMaxWidth: number = DATA_TABLE_CONFIG.COLUMN_MAX_WIDTH;
   public displayedColumns!: Column<undefined>[];
   public availableColumns!: Column<undefined>[];
 
   constructor(
     public config: ConfigService,
-    private _moduleService: ModuleService,
     private _translate: TranslateService,
     private activatedRoute: ActivatedRoute,
   ) {}
@@ -41,7 +48,6 @@ export class ListComponent implements OnInit, AfterViewInit {
   ngOnInit() : void {
     this.activatedRoute.data.subscribe(({data}) => {
       this.dataTable$ = of(data);
-      console.log('Resolver data:', data);
     });
 
     // Columns initialization with prop and empty name, to be filled with translations after
@@ -55,7 +61,7 @@ export class ListComponent implements OnInit, AfterViewInit {
     // // Build an array of translation observables for each column name
     const translateTab$ = this.availableColumns.map(
         // An observable is returned which emits the translation of this key
-        column => this._translate.get(`Individuals.AvailableFields.${column.prop}`)
+        column => this._translate.get(`Individuals.DevicesFields.${column.prop}`)
     );
 
     // Translation with CombineLatest will wait for all translations to be loaded before updating 
@@ -82,7 +88,7 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() : void {
-    setTimeout(() => this.calcContentHeight(), 500);
+    //setTimeout(() => this.calcContentHeight(), 500);
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
@@ -117,8 +123,19 @@ export class ListComponent implements OnInit, AfterViewInit {
     this.sort.emit($event);
   }
 
+  onRowSelect($event: any) : void {
+    this.select.emit($event);
+  }
+
   sendRowNumber() {
     this.rows.emit(this.nbRowsToDisplay);
+  }
+
+  toggleExpandRow(row: any) : void {
+    console.log('Columns:', this.displayedColumns);
+    if (this.dataTable) {
+      this.dataTable.rowDetail.toggleExpandRow(row);
+    }
   }
 }
 
