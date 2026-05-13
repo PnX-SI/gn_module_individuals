@@ -2,7 +2,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { GN2CommonModule } from '@geonature_common/GN2Common.module';
 
 import { HttpClient } from '@angular/common/http';
@@ -18,6 +18,9 @@ import { routes } from './module.routes';
 import { MainComponent } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
+import { DevicesListComponent } from './components/devices-list/devices-list.component';
+import { DevicesService } from './services/devices.service';
+import { DevicesResolver } from './resolvers/devices.resolver';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -26,8 +29,9 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
   declarations: [
     MainComponent,
     MapListComponent,
-    ListComponent
-  ], // Not standalone
+    ListComponent,
+    DevicesListComponent,
+  ],
   imports: [
     HttpClientXsrfModule.withOptions({
       cookieName: 'token',
@@ -47,7 +51,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     }),
     
   ],
-  providers: [],
+  providers: [DevicesService, DevicesResolver],
 })
 export class GeonatureModule {
   constructor(

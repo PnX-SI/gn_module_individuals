@@ -3,11 +3,142 @@
     class="col-12 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
-    <ngx-datatable
+    <ngx-datatable *ngIf="dataTable$ | async as dataTable"
+        #dataTable
         class="material striped margin-top-xs table-size expandable"
         [columnMode]="'force'"
-        [columns]=""
-    ></ngx-datatable>
+        [columns]="displayedColumns"
+        [rowHeight]="rowHeight"
+        [headerHeight]="rowHeight + 10"
+        [footerHeight]="rowHeight + 10"
+        [externalPaging]="true"
+        [count]="dataTable.total"
+        [limit]="nbRowsToDisplay"
+        [offset]="dataTable.page - 1"
+        [rows]="dataTable.items"
+        (page)="onPage($event)"
+        [sorts]="sorts"
+        (sort)="onSort($event)"
+        (select)="onRowSelect($event)"
+        [selectionType]="'single'"
+    >
+      <ngx-datatable-row-detail
+        rowHeight="auto"
+      >
+        <ng-template
+          ngx-datatable-row-detail-template
+          let-row="row"
+          let-expanded="expanded"
+        >
+          <ng-container
+            *ngTemplateOutlet="summaryTemplate; context: { row: row }"
+          >
+          </ng-container>
+        </ng-template>
+      </ngx-datatable-row-detail>
+      <ngx-datatable-column id="summary"
+        [width]="actionColumnsWidth"
+        [resizeable]="false"
+        [sortable]="false"
+        [draggable]="false"
+        [canAutoResize]="false"
+      >
+        <ng-template
+          ngx-datatable-cell-template
+          let-row="row"
+          let-expanded="expanded"
+        >
+          <button
+            class="btn btn-row"
+            matTooltip="{{ 'Individuals.Actions.Summary' | translate }}"
+            [class.datatable-icon-right]="!expanded"
+            [class.datatable-icon-down]="expanded"
+            (click)="toggleExpandRow(row)"
+          ></button>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column id="informations"
+        [width]="actionColumnsWidth"
+        [resizeable]="false"
+        [sortable]="false"
+        [draggable]="false"
+        [canAutoResize]="false"
+      >
+        <ng-template
+          ngx-datatable-cell-template
+          let-row="row"
+        >
+          <button
+            class="btn btn-row fa fa-info-circle"
+            matTooltip="{{ 'Individuals.Actions.Informations' | translate }}"
+            [routerLink]="['info', row[idName]]"
+            [disabled]="true"
+          ></button>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column id="edit"
+        [width]="actionColumnsWidth"
+        [resizeable]="false"
+        [sortable]="false"
+        [draggable]="false"
+        [canAutoResize]="false"
+      >
+        <ng-template
+          ngx-datatable-cell-template
+          let-row="row"
+        >
+          <button
+            class="btn btn-row fa fa-pencil-square-o"
+            matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
+            [routerLink]="['edit', row[idName]]"
+            [disabled]="true"
+          ></button>
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column id="delete"
+        [width]="actionColumnsWidth"
+        [resizeable]="false"
+        [sortable]="false"
+        [draggable]="false"
+        [canAutoResize]="false"
+      >
+        <ng-template
+          ngx-datatable-cell-template
+          let-row="row"
+        >
+          <button
+            class="btn btn-row fa fa-trash-o"
+            matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
+            (click)="openDeleteModal(row, deleteModal)"
+            [disabled]="true"
+          ></button>
+        </ng-template>
+        <ngx-datatable-column name="Date min">
+          <ng-template
+            ngx-datatable-cell-template
+            let-row="row"
+            maxWidth="columnMaxWidth"
+          >
+            <span matTooltip="{{ row.date_min | date: 'dd-MM-yyyy' }}">
+              {{ row.date_min | date: 'dd-MM-yyyy' }}
+            </span>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable-column>
+      <ngx-datatable-column 
+        *ngFor="let col of displayedColumns"
+        [name]="col.name">
+        <ng-template
+          ngx-datatable-cell-template
+          let-row="row"
+          maxWidth="columnMaxWidth"
+        >
+          <span>
+            {{ row[col.prop] }}
+          </span>
+        </ng-template>
+      </ngx-datatable-column>
+    </ngx-datatable>
   </div>
 </div>
 

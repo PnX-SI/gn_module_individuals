@@ -41,7 +41,7 @@
 
 Permet de sauvegarder temporairement les modifications si l'on ne souhaite pas tout de suite les ajouter à un `commit`.
 
-Exemple, je suis sur la branche feat/feat-3 et je souhaite faire un fetch sur ma branche develop sans ajouter mes dernières modifs à un comit et sans les perdre :
+Exemple, je suis sur la branche feat/feat-3 et je souhaite faire un fetch sur ma branche develop sans ajouter mes dernières modifs à un commit et sans les perdre :
 
 ```shell
 git stash
@@ -175,6 +175,10 @@ git push
 ### Accès aux variables de configuration du module
 
 Le fichier de configuration, `individuals_config.toml` doit soit être place dans `~/geonature/config` (pour la prod), soit un lien symbolique doit être créé dans ce dossier depuis `~/gn_module_individuals/individuals_config.toml` (plus pratique pour le dev).
+
+```sh
+ln -s ~/gn_module_individuals/individuals_config.toml  ~/geonature/config/individuals_config.toml
+```
 
 Le fichier `~/gn_module_individuals/backend/conf_shema.py` doit être créé et doit déclarer toutes les variables possibles pour le modul
 
@@ -543,7 +547,7 @@ TranslateModule.forChild({
 }),
 ```
 
-Afin que les LazyModule (chargés à la volée en fonction des besoins) bénéficient, à leur chargement, du service de traduction, il est nécessaire d'nitialiser le constructeur de `GeonatureModule` comme suit :
+Afin que les LazyModule (chargés à la volée en fonction des besoins) bénéficient, à leur chargement, du service de traduction, il est nécessaire d'initialiser le constructeur de `GeonatureModule` comme suit :
 
 ```typescript
 export class GeonatureModule {

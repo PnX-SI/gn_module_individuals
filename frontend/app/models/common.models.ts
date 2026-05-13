@@ -1,0 +1,43 @@
+// Used to declare avilable columns and their name in the table header
+export interface Column<T> {
+  prop: keyof T;
+  name: string;
+}
+
+export interface Sort {
+  prop: string;
+  dir: string;
+}
+
+export interface SimplePagination {
+  page: number;
+  limit: number; // Alias for per_page, to be used in the frontend for consistency with other modules
+}
+
+export interface SimplePaginationWithSort extends SimplePagination, Sort {
+}
+
+export interface PaginatedItemCollection<T> extends SimplePagination {
+  items: T[];
+  total: number;
+  pages: number;
+  prev_num: number | null;
+  next_num: number | null;
+  has_next: boolean;
+  has_prev: boolean;
+}
+
+// export interface StationFeature {
+//   id?: number;
+//   type: 'Feature';
+//   geometry: {
+//     type: string;
+//     coordinates: [number, number];
+//   };
+//   properties: Station;
+// }
+
+// export interface StationFeatureCollection {
+//   type: 'FeatureCollection';
+//   features: Array<StationFeature>;
+// }

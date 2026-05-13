@@ -6,6 +6,21 @@
             "Captures": "Captures",
             "TrackingDevices": "Dispositifs de suivi"
         },
+        "DevicesFields": {
+            "id_tracking_device" : "ID du dispositif",
+            "id_nomenclature_device_type" : "ID du type de dispositif",
+            "provider_name" : "Fournisseur",
+            "provider_device_id" : "ID chez le fournisseur",
+            "id_referer" : "ID du référent",
+            "comment" : "Commentaire",
+            "id_digitiser" : "ID digitaliseur",
+            "meta_create_date" : "Date de création",
+            "meta_update_date" : "Date de mise à jour",
+            "nomenclature_device_type_name" : "Type de dispositif",
+            "referer_name" : "Nom du référent",
+            "digitiser_name" : "Nom du digitaliseur",
+            "last_individual_equipped_name" : "Dernier individu équipé"
+        },
         "Error": {
             "Required" : "Ce champs est requis.",
             "MinLength" : "Vous devez choisir au moins une valeur."
@@ -28,6 +43,9 @@
             "Validate" : "Valider",
             "Cancel" : "Annuler",
             "Delete" : "Supprimer",
+            "Summary" : "Afficher / Cacher le résumé",
+            "Informations" : "Détail complet",
+            "Edit" : "Modifier",
             "Done" : "",
             "Deleted" : ""
         }
