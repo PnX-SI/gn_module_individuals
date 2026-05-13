@@ -6,25 +6,25 @@ import { ModuleService } from '@geonature/services/module.service';
 
 import { Device, DevicesAPIParams } from '../models/devices.models';
 import { PaginatedItemCollection } from '../models/common.models';
-import { DataTableConfig } from '../module.config';
+import { DATA_TABLE_CONFIG } from '..//utils/constants.util';
 
 @Injectable()
 export class DevicesService {
-  private MODULE_API: string;
+  private OBJECT_API: string;
 
   constructor(
     private _http: HttpClient,
     private _config: ConfigService,
     private _moduleService: ModuleService
   ) {
-    this.MODULE_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}`;
+    this.OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
   }
 
   getDevices(params: DevicesAPIParams = {}): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
    
     params.page ??= 1
-    params.per_page ??= DataTableConfig.PER_PAGE_OPTION
+    params.limit ??= DATA_TABLE_CONFIG.PER_PAGE_OPTION  
 
     Object.keys(params).forEach(key => {
       const value = params[key as keyof DevicesAPIParams];
@@ -35,20 +35,20 @@ export class DevicesService {
 
     // console.log('GET request on :', `${this.MODULE_API}/devices`, 'with params :', params);
     return this._http.get<PaginatedItemCollection<Device>>(
-      `${this.MODULE_API}/devices`, { params: httpParams }
+      `${this.OBJECT_API}`, { params: httpParams }
     );
   }
 
-  // getIndividual(id_individual: number): Observable<Device> {
-  //   return this._http.get<Device>(
-  //     `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/indiv/${id_individual}`
-  //   );
-  // }
+  getDevice(id_tracking_device: number): Observable<Device> {
+    return this._http.get<Device>(
+      `${this.OBJECT_API}/${id_tracking_device}`
+    );
+  }
 
-  // createIndividual(individual: Omit<Device, 'id_tracking_device'>): Observable<Device> {
-  //   return this._http.post<Device>(
-  //     `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/indiv`,
-  //     individual
-  //   );
-  // }
+  createDevice(device: Omit<Device, 'id_tracking_device'>): Observable<Device> {
+    return this._http.post<Device>(
+      `${this.OBJECT_API}`,
+      device
+    );
+  }
 }

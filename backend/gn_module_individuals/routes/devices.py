@@ -27,11 +27,16 @@ def list_devices(scope):
     provider_id    = request.args.get("providerDeviceId", type=str)
 
     page     = request.args.get("page", type=int)
-    per_page = request.args.get("per_page", type=int)
+    per_page = request.args.get("limit", type=int)
+
+    prop = request.args.get("prop", type=str, default="id_nomenclature_device_type")
+    dir = request.args.get("dir", type=str, default="asc")
 
     paginated = page is not None and per_page is not None
 
     schema = TrackingDevicesSchema(exclude=("deployments",), many=True)
+
+    sort_col = getattr(TrackingDevices, prop, None)
 
     query = (
         db.select(TrackingDevices)
@@ -42,8 +47,10 @@ def list_devices(scope):
             joinedload(TrackingDevices.deployments)
                 .joinedload(IndividualDeployments.individual),
         )
-        .order_by(TrackingDevices.meta_create_date.desc())
+        .order_by(sort_col.desc() if dir == "desc" else sort_col.asc())
     )
+
+    print(str(query))
 
     if device_type is not None:
         query = query.where(TrackingDevices.id_nomenclature_device_type == device_type)
@@ -92,4 +99,3 @@ def device(id_tracking_device, scope):
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
     return TrackingDevicesSchema().dump(device)
-   

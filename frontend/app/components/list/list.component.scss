@@ -3,6 +3,10 @@
   flex-wrap: wrap;
 }
 
+.ngx-datatable .datatable-header-cell {
+  line-height: 40px;
+}
+
 // Is used only if in the component the decorator encapsulation is set to ViewEncapsulation.None
 // This style set the vertical align to center of the datatable cells
 .ngx-datatable.fixed-row .datatable-scroll .datatable-body-row .datatable-body-cell {

@@ -1,0 +1,50 @@
+<ng-template 
+  #summaryTemplate
+  let-row="row"
+>
+  <div class="row mx-0">
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.id_tracking_device' | translate}} :</strong>
+      {{ row.id_tracking_device }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.meta_create_date' | translate}} :</strong>
+      {{ row.meta_create_date }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.digitiser_name' | translate}} :</strong>
+      {{ row.digitiser_name }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.provider_name' | translate}} :</strong>
+      {{ row.provider_name }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.provider_device_id' | translate}} :</strong>
+      {{ row.provider_device_id }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.nomenclature_device_type_name' | translate}} :</strong>
+      {{ row.nomenclature_device_type_name }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.DevicesFields.referer_name' | translate }} :</strong>
+      {{ row.referer_name }}
+    </div>  
+  </div>
+</ng-template>
+
+<gn-individuals-list
+  [displayedColumnsParams]="displayedColumnsParams"
+  [availableColumnsParams]="availableColumnsParams"
+  [dataTable$]="dataTable$"
+  [sorts]="sorts"
+  [idName]="idName"
+  (pagination)="onPage($event)"
+  (sort)="onSort($event)"
+  (rows)="onNbRowsReceived($event)"
+  (select)="onRowSelect($event)"
+  [summaryTemplate]="summaryTemplate"
+>
+</gn-individuals-list>
+

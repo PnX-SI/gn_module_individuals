@@ -1,67 +1,68 @@
-import { ViewEncapsulation, Component, OnInit, ViewChild, AfterViewInit, HostListener } from '@angular/core';
+import { ViewEncapsulation, Component, OnInit, ViewChild, AfterViewInit, EventEmitter, Output, Input, TemplateRef} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { ActivatedRoute } from '@angular/router';
 
-import { BehaviorSubject, Observable, combineLatest } from 'rxjs';
-import { switchMap, shareReplay, tap } from 'rxjs/operators';
+import { Observable, combineLatest, of } from 'rxjs';
 
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
 import { ConfigService } from '@geonature/services/config.service';
-import { ModuleService } from '@geonature/services/module.service';
 
-import { ContentConfig, DataTableConfig } from '../../module.config';
-import { Device, DEVICE_COLUMNS, DevicesAPIParams } from '../../models/devices.models';
-import { Column, SimplePagination, PaginatedItemCollection } from '../../models/common.models';
-
-import { DevicesService } from '../../services/devices.service';  
+import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { Column, PaginatedItemCollection } from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-list',
   templateUrl: 'list.component.html',
   styleUrls: ['list.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
 })
 export class ListComponent implements OnInit, AfterViewInit {
-  //@ViewChild('dataTable') dataTable: DatatableComponent;
-  public userCruved: any;
-  public contentHeight: number = ContentConfig.MIN_HEIGHT;
-  public rowHeight: number = DataTableConfig.TABLE_ROW_HEIGHT;
-  public headerFooterHeight = DataTableConfig.TABLE_ROW_HEIGHT < 50 ? 50 : DataTableConfig.TABLE_ROW_HEIGHT;
-  public rowNumber: number = DataTableConfig.PER_PAGE_OPTION;
-  public displayedColumns: Column<Device>[] = []
-  public availableColumns: Column<Device>[] = []
-  private _pagination$ = new BehaviorSubject<SimplePagination>({
-    page: 1,
-    limit: DataTableConfig.PER_PAGE_OPTION,
-  });
-  public dataTable$: Observable<PaginatedItemCollection<Device>>;
-  
+  // ViewChild : To be visible dynamicaly in the parent component linked with the #dataTable reference in the child template
+  @ViewChild("dataTable") dataTable: DatatableComponent | undefined;
+  @Output() pagination: EventEmitter<any> = new EventEmitter();
+  @Output() sort: EventEmitter<any> = new EventEmitter();
+  @Output() rows: EventEmitter<any> = new EventEmitter();
+  @Output() select: EventEmitter<any> = new EventEmitter();
+  @Input() availableColumnsParams!: Record<keyof any, true>;
+  @Input() displayedColumnsParams!: Array<String>;
+  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<PaginatedItemCollection<unknown>>();
+  @Input() sorts: Array<Object> = [];
+  @Input() idName: string = "";
+  @Input() summaryTemplate!: TemplateRef<any>;
+
+  public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
+  public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
+  public nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  public actionColumnsWidth: number = DATA_TABLE_CONFIG.ACTION_COLUMNS_WIDTH;
+  public columnMaxWidth: number = DATA_TABLE_CONFIG.COLUMN_MAX_WIDTH;
+  public displayedColumns!: Column<undefined>[];
+  public availableColumns!: Column<undefined>[];
+
   constructor(
     public config: ConfigService,
-    private _moduleService: ModuleService,
     private _translate: TranslateService,
-    private _devicesService: DevicesService
+    private activatedRoute: ActivatedRoute,
   ) {}
 
   ngOnInit() : void {
-    // Get current module and current user CRUVED
-    const currentModule = this._moduleService.currentModule;
-    this.userCruved = currentModule.cruved;
-    
-    // Columns initialization with prop and empty name, to be filled with translations after
-    this.availableColumns = (Object.keys(DEVICE_COLUMNS) as (keyof Device)[])
-      .map(prop => ({ prop, name: '' }));
+    this.activatedRoute.data.subscribe(({data}) => {
+      this.dataTable$ = of(data);
+    });
 
+    // Columns initialization with prop and empty name, to be filled with translations after
+    this.availableColumns = (Object.keys(this.availableColumnsParams) as (keyof undefined)[])
+      .map(prop => ({ prop, name: '' }));
+    
     this.displayedColumns = this.availableColumns.filter(column =>
-      this.config.INDIVIDUALS.DEVICES.DEFAULT_DISPLAYED_COLUMNS.includes(column.prop)
+       this.displayedColumnsParams.includes(column.prop)
     );
 
-    // Build an array of translation observables for each column name
-    const translateTab$ = (Object.keys(DEVICE_COLUMNS) as (keyof Device)[])
-      .map(
+    // // Build an array of translation observables for each column name
+    const translateTab$ = this.availableColumns.map(
         // An observable is returned which emits the translation of this key
-        prop => this._translate.get(`Individuals.AvailableFields.${prop}`)
-      );
+        column => this._translate.get(`Individuals.DevicesFields.${column.prop}`)
+    );
 
     // Translation with CombineLatest will wait for all translations to be loaded before updating 
     // the column names, avoiding multiple updates and ensuring all names are translated at once.
@@ -80,21 +81,14 @@ export class ListComponent implements OnInit, AfterViewInit {
 
     // Calculate the height of the content and the number of rows to display in the table, based on the viewport height
     this.contentHeight = this.calcContentHeight();
-    this.rowNumber = this.calcRowNumber();
+    this.nbRowsToDisplay = this.calcRowNumber();
+    this.sendRowNumber();
 
-    this.dataTable$ = this._pagination$.pipe(
-      // Transform the emitted value (pagination) into an API call
-      switchMap(({ page, limit }) => 
-        this._devicesService.getDevices({page, per_page: limit})
-      ),
-      tap(data => console.log('Devices JSON:', data)),
-      // Set in cache the last emitted value, If the same is called,
-      // no need to call the API again
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
+    console.log('Content height:', this.contentHeight, 'Row number:', this.nbRowsToDisplay);
   }
 
   ngAfterViewInit() : void {
+    //setTimeout(() => this.calcContentHeight(), 500);
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
@@ -113,21 +107,35 @@ export class ListComponent implements OnInit, AfterViewInit {
       : 0;
     let height = windowH - (toolbarH + 80);
 
-    return height >= ContentConfig.MIN_HEIGHT ? height : ContentConfig.MIN_HEIGHT;
+    return height >= CONTENT_CONFIG.MIN_HEIGHT ? height : CONTENT_CONFIG.MIN_HEIGHT;
   }
 
   calcRowNumber() : number {
-    let num = Math.trunc(this.contentHeight / DataTableConfig.TABLE_ROW_HEIGHT);
-    num = num > DataTableConfig.PER_PAGE_OPTION ? DataTableConfig.PER_PAGE_OPTION : num;
+    let num = Math.trunc((this.contentHeight - 5) / DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT) - 2; // We remove 5px for the header border and 2 rows for the header and footer of the table
     return num;
   }
 
   onPage($event: any) : void {
-    console.log('Page event:', $event);
-    this._pagination$.next({
-      page: Number($event.offset ?? 0) + 1,
-      limit: Number($event.limit ?? this._pagination$.getValue().limit),
-    });
+    this.pagination.emit($event);
+  }
+
+  onSort($event: any) : void {
+    this.sort.emit($event);
+  }
+
+  onRowSelect($event: any) : void {
+    this.select.emit($event);
+  }
+
+  sendRowNumber() {
+    this.rows.emit(this.nbRowsToDisplay);
+  }
+
+  toggleExpandRow(row: any) : void {
+    console.log('Columns:', this.displayedColumns);
+    if (this.dataTable) {
+      this.dataTable.rowDetail.toggleExpandRow(row);
+    }
   }
 }
 
