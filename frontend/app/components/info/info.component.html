@@ -1,0 +1,48 @@
+<div class="card border-primary bg-light">
+  <h2 class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+    <div>
+      {{ infoTitle }}
+    </div>
+    <div>
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Back' | translate"
+        class="mr-1 bg-dark text-white border-0"
+        type="button"
+        [disabled]="false"
+        (click)="goBack()"
+      >
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Edit' | translate"
+        class="mr-1 bg-success text-white border-0"
+        type="button"
+        [disabled]="true"
+        [routerLink]=""
+      >
+        <mat-icon>edit</mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Delete' | translate"
+        class="mr-1 bg-danger text-white border-0"
+        type="button"
+        [disabled]="true"
+      >
+        <mat-icon>delete</mat-icon>
+      </button>
+    </div>
+  </h2>
+  <div
+    class="card-body"
+    id="card-station"
+  >
+    <ng-container
+      *ngTemplateOutlet="infoTemplate; context: { dataTable: dataTable }"
+    >
+    </ng-container>
+  </div>
+</div>
+

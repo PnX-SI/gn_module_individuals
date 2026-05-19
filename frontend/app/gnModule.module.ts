@@ -20,7 +20,8 @@ import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
 import { DevicesService } from './services/devices.service';
-import { DevicesResolver } from './resolvers/devices.resolver';
+import { DeviceResolver, DevicesResolver } from './resolvers/devices.resolver';
+import { InfoComponent } from './components/info/info.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
@@ -32,6 +33,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     MapListComponent,
     ListComponent,
     DevicesListComponent,
+    InfoComponent,
     DevicesInfoComponent,
   ],
   imports: [
@@ -53,7 +55,11 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     }),
     
   ],
-  providers: [DevicesService, DevicesResolver],
+  providers: [
+    DevicesService,
+    DevicesResolver,
+    DeviceResolver
+  ],
 })
 export class GeonatureModule {
   constructor(

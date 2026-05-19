@@ -1,66 +1,82 @@
-<div class="card border-primary bg-light">
-  <h2 class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
-    <div>
-      {{ 'Individuals.DevicesTexts.DeviceInfoTitle' | translate }}
+<ng-template
+ #infoTemplate
+ let-dataTable="dataTable"
+>
+  <div class="content row">
+    <div 
+      *ngIf="'nomenclature_device_type_name' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
     </div>
-    <div>
-      <button
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Back' | translate"
-        class="mr-1 bg-dark text-white border-0"
-        type="button"
-        [disabled]="false"
-        [routerLink]=""
-      >
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <button
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Edit' | translate"
-        class="mr-1 bg-success text-white border-0"
-        type="button"
-        [disabled]="true"
-        [routerLink]=""
-      >
-        <mat-icon>edit</mat-icon>
-      </button>
-      <button
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Delete' | translate"
-        class="mr-1 bg-danger text-white border-0"
-        type="button"
-        [disabled]="true"
-      >
-        <mat-icon>delete</mat-icon>
-      </button>
+    <div 
+      *ngIf="'provider_name' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
     </div>
-  </h2>
-  <div
-    class="card-body"
-    id="card-station"
-  >
-    <div class="content row">
-      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
-        <h3 class="text-muted">Field 1 :</h3>
-        <p>
-          val 1
-        </p>
-      </div>
-    </div>         
-    <div class="content row">
-      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
-        <h3 class="text-muted">Field 2 :</h3>
-        <p>
-          val 2
-        </p>
-      </div>
-      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
-        <h3 class="text-muted">Field 3 :</h3>
-        <p>
-          val 3
-        </p>
-      </div>
+    <div 
+      *ngIf="'provider_device_id' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+  </div>         
+  <div class="content row one-per-row">
+    <div 
+      *ngIf="'referer_name' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'comment' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field]  ?? '-'}}
+      </p>
     </div>
   </div>
-</div>
+  <div class="content row">
+    <div 
+      *ngIf="'digitiser_name' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'meta_create_date' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+        <div 
+      *ngIf="'meta_update_date' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] ?? '-' }}
+      </p>
+    </div>
+  </div>
+</ng-template>
 
+<gn-individuals-info *ngIf="dataTable$ | async as dataTable"
+  [infoTemplate]="infoTemplate"
+  [dataTable]="dataTable"
+  [infoTitle]="('Individuals.DevicesTexts.InfoTitle' | translate) + dataTable.id_tracking_device"
+>
+</gn-individuals-info>

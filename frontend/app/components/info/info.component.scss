@@ -1,0 +1,25 @@
+
+button[disabled].mat-mdc-mini-fab {
+  opacity: 0.5;
+  /*filter: grayscale(100%);*/
+  cursor: not-allowed;
+}
+
+h2 {
+  font-size: clamp(1.3rem, 1.3vw, 1.4rem);
+}
+
+h3 {
+  font-size: clamp(1rem, 1.1vw, 1.1rem); /* min, preferred, max */
+  font-weight: 550;
+}
+
+.content {
+  border-top: 1px solid rgb(235, 235, 235) !important;
+  padding: 5px 0px !important;
+}
+
+.one-per-row {
+  display: flex;
+  flex-direction: column;
+}

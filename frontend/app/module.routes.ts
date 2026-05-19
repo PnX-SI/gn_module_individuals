@@ -4,7 +4,7 @@ import { MainComponent,  } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
-import { DevicesResolver } from './resolvers/devices.resolver';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 
 export const routes: Routes = [
     { 
@@ -20,11 +20,11 @@ export const routes: Routes = [
                 path: 'individuals',
                 component: MapListComponent,
             },
-                        {
+            {
                 path: 'observations',
                 component: MapListComponent,
             },
-                        {
+            {
                 path: 'captures',
                 component: MapListComponent,
             },
@@ -33,10 +33,10 @@ export const routes: Routes = [
                 component: DevicesListComponent,
                 resolve:{ data: DevicesResolver },  
             },
-
             {
                 path: 'devices/info/:id_tracking_device',
                 component: DevicesInfoComponent,
+                resolve:{ data: DeviceResolver },
             }
         ]
     }

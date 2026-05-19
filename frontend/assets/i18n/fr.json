@@ -19,10 +19,11 @@
             "nomenclature_device_type_name" : "Type de dispositif",
             "referer_name" : "Nom du référent",
             "digitiser_name" : "Nom du digitaliseur",
-            "last_individual_equipped_name" : "Dernier individu équipé"
+            "last_individual_equipped_name" : "Dernier individu équipé",
+            "deployments" : "Liste des déploiements associés"
         },
         "DevicesTexts": {
-            "DeviceInfoTitle" : "Dispositif de suivi n°"
+            "InfoTitle" : "Dispositif de suivi n°"
         },
         "Error": {
             "Required" : "Ce champs est requis.",
