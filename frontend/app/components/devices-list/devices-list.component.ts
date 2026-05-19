@@ -23,6 +23,8 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   public sorts: Array<Sort> = [{ prop: "id_tracking_device", dir: "asc" }];
   public idName: string = "id_tracking_device";
 
+  private _limit: number = this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
+
   constructor(
     public config: ConfigService,
     private _devicesService: DevicesService,
@@ -47,23 +49,25 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
         limit: Number($event.limit ?? this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
         prop: this.sorts[0].prop,
         dir: this.sorts[0].dir,
-    }; 
+    };
+    this._limit = params.limit;
     this.dataTable$ = this._devicesService.getDevices(params);
   }
 
   onSort($event: any) : void {
     let params: SimplePaginationWithSort = {
         page: Number($event.offset ?? 0) + 1,
-        limit: Number($event.limit ?? this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
+        limit: this._limit,
         prop: $event.sorts[0].prop,
         dir: $event.sorts[0].dir,
     };
+    console.log('Sorting with params :', params);
     this.dataTable$ = this._devicesService.getDevices(params);
     this.sorts = $event.sorts;
   }
 
   onRowSelect($event: any) : void {
-    console.log('Row selected:', $event.selected[0]["id_tracking_device"]);
+    // console.log('Row selected:', $event.selected[0]["id_tracking_device"]);
     // if (row instanceof Object && row.selected.length > 0) {
     //   this.tableSelected.next(row.selected[0][this.idName]);
     // } else {
@@ -78,6 +82,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
       prop: this.sorts[0].prop,
       dir: this.sorts[0].dir,
     }; 
+    this._limit = nbRowsPerPage;
     this.dataTable$ = this._devicesService.getDevices(params);
   } 
 }

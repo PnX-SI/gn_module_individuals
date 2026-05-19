@@ -22,7 +22,7 @@ export class DevicesService {
 
   getDevices(params: DevicesAPIParams = {}): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
-   
+    console.log('Initial params :', params);
     params.page ??= 1
     params.limit ??= DATA_TABLE_CONFIG.PER_PAGE_OPTION  
 
@@ -33,7 +33,7 @@ export class DevicesService {
       }
     });
 
-    // console.log('GET request on :', `${this.MODULE_API}/devices`, 'with params :', params);
+    console.log('GET request on :', `${this.OBJECT_API}`, 'with params :', httpParams);
     return this._http.get<PaginatedItemCollection<Device>>(
       `${this.OBJECT_API}`, { params: httpParams }
     );
