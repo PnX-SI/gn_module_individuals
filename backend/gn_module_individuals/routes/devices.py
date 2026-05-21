@@ -27,7 +27,7 @@ def list_devices(scope):
     provider_id    = request.args.get("providerDeviceId", type=str)
 
     page     = request.args.get("page", type=int)
-    per_page = request.args.get("limit", type=int)
+    per_page = request.args.get("per_page", type=int)
 
     prop = request.args.get("prop", type=str, default="id_nomenclature_device_type")
     dir = request.args.get("dir", type=str, default="asc")
@@ -49,8 +49,6 @@ def list_devices(scope):
         )
         .order_by(sort_col.desc() if dir == "desc" else sort_col.asc())
     )
-
-    print(str(query))
 
     if device_type is not None:
         query = query.where(TrackingDevices.id_nomenclature_device_type == device_type)
