@@ -11,7 +11,7 @@ from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
 from .. import MODULE_CODE
-from ..schemas import TrackingDevicesSchema
+from ..schemas import TrackingDevicesSchema, TrackingDeviceDetailSchema
 from ..models import TrackingDevices,IndividualDeployments
 
 from ..blueprint import blueprint
@@ -96,4 +96,4 @@ def device(id_tracking_device, scope):
 
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-    return TrackingDevicesSchema().dump(device)
+    return TrackingDeviceDetailSchema().dump(device)

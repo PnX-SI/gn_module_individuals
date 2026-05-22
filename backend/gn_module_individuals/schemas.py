@@ -99,6 +99,68 @@ class TrackingDevicesSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
             return name
         return None
 
+class DeploymentSummarySchema(ma.Schema):
+    id_individual = fields.Integer(dump_only=True)
+    individual_name = fields.Method("get_individual_name", dump_only=True)
+    install_date = fields.DateTime(format="%d-%m-%y", dump_only=True)
+    removal_date = fields.DateTime(format="%d-%m-%y", dump_only=True)
+    comment = fields.Method("get_comment", dump_only=True)
+
+    def get_individual_name(self, obj):
+        if obj.individual:
+            name = obj.individual.individual_name
+            if obj.individual.taxon and obj.individual.taxon.nom_vern:
+                return f"{name} ({obj.individual.taxon.nom_vern})"
+            return name
+        return None
+
+    def get_comment(self, obj):
+        if obj.comment:
+            return obj.comment.replace("\n", "<br>")
+        return None
+
+
+class TrackingDeviceDetailSchema(ma.Schema):
+    id_tracking_device = fields.Integer(dump_only=True)
+    id_nomenclature_device_type = fields.Integer(dump_only=True)
+    provider_name = fields.String(dump_only=True)
+    provider_device_id = fields.String(dump_only=True)
+    id_referer = fields.Integer(dump_only=True)
+    id_digitiser = fields.Integer(dump_only=True)
+    meta_create_date = fields.Date(format="%d-%m-%y", dump_only=True)
+    meta_update_date = fields.Date(format="%d-%m-%y", dump_only=True)
+    nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
+    referer_name = fields.Method("get_referer", dump_only=True)
+    digitiser_name = fields.Method("get_digitiser", dump_only=True)
+    comment = fields.Method("get_comment", dump_only=True)
+    deployments = fields.Method("get_deployments", dump_only=True)
+
+    def get_nomenclature_name(self, obj):
+        if obj.nomenclature_device_type:
+            return obj.nomenclature_device_type.label_fr
+        return None
+
+    def get_digitiser(self, obj):
+        if obj.digitiser:
+            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
+        return None
+
+    def get_referer(self, obj):
+        if obj.referer:
+            return f"{obj.referer.prenom_role} {obj.referer.nom_role}"
+        return None
+
+    def get_comment(self, obj):
+        if obj.comment:
+            return obj.comment.replace("\n", "<br>")
+        return None
+
+    def get_deployments(self, obj):
+        if not obj.deployments:
+            return []
+        return DeploymentSummarySchema(many=True).dump(obj.deployments)
+
+
 class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = IndividualDeployments
