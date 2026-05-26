@@ -28,7 +28,16 @@ def client(app):
     return app.test_client()
 
 
-
+@pytest.fixture
+def device_with_deployment(device, individual, db):
+    dep = IndividualDeployments(
+        id_tracking_device=device.id_tracking_device,
+        id_individual=individual.id_individual,
+        install_date=datetime(2024, 1, 1),
+    )
+    db.session.add(dep)
+    db.session.commit()
+    return device
 
 
 @pytest.fixture(scope="session", autouse=True)

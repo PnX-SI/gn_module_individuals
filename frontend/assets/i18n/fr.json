@@ -19,7 +19,24 @@
             "nomenclature_device_type_name" : "Type de dispositif",
             "referer_name" : "Nom du référent",
             "digitiser_name" : "Nom du digitaliseur",
-            "last_individual_equipped_name" : "Dernier individu équipé"
+            "last_individual_equipped_name" : "Dernier individu équipé",
+            "deployments" : "Liste des déploiements associés"
+        },
+        "DeploymentsFields": {
+            "id_deployment" : "ID du déploiement",
+            "id_tracking_device" : "ID du dispositif de suivi",
+            "id_individual" : "ID de l'individu",
+            "install_date" : "Date de déploiement",
+            "removal_date" : "Date de retrait",
+            "comment" : "Commentaire",
+            "id_digitiser" : "ID digitaliseur",
+            "meta_create_date" : "Date de création",
+            "meta_update_date" : "Date de mise à jour",
+            "individual_name" : "Nom de l'individu",
+            "digitiser_name" : "Nom du digitaliseur"
+        },
+        "DevicesTexts": {
+            "InfoTitle" : "Dispositif de suivi n°"
         },
         "Error": {
             "Required" : "Ce champs est requis.",
@@ -42,6 +59,7 @@
             "Add" : "Ajouter ",
             "Validate" : "Valider",
             "Cancel" : "Annuler",
+            "Back" : "Retour",
             "Delete" : "Supprimer",
             "Summary" : "Afficher / Cacher le résumé",
             "Informations" : "Détail complet",

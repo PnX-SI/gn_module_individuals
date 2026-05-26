@@ -1,0 +1,103 @@
+<ng-template
+ #infoTemplate
+ let-dataTable="dataTable"
+>
+  <div class="content row">
+    <div 
+      *ngIf="'nomenclature_device_type_name' as field"
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'provider_name' as field"
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'provider_device_id' as field"
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+  </div>         
+  <div class="content row one-per-row">
+    <div 
+      *ngIf="'referer_name' as field"
+      class="col-12 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'comment' as field"
+      class="col-12 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field]  ?? '-'}}
+      </p>
+    </div>
+  </div>
+  <div class="content row one-per-row">
+    <div 
+      *ngIf="'deployments' as field"
+      class="col-12 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+        <p *ngIf="dataTable[field].length > 0">
+          <ngx-datatable
+            class="material striped margin-top-xs table-size expandable"
+            [columnMode]="'force'"
+            [columns]="deploymentsColumns"
+            [rowHeight]="rowHeight"
+            [headerHeight]="rowHeight + 10"
+            [footerHeight]="rowHeight + 10"
+            [rows]="dataTable[field]"
+            [sorts]="[]"
+          >
+          </ngx-datatable>
+        </p>
+        <p *ngIf="deploymentsColumns.length == 0">-</p>
+    </div>
+  </div>
+  <div class="content row">
+    <div 
+      *ngIf="'digitiser_name' as field"
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'meta_create_date' as field"
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+        <div 
+      *ngIf="'meta_update_date' as field"
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] ?? '-' }}
+      </p>
+    </div>
+  </div>
+</ng-template>
+
+<gn-individuals-info *ngIf="dataTable$ | async as dataTable"
+  [infoTemplate]="infoTemplate"
+  [dataTable]="dataTable"
+  [infoTitle]="('Individuals.DevicesTexts.InfoTitle' | translate) + dataTable.id_tracking_device"
+>
+</gn-individuals-info>
