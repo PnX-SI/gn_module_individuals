@@ -16,11 +16,11 @@
       </button>
       <button
         mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Edit' | translate"
+        [matTooltip]="'Individuals.Actions.Save' | translate"
         class="mr-1 bg-success text-white border-0"
         type="button"
         [disabled]="true"
-        [routerLink]=""
+        (click)="save()"
       >
         <mat-icon>save</mat-icon>
       </button>

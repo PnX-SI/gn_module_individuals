@@ -17,8 +17,7 @@ import { I18nService } from '@geonature/shared/translate/i18n-service';
 import { routes } from './module.routes';
 import { MainComponent } from './components/main/main.component';
 import { DevicesService } from './services/devices.service';
-import { DeviceResolver } from './resolvers/devices.resolver';
-import { DevicesResolver } from './resolvers/devices.resolver';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
@@ -36,10 +35,10 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     MapListComponent,
     ListComponent,
     DevicesListComponent,
+    InfoComponent,
+    DevicesInfoComponent,
     FormComponent,
     DevicesFormComponent,
-    InfoComponent,
-    DevicesInfoComponent
   ],
   imports: [
     HttpClientXsrfModule.withOptions({

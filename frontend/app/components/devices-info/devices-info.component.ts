@@ -23,13 +23,13 @@ export class DevicesInfoComponent implements OnInit, AfterViewInit {
 
   constructor(
     public config: ConfigService,
-    private activatedRoute: ActivatedRoute,
+    private _route: ActivatedRoute,
     private _translate: TranslateService,
   ) {}
 
   ngOnInit() : void {
     // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
-    this.activatedRoute.data.subscribe(({data}) => {
+    this._route.data.subscribe(({data}) => {
       this.dataTable$ = of(data);
 
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
