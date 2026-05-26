@@ -49,6 +49,8 @@
             "ConfirmDelete" : "Confirmer la suppression"
         },
         "Form" : {
+            "DevicesAddTitle" : "Ajout d'un dispositif de suivi",
+            "DevicesEditTitle" : "Modification du dispositif de suivi : ",
             "PickGeom" : " Veuillez saisir une géométrie sur la carte ",
             "AssignedFields" : "Champs associés au type : ",
             "ValidateEnter" : "Valider et saisir des ",
@@ -56,7 +58,7 @@
             "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet"
         },
         "Actions" : {
-            "Add" : "Ajouter ",
+            "Add" : "Ajouter",
             "Validate" : "Valider",
             "Cancel" : "Annuler",
             "Back" : "Retour",

@@ -1,0 +1,77 @@
+<ng-template
+ #formTemplate
+ let-dataTable="dataTable"
+>
+  <div class="content row">
+    <div class="col-6 padding-sm">
+      <div>
+        <pnx-observers-text
+        ></pnx-observers-text>
+      </div>
+      <ng-template #observerIDBlock>
+        <pnx-observers
+          label="Label"
+        ></pnx-observers>
+      </ng-template>
+    </div>
+  </div>  
+     
+  <div class="content row one-per-row">
+    <div 
+      *ngIf="'referer_name' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'comment' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field]  ?? '-'}}
+      </p>
+    </div>
+  </div>
+  <div class="content row">
+    <div 
+      *ngIf="'digitiser_name' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+    <div 
+      *ngIf="'meta_create_date' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] }}
+      </p>
+    </div>
+        <div 
+      *ngIf="'meta_update_date' as field"
+      class="col-xs-12 col-sm-4 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted"> {{ 'Individuals.DevicesFields.' + field | translate }}</h3>
+      <p>
+        {{ dataTable[field] ?? '-' }}
+      </p>
+    </div>
+  </div>
+
+</ng-template>
+
+<!-- <gn-individuals-form *ngIf="dataTable$ | async as dataTable"
+  [formTemplate]="formTemplate"
+  [dataTable]="dataTable"
+  [formTitle]="('Individuals.DevicesTexts.InfoTitle' | translate) + dataTable.id_tracking_device"
+>
+</gn-individuals-form> -->
+
+<gn-individuals-form
+  [formTitle]="formAction == 'ADD' ? ('Individuals.Form.DevicesAddTitle' | translate) : ('Individuals.Form.DevicesEditTitle' | translate) + deviceId"
+  [formTemplate]="formTemplate"
+>
+</gn-individuals-form>
