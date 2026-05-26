@@ -35,19 +35,19 @@ class TrackingDevicesSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     # Validators
 
     @validates("provider_name")
-    def validate_provider_name(self, value):
+    def validate_provider_name(self, value, **kwargs):
         if not value or not value.strip():
             raise ValidationError("provider_name ne peut pas être vide.")
         return value
 
     @validates("provider_device_id")
-    def validate_provider_device_id(self, value):
+    def validate_provider_device_id(self, value, **kwargs):
         if not value or not value.strip():
             raise ValidationError("provider_device_id ne peut pas être vide.")
         return value
 
     @validates("id_nomenclature_device_type")
-    def validate_nomenclature_device_type(self, value):
+    def validate_nomenclature_device_type(self, value, **kwargs):
         if value is None:
             return value
         exists = db.session.execute(
@@ -60,7 +60,7 @@ class TrackingDevicesSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         return value
 
     @validates("id_referer")
-    def validate_referer(self, value):
+    def validate_referer(self, value, **kwargs):
         if value is None:
             return value
         user = db.session.execute(
@@ -186,7 +186,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
     # Validators
  
     @validates("id_individual")
-    def validate_individual(self, value):
+    def validate_individual(self, value, **kwargs):
         individual = db.session.execute(
             db.select(TIndividuals).filter_by(id_individual=value)
         ).scalar_one_or_none()
@@ -195,7 +195,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
         return value
 
     @validates("id_tracking_device")
-    def validate_tracking_device(self, value):
+    def validate_tracking_device(self, value, **kwargs):
         device = db.session.execute(
             db.select(TrackingDevices).filter_by(id_tracking_device=value)
         ).scalar_one_or_none()
@@ -204,7 +204,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
         return value
 
     @validates("id_nomenclature_deployment_type")
-    def validate_nomenclature_deployment_type(self, value):
+    def validate_nomenclature_deployment_type(self, value, **kwargs):
         if value is None:
             return value
         exists = db.session.execute(
@@ -217,7 +217,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
         return value
 
     @validates("id_nomenclature_deployment_location")
-    def validate_nomenclature_deployment_location(self, value):
+    def validate_nomenclature_deployment_location(self, value, **kwargs):
         if value is None:
             return value
         exists = db.session.execute(
@@ -230,7 +230,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
         return value
 
     @validates("additional_data")
-    def validate_additional_data(self, value):
+    def validate_additional_data(self, value, **kwargs):
         if value is None:
             return value
         if not isinstance(value, dict):

@@ -1,4 +1,5 @@
 import pytest
+from datetime import datetime
 from sqlalchemy import func, select
 
 from geonature.tests.fixtures import *
@@ -11,7 +12,7 @@ from pypnusershub.tests.fixtures import teardown_logout_user
 
 from gn_module_individuals import MODULE_CODE, MODULE_LABEL, MODULE_PICTO
 from gn_module_individuals.blueprint import blueprint as indiv_blueprint
-from gn_module_individuals.models import TrackingDevices
+from gn_module_individuals.models import TrackingDevices, IndividualDeployments
 from gn_module_individuals.tests.fixtures import *
 
 pytest.endpoint = ""
@@ -29,14 +30,16 @@ def client(app):
 
 
 @pytest.fixture
-def device_with_deployment(device, individual, db):
+def device_with_deployment(device, individual):
     dep = IndividualDeployments(
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
+        id_capture=1,
         install_date=datetime(2024, 1, 1),
     )
-    db.session.add(dep)
-    db.session.commit()
+    with db.session.begin_nested():
+        db.session.add(dep)
+        db.session.flush()
     return device
 
 

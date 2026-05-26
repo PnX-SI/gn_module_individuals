@@ -119,3 +119,235 @@ class TestGetDevice:
             url_for("individuals.device", id_tracking_device=device.id_tracking_device)
         )
         assert r.status_code == 401
+
+
+# ===========================================================================
+# POST /devices  (create_device)
+# ===========================================================================
+
+
+class TestCreateDevice:
+
+    VALID_PAYLOAD = {
+        "provider_name": "Ornitela",
+        "provider_device_id": "TEST_POST_001",
+    }
+
+    def test_returns_201_with_valid_payload(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
+        assert r.status_code == 201
+
+    def test_response_contains_id(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
+        payload = r.get_json()
+        assert "id_tracking_device" in payload
+        assert payload["id_tracking_device"] is not None
+
+    def test_digitiser_is_set_from_authenticated_user(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
+        payload = r.get_json()
+        assert payload["id_digitiser"] == users["admin_user"].id_role
+
+    def test_empty_provider_name_returns_400(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(
+                url_for("individuals.create_device"),
+                json={"provider_name": "   ", "provider_device_id": "X"},
+            )
+        assert r.status_code == 400
+
+    def test_empty_provider_device_id_returns_400(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(
+                url_for("individuals.create_device"),
+                json={"provider_name": "Ornitela", "provider_device_id": ""},
+            )
+        assert r.status_code == 400
+
+    def test_invalid_nomenclature_returns_400(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(
+                url_for("individuals.create_device"),
+                json={**self.VALID_PAYLOAD, "id_nomenclature_device_type": -999},
+            )
+        assert r.status_code == 400
+
+    def test_invalid_referer_returns_400(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.post(
+                url_for("individuals.create_device"),
+                json={**self.VALID_PAYLOAD, "id_referer": -999},
+            )
+        assert r.status_code == 400
+
+    def test_computed_fields_in_payload_are_ignored(self, client, users):
+        """Les champs dump_only du frontend ne doivent pas lever d'erreur."""
+        payload = {
+            **self.VALID_PAYLOAD,
+            "nomenclature_device_type_name": "Balise GPS",
+            "digitiser_name": "Test Agent",
+            "referer_name": "Test Agent",
+            "last_individual_equipped_name": None,
+        }
+        with logged_user(client, users["admin_user"]):
+            r = client.post(url_for("individuals.create_device"), json=payload)
+        assert r.status_code == 201
+
+    def test_forbidden_without_create_permission(self, client, users):
+        with logged_user(client, users["noright_user"]):
+            r = client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
+        assert r.status_code == 403
+
+    def test_unauthenticated_returns_401(self, client):
+        r = client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
+        assert r.status_code == 401
+
+
+# ===========================================================================
+# PUT /devices/<id>  (update_device)
+# ===========================================================================
+
+
+class TestUpdateDevice:
+
+    def test_returns_200_with_valid_payload(self, client, users, device):
+        payload = {"provider_name": "Ornitela Updated", "provider_device_id": "UPD_001"}
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json=payload,
+            )
+        assert r.status_code == 200
+
+    def test_response_reflects_updated_fields(self, client, users, device):
+        payload = {"provider_name": "NewProvider", "provider_device_id": "UPD_002"}
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json=payload,
+            )
+        data = r.get_json()
+        assert data["provider_name"] == "NewProvider"
+        assert data["provider_device_id"] == "UPD_002"
+
+    def test_digitiser_is_set_from_authenticated_user(self, client, users, device):
+        payload = {"provider_name": "X", "provider_device_id": "Y"}
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json=payload,
+            )
+        assert r.get_json()["id_digitiser"] == users["admin_user"].id_role
+
+    def test_computed_fields_in_payload_are_ignored(self, client, users, device):
+        payload = {
+            "provider_name": "X",
+            "provider_device_id": "Y",
+            "nomenclature_device_type_name": "Balise GPS",
+            "digitiser_name": "Test Agent",
+        }
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json=payload,
+            )
+        assert r.status_code == 200
+
+    def test_empty_provider_name_returns_400(self, client, users, device):
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json={"provider_name": "", "provider_device_id": "X"},
+            )
+        assert r.status_code == 400
+
+    def test_invalid_nomenclature_returns_400(self, client, users, device):
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json={"provider_name": "X", "provider_device_id": "Y", "id_nomenclature_device_type": -999},
+            )
+        assert r.status_code == 400
+
+    def test_not_found_returns_404(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=-1),
+                json={"provider_name": "X", "provider_device_id": "Y"},
+            )
+        assert r.status_code == 404
+
+    def test_forbidden_without_update_permission(self, client, users, device):
+        with logged_user(client, users["noright_user"]):
+            r = client.put(
+                url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+                json={"provider_name": "X", "provider_device_id": "Y"},
+            )
+        assert r.status_code == 403
+
+    def test_unauthenticated_returns_401(self, client, device):
+        r = client.put(
+            url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+            json={"provider_name": "X", "provider_device_id": "Y"},
+        )
+        assert r.status_code == 401
+
+
+# ===========================================================================
+# DELETE /devices/<id>  (delete_device)
+# ===========================================================================
+
+
+class TestDeleteDevice:
+
+    def test_returns_204_for_existing_device(self, client, users, device):
+        with logged_user(client, users["admin_user"]):
+            r = client.delete(
+                url_for("individuals.delete_device", id_tracking_device=device.id_tracking_device)
+            )
+        assert r.status_code == 204
+
+    def test_response_body_is_empty(self, client, users, device):
+        with logged_user(client, users["admin_user"]):
+            r = client.delete(
+                url_for("individuals.delete_device", id_tracking_device=device.id_tracking_device)
+            )
+        assert r.data == b""
+
+    def test_device_no_longer_exists_after_delete(self, client, users, device):
+        device_id = device.id_tracking_device
+        with logged_user(client, users["admin_user"]):
+            client.delete(url_for("individuals.delete_device", id_tracking_device=device_id))
+            r = client.get(url_for("individuals.device", id_tracking_device=device_id))
+        assert r.status_code == 404
+
+    def test_conflict_if_device_has_deployments(self, client, users, device_with_deployment):
+        with logged_user(client, users["admin_user"]):
+            r = client.delete(
+                url_for(
+                    "individuals.delete_device",
+                    id_tracking_device=device_with_deployment.id_tracking_device,
+                )
+            )
+        assert r.status_code == 409
+
+    def test_not_found_returns_404(self, client, users):
+        with logged_user(client, users["admin_user"]):
+            r = client.delete(url_for("individuals.delete_device", id_tracking_device=-1))
+        assert r.status_code == 404
+
+    def test_forbidden_without_delete_permission(self, client, users, device):
+        with logged_user(client, users["noright_user"]):
+            r = client.delete(
+                url_for("individuals.delete_device", id_tracking_device=device.id_tracking_device)
+            )
+        assert r.status_code == 403
+
+    def test_unauthenticated_returns_401(self, client, device):
+        r = client.delete(
+            url_for("individuals.delete_device", id_tracking_device=device.id_tracking_device)
+        )
+        assert r.status_code == 401

@@ -1,9 +1,11 @@
 from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import joinedload,selectinload  
+from sqlalchemy.orm import joinedload,selectinload
 
-from flask import request, jsonify,g
-from werkzeug.exceptions import NotFound, BadRequest
+from flask import request, jsonify, g, make_response
+from marshmallow import EXCLUDE, ValidationError
+from sqlalchemy.exc import IntegrityError
+from werkzeug.exceptions import NotFound, BadRequest, Conflict
 
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
@@ -73,6 +75,73 @@ def list_devices(scope):
     else:
         items = db.session.execute(query).unique().scalars().all()
         return schema.dump(items)
+
+
+@blueprint.route("/devices", methods=["POST"])
+@login_required
+@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE)
+@json_resp
+def create_device(scope):
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Corps de requête JSON manquant.")
+
+    schema = TrackingDevicesSchema(exclude=("deployments",), unknown=EXCLUDE)
+    try:
+        device = schema.load(data)
+    except ValidationError as e:
+        raise BadRequest(e.messages)
+
+    device.id_digitiser = g.current_user.id_role
+
+    db.session.add(device)
+    db.session.commit()
+
+    return TrackingDeviceDetailSchema().dump(device), 201
+
+
+@blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
+@login_required
+@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE)
+@json_resp
+def update_device(id_tracking_device, scope):
+    device = db.session.get(TrackingDevices, id_tracking_device)
+    if device is None:
+        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
+
+    data = request.get_json()
+    if not data:
+        raise BadRequest("Corps de requête JSON manquant.")
+
+    schema = TrackingDevicesSchema(exclude=("deployments",), unknown=EXCLUDE)
+    try:
+        device = schema.load(data, instance=device)
+    except ValidationError as e:
+        raise BadRequest(e.messages)
+
+    device.id_digitiser = g.current_user.id_role
+
+    db.session.commit()
+
+    return TrackingDeviceDetailSchema().dump(device)
+
+
+@blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])
+@login_required
+@permissions.check_cruved_scope("D", get_scope=True, module_code=MODULE_CODE)
+def delete_device(id_tracking_device, scope):
+    device = db.session.get(TrackingDevices, id_tracking_device)
+    if device is None:
+        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
+
+    if device.deployments:
+        raise Conflict(
+            "Ce dispositif ne peut pas être supprimé car il est utilisé dans des déploiements."
+        )
+
+    db.session.delete(device)
+    db.session.commit()
+    return make_response("", 204)
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
