@@ -8,6 +8,7 @@
     - [Mettre à jour les infos du remote](#mettre-à-jour-les-infos-du-remote)
     - [Ajouter une modification au précédent commit](#ajouter-une-modification-au-précédent-commit)
     - [Associer une branche à un dépôt distant](#associer-une-branche-à-un-dépôt-distant)
+    - [Créer une nouvelle branche à partir du remote](#créer-une-nouvelle-branche-à-partir-du-remote)
     - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
     - [Cloner une branche spécifique](#cloner-une-branche-spécifique)
     - [Renommer une branche](#renommer-une-branche)
@@ -83,6 +84,14 @@ git branch -u github-pnv/develop develop
 
 l'option `-u <upstream>` est un racoursi de l'option `--set-upstream-to=<upstream>`
 Dans cet exemple on paramètre la brache develop pour suivre la branche 'github-pnv/develop'
+
+### Créer une nouvelle branche à partir du remote
+
+Exemple :
+
+```sh
+git checkout -b fix/devicesList origin/develop
+```
 
 ### Retirer des fichiers du commit
 
