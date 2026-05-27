@@ -136,39 +136,74 @@ Repousser la nouvelle branche, qui sera créée sur le répo distant :
 git push --set-upstream origin <new_branch>
 ```
 
-### "Merge" sur la branche de confiance
+### "Merge" d'une branche fonctionelle sur la branche de confiance
 
-Pour l'exemple, `develop` est la branche de confiance et `feat/dev` la branche à merger.
+Pour l'exemple, `develop` est la branche de confiance et `feat/dev` la branche à merger. Nous souhaiterions réaliser ce merge via une PR.
 
-Mise à jour de la branche develop en local :
+Il est préférable pour ne pas faire d'erreur de ne pas avoir de branche develop en local, la surprimer :
+
+```sh
+git branch -D develop
+```
+
+#### Mise à jour de la branche `feat/dev` en local
 
 ```sh
 git fetch origin
-git checkout develop
-git pull
-```
-
-Ensuite 2 possibilités :
-
-- Merge de la branche `feat/dev`
-
-```sh
-git merge feat/dev
-git push
-
-```
-
-- Le matin : Rebase de la branche `feat/dev` pour la mettre à jour par rapport à `develop`
-
-```sh
-git fetch origin develop
 git checkout feat/dev
 git pull
-git rebase origin/develop
+```
+
+#### Rebaser la branche avec `develop` du remote
+
+```sh
+git merge develop
+```
+
+#### Résolution des conflits et `push`
+
+S'il y a des conflits, les résoudre en modifiant les fichiers et en les sauvegardant. Puis
+
+```sh
+git add .
+git commit -m "chore: resolve rebase conflicts"
+git rebase --continue
 git push
 ```
 
-- Pour merger une modification fonctionnelle : Merge de `feat/dev` vers `develop` via une PR dans l'idéal.
+#### Création d'une PR sur github
+
+Crééer une PR qui compare `feat/dev` à `develop`.
+Si vous êtes admin du répo, merger la PR puis supprimer la branche `feat/dev`.
+
+#### Mise à jour des références locales
+
+```sh
+git fetch --prune
+```
+
+### Bonnes pratiques de dev
+
+#### Avant de reprendre une session de code (matin)
+
+```sh
+git fetch origin
+git checkout <ma_branche>
+git pull
+git rebase origin/develop
+git status
+```
+
+Puis dev
+
+#### A la fin d'une session de code (soir)
+
+```sh
+git fetch origin
+git add <liste_des_fichiers>
+git commit -m "<msg>"
+git push --force with-lease
+```
 
 ## Backend
 
