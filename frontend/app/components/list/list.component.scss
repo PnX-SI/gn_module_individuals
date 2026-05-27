@@ -13,3 +13,8 @@
   display: flex;
   align-items: center;
 }
+
+.ngx-datatable.material:not(.cell-selection) .datatable-body-row:hover .datatable-row-group {
+  background-color: #ddd;
+  transition: none;
+}

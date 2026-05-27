@@ -127,7 +127,8 @@
       </ngx-datatable-column>
       <ngx-datatable-column 
         *ngFor="let col of displayedColumns"
-        [name]="col.name">
+        [name]="col.name"
+        [prop]="col.prop">
         <ng-template
           ngx-datatable-cell-template
           let-row="row"

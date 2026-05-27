@@ -1,4 +1,7 @@
-import { ViewEncapsulation, Component, OnInit, ViewChild, AfterViewInit, EventEmitter, Output, Input, TemplateRef} from '@angular/core';
+import { ViewEncapsulation, Component, OnInit, ViewChild, 
+  AfterViewInit, EventEmitter, Output, Input, TemplateRef,
+  HostListener
+} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -92,10 +95,12 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
-  // @HostListener('window:resize', ['$event'])
-  // onResize(event) : void {
-  //   this.contentHeight = this.calcContentHeight();
-  // }
+  @HostListener('window:resize', ['$event'])
+  onResize($event: any) : void {
+    this.contentHeight = this.calcContentHeight();
+    this.nbRowsToDisplay = this.calcRowNumber();
+    this.sendRowNumber();
+  }
 
   // Fonction that sets the size of the content of the card, to set the height of the map
   // and calculate the number of rows to display in the table based on the viewport height
