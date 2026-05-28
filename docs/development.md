@@ -544,6 +544,14 @@ def list_indiv():
     return schema.dump(indivs)
 ```
 
+### Tests
+
+Pour avoir une idée du coverage avant de faire la pull request, lancer avec le venv activé
+
+```
+  pytest -v --cov --cov-report=term-missing
+```python
+
 ## Frontend
 
 ### Utilisation des variables de configuration du module
