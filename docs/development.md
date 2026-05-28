@@ -187,8 +187,19 @@ Si vous êtes admin du répo, merger la PR puis supprimer la branche `feat/dev`.
 
 #### Mise à jour des références locales
 
+Pour tout le monde :
+
 ```sh
 git fetch --prune
+```
+
+#### Les autres développeurs
+
+!!! Les autres développeurs, après le rebase
+
+```sh
+git fetch origin
+git rebase origin/feat/dev
 ```
 
 ### Bonnes pratiques de dev
