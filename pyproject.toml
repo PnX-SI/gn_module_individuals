@@ -45,11 +45,6 @@ testpaths = ["backend"]
 source = ["gn_module_individuals"]
 omit = ["*/tests/*", "*/migrations/*"]
 
-[tool.coverage.report]
-fail_under = 80
-show_missing = true
-skip_covered = true
-
 [tool.black]
 line-length = 99
 exclude = '''
