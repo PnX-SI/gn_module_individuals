@@ -5,9 +5,8 @@ import { Observable, of } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 
-import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
-
-import { DevicesService } from '../../services/devices.service';  
+import { Device } from '../../models/devices.models';
+import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 
 @Component({
   selector: 'gn-individuals-devices-form',
@@ -21,7 +20,8 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   public deviceId!: number | null;
   public formAction!: string;
   public form!: FormGroup;
-
+  public formConstraints = DEVICE_FORM_CONSTRAINTS;
+  
   constructor(
     public config: ConfigService,
     private _route: ActivatedRoute,
@@ -44,11 +44,38 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
     this.form = this._fb.group({
       id_tracking_device: null,
       id_nomenclature_device_type: [null, Validators.required],
-      provider_name: [null, Validators.required, Validators.maxLength(50), Validators.pattern(/^[a-zA-Z0-9_-]*$/)],
-      provider_device_id: [null, Validators.required, Validators.maxLength(50), Validators.pattern(/^[a-zA-Z0-9_-]*$/)],
-      id_referer: [null, Validators.required],
-      comment: [null, [Validators.required, Validators.maxLength(255), Validators.pattern(/^[^<>]*$/)]], // or [a-zA-Z0-9À-ÿ\s.,!?'"()_- ... to test
-      id_digitiser : [null, Validators.required],
+      provider_name: [
+        null, 
+        [
+          Validators.required, 
+          Validators.maxLength(this.formConstraints.provider_name.maxLength),
+          Validators.pattern(this.formConstraints.provider_name.pattern)
+        ]
+      ],
+      provider_device_id: [
+        null, 
+        [
+          Validators.required, 
+          Validators.maxLength(this.formConstraints.provider_device_id.maxLength), 
+          Validators.pattern(this.formConstraints.provider_device_id.pattern)
+        ]
+      ],
+      id_referer: [
+        null, 
+        Validators.required
+      ],
+      comment: [
+        null, 
+        [
+          Validators.required,
+          Validators.maxLength(this.formConstraints.comment.maxLength),
+          Validators.pattern(this.formConstraints.comment.pattern) // or [a-zA-Z0-9À-ÿ\s.,!?'"()_- ... to test
+        ]
+      ],
+      id_digitiser : [
+        null, 
+        Validators.required
+      ],
     });
 
     console.log(this.form.get('comment'));

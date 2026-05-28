@@ -12,7 +12,7 @@ export const DATA_TABLE_CONFIG = {
 export const DEVICE_FORM_CONSTRAINTS = {
     "provider_name": {
         "maxLength": 50,
-        "pattern": /^[a-zA-Z0-9_-]*$/,
+        "pattern": /^[a-zA-Z0-9 _-]*$/,
     },
     "provider_device_id": {
         "maxLength": 50,

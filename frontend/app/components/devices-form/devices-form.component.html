@@ -12,24 +12,47 @@
           [parentFormControl]="form.get(field)"
           [bindAllItem]="true"
         ></pnx-observers>
-      </div> 
-      <!-- <mat-form-field *ngIf="'comment' as field"
-        class="form-group"
-      >
-        <mat-label class="small">{{'Individuals.DevicesFields.' + field | translate}}</mat-label>
-        <textarea
-          type="textarea"
+      </div>
+      <div *ngIf="'provider_name' as field"
+        class="form-group w-50">
+        <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
+        <input
+          type="text"
           class="form-control form-control-sm"
           [formControl]="form.get(field)"
-        ></textarea>
-        <mat-hint>
-          {{ form.get('comment')?.value?.length || 0 }}/{{form.get('comment')?.getError('maxlength')?.requiredLength}}
-        </mat-hint>
-        <mat-error *ngIf="form.get('comment')?.hasError('pattern')">
-           // The comment must not contain HTML tags.
-        </mat-error>
-      </mat-form-field> -->
-      
+          maxlength="{{ formConstraints[field].maxLength }}"
+        />
+        <div *ngIf="form.get(field)?.dirty"
+          class="d-flex justify-content-end"
+        >
+          <small
+            class="text-danger d-block"
+            *ngIf="form.get(field)?.errors?.['pattern']"
+          >
+            {{'Individuals.Error.ForbiddenChars' | translate}}
+          </small>
+        </div>
+      </div>
+      <div *ngIf="'provider_device_id' as field"
+        class="form-group w-50">
+        <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
+        <input
+          type="text"
+          class="form-control form-control-sm"
+          [formControl]="form.get(field)"
+          maxlength="{{ formConstraints[field].maxLength }}"
+        />
+        <div *ngIf="form.get(field)?.dirty"
+          class="d-flex justify-content-end"
+        >
+          <small
+            class="text-danger d-block"
+            *ngIf="form.get(field)?.errors?.['pattern']"
+          >
+            {{'Individuals.Error.ForbiddenChars' | translate}}
+          </small>
+        </div>
+      </div>      
       <div *ngIf="'comment' as field"
         class="form-group">
         <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
@@ -38,13 +61,9 @@
           class="form-control form-control-sm"
           [formControl]="form.get(field)"
         ></textarea>
-        <mat-hint>
-          {{ form.get(field)}}
-          {{ form.get(field)?.value?.length || 0 }}/{{form.get(field)?.getError('maxLength')?.requiredLength}}
-        </mat-hint>
-        <mat-error *ngIf="form.get(field)?.hasError('pattern')">
-           // The comment must not contain HTML tags.
-        </mat-error>
+        <small class="d-flex justify-content-end text-muted">
+          {{ form.get(field)?.value?.length || 0 }}/{{ formConstraints[field].maxLength }}
+        </small>
       </div>
     </div>
   </div>  
