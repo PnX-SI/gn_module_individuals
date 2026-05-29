@@ -550,7 +550,7 @@ Pour avoir une idée du coverage avant de faire la pull request, lancer avec le 
 
 ```
   pytest -v --cov --cov-report=term-missing
-```python
+```
 
 ## Frontend
 
