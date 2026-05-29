@@ -1,16 +1,19 @@
 from geonature.utils.env import db, ma
 from marshmallow import fields, validates, validates_schema, ValidationError
 from utils_flask_sqla.schema import SmartRelationshipsMixin
+from geonature.utils.schema import CruvedSchemaMixin
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.schemas import UserSchema
 from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
 
+
+from . import MODULE_CODE
 from .models import TrackingDevices, IndividualDeployments
 
 ADDITIONAL_DATA_ALLOWED_KEYS = ["removal_reason"]  # A RECUPERER DEPUIS LE FICHIER DE CONFIGURATION
-class TrackingDevicesSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+class TrackingDevicesSchema(CruvedSchemaMixin,SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = TrackingDevices
         include_fk = True
@@ -20,6 +23,7 @@ class TrackingDevicesSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         model_converter = NomenclaturesConverter
         feature_id = "id_tracking_device"
 
+    __module_code__ = MODULE_CODE
     id_tracking_device = ma.auto_field(dump_only=True)
     meta_create_date = fields.Date(format="%Y-%m-%d", dump_only=True)
     meta_update_date = fields.Date(format="%Y-%m-%d", dump_only=True)
@@ -288,6 +292,8 @@ class DeploymentSummarySchema(ma.Schema):
     removal_date = fields.DateTime(format="%d-%m-%y", dump_only=True)
     comment = fields.Method("get_comment", dump_only=True)
 
+    __module_code__ = MODULE_CODE
+
     def get_individual_name(self, obj):
         if obj.individual:
             name = obj.individual.individual_name
@@ -323,23 +329,19 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
     tracking_device_info = fields.Method("get_tracking_device", dump_only=True)
     name_digitiser = fields.Method("get_digitiser", dump_only=True)
 
+    __module_code__ = MODULE_CODE
+
     # Validators
  
     @validates("id_individual")
     def validate_individual(self, value, **kwargs):
-        individual = db.session.execute(
-            db.select(TIndividuals).filter_by(id_individual=value)
-        ).scalar_one_or_none()
-        if individual is None:
+        if db.session.get(TIndividuals, value) is None:
             raise ValidationError(f"L'individu {value} n'existe pas.")
         return value
 
     @validates("id_tracking_device")
     def validate_tracking_device(self, value, **kwargs):
-        device = db.session.execute(
-            db.select(TrackingDevices).filter_by(id_tracking_device=value)
-        ).scalar_one_or_none()
-        if device is None:
+        if db.session.get(TrackingDevices, value) is None:
             raise ValidationError(f"Le dispositif de suivi {value} n'existe pas.")
         return value
 
@@ -347,10 +349,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
     def validate_nomenclature_deployment_type(self, value, **kwargs):
         if value is None:
             return value
-        exists = db.session.execute(
-            db.select(TNomenclatures).filter_by(id_nomenclature=value)
-        ).scalar_one_or_none()
-        if exists is None:
+        if db.session.get(TNomenclatures, value) is None:
             raise ValidationError(
                 f"La nomenclature {value} (type de déploiement) n'existe pas."
             )
@@ -360,10 +359,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
     def validate_nomenclature_deployment_location(self, value, **kwargs):
         if value is None:
             return value
-        exists = db.session.execute(
-            db.select(TNomenclatures).filter_by(id_nomenclature=value)
-        ).scalar_one_or_none()
-        if exists is None:
+        if db.session.get(TNomenclatures, value) is None:
             raise ValidationError(
                 f"La nomenclature {value} (localisation du déploiement) n'existe pas."
             )

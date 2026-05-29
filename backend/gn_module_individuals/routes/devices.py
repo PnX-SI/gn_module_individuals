@@ -5,7 +5,7 @@ from sqlalchemy.orm import joinedload,selectinload
 from flask import request, jsonify, g, make_response
 from marshmallow import EXCLUDE, ValidationError
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import NotFound, BadRequest, Conflict
+from werkzeug.exceptions import Forbidden, NotFound, BadRequest, Conflict
 
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
@@ -147,11 +147,13 @@ def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-
+    
     data = request.get_json()
     if not data:
         raise BadRequest("Corps de requête JSON manquant.")
-
+    if not device.has_instance_permission(scope):
+        raise Forbidden(f"Vous n'avez pas la permission de mettre à jour le dispositif {id_tracking_device} ")
+    
     schema = TrackingDevicesSchema(exclude=("deployments",), unknown=EXCLUDE)
     try:
         device = schema.load(data, instance=device)

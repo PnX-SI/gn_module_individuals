@@ -1,4 +1,5 @@
 from geonature.utils.env import DB
+from flask import g
 from pypnnomenclature.models import TNomenclatures
 from geonature.core.gn_monitoring.models import TIndividuals
 from pypnusershub.db.models import User
@@ -97,6 +98,14 @@ class TrackingDevices(DB.Model):
         order_by="IndividualDeployments.install_date.desc()",
         back_populates="tracking_device",
     )
+
+    def has_instance_permission(self, scope):
+        if scope == 0:
+            return False
+        elif scope in (1, 2):
+            return g.current_user == self.digitiser or g.current_user == self.referer
+        elif scope == 3:
+            return True
 
 class IndividualDeployments(DB.Model):
     __tablename__ = "t_individual_deployments"
@@ -229,3 +238,11 @@ class IndividualDeployments(DB.Model):
         foreign_keys=[id_digitiser],
         lazy="select",
     )
+
+    def has_instance_permission(self, scope):
+        if scope == 0:
+            return False
+        elif scope in (1, 2):
+            return g.current_user == self.digitiser
+        elif scope == 3:
+            return True
