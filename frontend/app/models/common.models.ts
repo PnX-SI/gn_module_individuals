@@ -27,6 +27,11 @@ export interface PaginatedItemCollection<T> extends SimplePagination {
   has_prev: boolean;
 }
 
+export interface PaginationAPIParams {
+  page?: number,
+  per_page?: number,
+}
+
 // export interface StationFeature {
 //   id?: number;
 //   type: 'Feature';
