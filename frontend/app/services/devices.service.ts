@@ -4,8 +4,8 @@ import { Observable } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Device, DevicesAPIParams } from '../models/devices.models';
-import { PaginatedItemCollection } from '../models/common.models';
+import { Device } from '../models/devices.models';
+import { PaginatedItemCollection, PaginationAPIParams } from '../models/common.models';
 import { DATA_TABLE_CONFIG } from '..//utils/constants.util';
 
 @Injectable()
@@ -20,13 +20,13 @@ export class DevicesService {
     this.OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
   }
 
-  getDevices(params: DevicesAPIParams = {}): Observable<PaginatedItemCollection<Device>> {
+  getDevices(params: PaginationAPIParams = {}): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
     params.page ??= 1
-    params.limit ??= DATA_TABLE_CONFIG.PER_PAGE_OPTION  
+    params.per_page ??= DATA_TABLE_CONFIG.PER_PAGE_OPTION  
 
     Object.keys(params).forEach(key => {
-      const value = params[key as keyof DevicesAPIParams];
+      const value = params[key as keyof PaginationAPIParams];
       if (value != null) { 
         httpParams = httpParams.set(key, String(value));
       }

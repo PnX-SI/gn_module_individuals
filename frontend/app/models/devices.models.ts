@@ -29,15 +29,3 @@ export const DEVICE_COLUMNS: Record<keyof Device, true> = {
   meta_create_date: true,
   meta_update_date: true,
 };
-
-export interface DevicesAPIParams {
-  page?: number,
-  limit?: number,
-  // id_tracking_device?: number,
-  // id_nomenclature_device_type?: number,
-  // provider_name?: string,
-  // provider_device_id?: string,
-  // id_referer?: number,
-  // comment?: string,
-  // id_digitiser?: number,
-}
