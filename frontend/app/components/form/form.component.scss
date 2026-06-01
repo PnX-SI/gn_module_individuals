@@ -23,3 +23,14 @@ h3 {
   display: flex;
   flex-direction: column;
 }
+
+/* Space between label and input */
+small , label {
+  margin-bottom: .3rem;
+  display: inline-block;
+}
+
+/* Space between inputs */
+.form-group {
+  margin-bottom: 0.6rem;
+}

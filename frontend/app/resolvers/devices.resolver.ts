@@ -9,11 +9,11 @@ import  { PaginatedItemCollection } from '../models/common.models';
 @Injectable({ providedIn: 'root' })
 export class DevicesResolver implements Resolve<PaginatedItemCollection<Device>> {
   constructor(
-    private service: DevicesService
+    private _service: DevicesService
   ) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<PaginatedItemCollection<Device>> {
-    return this.service.getDevices();
+    return this._service.getDevices();
   }
 }
 
@@ -22,10 +22,10 @@ export class DevicesResolver implements Resolve<PaginatedItemCollection<Device>>
 })
 export class DeviceResolver implements Resolve<Device> {
   constructor(
-    private service: DevicesService
+    private _service: DevicesService
   ) {}
 
   resolve(route: ActivatedRouteSnapshot,  state: RouterStateSnapshot): Observable<Device> {
-    return this.service.getDevice(route.params.id_tracking_device);
+    return this._service.getDevice(route.params.id_tracking_device);
   }
 }

@@ -1,4 +1,5 @@
-import { ViewEncapsulation, Component, OnInit, AfterViewInit, Input, TemplateRef } from '@angular/core';
+import { ViewEncapsulation, Component, OnInit, AfterViewInit, Input, 
+  TemplateRef, Output, EventEmitter } from '@angular/core';
 import { Location } from '@angular/common';
 
 import { ConfigService } from '@geonature/services/config.service';
@@ -10,9 +11,11 @@ import { ConfigService } from '@geonature/services/config.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class FormComponent implements OnInit, AfterViewInit {
+  @Output() save: EventEmitter<any> = new EventEmitter();
   @Input() formTemplate!: TemplateRef<any>;
   @Input() formTitle: string = "";
   @Input() formAction: string = "";
+  @Input() canSave: boolean = false;
   // @Input() dataTable: any;
 
   constructor(
@@ -28,10 +31,6 @@ export class FormComponent implements OnInit, AfterViewInit {
 
   goBack() : void {
     this._location.back();
-  }
-
-  save() : void {
-    alert("Save action not implemented yet");
   }
 }
 

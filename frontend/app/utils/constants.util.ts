@@ -11,15 +11,18 @@ export const DATA_TABLE_CONFIG = {
 
 export const DEVICE_FORM_CONSTRAINTS = {
     "provider_name": {
-        "maxLength": 50,
-        "pattern": /^[a-zA-Z0-9 _-]*$/,
+        "maxLength": 10,
+        "pattern": '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
+        "help": 'PatternText1'
     },
     "provider_device_id": {
         "maxLength": 50,
-        "pattern": /^[a-zA-Z0-9_-]*$/,
+        "pattern": '^[a-zA-Z0-9_-]*$',
+        "help": 'PatternText2'
     },
     "comment": {
         "maxLength": 255,
-        "pattern": /^[^<>]*$/, // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
+        "pattern": '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
+        "help": 'PatternText3'
     }
 }

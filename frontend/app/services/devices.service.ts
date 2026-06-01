@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Device } from '../models/devices.models';
+import { Device, CreateDeviceDto } from '../models/devices.models';
 import { PaginatedItemCollection, PaginationAPIParams } from '../models/common.models';
 import { DATA_TABLE_CONFIG } from '..//utils/constants.util';
 
@@ -43,10 +43,28 @@ export class DevicesService {
     );
   }
 
-  createDevice(device: Omit<Device, 'id_tracking_device'>): Observable<Device> {
-    return this._http.post<Device>(
-      `${this.OBJECT_API}`,
-      device
+  createDevice(device: any, params: Record<string, string> = {}): Observable<Device> {
+    params['format'] = 'json';
+
+    // Map form to Dto
+    const payload: CreateDeviceDto = {
+      id_nomenclature_device_type: device.id_nomenclature_device_type.id_nomenclature,
+      provider_name: device.provider_name,
+      provider_device_id: device.provider_device_id,
+      id_referer: device.id_referer.id_role,
+      comment: device.comment,
+    };
+
+    console.log(
+      'POST payload JSON:',
+      JSON.stringify(payload, null, 2)
     );
+
+    return of(device as Device);
+    // return this._http.post<Device>(
+    //   `${this.OBJECT_API}`,
+    //   device,
+    //   {params: params}
+    // );
   }
 }

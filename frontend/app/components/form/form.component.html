@@ -19,8 +19,8 @@
         [matTooltip]="'Individuals.Actions.Save' | translate"
         class="mr-1 bg-success text-white border-0"
         type="button"
-        [disabled]="true"
-        (click)="save()"
+        [disabled]="!canSave"
+        (click)="save.emit()"
       >
         <mat-icon>save</mat-icon>
       </button>
@@ -40,4 +40,3 @@
     </ng-container>
   </div>
 </div>
-

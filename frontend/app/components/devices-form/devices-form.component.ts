@@ -5,8 +5,10 @@ import { Observable, of } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 
-import { Device } from '../../models/devices.models';
+import { CreateDeviceDto, Device } from '../../models/devices.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
+import { DevicesService } from '../../services/devices.service';
+import { NomenclaturesService } from '../../services/nomenclature.service';
 
 @Component({
   selector: 'gn-individuals-devices-form',
@@ -26,6 +28,8 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
     public config: ConfigService,
     private _route: ActivatedRoute,
     private _fb: FormBuilder,
+    public nomenclatureService: NomenclaturesService,
+    private _service: DevicesService
   ) {}
 
   ngOnInit() : void {
@@ -42,7 +46,6 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
 
     // Form initialization
     this.form = this._fb.group({
-      id_tracking_device: null,
       id_nomenclature_device_type: [null, Validators.required],
       provider_name: [
         null, 
@@ -69,20 +72,38 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
         [
           Validators.required,
           Validators.maxLength(this.formConstraints.comment.maxLength),
-          Validators.pattern(this.formConstraints.comment.pattern) // or [a-zA-Z0-9À-ÿ\s.,!?'"()_- ... to test
+          Validators.pattern(this.formConstraints.comment.pattern)
         ]
-      ],
-      id_digitiser : [
-        null, 
-        Validators.required
       ],
     });
 
-    console.log(this.form.get('comment'));
+    // this.form.statusChanges.subscribe(status => {
+    //   console.log('FORM STATUS:', status);
+
+    //   Object.entries(this.form.controls).forEach(([name, control]) => {
+    //     console.log(
+    //       name,
+    //       'value=', control.value,
+    //       'valid=', control.valid,
+    //       'errors=', control.errors
+    //     );
+    //   });
+    // });
   }
 
   ngAfterViewInit() : void {
   }
+
+  onSave() : void {
+    const device = this.form.getRawValue();
+
+    this._service.createDevice(device).subscribe({
+      next: (res) => {
+        console.log('Device créé', res);
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
 }
-
-

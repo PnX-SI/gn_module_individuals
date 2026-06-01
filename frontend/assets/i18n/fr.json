@@ -8,17 +8,17 @@
         },
         "DevicesFields": {
             "id_tracking_device" : "ID du dispositif",
-            "id_nomenclature_device_type" : "ID du type de dispositif",
+            "id_nomenclature_device_type" : "Type de dispositif",
             "provider_name" : "Fournisseur",
             "provider_device_id" : "ID chez le fournisseur",
-            "id_referer" : "ID du référent",
+            "id_referer" : "Référent",
             "comment" : "Commentaire",
-            "id_digitiser" : "ID digitaliseur",
+            "id_digitiser" : "Digitaliseur",
             "meta_create_date" : "Date de création",
             "meta_update_date" : "Date de mise à jour",
             "nomenclature_device_type_name" : "Type de dispositif",
-            "referer_name" : "Nom du référent",
-            "digitiser_name" : "Nom du digitaliseur",
+            "referer_name" : "Référent",
+            "digitiser_name" : "Digitaliseur",
             "last_individual_equipped_name" : "Dernier individu équipé",
             "deployments" : "Liste des déploiements associés"
         },
@@ -40,7 +40,10 @@
         },
         "Error": {
             "Required" : "Ce champs est requis.",
-            "MinLength" : "Vous devez choisir au moins une valeur."
+            "MinLength" : "Vous devez choisir au moins une valeur.",
+            "PatternText1" : "Seulement des lettres, des chiffres, des espaces et les - ou _.",
+            "PatternText2" : "Seulement des lettres (sans accent), des chiffres et les - ou _.",
+            "PatternText3" : "Ne doit pas contenir de < ou >."
         },
         "Export" : "",       
         "DeletingPopup" : {
@@ -56,6 +59,7 @@
             "ValidateEnter" : "Valider et saisir des ",
             "ValidateChain" : "Valider et enchainer les saisies",
             "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet"
+
         },
         "Actions" : {
             "Add" : "Ajouter",

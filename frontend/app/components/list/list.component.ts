@@ -86,8 +86,6 @@ export class ListComponent implements OnInit, AfterViewInit {
     this.contentHeight = this.calcContentHeight();
     this.nbRowsToDisplay = this.calcRowNumber();
     this.sendRowNumber();
-
-    console.log('Content height:', this.contentHeight, 'Row number:', this.nbRowsToDisplay);
   }
 
   ngAfterViewInit() : void {
@@ -126,10 +124,6 @@ export class ListComponent implements OnInit, AfterViewInit {
 
   onSort($event: any) : void {
     this.sort.emit($event);
-  }
-
-  onRowSelect($event: any) : void {
-    this.select.emit($event);
   }
 
   sendRowNumber() {

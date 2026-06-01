@@ -66,15 +66,6 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
     this.sorts = $event.sorts;
   }
 
-  onRowSelect($event: any) : void {
-    // console.log('Row selected:', $event.selected[0]["id_tracking_device"]);
-    // if (row instanceof Object && row.selected.length > 0) {
-    //   this.tableSelected.next(row.selected[0][this.idName]);
-    // } else {
-    //   this.tableSelected.next(row);
-    // }
-  }
-
   onNbRowsReceived(nbRowsPerPage: number) {
     let params: SimplePaginationWithSort = {
       page: 1,

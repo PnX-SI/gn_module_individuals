@@ -2,69 +2,79 @@
  #formTemplate
  let-dataTable="dataTable"
 >
-  <div class="content row">
-    <div class="col-6 padding-sm">
-      <div *ngIf="'id_referer' as field"
-        class="form-group"
+  <div class="col-6 padding-sm">
+    <div *ngIf="'id_nomenclature_device_type' as field"
+      class="form-group w-50"
+    >
+      <pnx-dumb-select
+        label="{{ 'Individuals.DevicesFields.' + field | translate }}"
+        [parentFormControl]="form.get(field)"
+        [items]="nomenclatureService.nomenclatureItems.TYPE_DISPO_SUIVI"
+        comparedKey="{{ field }}"
+        titleKey="definition_default"
+        displayedKey="label_default"
+      ></pnx-dumb-select>
+    </div>
+    <div *ngIf="'provider_name' as field"
+      class="form-group w-50">
+      <label class="small">{{ 'Individuals.DevicesFields.' + field | translate }}</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [formControl]="form.get(field)"
+        maxlength="{{ formConstraints[field].maxLength }}"
+      />
+      <div *ngIf="form.get(field)?.dirty"
+        class="d-flex justify-content-end"
       >
-        <pnx-observers
-          label="{{'Individuals.DevicesFields.' + field | translate}}"
-          [parentFormControl]="form.get(field)"
-          [bindAllItem]="true"
-        ></pnx-observers>
-      </div>
-      <div *ngIf="'provider_name' as field"
-        class="form-group w-50">
-        <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
-        <input
-          type="text"
-          class="form-control form-control-sm"
-          [formControl]="form.get(field)"
-          maxlength="{{ formConstraints[field].maxLength }}"
-        />
-        <div *ngIf="form.get(field)?.dirty"
-          class="d-flex justify-content-end"
+        <small
+          class="text-danger d-block"
+          *ngIf="form.get(field)?.errors?.['pattern']"
         >
-          <small
-            class="text-danger d-block"
-            *ngIf="form.get(field)?.errors?.['pattern']"
-          >
-            {{'Individuals.Error.ForbiddenChars' | translate}}
-          </small>
-        </div>
-      </div>
-      <div *ngIf="'provider_device_id' as field"
-        class="form-group w-50">
-        <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
-        <input
-          type="text"
-          class="form-control form-control-sm"
-          [formControl]="form.get(field)"
-          maxlength="{{ formConstraints[field].maxLength }}"
-        />
-        <div *ngIf="form.get(field)?.dirty"
-          class="d-flex justify-content-end"
-        >
-          <small
-            class="text-danger d-block"
-            *ngIf="form.get(field)?.errors?.['pattern']"
-          >
-            {{'Individuals.Error.ForbiddenChars' | translate}}
-          </small>
-        </div>
-      </div>      
-      <div *ngIf="'comment' as field"
-        class="form-group">
-        <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
-        <textarea
-          type="textarea"
-          class="form-control form-control-sm"
-          [formControl]="form.get(field)"
-        ></textarea>
-        <small class="d-flex justify-content-end text-muted">
-          {{ form.get(field)?.value?.length || 0 }}/{{ formConstraints[field].maxLength }}
+          {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
         </small>
       </div>
+    </div>
+    <div *ngIf="'provider_device_id' as field"
+      class="form-group w-50">
+      <label class="small">{{ 'Individuals.DevicesFields.' + field | translate }}</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [formControl]="form.get(field)"
+        maxlength="{{ formConstraints[field].maxLength }}"
+      />
+      <div *ngIf="form.get(field)?.dirty"
+        class="d-flex justify-content-end"
+      >
+        <small
+          class="text-danger d-block"
+          *ngIf="form.get(field)?.errors?.['pattern']"
+        >
+          {{'Individuals.Error.ForbiddenChars' | translate}}
+        </small>
+      </div>
+    </div> 
+    <div *ngIf="'id_referer' as field"
+      class="form-group"
+    >
+      <pnx-observers
+        label="{{'Individuals.DevicesFields.' + field | translate}}"
+        [parentFormControl]="form.get(field)"
+        [bindAllItem]="true"
+      ></pnx-observers>
+    </div>     
+    <div *ngIf="'comment' as field"
+      class="form-group">
+      <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
+      <textarea
+        type="textarea"
+        class="form-control form-control-sm"
+        [formControl]="form.get(field)"
+      ></textarea>
+      <small class="d-flex justify-content-end text-muted">
+        {{ form.get(field)?.value?.length || 0 }}/{{ formConstraints[field].maxLength }}
+      </small>
     </div>
   </div>  
 </ng-template>
@@ -73,6 +83,8 @@
   [formTitle]="'Individuals.Form.DevicesAddTitle' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
+  [canSave]="form.valid && form.dirty"
+  (save)="onSave()"
 >
 </gn-individuals-form>
 
@@ -83,6 +95,8 @@
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [dataTable]="dataTable"
+    [canSave]="form.valid && form.dirty"
+    (save)="onSave()"
   >
   </gn-individuals-form>
 </ng-template>
