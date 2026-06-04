@@ -10,14 +10,14 @@ import { DATA_TABLE_CONFIG } from '..//utils/constants.util';
 
 @Injectable()
 export class DevicesService {
-  private OBJECT_API: string;
+  private _OBJECT_API: string;
 
   constructor(
     private _http: HttpClient,
     private _config: ConfigService,
     private _moduleService: ModuleService
   ) {
-    this.OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
+    this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
   }
 
   getDevices(params: PaginationAPIParams = {}): Observable<PaginatedItemCollection<Device>> {
@@ -33,13 +33,13 @@ export class DevicesService {
     });
 
     return this._http.get<PaginatedItemCollection<Device>>(
-      `${this.OBJECT_API}`, { params: httpParams }
+      `${this._OBJECT_API}`, { params: httpParams }
     );
   }
 
   getDevice(id_tracking_device: number): Observable<Device> {
     return this._http.get<Device>(
-      `${this.OBJECT_API}/${id_tracking_device}`
+      `${this._OBJECT_API}/${id_tracking_device}`
     );
   }
 
@@ -62,7 +62,7 @@ export class DevicesService {
 
     return of(device as Device);
     // return this._http.post<Device>(
-    //   `${this.OBJECT_API}`,
+    //   `${this._OBJECT_API}`,
     //   device,
     //   {params: params}
     // );

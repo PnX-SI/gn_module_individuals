@@ -3,18 +3,22 @@
  let-dataTable="dataTable"
 >
   <div class="col-6 padding-sm">
+
+    <!-- id_nomenclature_device_type -->
     <div *ngIf="'id_nomenclature_device_type' as field"
       class="form-group w-50"
     >
       <pnx-dumb-select
         label="{{ 'Individuals.DevicesFields.' + field | translate }}"
         [parentFormControl]="form.get(field)"
-        [items]="nomenclatureService.nomenclatureItems.TYPE_DISPO_SUIVI"
-        comparedKey="{{ field }}"
-        titleKey="definition_default"
-        displayedKey="label_default"
+        [items]="nomenclatureService.items.TYPE_DISPO_SUIVI"
+        comparedKey="{{ id_nomenclature}}"
+        titleKey="definition_{{ lang }}"
+        displayedKey="label_{{ lang }}"
       ></pnx-dumb-select>
     </div>
+
+    <!-- provider_name -->
     <div *ngIf="'provider_name' as field"
       class="form-group w-50">
       <label class="small">{{ 'Individuals.DevicesFields.' + field | translate }}</label>
@@ -35,6 +39,8 @@
         </small>
       </div>
     </div>
+
+    <!-- provider_device_id -->
     <div *ngIf="'provider_device_id' as field"
       class="form-group w-50">
       <label class="small">{{ 'Individuals.DevicesFields.' + field | translate }}</label>
@@ -55,6 +61,8 @@
         </small>
       </div>
     </div> 
+
+    <!-- id_referer -->
     <div *ngIf="'id_referer' as field"
       class="form-group"
     >
@@ -64,6 +72,8 @@
         [bindAllItem]="true"
       ></pnx-observers>
     </div>     
+
+    <!-- comment -->
     <div *ngIf="'comment' as field"
       class="form-group">
       <label class="small">{{'Individuals.DevicesFields.' + field | translate}}</label>
@@ -83,7 +93,7 @@
   [formTitle]="'Individuals.Form.DevicesAddTitle' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
-  [canSave]="form.valid && form.dirty"
+  [canSave]="form.valid"
   (save)="onSave()"
 >
 </gn-individuals-form>

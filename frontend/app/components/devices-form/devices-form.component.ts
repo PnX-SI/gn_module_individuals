@@ -1,11 +1,12 @@
 import { ViewEncapsulation, Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable, of } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
+import { filter, take, switchMap, map } from 'rxjs/operators';
 
 import { ConfigService } from '@geonature/services/config.service';
 
-import { CreateDeviceDto, Device } from '../../models/devices.models';
+import { Device } from '../../models/devices.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { DevicesService } from '../../services/devices.service';
 import { NomenclaturesService } from '../../services/nomenclature.service';
@@ -23,9 +24,10 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints = DEVICE_FORM_CONSTRAINTS;
-  
+  public lang = this._config.DEFAULT_LANGUAGE;
+
   constructor(
-    public config: ConfigService,
+    private _config: ConfigService,
     private _route: ActivatedRoute,
     private _fb: FormBuilder,
     public nomenclatureService: NomenclaturesService,
@@ -33,17 +35,6 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() : void {
-    const id = this._route.snapshot.paramMap.get('id_tracking_device');
-    this.deviceId = id !== null ? Number(id) : null;
-    this.formAction = this.deviceId ? 'EDIT' : 'ADD';
-
-    // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
-    if(this.formAction === 'UPDATE') {
-      this._route.data.subscribe(({data}) => {
-        this.dataTable$ = of(data);
-      });
-    }
-
     // Form initialization
     this.form = this._fb.group({
       id_nomenclature_device_type: [null, Validators.required],
@@ -70,7 +61,6 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
       comment: [
         null, 
         [
-          Validators.required,
           Validators.maxLength(this.formConstraints.comment.maxLength),
           Validators.pattern(this.formConstraints.comment.pattern)
         ]
@@ -92,6 +82,41 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() : void {
+    this._route.params.subscribe((params) => {
+        if (params['id_tracking_device']) {
+          this.deviceId = params['id_tracking_device'];
+          this.formAction = 'EDIT';
+          // Peut-être pas utile le dataTable$
+          this.dataTable$ = this._service.getDevice(params['id_tracking_device']);
+          this._service.getDevice(params['id_tracking_device'])
+            .subscribe((device: any) => {
+  //   //           const deviceTypeId = device.id_nomenclature_device_type
+  //   //           this.form.patchValue({
+  //   //              id_nomenclature_device_type: device.id_nomenclature_device_type
+  //   //           });
+              this.patchForm(device);
+            });
+        } else {
+          this.formAction = 'ADD';
+        }
+    });
+  }
+  
+  patchForm(device: any) : void { /// Modifier par : Device au lieu de any et faire le mapping si besoin
+    // this.form.patchValue({
+    //   id_nomenclature_device_type: device.id_nomenclature_device_type,
+    console.log('Device à patcher dans le form :', device);
+    // console.log('Device à patcher dans le form :', device.nomenclature_device_type.cd_nomenclature);
+    this.form.patchValue(device);
+    this.form.patchValue({
+      id_nomenclature_device_type: device.nomenclature_device_type,
+      id_referer: device.referer
+    });
+    // this.form.patchValue(device);
+    // this.form.patchValue({
+    //    id_referer: device.referer_name
+    // });
+    
   }
 
   onSave() : void {

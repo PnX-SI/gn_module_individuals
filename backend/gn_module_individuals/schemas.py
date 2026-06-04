@@ -3,6 +3,7 @@ from marshmallow import fields, validates, validates_schema, ValidationError
 from utils_flask_sqla.schema import SmartRelationshipsMixin
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
+from pypnusershub.schemas import UserSchema
 from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
 
@@ -99,6 +100,187 @@ class TrackingDevicesSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
             return name
         return None
 
+# class TrackingDevicesDetailSchema(ma.Schema):
+#     id_tracking_device = fields.Integer(dump_only=True)
+#     id_nomenclature_device_type = fields.Integer(dump_only=True)
+#     provider_name = fields.String(dump_only=True)
+#     provider_device_id = fields.String(dump_only=True)
+#     id_referer = fields.Integer(dump_only=True)
+#     id_digitiser = fields.Integer(dump_only=True)
+#     meta_create_date = fields.Date(format="%d-%m-%y", dump_only=True)
+#     meta_update_date = fields.Date(format="%d-%m-%y", dump_only=True)
+#     nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
+#     referer_name = fields.Method("get_referer", dump_only=True)
+#     digitiser_name = fields.Method("get_digitiser", dump_only=True)
+#     comment = fields.Method("get_comment", dump_only=True)
+#     deployments = fields.Method("get_deployments", dump_only=True)
+
+#     def get_nomenclature_name(self, obj):
+#         if obj.nomenclature_device_type:
+#             return obj.nomenclature_device_type.label_fr
+#         return None
+
+#     def get_digitiser(self, obj):
+#         if obj.digitiser:
+#             return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
+#         return None
+
+#     def get_referer(self, obj):
+#         if obj.referer:
+#             return f"{obj.referer.prenom_role} {obj.referer.nom_role}"
+#         return None
+
+#     def get_comment(self, obj):
+#         if obj.comment:
+#             return obj.comment.replace("\n", "<br>")
+#         return None
+
+#     def get_deployments(self, obj):
+#         if not obj.deployments:
+#             return []
+#         return DeploymentSummarySchema(many=True).dump(obj.deployments)
+
+class TrackingDevicesBaseSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TrackingDevices
+        include_fk = True
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = True
+        model_converter = NomenclaturesConverter
+        feature_id = "id_tracking_device"
+
+    id_tracking_device = ma.auto_field(dump_only=True)
+    meta_create_date = fields.Date(format="%Y-%m-%d", dump_only=True)
+    meta_update_date = fields.Date(format="%Y-%m-%d", dump_only=True)
+    comment = fields.Method("get_comment", dump_only=True)
+
+    nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
+    digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
+    referer_name = fields.Method("get_referer_name", dump_only=True)
+
+    # Validators
+
+    @validates("provider_name")
+    def validate_provider_name(self, value, **kwargs):
+        if not value or not value.strip():
+            raise ValidationError("provider_name ne peut pas être vide.")
+        return value
+
+    @validates("provider_device_id")
+    def validate_provider_device_id(self, value, **kwargs):
+        if not value or not value.strip():
+            raise ValidationError("provider_device_id ne peut pas être vide.")
+        return value
+
+    @validates("id_nomenclature_device_type")
+    def validate_nomenclature_device_type(self, value, **kwargs):
+        if value is None:
+            return value
+        exists = db.session.execute(
+            db.select(TNomenclatures).filter_by(id_nomenclature=value)
+        ).scalar_one_or_none()
+        if exists is None:
+            raise ValidationError(
+                f"La nomenclature id={value} n'existe pas dans ref_nomenclatures."
+            )
+        return value
+
+    @validates("id_referer")
+    def validate_referer(self, value, **kwargs):
+        if value is None:
+            return value
+        user = db.session.execute(
+            db.select(User).filter_by(id_role=value)
+        ).scalar_one_or_none()
+        if user is None:
+            raise ValidationError(f"L'utilisateur id_role={value} (référent) n'existe pas.")
+        return value
+
+    # Serialisation 
+
+    def get_comment(self, obj):
+        if obj.comment:
+            return obj.comment.replace("\n", "<br>")
+        return None
+    
+    def get_nomenclature_name(self, obj):
+        if obj.nomenclature_device_type:
+            return obj.nomenclature_device_type.label_fr
+        return None
+    
+    def get_digitiser_name(self, obj):
+        if obj.digitiser:
+            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
+        return None
+
+    def get_referer_name(self, obj):
+        if obj.referer:
+            return f"{obj.referer.prenom_role} {obj.referer.nom_role}"
+        return None
+    
+class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
+
+    last_individual_equipped_name = fields.Method(
+        "get_last_individual_equipped_name", dump_only=True
+    )
+
+    # deployments = ma.Nested("IndividualDeploymentsSchema", many=True)
+
+    def get_last_individual_equipped_name(self, obj):
+        if not obj.deployments:
+            return None
+        last_deployment = obj.deployments[0]
+        if last_deployment.individual:
+            individual = last_deployment.individual
+            name = individual.individual_name
+            if individual.taxon and individual.taxon.nom_vern:
+                return f"{name} ({individual.taxon.nom_vern})"
+            return name
+        return None
+
+class TrackingDevicesDetailSchema(TrackingDevicesBaseSchema):
+
+    class Meta(TrackingDevicesSchema.Meta):
+        exclude = ()
+
+    deployments = fields.Method("get_deployments", dump_only=True)
+    referer = fields.Nested(UserSchema,dump_only=True)
+
+    def get_deployments(self, obj):
+        if not obj.deployments:
+            return []
+        return DeploymentSummarySchema(many=True).dump(obj.deployments)
+
+class TrackingDevicesWriteSchema(TrackingDevicesSchema):
+    class Meta(TrackingDevicesSchema.Meta):
+        exclude = (
+            "id_nomenclature_device_type",
+            "nomenclature_device_type_name",
+            "id_referer",
+            "referer_name",
+            "id_digitiser",
+            "digitiser_name",
+            "meta_create_date",
+            "meta_update_date",
+        )
+
+    id_nomenclature_device_type = fields.Integer(dump_only=True)
+    provider_name = fields.String(dump_only=True)
+    provider_device_id = fields.String(dump_only=True)
+    id_referer = fields.Integer(dump_only=True)
+    id_digitiser = fields.Integer(dump_only=True)
+
+    deployments = fields.Method("get_deployments", dump_only=True)
+
+    # Necessary to redefine the referer field to get the nested user info instead of just the id_referer
+    referer = fields.Nested(UserSchema,dump_only=True)
+
+    def get_deployments(self, obj):
+        if not obj.deployments:
+            return []
+        return DeploymentSummarySchema(many=True).dump(obj.deployments)
+
 class DeploymentSummarySchema(ma.Schema):
     id_individual = fields.Integer(dump_only=True)
     individual_name = fields.Method("get_individual_name", dump_only=True)
@@ -118,48 +300,6 @@ class DeploymentSummarySchema(ma.Schema):
         if obj.comment:
             return obj.comment.replace("\n", "<br>")
         return None
-
-
-class TrackingDeviceDetailSchema(ma.Schema):
-    id_tracking_device = fields.Integer(dump_only=True)
-    id_nomenclature_device_type = fields.Integer(dump_only=True)
-    provider_name = fields.String(dump_only=True)
-    provider_device_id = fields.String(dump_only=True)
-    id_referer = fields.Integer(dump_only=True)
-    id_digitiser = fields.Integer(dump_only=True)
-    meta_create_date = fields.Date(format="%d-%m-%y", dump_only=True)
-    meta_update_date = fields.Date(format="%d-%m-%y", dump_only=True)
-    nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
-    referer_name = fields.Method("get_referer", dump_only=True)
-    digitiser_name = fields.Method("get_digitiser", dump_only=True)
-    comment = fields.Method("get_comment", dump_only=True)
-    deployments = fields.Method("get_deployments", dump_only=True)
-
-    def get_nomenclature_name(self, obj):
-        if obj.nomenclature_device_type:
-            return obj.nomenclature_device_type.label_fr
-        return None
-
-    def get_digitiser(self, obj):
-        if obj.digitiser:
-            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
-        return None
-
-    def get_referer(self, obj):
-        if obj.referer:
-            return f"{obj.referer.prenom_role} {obj.referer.nom_role}"
-        return None
-
-    def get_comment(self, obj):
-        if obj.comment:
-            return obj.comment.replace("\n", "<br>")
-        return None
-
-    def get_deployments(self, obj):
-        if not obj.deployments:
-            return []
-        return DeploymentSummarySchema(many=True).dump(obj.deployments)
-
 
 class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:

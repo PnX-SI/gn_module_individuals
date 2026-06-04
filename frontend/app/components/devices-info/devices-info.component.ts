@@ -22,7 +22,7 @@ export class DevicesInfoComponent implements OnInit, AfterViewInit {
   public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
 
   constructor(
-    public config: ConfigService,
+    private _config: ConfigService,
     private _route: ActivatedRoute,
     private _translate: TranslateService,
   ) {}
@@ -34,7 +34,7 @@ export class DevicesInfoComponent implements OnInit, AfterViewInit {
 
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
       if (data.deployments.length > 0) {
-        const props = this.config.INDIVIDUALS.DEVICES.DEFAULT_DEPLOY_DISPLAYED_COLUMNS as (keyof Deployment)[];
+        const props = this._config.INDIVIDUALS.DEVICES.DEFAULT_DEPLOY_DISPLAYED_COLUMNS as (keyof Deployment)[];
 
         forkJoin(
           props.map(
@@ -48,8 +48,16 @@ export class DevicesInfoComponent implements OnInit, AfterViewInit {
           }));
         });
       }
-      console.log(this.deploymentsColumns);
-      console.log(data.deployments);
+
+      // Search null values in deployments data and replace them by "-"
+      Object.keys(data['deployments']).forEach(dep => {
+        console.log('Deployment', data['deployments'][dep]);
+        Object.keys(data['deployments'][dep]).forEach(key => {
+          if (data['deployments'][dep][key] == null) {
+            data['deployments'][dep][key] = '-';
+          }
+        });
+      });
     });
     
   }

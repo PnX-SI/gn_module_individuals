@@ -61,7 +61,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
         prop: $event.sorts[0].prop,
         dir: $event.sorts[0].dir,
     };
-    console.log('Sorting with params :', params);
+
     this.dataTable$ = this._devicesService.getDevices(params);
     this.sorts = $event.sorts;
   }

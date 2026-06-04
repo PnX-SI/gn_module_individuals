@@ -131,7 +131,6 @@ export class ListComponent implements OnInit, AfterViewInit {
   }
 
   toggleExpandRow(row: any) : void {
-    console.log('Columns:', this.displayedColumns);
     if (this.dataTable) {
       this.dataTable.rowDetail.toggleExpandRow(row);
     }

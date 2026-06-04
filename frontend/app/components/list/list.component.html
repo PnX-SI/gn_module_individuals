@@ -134,7 +134,7 @@
           maxWidth="columnMaxWidth"
         >
           <span>
-            {{ row[col.prop] }}
+            {{ row[col.prop] || "-" }}
           </span>
         </ng-template>
       </ngx-datatable-column>

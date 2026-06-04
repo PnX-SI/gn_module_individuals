@@ -19,8 +19,8 @@
         [matTooltip]="'Individuals.Actions.Edit' | translate"
         class="mr-1 bg-success text-white border-0"
         type="button"
-        [disabled]="true"
-        [routerLink]=""
+        [disabled]="false"
+        [routerLink]="['/' + moduleName + '/' + objectName + '/form/',objectId]"
       >
         <mat-icon>edit</mat-icon>
       </button>

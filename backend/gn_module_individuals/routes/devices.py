@@ -12,11 +12,43 @@ from geonature.core.gn_permissions.decorators import login_required
 from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
+from pypnnomenclature.schemas import NomenclatureSchema
+
 from .. import MODULE_CODE
-from ..schemas import TrackingDevicesSchema, TrackingDeviceDetailSchema
+# from ..schemas import TrackingDevicesSchema
+from ..schemas import TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
 from ..models import TrackingDevices,IndividualDeployments
 
 from ..blueprint import blueprint
+
+@blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
+@login_required
+@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+@json_resp
+def device(id_tracking_device, scope):
+    query = (
+        db.select(TrackingDevices)
+        .options(
+            joinedload(TrackingDevices.nomenclature_device_type),
+            selectinload(TrackingDevices.digitiser),
+            selectinload(TrackingDevices.referer),
+            joinedload(TrackingDevices.deployments)
+                .joinedload(IndividualDeployments.individual)
+        )
+        .where(TrackingDevices.id_tracking_device == id_tracking_device)
+    )
+
+    device = db.session.execute(query).unique().scalar_one_or_none()
+
+    if device is None:
+        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
+
+    # Claire version
+    # return TrackingDevicesDetailSchema().dump(device)
+
+    # Proposed version
+    # SmartRelationshipsMixin have to get explicitely the relationship with only
+    return TrackingDevicesDetailSchema(only=["nomenclature_device_type","referer"]).dump(device)
 
 @blueprint.route("/devices", methods=["GET"])
 @login_required
@@ -36,7 +68,11 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
-    schema = TrackingDevicesSchema(exclude=("deployments",), many=True)
+    # Claire version
+    # schema = TrackingDevicesSchema(exclude=("deployments",), many=True)
+
+    # Proposed version
+    schema = TrackingDevicesListSchema(many=True)
 
     sort_col = getattr(TrackingDevices, prop, None)
 
@@ -97,7 +133,10 @@ def create_device(scope):
     db.session.add(device)
     db.session.commit()
 
-    return TrackingDeviceDetailSchema().dump(device), 201
+    # Claire version
+    # return TrackingDeviceDetailSchema().dump(device), 201
+    # Proposed version
+    return TrackingDevicesWriteSchema().dump(device), 201
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
@@ -123,7 +162,11 @@ def update_device(id_tracking_device, scope):
 
     db.session.commit()
 
-    return TrackingDeviceDetailSchema().dump(device)
+    # Claire version
+    # return TrackingDeviceDetailSchema().dump(device)
+
+    # Proposed version
+    return TrackingDevicesWriteSchema().dump(device)
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])
@@ -134,6 +177,9 @@ def delete_device(id_tracking_device, scope):
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
+    # !!!!!!! If there're deployments linked to this device, we cannot delete it.
+    # Test to add
+
     if device.deployments:
         raise Conflict(
             "Ce dispositif ne peut pas être supprimé car il est utilisé dans des déploiements."
@@ -142,27 +188,3 @@ def delete_device(id_tracking_device, scope):
     db.session.delete(device)
     db.session.commit()
     return make_response("", 204)
-
-
-@blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
-@login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
-@json_resp
-def device(id_tracking_device, scope):
-    query = (
-        db.select(TrackingDevices)
-        .options(
-            joinedload(TrackingDevices.nomenclature_device_type),
-            selectinload(TrackingDevices.digitiser),
-            selectinload(TrackingDevices.referer),
-            joinedload(TrackingDevices.deployments)
-                .joinedload(IndividualDeployments.individual)
-        )
-        .where(TrackingDevices.id_tracking_device == id_tracking_device)
-    )
-
-    device = db.session.execute(query).unique().scalar_one_or_none()
-
-    if device is None:
-        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-    return TrackingDeviceDetailSchema().dump(device)

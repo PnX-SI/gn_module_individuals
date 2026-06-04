@@ -5,11 +5,8 @@ import { ConfigService } from "@geonature/services/config.service";
 
 @Injectable()
 export class NomenclaturesService {
-  public nomenclatureItems = <any>{};
-  public firstMessageMapList = true;
-  private _defaultNomenclature$: BehaviorSubject<any> = new BehaviorSubject(null);
-  public defaultNomenclature$: Observable<any> = this._defaultNomenclature$.asObservable();
-  
+  public items = <any>{};
+
   constructor(
     private _gnDataService: DataFormService,
     public config: ConfigService
@@ -20,18 +17,8 @@ export class NomenclaturesService {
       ])
       .subscribe((data) => {
         data.forEach((element: any) => {
-          this.nomenclatureItems[element.mnemonique] = element.values;
+          this.items[element.mnemonique] = element.values;
         });
       });
-
-    // this._gnDataService
-    //   .getDefaultNomenclatureValue("occhab")
-    //   .subscribe((data) => {
-    //     this._defaultNomenclature$.next(data);
-    //   });
   }
-
-  // get defaultNomenclature() {
-  //   return this._defaultNomenclature$.getValue();
-  // }
 }
