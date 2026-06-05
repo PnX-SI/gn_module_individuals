@@ -1,5 +1,5 @@
+import datetime as dt
 import pytest
-from datetime import datetime
 from sqlalchemy import func, select
 
 from geonature.tests.fixtures import *
@@ -35,7 +35,7 @@ def device_with_deployment(device, individual):
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
         id_capture=1,
-        install_date=datetime(2024, 1, 1),
+        install_date=dt.datetime(2024, 1, 1),
     )
     with db.session.begin_nested():
         db.session.add(dep)

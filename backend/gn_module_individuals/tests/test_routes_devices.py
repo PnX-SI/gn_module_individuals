@@ -3,7 +3,7 @@ from flask import url_for, g
 
 from pypnusershub.tests.utils import set_logged_user
 
-from gn_module_individuals.schemas import TrackingDeviceDetailSchema
+from gn_module_individuals.schemas import TrackingDevicesDetailSchema, TrackingDevicesWriteSchema
 
 
 # ===========================================================================
@@ -107,7 +107,7 @@ class TestGetDevice:
         )
         assert r.status_code == 200
         data = r.get_json()
-        expected_keys = set(TrackingDeviceDetailSchema().fields.keys())
+        expected_keys = set(TrackingDevicesDetailSchema().fields.keys())
         missing = expected_keys - data.keys()
         assert not missing, f"Champs manquants dans la réponse : {missing}"
 
@@ -176,14 +176,16 @@ class TestCreateDevice:
         r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
         assert r.status_code == 201
         data = r.get_json()
-        expected_keys = set(TrackingDeviceDetailSchema().fields.keys())
+        expected_keys = set(TrackingDevicesWriteSchema().fields.keys())
         missing = expected_keys - data.keys()
         assert not missing, f"Champs manquants dans la réponse : {missing}"
 
     def test_digitiser_is_set_from_authenticated_user(self, users):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
-        assert r.get_json()["id_digitiser"] == users["admin_user"].id_role
+        device_id = r.get_json()["id_tracking_device"]
+        detail = self.client.get(url_for("individuals.device", id_tracking_device=device_id)).get_json()
+        assert detail["id_digitiser"] == users["admin_user"].id_role
 
     def test_empty_provider_name_returns_400(self, users):
         set_logged_user(self.client, users["admin_user"])
@@ -292,7 +294,7 @@ class TestUpdateDevice:
         )
         assert r.status_code == 200
         data = r.get_json()
-        expected_keys = set(TrackingDeviceDetailSchema().fields.keys())
+        expected_keys = set(TrackingDevicesWriteSchema().fields.keys())
         missing = expected_keys - data.keys()
         assert not missing, f"Champs manquants dans la réponse : {missing}"
 
@@ -308,11 +310,14 @@ class TestUpdateDevice:
 
     def test_digitiser_is_set_from_authenticated_user(self, users, device):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.put(
+        self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
             json={"provider_name": "X", "provider_device_id": "Y"},
         )
-        assert r.get_json()["id_digitiser"] == users["admin_user"].id_role
+        detail = self.client.get(
+            url_for("individuals.device", id_tracking_device=device.id_tracking_device)
+        ).get_json()
+        assert detail["id_digitiser"] == users["admin_user"].id_role
 
     def test_computed_fields_in_payload_are_ignored(self, users, device):
         set_logged_user(self.client, users["admin_user"])

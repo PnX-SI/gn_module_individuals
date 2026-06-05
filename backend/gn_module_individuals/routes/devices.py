@@ -15,8 +15,7 @@ from utils_flask_sqla.response import json_resp
 from pypnnomenclature.schemas import NomenclatureSchema
 
 from .. import MODULE_CODE
-# from ..schemas import TrackingDevicesSchema
-from ..schemas import TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
+from ..schemas import TrackingDevicesSchema, TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
 from ..models import TrackingDevices,IndividualDeployments
 
 from ..blueprint import blueprint
@@ -133,9 +132,6 @@ def create_device(scope):
     db.session.add(device)
     db.session.commit()
 
-    # Claire version
-    # return TrackingDeviceDetailSchema().dump(device), 201
-    # Proposed version
     return TrackingDevicesWriteSchema().dump(device), 201
 
 
@@ -164,10 +160,6 @@ def update_device(id_tracking_device, scope):
 
     db.session.commit()
 
-    # Claire version
-    # return TrackingDeviceDetailSchema().dump(device)
-
-    # Proposed version
     return TrackingDevicesWriteSchema().dump(device)
 
 
@@ -179,12 +171,12 @@ def delete_device(id_tracking_device, scope):
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
-    # !!!!!!! If there're deployments linked to this device, we cannot delete it.
-    # Test to add
-
-    if device.deployments:
+    has_deployments = db.session.scalar(
+        db.select(db.exists().where(IndividualDeployments.id_tracking_device == id_tracking_device))
+    )
+    if has_deployments:
         raise Conflict(
-            "Ce dispositif ne peut pas être supprimé car il est utilisé dans des déploiements."
+            "Ce dispositif ne peut pas être supprimé car il est associé à des déploiements."
         )
 
     db.session.delete(device)

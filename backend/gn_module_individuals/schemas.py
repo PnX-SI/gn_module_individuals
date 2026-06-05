@@ -8,9 +8,18 @@ from pypnusershub.schemas import UserSchema
 from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
 
-
 from . import MODULE_CODE
 from .models import TrackingDevices, IndividualDeployments
+
+from flask import current_app
+
+def get_label(nomenclature):
+    """Retourne le label dans la langue configurée (DEFAULT_LANGUAGE), avec fallback."""
+    if nomenclature is None:
+        return None
+    lang = current_app.config.get("DEFAULT_LANGUAGE", "fr")
+    label = getattr(nomenclature, f"label_{lang}", None)
+    return label or nomenclature.label_default
 
 ADDITIONAL_DATA_ALLOWED_KEYS = ["removal_reason"]  # A RECUPERER DEPUIS LE FICHIER DE CONFIGURATION
 class TrackingDevicesSchema(CruvedSchemaMixin,SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
@@ -79,7 +88,8 @@ class TrackingDevicesSchema(CruvedSchemaMixin,SmartRelationshipsMixin, ma.SQLAlc
 
     def get_nomenclature_name(self, obj):
         if obj.nomenclature_device_type:
-            return obj.nomenclature_device_type.label_fr
+            #return obj.nomenclature_device_type.label_fr
+            return get_label(obj.nomenclature_device_type)
         return None
 
     def get_digitiser(self, obj):
@@ -210,7 +220,8 @@ class TrackingDevicesBaseSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
     
     def get_nomenclature_name(self, obj):
         if obj.nomenclature_device_type:
-            return obj.nomenclature_device_type.label_fr
+            #return obj.nomenclature_device_type.label_fr
+            return get_label(obj.nomenclature_device_type)
         return None
     
     def get_digitiser_name(self, obj):
@@ -245,8 +256,8 @@ class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
 
 class TrackingDevicesDetailSchema(TrackingDevicesBaseSchema):
 
-    class Meta(TrackingDevicesSchema.Meta):
-        exclude = ()
+    class Meta(TrackingDevicesBaseSchema.Meta):
+        pass
 
     deployments = fields.Method("get_deployments", dump_only=True)
     referer = fields.Nested(UserSchema,dump_only=True)
@@ -256,34 +267,21 @@ class TrackingDevicesDetailSchema(TrackingDevicesBaseSchema):
             return []
         return DeploymentSummarySchema(many=True).dump(obj.deployments)
 
-class TrackingDevicesWriteSchema(TrackingDevicesSchema):
-    class Meta(TrackingDevicesSchema.Meta):
-        exclude = (
+class TrackingDevicesWriteSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TrackingDevices
+        include_fk = True
+        sqla_session = db.session
+        model_converter = NomenclaturesConverter
+        fields = (
+            "id_tracking_device",
+            "provider_name",
+            "provider_device_id",
             "id_nomenclature_device_type",
-            "nomenclature_device_type_name",
             "id_referer",
-            "referer_name",
-            "id_digitiser",
-            "digitiser_name",
-            "meta_create_date",
-            "meta_update_date",
         )
 
-    id_nomenclature_device_type = fields.Integer(dump_only=True)
-    provider_name = fields.String(dump_only=True)
-    provider_device_id = fields.String(dump_only=True)
-    id_referer = fields.Integer(dump_only=True)
-    id_digitiser = fields.Integer(dump_only=True)
-
-    deployments = fields.Method("get_deployments", dump_only=True)
-
-    # Necessary to redefine the referer field to get the nested user info instead of just the id_referer
-    referer = fields.Nested(UserSchema,dump_only=True)
-
-    def get_deployments(self, obj):
-        if not obj.deployments:
-            return []
-        return DeploymentSummarySchema(many=True).dump(obj.deployments)
+    id_tracking_device = ma.auto_field(dump_only=True)
 
 class DeploymentSummarySchema(ma.Schema):
     id_individual = fields.Integer(dump_only=True)
@@ -393,12 +391,14 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
 
     def get_deployment_type(self, obj):
         if obj.nomenclature_deployment_type:
-            return obj.nomenclature_deployment_type.label_fr
+            #return obj.nomenclature_deployment_type.label_fr
+            return get_label(obj.nomenclature_deployment_type)
         return None
 
     def get_deployment_location(self, obj):
         if obj.nomenclature_deployment_location:
-            return obj.nomenclature_deployment_location.label_fr
+            #return obj.nomenclature_deployment_location.label_fr
+            return get_label(obj.nomenclature_deployment_location)
         return None
 
     def get_individual_name(self, obj):
