@@ -1,5 +1,7 @@
-<div class="card border-primary bg-light">
-  <h2 class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+<!-- <div class="card bg-light"> -->
+<div class="card">
+  <!-- <h2 class="card-header bg-body-secondary d-flex align-items-center justify-content-between"> -->
+  <h2 class="card-header card-header-custom">  
     <div>
       {{ infoTitle }}
     </div>
@@ -37,7 +39,6 @@
   </h2>
   <div
     class="card-body"
-    id="card-station"
   >
     <ng-container
       *ngTemplateOutlet="infoTemplate; context: { dataTable: dataTable }"
