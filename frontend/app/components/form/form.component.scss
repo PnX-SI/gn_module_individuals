@@ -25,8 +25,11 @@ h3 {
 }
 
 /* Space between label and input */
+.form-group > small:not(:first-of-type) {
+  margin-top: 0.5rem;
+}
+
 small , label {
-  margin-bottom: .3rem;
   display: inline-block;
 }
 

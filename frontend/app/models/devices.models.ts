@@ -15,18 +15,19 @@ export interface Device {
   meta_update_date : string,
 }
 
-export interface UpdateDeviceDto {
-  // This model is only used to PUT data to the API (dto = data transfer object)
-  id_tracking_device: number,
+// This model is only used to POST data to the API (dto = data transfer object)
+export interface CreateDeviceDto {
   id_nomenclature_device_type: number,
   provider_name: string,
   provider_device_id: string,
   id_referer: number,
-  comment: string,
+  comment: string, 
 }
 
-// This model is only used to POST data to the API (dto = data transfer object)
-export type CreateDeviceDto = Omit<UpdateDeviceDto, 'id_tracking_device'>;
+// This model is only used to PUT data to the API (dto = data transfer object)
+export interface UpdateDeviceDto extends CreateDeviceDto {
+  id_tracking_device: number,
+}
 
 export const DEVICE_COLUMNS: Record<keyof Device, true> = {
   id_tracking_device: true,

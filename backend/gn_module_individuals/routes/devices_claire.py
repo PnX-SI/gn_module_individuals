@@ -15,8 +15,7 @@ from utils_flask_sqla.response import json_resp
 from pypnnomenclature.schemas import NomenclatureSchema
 
 from .. import MODULE_CODE
-# from ..schemas import TrackingDevicesSchema
-from ..schemas import TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
+from ..schemas import TrackingDevicesSchema, TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
 from ..models import TrackingDevices,IndividualDeployments
 
 from ..blueprint import blueprint
@@ -43,6 +42,10 @@ def device(id_tracking_device, scope):
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
+    # Claire version
+    # return TrackingDevicesDetailSchema().dump(device)
+
+    # Proposed version
     # SmartRelationshipsMixin have to get explicitely the relationship with only
     return TrackingDevicesDetailSchema(only=["nomenclature_device_type","referer"]).dump(device)
 
@@ -64,6 +67,10 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
+    # Claire version
+    # schema = TrackingDevicesSchema(exclude=("deployments",), many=True)
+
+    # Proposed version
     schema = TrackingDevicesListSchema(many=True)
 
     sort_col = getattr(TrackingDevices, prop, None)
@@ -111,11 +118,10 @@ def list_devices(scope):
 @json_resp
 def create_device(scope):
     data = request.get_json()
-
     if not data:
         raise BadRequest("Corps de requête JSON manquant.")
 
-    schema = TrackingDevicesWriteSchema(exclude=("deployments",), unknown=EXCLUDE)
+    schema = TrackingDevicesSchema(exclude=("deployments",), unknown=EXCLUDE)
     try:
         device = schema.load(data)
     except ValidationError as e:
@@ -126,7 +132,7 @@ def create_device(scope):
     db.session.add(device)
     db.session.commit()
 
-    return schema.dump(device), 201
+    return TrackingDevicesWriteSchema().dump(device), 201
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
@@ -139,13 +145,12 @@ def update_device(id_tracking_device, scope):
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
     
     data = request.get_json()
-
     if not data:
         raise BadRequest("Corps de requête JSON manquant.")
     if not device.has_instance_permission(scope):
         raise Forbidden(f"Vous n'avez pas la permission de mettre à jour le dispositif {id_tracking_device} ")
     
-    schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
+    schema = TrackingDevicesSchema(exclude=("deployments",), unknown=EXCLUDE)
     try:
         device = schema.load(data, instance=device)
     except ValidationError as e:
@@ -155,7 +160,7 @@ def update_device(id_tracking_device, scope):
 
     db.session.commit()
 
-    return schema.dump(device), 201
+    return TrackingDevicesWriteSchema().dump(device)
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])

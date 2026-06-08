@@ -11,7 +11,7 @@ export const DATA_TABLE_CONFIG = {
 
 export const DEVICE_FORM_CONSTRAINTS = {
     "provider_name": {
-        "maxLength": 10,
+        "maxLength": 50,
         "pattern": '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
         "help": 'PatternText1'
     },

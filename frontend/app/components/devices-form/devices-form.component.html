@@ -12,9 +12,9 @@
         label="{{ 'Individuals.DevicesFields.' + field | translate }}"
         [parentFormControl]="form.get(field)"
         [items]="nomenclatureService.items.TYPE_DISPO_SUIVI"
-        comparedKey="{{ id_nomenclature}}"
-        titleKey="definition_{{ lang }}"
+        comparedKey="cd_nomenclature"
         displayedKey="label_{{ lang }}"
+        titleKey="definition_{{ lang }}"
       ></pnx-dumb-select>
     </div>
 
@@ -28,16 +28,12 @@
         [formControl]="form.get(field)"
         maxlength="{{ formConstraints[field].maxLength }}"
       />
-      <div *ngIf="form.get(field)?.dirty"
-        class="d-flex justify-content-end"
+      <small
+        class="text-danger d-block d-flex justify-content-end"
+        *ngIf="form.get(field)?.dirty && form.get(field)?.errors?.['pattern']"
       >
-        <small
-          class="text-danger d-block"
-          *ngIf="form.get(field)?.errors?.['pattern']"
-        >
-          {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
-        </small>
-      </div>
+        {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
+      </small>
     </div>
 
     <!-- provider_device_id -->
@@ -50,16 +46,12 @@
         [formControl]="form.get(field)"
         maxlength="{{ formConstraints[field].maxLength }}"
       />
-      <div *ngIf="form.get(field)?.dirty"
-        class="d-flex justify-content-end"
+      <small
+        class="text-danger d-block d-flex justify-content-end"
+        *ngIf="form.get(field)?.dirty && form.get(field)?.errors?.['pattern']"
       >
-        <small
-          class="text-danger d-block"
-          *ngIf="form.get(field)?.errors?.['pattern']"
-        >
-          {{'Individuals.Error.ForbiddenChars' | translate}}
-        </small>
-      </div>
+        {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
+      </small>
     </div> 
 
     <!-- id_referer -->
@@ -84,6 +76,12 @@
       ></textarea>
       <small class="d-flex justify-content-end text-muted">
         {{ form.get(field)?.value?.length || 0 }}/{{ formConstraints[field].maxLength }}
+      </small>
+      <small
+        class="text-danger d-block d-flex justify-content-end"
+        *ngIf="form.get(field)?.dirty && form.get(field)?.errors?.['pattern']"
+      >
+        {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
       </small>
     </div>
   </div>  

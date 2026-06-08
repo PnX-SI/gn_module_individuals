@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Device, CreateDeviceDto } from '../models/devices.models';
+import { Device, CreateDeviceDto, UpdateDeviceDto } from '../models/devices.models';
 import { PaginatedItemCollection, PaginationAPIParams } from '../models/common.models';
 import { DATA_TABLE_CONFIG } from '..//utils/constants.util';
 
@@ -55,16 +55,40 @@ export class DevicesService {
       comment: device.comment,
     };
 
-    console.log(
-      'POST payload JSON:',
-      JSON.stringify(payload, null, 2)
-    );
-
-    return of(device as Device);
-    // return this._http.post<Device>(
-    //   `${this._OBJECT_API}`,
-    //   device,
-    //   {params: params}
+    // console.log(
+    //   'POST payload JSON:',
+    //   JSON.stringify(payload, null, 2)
     // );
+
+    return this._http.post<Device>(
+      `${this._OBJECT_API}`,
+      payload,
+      {params: params}
+    );
+  }
+
+  updateDevice(device: any, id: number, params: Record<string, string> = {}): Observable<Device> {
+    params['format'] = 'json';
+
+    // Map form to Dto
+    const payload: UpdateDeviceDto = {
+      id_tracking_device: id,
+      id_nomenclature_device_type: device.id_nomenclature_device_type.id_nomenclature,
+      provider_name: device.provider_name,
+      provider_device_id: device.provider_device_id,
+      id_referer: device.id_referer.id_role,
+      comment: device.comment,
+    };
+
+    // console.log(
+    //   'PUT payload JSON:',
+    //   JSON.stringify(payload, null, 2)
+    // );
+
+    return this._http.post<Device>(
+      `${this._OBJECT_API}`,
+      payload,
+      {params: params}
+    );
   }
 }

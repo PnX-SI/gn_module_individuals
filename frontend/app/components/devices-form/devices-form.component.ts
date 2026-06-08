@@ -5,7 +5,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { filter, take, switchMap, map } from 'rxjs/operators';
 
 import { ConfigService } from '@geonature/services/config.service';
-
+import { CommonService } from '@geonature_common/service/common.service';
 import { Device } from '../../models/devices.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { DevicesService } from '../../services/devices.service';
@@ -20,7 +20,7 @@ import { NomenclaturesService } from '../../services/nomenclature.service';
 export class DevicesFormComponent implements OnInit, AfterViewInit {
   public dataTable$: Observable<Device> = new Observable<Device>();
   public availableFields!: Device;
-  public deviceId!: number | null;
+  public deviceId!: number;
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints = DEVICE_FORM_CONSTRAINTS;
@@ -29,6 +29,7 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   constructor(
     private _config: ConfigService,
     private _route: ActivatedRoute,
+    private _commonService: CommonService,
     private _fb: FormBuilder,
     public nomenclatureService: NomenclaturesService,
     private _service: DevicesService
@@ -67,21 +68,6 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
       ],
     });
 
-    // this.form.statusChanges.subscribe(status => {
-    //   console.log('FORM STATUS:', status);
-
-    //   Object.entries(this.form.controls).forEach(([name, control]) => {
-    //     console.log(
-    //       name,
-    //       'value=', control.value,
-    //       'valid=', control.valid,
-    //       'errors=', control.errors
-    //     );
-    //   });
-    // });
-  }
-
-  ngAfterViewInit() : void {
     this._route.params.subscribe((params) => {
         if (params['id_tracking_device']) {
           this.deviceId = params['id_tracking_device'];
@@ -90,10 +76,6 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
           this.dataTable$ = this._service.getDevice(params['id_tracking_device']);
           this._service.getDevice(params['id_tracking_device'])
             .subscribe((device: any) => {
-  //   //           const deviceTypeId = device.id_nomenclature_device_type
-  //   //           this.form.patchValue({
-  //   //              id_nomenclature_device_type: device.id_nomenclature_device_type
-  //   //           });
               this.patchForm(device);
             });
         } else {
@@ -101,34 +83,43 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
         }
     });
   }
+
+  ngAfterViewInit() : void {
+  }
   
   patchForm(device: any) : void { /// Modifier par : Device au lieu de any et faire le mapping si besoin
-    // this.form.patchValue({
-    //   id_nomenclature_device_type: device.id_nomenclature_device_type,
     console.log('Device à patcher dans le form :', device);
-    // console.log('Device à patcher dans le form :', device.nomenclature_device_type.cd_nomenclature);
+    console.log('Nomenclature à patcher dans le form :', device.nomenclature_device_type);
     this.form.patchValue(device);
+
     this.form.patchValue({
       id_nomenclature_device_type: device.nomenclature_device_type,
       id_referer: device.referer
-    });
-    // this.form.patchValue(device);
-    // this.form.patchValue({
-    //    id_referer: device.referer_name
-    // });
-    
+    });   
   }
 
   onSave() : void {
     const device = this.form.getRawValue();
 
-    this._service.createDevice(device).subscribe({
-      next: (res) => {
-        console.log('Device créé', res);
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    });
+    if (this.formAction === 'ADD') {
+      this._service.createDevice(device).subscribe({
+        next: (res) => {
+          console.log('Device créé', res);
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+    } else {
+        this._service.updateDevice(device, this.deviceId).subscribe({
+        next: (res) => {
+          console.log('Device mis à jour', res);
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
+    }
+    this._commonService.translateToaster('info', 'Occtax.Releve.Messages.Modified');
   }
 }
