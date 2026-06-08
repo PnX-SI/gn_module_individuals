@@ -91,4 +91,30 @@ export class DevicesService {
       {params: params}
     );
   }
+
+  createOrUpdateDevice(device: any, formAction: string, id: number | null = null, params: Record<string, string> = {}): Observable<Device> {
+    params['format'] = 'json';
+
+    // Map form to Dto
+    let payload: CreateDeviceDto | UpdateDeviceDto = {
+      id_nomenclature_device_type: device.id_nomenclature_device_type.id_nomenclature,
+      provider_name: device.provider_name,
+      provider_device_id: device.provider_device_id,
+      id_referer: device.id_referer.id_role,
+      comment: device.comment,
+    };
+
+    if (formAction === "EDIT") {
+      payload = {
+        ...payload,
+        id_tracking_device: device.id,
+      };
+    }
+    if (formAction === "ADD") {
+      return this._http.post<Device>(`${this._OBJECT_API}`,payload,{params: params});
+    }
+    else {
+      return this._http.put<Device>(`${this._OBJECT_API}/${id}`,payload,{params: params});
+    }
+  }
 }

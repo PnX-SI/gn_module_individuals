@@ -1,5 +1,6 @@
 import { ViewEncapsulation, Component, OnInit, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable, combineLatest } from 'rxjs';
 import { filter, take, switchMap, map } from 'rxjs/operators';
@@ -32,7 +33,8 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
     private _commonService: CommonService,
     private _fb: FormBuilder,
     public nomenclatureService: NomenclaturesService,
-    private _service: DevicesService
+    private _service: DevicesService,
+    private _location: Location
   ) {}
 
   ngOnInit() : void {
@@ -101,25 +103,16 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   onSave() : void {
     const device = this.form.getRawValue();
 
-    if (this.formAction === 'ADD') {
-      this._service.createDevice(device).subscribe({
-        next: (res) => {
-          console.log('Device créé', res);
-        },
-        error: (err) => {
-          console.error(err);
-        }
-      });
-    } else {
-        this._service.updateDevice(device, this.deviceId).subscribe({
-        next: (res) => {
-          console.log('Device mis à jour', res);
-        },
-        error: (err) => {
-          console.error(err);
-        }
-      });
-    }
-    this._commonService.translateToaster('info', 'Occtax.Releve.Messages.Modified');
+    this._service.createOrUpdateDevice(device, this.formAction, this.deviceId).subscribe({
+      next: (res) => {
+        this._commonService.translateToaster('info', this.formAction === 'ADD' ? 'Individuals.Devices.Messages.Added' : 'Individuals.Devices.Messages.Edited', {id: this.deviceId});
+        this.form.markAsPristine();
+        this._location.back();
+      },
+      error: (err) => {
+          const msg = err.name + ':' + err.message || JSON.stringify(err);
+          this._commonService.translateToaster('error', this.formAction === 'ADD' ? 'Individuals.Devices.Errors.AddedNOK' : 'Individuals.Devices.Errors.EditedNOK', {id: this.deviceId, error: msg });
+      }
+    });
   }
 }

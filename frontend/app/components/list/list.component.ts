@@ -64,7 +64,7 @@ export class ListComponent implements OnInit, AfterViewInit {
     // // Build an array of translation observables for each column name
     const translateTab$ = this.availableColumns.map(
         // An observable is returned which emits the translation of this key
-        column => this._translate.get(`Individuals.DevicesFields.${column.prop}`)
+        column => this._translate.get(`Individuals.Devices.Fields.${column.prop}`)
     );
 
     // Translation with CombineLatest will wait for all translations to be loaded before updating 
