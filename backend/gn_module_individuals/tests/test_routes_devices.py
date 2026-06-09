@@ -278,13 +278,13 @@ class TestUpdateDevice:
         )
         assert r.status_code == 404
 
-    def test_returns_200_with_valid_payload(self, users, device):
+    def test_returns_201_with_valid_payload(self, users, device):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
             json={"provider_name": "Ornitela Updated", "provider_device_id": "UPD_001"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 201
 
     def test_response_validates_schema(self, users, device):
         set_logged_user(self.client, users["admin_user"])
@@ -292,7 +292,7 @@ class TestUpdateDevice:
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
             json={"provider_name": "X", "provider_device_id": "Y"},
         )
-        assert r.status_code == 200
+        assert r.status_code == 201
         data = r.get_json()
         expected_keys = set(TrackingDevicesWriteSchema().fields.keys())
         missing = expected_keys - data.keys()
@@ -330,7 +330,7 @@ class TestUpdateDevice:
                 "digitiser_name": "Test Agent",
             },
         )
-        assert r.status_code == 200
+        assert r.status_code == 201
 
     def test_empty_provider_name_returns_400(self, users, device):
         set_logged_user(self.client, users["admin_user"])

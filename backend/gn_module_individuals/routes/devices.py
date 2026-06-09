@@ -15,7 +15,6 @@ from utils_flask_sqla.response import json_resp
 from pypnnomenclature.schemas import NomenclatureSchema
 
 from .. import MODULE_CODE
-# from ..schemas import TrackingDevicesSchema
 from ..schemas import TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
 from ..models import TrackingDevices,IndividualDeployments
 
@@ -126,7 +125,7 @@ def create_device(scope):
     db.session.add(device)
     db.session.commit()
 
-    return schema.dump(device), 201
+    return schema.dump(device), 200
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
