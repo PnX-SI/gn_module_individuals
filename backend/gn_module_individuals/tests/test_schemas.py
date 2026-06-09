@@ -33,7 +33,6 @@ class TestTrackingDevicesSchema:
         user_id = users["admin_user"].id_role
         assert TrackingDevicesSchema().validate_referer(user_id) == user_id
 
-
     def test_get_nomenclature_name_returns_label(self, app, devices):
         result = TrackingDevicesSchema().get_nomenclature_name(devices[0])
         assert result is not None
@@ -45,7 +44,6 @@ class TestTrackingDevicesSchema:
     def test_get_referer_returns_name(self, app, devices):
         result = TrackingDevicesSchema().get_referer(devices[0])
         assert result is not None
-
 
 
 @pytest.mark.usefixtures("temporary_transaction")
@@ -107,7 +105,9 @@ class TestIndividualDeploymentsSchema:
     # --- validate_nomenclature_deployment_location ----------
 
     def test_validate_nomenclature_deployment_location_accepts_none(self, app):
-        assert IndividualDeploymentsSchema().validate_nomenclature_deployment_location(None) is None
+        assert (
+            IndividualDeploymentsSchema().validate_nomenclature_deployment_location(None) is None
+        )
 
     def test_validate_nomenclature_deployment_location_accepts_valid_id(self, app):
         valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
@@ -177,7 +177,6 @@ class TestIndividualDeploymentsSchema:
     def test_get_digitiser_returns_none_when_unset(self, app, device_with_deployment):
         deployment = device_with_deployment.deployments[0]
         assert IndividualDeploymentsSchema().get_digitiser(deployment) is None
-
 
     def test_has_instance_permission_scope_0_always_false(self, app, device):
         assert device.has_instance_permission(scope=0) is False

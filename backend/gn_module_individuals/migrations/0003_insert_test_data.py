@@ -5,13 +5,14 @@ Revises: 0002_create_tables
 Create Date: 2026-03-19 16:53:24.982945
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '0003_insert_test_data'
-down_revision = '0002_create_tables'
+revision = "0003_insert_test_data"
+down_revision = "0002_create_tables"
 branch_labels = None
 depends_on = None
 
@@ -150,6 +151,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
             """
         )
     )
+
 
 def downgrade():
     conn = op.get_bind()

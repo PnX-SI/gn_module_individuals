@@ -20,6 +20,7 @@ SCHEMA_NAME = "gn_individual"
 # TABLE_NAME = "t_individuals"
 # PRIMARY_KEY = "id_demo"
 
+
 def upgrade():
     # #########################################################################
     # Schema pr_demo
@@ -89,4 +90,3 @@ def downgrade():
     )
 
     op.execute(sa.text(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE"))
-

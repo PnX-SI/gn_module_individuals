@@ -1,6 +1,6 @@
 from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import joinedload,selectinload
+from sqlalchemy.orm import joinedload, selectinload
 
 from flask import request, jsonify, g, make_response
 from marshmallow import EXCLUDE, ValidationError
@@ -15,10 +15,15 @@ from utils_flask_sqla.response import json_resp
 from pypnnomenclature.schemas import NomenclatureSchema
 
 from .. import MODULE_CODE
-from ..schemas import TrackingDevicesDetailSchema, TrackingDevicesListSchema, TrackingDevicesWriteSchema
-from ..models import TrackingDevices,IndividualDeployments
+from ..schemas import (
+    TrackingDevicesDetailSchema,
+    TrackingDevicesListSchema,
+    TrackingDevicesWriteSchema,
+)
+from ..models import TrackingDevices, IndividualDeployments
 
 from ..blueprint import blueprint
+
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
 @login_required
@@ -31,8 +36,7 @@ def device(id_tracking_device, scope):
             joinedload(TrackingDevices.nomenclature_device_type),
             selectinload(TrackingDevices.digitiser),
             selectinload(TrackingDevices.referer),
-            joinedload(TrackingDevices.deployments)
-                .joinedload(IndividualDeployments.individual)
+            joinedload(TrackingDevices.deployments).joinedload(IndividualDeployments.individual),
         )
         .where(TrackingDevices.id_tracking_device == id_tracking_device)
     )
@@ -43,7 +47,8 @@ def device(id_tracking_device, scope):
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
     # SmartRelationshipsMixin have to get explicitely the relationship with only
-    return TrackingDevicesDetailSchema(only=["nomenclature_device_type","referer"]).dump(device)
+    return TrackingDevicesDetailSchema(only=["nomenclature_device_type", "referer"]).dump(device)
+
 
 @blueprint.route("/devices", methods=["GET"])
 @login_required
@@ -51,11 +56,11 @@ def device(id_tracking_device, scope):
 @json_resp
 def list_devices(scope):
 
-    device_type    = request.args.get("type", type=int)
-    provider_name  = request.args.get("providerName", type=str)
-    provider_id    = request.args.get("providerDeviceId", type=str)
+    device_type = request.args.get("type", type=int)
+    provider_name = request.args.get("providerName", type=str)
+    provider_id = request.args.get("providerDeviceId", type=str)
 
-    page     = request.args.get("page", type=int)
+    page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
 
     prop = request.args.get("prop", type=str, default="id_nomenclature_device_type")
@@ -73,8 +78,7 @@ def list_devices(scope):
             joinedload(TrackingDevices.nomenclature_device_type),
             selectinload(TrackingDevices.digitiser),
             selectinload(TrackingDevices.referer),
-            joinedload(TrackingDevices.deployments)
-                .joinedload(IndividualDeployments.individual),
+            joinedload(TrackingDevices.deployments).joinedload(IndividualDeployments.individual),
         )
         .order_by(sort_col.desc() if dir == "desc" else sort_col.asc())
     )
@@ -136,14 +140,16 @@ def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-    
+
     data = request.get_json()
 
     if not data:
         raise BadRequest("Corps de requête JSON manquant.")
     if not device.has_instance_permission(scope):
-        raise Forbidden(f"Vous n'avez pas la permission de mettre à jour le dispositif {id_tracking_device} ")
-    
+        raise Forbidden(
+            f"Vous n'avez pas la permission de mettre à jour le dispositif {id_tracking_device} "
+        )
+
     schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data, instance=device)
@@ -166,7 +172,9 @@ def delete_device(id_tracking_device, scope):
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
     has_deployments = db.session.scalar(
-        db.select(db.exists().where(IndividualDeployments.id_tracking_device == id_tracking_device))
+        db.select(
+            db.exists().where(IndividualDeployments.id_tracking_device == id_tracking_device)
+        )
     )
     if has_deployments:
         raise Conflict(

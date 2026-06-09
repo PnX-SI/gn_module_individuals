@@ -2,7 +2,7 @@ from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import joinedload
 
-from flask import request, jsonify,g
+from flask import request, jsonify, g
 from werkzeug.exceptions import NotFound, BadRequest
 
 from geonature.core.gn_permissions import decorators as permissions
@@ -12,6 +12,7 @@ from utils_flask_sqla.response import json_resp
 
 from ..blueprint import blueprint
 
+
 @blueprint.route("/captures", methods=["GET"])
 @login_required
 @json_resp
@@ -20,24 +21,17 @@ def list_captures():
         "features": [
             {
                 "geometry": {
-                    "coordinates": [
-                        -1.363055012466776,
-                        -5.983571570298366
-                    ],
-                    "type": "Point"
+                    "coordinates": [-1.363055012466776, -5.983571570298366],
+                    "type": "Point",
                 },
                 "id": 0,
                 "properties": {
                     "id_capture": 1,
                 },
-                "type": "Feature"
+                "type": "Feature",
             }
         ],
-        "type": "FeatureCollection"
+        "type": "FeatureCollection",
     }
 
-    return {
-        "total": len(geojson["features"]),
-        "page": 0,
-        "items": geojson
-    }
+    return {"total": len(geojson["features"]), "page": 0, "items": geojson}

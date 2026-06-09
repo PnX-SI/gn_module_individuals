@@ -68,9 +68,7 @@ class TestListDevices:
 
     def test_filter_by_provider_name_no_match(self, users, devices):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.get(
-            url_for("individuals.list_devices", providerName="__no_match_xyz__")
-        )
+        r = self.client.get(url_for("individuals.list_devices", providerName="__no_match_xyz__"))
         assert r.get_json() == []
 
 
@@ -147,16 +145,12 @@ class TestCreateDevice:
     }
 
     def test_unauthenticated_returns_401(self):
-        r = self.client.post(
-            url_for("individuals.create_device"), json=self.VALID_PAYLOAD
-        )
+        r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
         assert r.status_code == 401
 
     def test_forbidden_without_create_permission(self, users):
         set_logged_user(self.client, users["noright_user"])
-        r = self.client.post(
-            url_for("individuals.create_device"), json=self.VALID_PAYLOAD
-        )
+        r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
         assert r.status_code == 403
 
     def test_returns_201_with_valid_payload(self, users):
@@ -184,7 +178,9 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
         device_id = r.get_json()["id_tracking_device"]
-        detail = self.client.get(url_for("individuals.device", id_tracking_device=device_id)).get_json()
+        detail = self.client.get(
+            url_for("individuals.device", id_tracking_device=device_id)
+        ).get_json()
         assert detail["id_digitiser"] == users["admin_user"].id_role
 
     def test_empty_provider_name_returns_400(self, users):
@@ -396,9 +392,7 @@ class TestDeleteDevice:
     def test_device_no_longer_exists_after_delete(self, users, device):
         device_id = device.id_tracking_device
         set_logged_user(self.client, users["admin_user"])
-        self.client.delete(
-            url_for("individuals.delete_device", id_tracking_device=device_id)
-        )
+        self.client.delete(url_for("individuals.delete_device", id_tracking_device=device_id))
         r = self.client.get(url_for("individuals.device", id_tracking_device=device_id))
         assert r.status_code == 404
 

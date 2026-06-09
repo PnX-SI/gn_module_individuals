@@ -13,6 +13,7 @@ from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .utils import get_label
 
+
 class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = IndividualDeployments
@@ -38,7 +39,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
     __module_code__ = MODULE_CODE
 
     # Validators
- 
+
     @validates("id_individual")
     def validate_individual(self, value, **kwargs):
         if db.session.get(TIndividuals, value) is None:
@@ -56,9 +57,7 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
         if value is None:
             return value
         if db.session.get(TNomenclatures, value) is None:
-            raise ValidationError(
-                f"La nomenclature {value} (type de déploiement) n'existe pas."
-            )
+            raise ValidationError(f"La nomenclature {value} (type de déploiement) n'existe pas.")
         return value
 
     @validates("id_nomenclature_deployment_location")

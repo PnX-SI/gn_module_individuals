@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 from .devices import TrackingDevices
 
+
 class IndividualDeployments(DB.Model):
     __tablename__ = "t_individual_deployments"
     __table_args__ = {"schema": "gn_individual"}
@@ -115,7 +116,7 @@ class IndividualDeployments(DB.Model):
         primaryjoin=TrackingDevices.id_tracking_device == id_tracking_device,
         foreign_keys=[id_tracking_device],
         lazy="select",
-        back_populates="deployments", 
+        back_populates="deployments",
     )
 
     nomenclature_deployment_type = DB.relationship(

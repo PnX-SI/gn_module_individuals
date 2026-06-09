@@ -100,6 +100,7 @@ def ensure_individuals_module(app, users):
 
     return module
 
+
 def add_user_permission(
     module_code, user, scope, type_code_object, code_action="CRUVED", sensitivity_filter=None
 ):
@@ -212,4 +213,3 @@ def create_user():
         return user
 
     return _create_user
-

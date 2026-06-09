@@ -13,6 +13,7 @@ from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .utils import get_label
 
+
 class DeploymentSummarySchema(ma.Schema):
     id_individual = fields.Integer(dump_only=True)
     individual_name = fields.Method("get_individual_name", dump_only=True)

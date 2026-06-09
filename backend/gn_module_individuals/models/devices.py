@@ -5,6 +5,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from pypnusershub.db.models import User
 from sqlalchemy.dialects.postgresql import JSONB
 
+
 class TrackingDevices(DB.Model):
     __tablename__ = "bib_tracking_devices"
     __table_args__ = {"schema": "gn_individual"}

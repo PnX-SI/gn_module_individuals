@@ -66,25 +66,23 @@ class TrackingDevicesBaseSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
     def validate_referer(self, value, **kwargs):
         if value is None:
             return value
-        user = db.session.execute(
-            db.select(User).filter_by(id_role=value)
-        ).scalar_one_or_none()
+        user = db.session.execute(db.select(User).filter_by(id_role=value)).scalar_one_or_none()
         if user is None:
             raise ValidationError(f"L'utilisateur id_role={value} (référent) n'existe pas.")
         return value
 
-    # Serialisation 
+    # Serialisation
 
     def get_comment(self, obj):
         if obj.comment:
             return obj.comment.replace("\n", "<br>")
         return None
-    
+
     def get_nomenclature_name(self, obj):
         if obj.nomenclature_device_type:
             return get_label(obj.nomenclature_device_type)
         return None
-    
+
     def get_digitiser_name(self, obj):
         if obj.digitiser:
             return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
@@ -94,7 +92,8 @@ class TrackingDevicesBaseSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
         if obj.referer:
             return f"{obj.referer.prenom_role} {obj.referer.nom_role}"
         return None
-    
+
+
 class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
 
     last_individual_equipped_name = fields.Method(
@@ -113,15 +112,17 @@ class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
             return name
         return None
 
+
 class TrackingDevicesDetailSchema(TrackingDevicesBaseSchema):
 
     deployments = fields.Method("get_deployments", dump_only=True)
-    referer = fields.Nested(UserSchema,dump_only=True)
+    referer = fields.Nested(UserSchema, dump_only=True)
 
     def get_deployments(self, obj):
         if not obj.deployments:
             return []
         return DeploymentSummarySchema(many=True).dump(obj.deployments)
+
 
 class TrackingDevicesWriteSchema(TrackingDevicesBaseSchema):
     class Meta(TrackingDevicesBaseSchema.Meta):
