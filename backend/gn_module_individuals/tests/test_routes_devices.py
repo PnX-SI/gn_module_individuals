@@ -5,7 +5,6 @@ from pypnusershub.tests.utils import set_logged_user
 
 from gn_module_individuals.schemas import TrackingDevicesDetailSchema, TrackingDevicesWriteSchema
 
-
 # ===========================================================================
 # GET /devices  (list_devices)
 # ===========================================================================

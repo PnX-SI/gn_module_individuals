@@ -31,8 +31,7 @@ def upgrade():
     ## ########################################################################
     ## Module permissions
     ## ########################################################################
-    op.execute(
-        f"""
+    op.execute(f"""
       INSERT INTO
           gn_permissions.t_permissions_available (
               id_module,
@@ -62,30 +61,25 @@ def upgrade():
           gn_permissions.t_objects o ON o.code_object = v.object_code
       JOIN
           gn_permissions.bib_actions a ON a.code_action = v.action_code
-      """
-    )
+      """)
 
 
 def downgrade():
     conn = op.get_bind()
     module_id = conn.execute(
-        sa.text(
-            """
+        sa.text("""
             SELECT id_module
             FROM gn_commons.t_modules
             WHERE module_code = :module_code
-            """
-        ),
+            """),
         {"module_code": MODULE_CODE},
     ).scalar()
 
     conn.execute(
-        sa.text(
-            """
+        sa.text("""
             DELETE FROM gn_permissions.t_permissions_available
             WHERE id_module = :module_id
-            """
-        ),
+            """),
         {"module_id": module_id},
     )
 
