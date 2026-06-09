@@ -26,3 +26,5 @@ export const DEVICE_FORM_CONSTRAINTS = {
         "help": 'PatternText3'
     }
 }
+
+export const DEVICES_DEFAULT_SORT = { prop: "meta_create_date", dir: "desc" }

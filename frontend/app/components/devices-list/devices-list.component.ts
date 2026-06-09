@@ -9,6 +9,7 @@ import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
 import { Sort, PaginatedItemCollection, SimplePaginationWithSort } from '../../models/common.models';
 
 import { DevicesService } from '../../services/devices.service';  
+import { DEVICES_DEFAULT_SORT } from '../../utils/constants.util';
 
 @Component({
   selector: 'gn-individuals-devices-list',
@@ -20,7 +21,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   public availableColumnsParams: Record<keyof Device, true> = DEVICE_COLUMNS;
   public displayedColumnsParams: Array<String> = [];
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<PaginatedItemCollection<Device>>();
-  public sorts: Array<Sort> = [{ prop: "id_tracking_device", dir: "asc" }];
+  public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public idName: string = "id_tracking_device";
 
   private _limit: number = this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
@@ -74,6 +75,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
       dir: this.sorts[0].dir,
     }; 
     this._limit = nbRowsPerPage;
+    console.log("onNbRowsReceived:",params)
     this.dataTable$ = this._devicesService.getDevices(params);
   } 
 }

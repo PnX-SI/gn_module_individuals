@@ -63,8 +63,8 @@ def list_devices(scope):
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
 
-    prop = request.args.get("prop", type=str, default="id_nomenclature_device_type")
-    dir = request.args.get("dir", type=str, default="asc")
+    prop = request.args.get("prop", type=str, default="meta_create_date")
+    dir = request.args.get("dir", type=str, default="desc")
 
     paginated = page is not None and per_page is not None
 
