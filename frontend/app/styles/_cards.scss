@@ -1,0 +1,46 @@
+.card > h2 {
+  font-size: 1.3rem;
+}
+
+.card .card-body h3 {
+  font-size: 1.1rem; /* clamp : min, preferred, max */
+  font-weight: 550;
+  margin: 0.5rem 0rem;
+}
+
+.card.card-custom {
+  margin-right: 15px;
+  margin-left: 15px;
+  border-radius: 0;
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.card-header.card-header-custom {
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+  gap: 0.5rem;
+}
+
+.card-body {
+  padding: 0.75rem;
+}
+
+.card-body .content:not(:first-child) {
+  border-top: 1px solid rgb(235, 235, 235) !important;
+}
+
+.card-body .content {
+  padding: 5px 0px !important;
+}
+
+.card-body .content.row {
+  margin-right: 0px; /* Otherwise -15px ! */
+  margin-left: 0px;
+}
+
+.card-body .content.row p {
+  margin: 0px; /* Otherwise margin-bottom: 1rem */
+}

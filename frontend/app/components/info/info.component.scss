@@ -1,53 +1,8 @@
-h2 {
-  font-size: 1.3rem;
-}
-
-h3 {
-  font-size: 1.1rem; /* clamp : min, preferred, max */
-  font-weight: 550;
-  margin: 0.5rem 0rem;
-}
-
-p {
-  font-size: 1rem;
-}
-
-.card-header.card-header-custom {
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem;
-}
-
-.card-body {
-  padding: 0.75rem;
-}
-
-.card-body .content:not(:first-child) {
-  border-top: 1px solid rgb(235, 235, 235) !important;
-}
-
-.card-body .content {
-  padding: 5px 0px !important;
-}
-
-.card-body .content.row {
-  margin-right: 0px; /* Otherwise -15px ! */
-  margin-left: 0px;
-}
-
-.card-body .content.row p {
-  margin: 0px; /* Otherwise margin-bottom: 1rem */
-}
+@use '../../styles/buttons' as *;
+@use '../../styles/cards' as *;
+@use '../../styles/global' as *;
 
 .one-per-row {
   display: flex;
   flex-direction: column;
-}
-
-button[disabled].mat-mdc-mini-fab {
-  opacity: 0.5;
-  /*filter: grayscale(100%);*/
-  cursor: not-allowed;
 }

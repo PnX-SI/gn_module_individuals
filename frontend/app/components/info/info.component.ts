@@ -1,7 +1,5 @@
 import { ViewEncapsulation, Component, OnInit, AfterViewInit, Input, TemplateRef } from '@angular/core';
-import { Location } from '@angular/common';
 
-import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
 @Component({
@@ -19,19 +17,13 @@ export class InfoComponent implements OnInit, AfterViewInit {
   public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(
-    private _config: ConfigService,
     private _moduleService: ModuleService,
-    private _location: Location,
   ) {}
 
   ngOnInit() : void {
   }
 
   ngAfterViewInit() : void {
-  }
-
-  goBack() : void {
-    this._location.back();
   }
 }
 

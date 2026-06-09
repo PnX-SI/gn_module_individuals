@@ -1,6 +1,5 @@
 <!-- <div class="card bg-light"> -->
-<div class="card">
-  <!-- <h2 class="card-header bg-body-secondary d-flex align-items-center justify-content-between"> -->
+<div class="card card-custom">
   <h2 class="card-header card-header-custom">  
     <div>
       {{ infoTitle }}
@@ -8,18 +7,8 @@
     <div>
       <button
         mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Back' | translate"
-        class="mr-1 bg-dark text-white border-0"
-        type="button"
-        [disabled]="false"
-        (click)="goBack()"
-      >
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <button
-        mat-mini-fab
         [matTooltip]="'Individuals.Actions.Edit' | translate"
-        class="mr-1 bg-success text-white border-0"
+        class="custom-mini-fab mr-1 bg-success text-white border-0"
         type="button"
         [disabled]="false"
         [routerLink]="['/' + moduleName + '/' + objectName + '/form/',objectId]"

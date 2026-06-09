@@ -3,6 +3,10 @@
   flex-wrap: wrap;
 }
 
+.action-buttons {
+  margin-bottom: 10px;
+}
+
 .ngx-datatable .datatable-header-cell {
   line-height: 40px;
 }
@@ -19,7 +23,7 @@
   transition: none;
 }
 
-// Highlight expanded row header in ngx-datatable
+// Highlight expanded row header in ngx-datatable blue -> grey
 .ngx-datatable.material.single-selection .datatable-body-row.active, 
 .ngx-datatable.material.single-selection .datatable-body-row.active .datatable-row-group,
 .ngx-datatable.material.single-selection .datatable-body-row.active:hover,
@@ -30,3 +34,9 @@
 .ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover .datatable-row-group {
   background-color: #ccc;
 } 
+
+// button box-shadow -> cancel this box shadow that appear on focus
+.btn:focus {
+  outline: none;
+  box-shadow: none;
+}

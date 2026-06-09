@@ -1,18 +1,18 @@
-<div class="card border-primary bg-light">
-  <h2 class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+<div class="card card-custom">
+  <h2 class="card-header card-header-custom">
     <div>
       {{ formTitle}}
     </div>
     <div>
       <button
         mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Back' | translate"
-        class="mr-1 bg-dark text-white border-0"
+        [matTooltip]="'Individuals.Actions.Cancel' | translate"
+        class="mr-1 bg-secondary text-white border-0"
         type="button"
         [disabled]="false"
         (click)="goBack()"
       >
-        <mat-icon>arrow_back</mat-icon>
+        <mat-icon>close</mat-icon>
       </button>
       <button
         mat-mini-fab

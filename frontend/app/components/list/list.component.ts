@@ -10,6 +10,7 @@ import { Observable, combineLatest, of } from 'rxjs';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
 
 import { ConfigService } from '@geonature/services/config.service';
+import { ModuleService } from '@geonature/services/module.service';
 
 import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
 import { Column, PaginatedItemCollection } from '../../models/common.models';
@@ -33,7 +34,8 @@ export class ListComponent implements OnInit, AfterViewInit {
   @Input() sorts: Array<Object> = [];
   @Input() idName: string = "";
   @Input() summaryTemplate!: TemplateRef<any>;
-
+  @Input() objectName: string = "";
+  
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
   public nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
@@ -41,15 +43,17 @@ export class ListComponent implements OnInit, AfterViewInit {
   public columnMaxWidth: number = DATA_TABLE_CONFIG.COLUMN_MAX_WIDTH;
   public displayedColumns!: Column<undefined>[];
   public availableColumns!: Column<undefined>[];
+  public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(
     public config: ConfigService,
     private _translate: TranslateService,
-    private activatedRoute: ActivatedRoute,
+    private _activatedRoute: ActivatedRoute,
+    private _moduleService: ModuleService,
   ) {}
 
   ngOnInit() : void {
-    this.activatedRoute.data.subscribe(({data}) => {
+    this._activatedRoute.data.subscribe(({data}) => {
       this.dataTable$ = of(data);
     });
 
