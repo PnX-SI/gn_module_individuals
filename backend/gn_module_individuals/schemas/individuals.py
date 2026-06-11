@@ -70,20 +70,6 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
             )
         return value
 
-    @validates("additional_data")
-    def validate_additional_data(self, value, **kwargs):
-        if value is None:
-            return value
-        if not isinstance(value, dict):
-            raise ValidationError("additional_data doit être un objet JSON (dict).")
-        invalid_keys = set(value.keys()) - set(ADDITIONAL_DATA_ALLOWED_KEYS)
-        if invalid_keys:
-            raise ValidationError(
-                f"Clés non autorisées dans additional_data : {sorted(invalid_keys)}. "
-                f"Clés acceptées : {ADDITIONAL_DATA_ALLOWED_KEYS}."
-            )
-        return value
-
     @validates_schema
     def validate_dates(self, data, **kwargs):
         """removal_date doit être postérieure à install_date si les deux sont présentes."""

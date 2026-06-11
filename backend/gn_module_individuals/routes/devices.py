@@ -129,7 +129,7 @@ def create_device(scope):
     db.session.add(device)
     db.session.commit()
 
-    return schema.dump(device), 200
+    return schema.dump(device), 201
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
@@ -160,7 +160,7 @@ def update_device(id_tracking_device, scope):
 
     db.session.commit()
 
-    return schema.dump(device), 201
+    return schema.dump(device), 200
 
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])

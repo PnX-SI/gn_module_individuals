@@ -135,11 +135,6 @@ def upgrade():
             nullable=True,
         ),
         sa.Column(
-            "additional_data",
-            sa.JSON(),
-            nullable=True,
-        ),
-        sa.Column(
             "id_digitiser",
             sa.Integer(),
             sa.ForeignKey("utilisateurs.t_roles.id_role"),

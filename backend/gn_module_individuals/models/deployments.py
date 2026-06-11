@@ -77,12 +77,6 @@ class IndividualDeployments(DB.Model):
         nullable=True,
     )
 
-    additional_data = DB.Column(
-        "additional_data",
-        DB.JSON,
-        nullable=True,
-    )
-
     id_digitiser = DB.Column(
         "id_digitiser",
         DB.Integer,

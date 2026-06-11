@@ -8,58 +8,58 @@ from geonature.utils.env import db
 from pypnnomenclature.models import TNomenclatures
 
 from gn_module_individuals.schemas import (
-    TrackingDevicesSchema,
-    TrackingDeviceDetailSchema,
+    TrackingDevicesBaseSchema,
+    TrackingDevicesDetailSchema,
     IndividualDeploymentsSchema,
 )
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestTrackingDevicesSchema:
+class TestTrackingDevicesBaseSchema:
 
     # --- validators : branches None  --------------------------
 
     def test_validate_nomenclature_device_type_accepts_none(self, app):
-        assert TrackingDevicesSchema().validate_nomenclature_device_type(None) is None
+        assert TrackingDevicesBaseSchema().validate_nomenclature_device_type(None) is None
 
     def test_validate_nomenclature_device_type_accepts_valid_id(self, app):
         valid_id = get_id_nomenclature("TYPE_DISPO_SUIVI", "1")
-        assert TrackingDevicesSchema().validate_nomenclature_device_type(valid_id) == valid_id
+        assert TrackingDevicesBaseSchema().validate_nomenclature_device_type(valid_id) == valid_id
 
     def test_validate_referer_accepts_none(self, app):
-        assert TrackingDevicesSchema().validate_referer(None) is None
+        assert TrackingDevicesBaseSchema().validate_referer(None) is None
 
     def test_validate_referer_accepts_valid_id(self, app, users):
         user_id = users["admin_user"].id_role
-        assert TrackingDevicesSchema().validate_referer(user_id) == user_id
+        assert TrackingDevicesBaseSchema().validate_referer(user_id) == user_id
 
     def test_get_nomenclature_name_returns_label(self, app, devices):
-        result = TrackingDevicesSchema().get_nomenclature_name(devices[0])
+        result = TrackingDevicesBaseSchema().get_nomenclature_name(devices[0])
         assert result is not None
 
     def test_get_digitiser_returns_name(self, app, devices):
-        result = TrackingDevicesSchema().get_digitiser(devices[0])
+        result = TrackingDevicesBaseSchema().get_digitiser_name(devices[0])
         assert result is not None
 
     def test_get_referer_returns_name(self, app, devices):
-        result = TrackingDevicesSchema().get_referer(devices[0])
+        result = TrackingDevicesBaseSchema().get_referer_name(devices[0])
         assert result is not None
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestTrackingDeviceDetailSchema:
+class TestTrackingDevicesDetailSchema:
 
     def test_get_nomenclature_name_returns_label(self, app, devices):
-        assert TrackingDeviceDetailSchema().get_nomenclature_name(devices[0]) is not None
+        assert TrackingDevicesDetailSchema().get_nomenclature_name(devices[0]) is not None
 
     def test_get_digitiser_returns_name(self, app, devices):
-        assert TrackingDeviceDetailSchema().get_digitiser(devices[0]) is not None
+        assert TrackingDevicesDetailSchema().get_digitiser_name(devices[0]) is not None
 
     def test_get_referer_returns_name(self, app, devices):
-        assert TrackingDeviceDetailSchema().get_referer(devices[0]) is not None
+        assert TrackingDevicesDetailSchema().get_referer_name(devices[0]) is not None
 
     def test_get_deployments_returns_list_with_individual_name(self, app, device_with_deployment):
-        result = TrackingDeviceDetailSchema().get_deployments(device_with_deployment)
+        result = TrackingDevicesDetailSchema().get_deployments(device_with_deployment)
         assert isinstance(result, list)
         assert len(result) > 0
         assert result[0]["individual_name"] is not None
@@ -117,23 +117,6 @@ class TestIndividualDeploymentsSchema:
     def test_validate_nomenclature_deployment_location_rejects_unknown_id(self, app):
         with pytest.raises(ValidationError, match="n'existe pas"):
             IndividualDeploymentsSchema().validate_nomenclature_deployment_location(-1)
-
-    # --- validate_additional_data  ---------------------------
-
-    def test_validate_additional_data_accepts_none(self, app):
-        assert IndividualDeploymentsSchema().validate_additional_data(None) is None
-
-    def test_validate_additional_data_rejects_non_dict(self, app):
-        with pytest.raises(ValidationError, match="dict"):
-            IndividualDeploymentsSchema().validate_additional_data("pas_un_dict")
-
-    def test_validate_additional_data_rejects_forbidden_key(self, app):
-        with pytest.raises(ValidationError, match="non autorisées"):
-            IndividualDeploymentsSchema().validate_additional_data({"cle_interdite": "x"})
-
-    def test_validate_additional_data_accepts_allowed_key(self, app):
-        data = {"removal_reason": "fin de suivi"}
-        assert IndividualDeploymentsSchema().validate_additional_data(data) == data
 
     # --- validate_dates -------------------------------------
 

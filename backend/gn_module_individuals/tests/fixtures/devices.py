@@ -1,3 +1,4 @@
+import datetime as dt
 import pytest
 from sqlalchemy import func, select
 
@@ -12,8 +13,8 @@ devices_example = [
         ("TYPE_DISPO_SUIVI", 1),
         "Ornitela",
         "Balise 56",
-        "2023-01-01",
-        "2023-12-31",
+        dt.date(2023, 1, 1),
+        dt.date(2023, 12, 31),
         "admin_user",
         "admin_user",
         "commentaire test",
@@ -22,8 +23,8 @@ devices_example = [
         ("TYPE_DISPO_SUIVI", 2),
         "Lotek",
         "Balise 57",
-        "2023-01-01",
-        "2023-12-31",
+        dt.date(2023, 1, 1),
+        dt.date(2023, 12, 31),
         "self_user",
         "admin_user",
         "commentaire test",
@@ -32,8 +33,8 @@ devices_example = [
         ("TYPE_DISPO_SUIVI", 3),
         "Vifly",
         "Balise 58",
-        "2023-01-01",
-        "2023-12-31",
+        dt.date(2023, 1, 1),
+        dt.date(2023, 12, 31),
         "self_user",
         "self_user",
         "commentaire test",
@@ -42,8 +43,8 @@ devices_example = [
         ("TYPE_DISPO_SUIVI", 4),
         "Ornitela",
         "Balise 59",
-        "2023-01-01",
-        "2023-12-31",
+        dt.date(2023, 1, 1),
+        dt.date(2023, 12, 31),
         "admin_user",
         "self_user",
         "commentaire test",
