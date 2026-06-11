@@ -46,8 +46,7 @@ def device(id_tracking_device, scope):
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
-    # SmartRelationshipsMixin have to get explicitely the relationship with only
-    return TrackingDevicesDetailSchema(only=["nomenclature_device_type", "referer"]).dump(device)
+    return TrackingDevicesDetailSchema(only=["nomenclature_device_type", "referer", "+cruved"]).dump(device)
 
 
 @blueprint.route("/devices", methods=["GET"])
@@ -55,7 +54,7 @@ def device(id_tracking_device, scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def list_devices(scope):
-
+    # Scope not used 
     device_type = request.args.get("type", type=int)
     provider_name = request.args.get("providerName", type=str)
     provider_id = request.args.get("providerDeviceId", type=str)
@@ -68,7 +67,7 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
-    schema = TrackingDevicesListSchema(many=True)
+    schema = TrackingDevicesListSchema(many=True, only=["+cruved"])
 
     sort_col = getattr(TrackingDevices, prop, None)
 
@@ -110,7 +109,7 @@ def list_devices(scope):
 
 @blueprint.route("/devices", methods=["POST"])
 @login_required
-@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
 @json_resp
 def create_device(scope):
     data = request.get_json()
@@ -134,7 +133,7 @@ def create_device(scope):
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
 @login_required
-@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
 @json_resp
 def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
@@ -165,7 +164,7 @@ def update_device(id_tracking_device, scope):
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])
 @login_required
-@permissions.check_cruved_scope("D", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope("D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
 def delete_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:

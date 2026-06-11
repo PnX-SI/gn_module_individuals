@@ -66,37 +66,59 @@ def ensure_individuals_module(app, users):
     }
     object_all = db.session.scalar(select(PermObject).filter_by(code_object="ALL"))
 
-    target_permissions = {
-        "admin_user": {"actions": "CRUDV", "scope": None},
-        "self_user": {"actions": "RU", "scope": 1},
+    # Créer les objets métier du module s'ils n'existent pas encore
+    with db.session.begin_nested():
+        for code, description in [
+            ("INDIVIDUALS_INDIVIDUALS", "Gestion des individus"),
+            ("INDIVIDUALS_SAMPLES", "Gestion des échantillons dans Individus"),
+        ]:
+            if db.session.scalar(select(PermObject).filter_by(code_object=code)) is None:
+                db.session.add(PermObject(code_object=code, description_object=description))
+
+    object_individuals = db.session.scalar(
+        select(PermObject).filter_by(code_object="INDIVIDUALS_INDIVIDUALS")
+    )
+
+    # Permissions sur ALL (lecture globale du module)
+    all_permissions = {
+        "admin_user": {"actions": "RV", "scope": None},
+        "self_user":  {"actions": "R",  "scope": 1},
+    }
+    # Permissions sur INDIVIDUALS_INDIVIDUALS (C/U/D discriminés)
+    individuals_permissions = {
+        "admin_user": {"actions": "CUD", "scope": None},
+        "self_user":  {"actions": "U",   "scope": 1},
     }
 
-    with db.session.begin_nested():
-        for username, config in target_permissions.items():
-            user = users.get(username)
-            if user is None:
-                continue
-            for action_code in config["actions"]:
-                action = actions.get(action_code)
-                if action is None or object_all is None:
+    def _add_permissions(target_map, perm_object):
+        with db.session.begin_nested():
+            for username, config in target_map.items():
+                user = users.get(username)
+                if user is None or perm_object is None:
                     continue
-                exists = db.session.scalar(
-                    select(Permission).where(
-                        Permission.id_role == user.id_role,
-                        Permission.id_module == module.id_module,
-                        Permission.id_action == action.id_action,
-                        Permission.id_object == object_all.id_object,
+                for action_code in config["actions"]:
+                    action = actions.get(action_code)
+                    if action is None:
+                        continue
+                    exists = db.session.scalar(
+                        select(Permission).where(
+                            Permission.id_role == user.id_role,
+                            Permission.id_module == module.id_module,
+                            Permission.id_action == action.id_action,
+                            Permission.id_object == perm_object.id_object,
+                        )
                     )
-                )
-                if exists is None:
-                    permission = Permission(
-                        id_role=user.id_role,
-                        id_module=module.id_module,
-                        id_action=action.id_action,
-                        id_object=object_all.id_object,
-                        scope_value=config["scope"],
-                    )
-                    db.session.add(permission)
+                    if exists is None:
+                        db.session.add(Permission(
+                            id_role=user.id_role,
+                            id_module=module.id_module,
+                            id_action=action.id_action,
+                            id_object=perm_object.id_object,
+                            scope_value=config["scope"],
+                        ))
+
+    _add_permissions(all_permissions, object_all)
+    _add_permissions(individuals_permissions, object_individuals)
 
     return module
 
