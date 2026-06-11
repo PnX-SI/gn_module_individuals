@@ -5,7 +5,7 @@ import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { Device, CreateDeviceDto, UpdateDeviceDto } from '../models/devices.models';
-import { PaginatedItemCollection, APIParamsWithPagination } from '../models/common.models';
+import { PaginatedItemCollection, APIParamsPagination } from '../models/common.models';
 import { DATA_TABLE_CONFIG, DEVICES_DEFAULT_SORT } from '..//utils/constants.util';
 
 @Injectable()
@@ -20,17 +20,15 @@ export class DevicesService {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
   }
 
-  getDevices(params: APIParamsWithPagination = {}): Observable<PaginatedItemCollection<Device>> {
+  getDevices(params: APIParamsPagination = {page:1, per_page:DATA_TABLE_CONFIG.PER_PAGE_OPTION}): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
     console.log("Parameters sent to API",params)
-    params.page ??= 1
-    params.per_page ??= DATA_TABLE_CONFIG.PER_PAGE_OPTION  
     params.prop ??= DEVICES_DEFAULT_SORT.prop
     params.dir ??= DEVICES_DEFAULT_SORT.dir
 
 
     Object.keys(params).forEach(key => {
-      const value = params[key as keyof APIParamsWithPagination];
+      const value = params[key as keyof APIParamsPagination];
       if (value != null) { 
         httpParams = httpParams.set(key, String(value));
       }

@@ -1,8 +1,8 @@
 import { ViewEncapsulation, Component, OnInit, AfterViewInit, Input, 
   TemplateRef, Output, EventEmitter } from '@angular/core';
-import { Location } from '@angular/common';
 
 import { ConfigService } from '@geonature/services/config.service';
+import { ModuleService } from '@geonature/services/module.service';
 
 @Component({
   selector: 'gn-individuals-form',
@@ -17,20 +17,18 @@ export class FormComponent implements OnInit, AfterViewInit {
   @Input() formAction: string = "";
   @Input() canSave: boolean = false;
   @Input() dataTable: any;
+  @Input() objectName: string = "";
+  public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(
     public config: ConfigService,
-    private _location: Location,
+    private _moduleService: ModuleService
   ) {}
 
   ngOnInit() : void {
   }
 
   ngAfterViewInit() : void {
-  }
-
-  goBack() : void {
-    this._location.back();
   }
 }
 

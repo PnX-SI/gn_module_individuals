@@ -10,7 +10,7 @@
         class="mr-1 bg-secondary text-white border-0"
         type="button"
         [disabled]="false"
-        (click)="goBack()"
+        [routerLink]="['/' + moduleName + '/' + objectName ]"
       >
         <mat-icon>close</mat-icon>
       </button>

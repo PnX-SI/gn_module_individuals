@@ -9,15 +9,13 @@ export interface Sort {
   dir: string;
 }
 
-export interface SimplePagination {
-  page: number;
-  limit: number; // Alias for per_page, to be used in the frontend for consistency with other modules
+// Partial : Sort attributes not mandatory
+export interface APIParamsPagination extends Partial<Sort> {
+  page: number,
+  per_page: number,
 }
 
-export interface SimplePaginationWithSort extends SimplePagination, Sort {
-}
-
-export interface PaginatedItemCollection<T> extends SimplePagination {
+export interface PaginatedItemCollection<T> extends APIParamsPagination {
   items: T[];
   total: number;
   pages: number;
@@ -27,12 +25,23 @@ export interface PaginatedItemCollection<T> extends SimplePagination {
   has_prev: boolean;
 }
 
-export interface APIParamsWithPagination  {
-  page?: number,
-  per_page?: number,
-  prop?: string,
-  dir?: string
-}
+// export interface SimplePagination {
+//   page: number;
+//   per_page: number; // Alias for per_page, to be used in the frontend for consistency with other modules
+// }
+
+// export interface SimplePaginationWithSort extends SimplePagination, Sort {
+// }
+
+// export interface PaginatedItemCollection<T> extends SimplePagination {
+//   items: T[];
+//   total: number;
+//   pages: number;
+//   prev_num: number | null;
+//   next_num: number | null;
+//   has_next: boolean;
+//   has_prev: boolean;
+// }
 
 // export interface StationFeature {
 //   id?: number;

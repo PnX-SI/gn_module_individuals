@@ -4,7 +4,7 @@ export const CONTENT_CONFIG = {
 
 export const DATA_TABLE_CONFIG = {
     "TABLE_ROW_HEIGHT": 40, // Think to change the list.component.css .ngx-datatable .datatable-header-cell line-height if you change this value
-    "PER_PAGE_OPTION": 5,
+    "PER_PAGE_OPTION": 10,
     "ACTION_COLUMNS_WIDTH": 10,
     "COLUMN_MAX_WIDTH": 50,
 }
@@ -27,4 +27,4 @@ export const DEVICE_FORM_CONSTRAINTS = {
     }
 }
 
-export const DEVICES_DEFAULT_SORT = { prop: "meta_create_date", dir: "desc" }
+export const DEVICES_DEFAULT_SORT = { prop: "meta_create_date", dir: "asc" }

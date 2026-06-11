@@ -29,7 +29,7 @@
                 "Edit" : "Modification du dispositif de suivi n°{{ id }}"
             },
             "Messages": {
-                "Added" : "Le dispositif de suivi n°{{ id }} a été créé.",
+                "Added" : "Le dispositif de suivi a été créé.",
                 "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
                 "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé."
             },

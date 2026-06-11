@@ -2,9 +2,10 @@ import { Injectable } from '@angular/core';
 import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 
+import  { PaginatedItemCollection, APIParamsPagination } from '../models/common.models';
 import { DevicesService } from '../services/devices.service';
 import { Device } from '../models/devices.models';
-import  { PaginatedItemCollection } from '../models/common.models';
+import { calcContentHeight, calcRowNumber} from '../utils/functions.utils';
 
 @Injectable({ providedIn: 'root' })
 export class DevicesResolver implements Resolve<PaginatedItemCollection<Device>> {
@@ -13,7 +14,14 @@ export class DevicesResolver implements Resolve<PaginatedItemCollection<Device>>
   ) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<PaginatedItemCollection<Device>> {
-    return this._service.getDevices();
+    const contentHeight = calcContentHeight();
+    const nbRowsPerPage = calcRowNumber(contentHeight);
+    const params = {
+      page: 1,
+      per_page: nbRowsPerPage
+    }
+    
+    return this._service.getDevices(params);
   }
 }
 

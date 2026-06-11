@@ -91,6 +91,7 @@
   [formTitle]="'Individuals.Devices.Titles.Add' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
+  [objectName]="'devices'"
   [canSave]="form.valid"
   (save)="onSave()"
 >
@@ -102,6 +103,7 @@
     [formTitle]="'Individuals.Devices.Titles.Edit' | translate:{id:dataTable.id_tracking_device}"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
+    [objectName]="'devices'"
     [dataTable]="dataTable"
     [canSave]="form.valid && form.dirty"
     (save)="onSave()"

@@ -6,7 +6,7 @@ import { Observable, of } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 
 import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
-import { Sort, PaginatedItemCollection, SimplePaginationWithSort } from '../../models/common.models';
+import { Sort, PaginatedItemCollection, APIParamsPagination } from '../../models/common.models';
 
 import { DevicesService } from '../../services/devices.service';  
 import { DEVICES_DEFAULT_SORT } from '../../utils/constants.util';
@@ -24,41 +24,40 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public idName: string = "id_tracking_device";
 
-  private _limit: number = this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
+  private _per_page: number = this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
 
   constructor(
     public config: ConfigService,
     private _devicesService: DevicesService,
-    private activatedRoute: ActivatedRoute,
+    private _activatedRoute: ActivatedRoute,
   ) {}
 
   ngOnInit() : void {
     // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
-    this.activatedRoute.data.subscribe(({data}) => {
+    this._activatedRoute.data.subscribe(({data}) => {
        this.dataTable$ = of(data);
     });
 
     this.displayedColumnsParams = this.config.INDIVIDUALS.DEVICES.DEFAULT_DISPLAYED_COLUMNS;
   }
 
-  ngAfterViewInit() : void {
-  }
+  ngAfterViewInit() : void {}
 
   onPage($event: any) : void {
-    let params: SimplePaginationWithSort = {
+    let params: APIParamsPagination = {
         page: Number($event.offset ?? 0) + 1,
-        limit: Number($event.limit ?? this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
+        per_page: Number($event.limit ?? this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
         prop: this.sorts[0].prop,
         dir: this.sorts[0].dir,
     };
-    this._limit = params.limit;
+    this._per_page = params.per_page;
     this.dataTable$ = this._devicesService.getDevices(params);
   }
 
   onSort($event: any) : void {
-    let params: SimplePaginationWithSort = {
+    let params: APIParamsPagination = {
         page: Number($event.offset ?? 0) + 1,
-        limit: this._limit,
+        per_page: this._per_page,
         prop: $event.sorts[0].prop,
         dir: $event.sorts[0].dir,
     };
@@ -68,14 +67,13 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   }
 
   onNbRowsReceived(nbRowsPerPage: number) {
-    let params: SimplePaginationWithSort = {
+    let params: APIParamsPagination = {
       page: 1,
-      limit: nbRowsPerPage,
+      per_page: nbRowsPerPage,
       prop: this.sorts[0].prop,
       dir: this.sorts[0].dir,
     }; 
-    this._limit = nbRowsPerPage;
-    console.log("onNbRowsReceived:",params)
+    this._per_page = nbRowsPerPage;
     this.dataTable$ = this._devicesService.getDevices(params);
   } 
 }
