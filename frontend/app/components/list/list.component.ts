@@ -31,7 +31,7 @@ export class ListComponent implements OnInit, AfterViewInit {
   @Output() rows: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<any> = new EventEmitter();
   @Input() availableColumnsParams!: Record<keyof any, true>;
-  @Input() displayedColumnsParams!: Array<String>;
+  @Input() displayedColumnsParams: string[] = [];
   @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<PaginatedItemCollection<unknown>>();
   @Input() sorts: Array<Object> = [];
   @Input() idName: string = "";

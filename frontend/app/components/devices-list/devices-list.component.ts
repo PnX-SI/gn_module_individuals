@@ -19,15 +19,14 @@ import { DEVICES_DEFAULT_SORT } from '../../utils/constants.util';
 })
 export class DevicesListComponent implements OnInit, AfterViewInit {
   public availableColumnsParams: Record<keyof Device, true> = DEVICE_COLUMNS;
-  public displayedColumnsParams: Array<String> = [];
+  public displayedColumnsParams: string[] = [];
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<PaginatedItemCollection<Device>>();
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public idName: string = "id_tracking_device";
-
-  private _per_page: number = this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
+  private _per_page!: number;
 
   constructor(
-    public config: ConfigService,
+    private _config: ConfigService,
     private _devicesService: DevicesService,
     private _activatedRoute: ActivatedRoute,
   ) {}
@@ -38,7 +37,8 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
        this.dataTable$ = of(data);
     });
 
-    this.displayedColumnsParams = this.config.INDIVIDUALS.DEVICES.DEFAULT_DISPLAYED_COLUMNS;
+    this.displayedColumnsParams = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_DISPLAYED_COLUMNS?? [];
+    this._per_page = this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
   }
 
   ngAfterViewInit() : void {}
@@ -46,7 +46,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   onPage($event: any) : void {
     let params: APIParamsPagination = {
         page: Number($event.offset ?? 0) + 1,
-        per_page: Number($event.limit ?? this.config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
+        per_page: Number($event.limit ?? this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
         prop: this.sorts[0].prop,
         dir: this.sorts[0].dir,
     };
