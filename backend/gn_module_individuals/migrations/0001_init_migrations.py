@@ -59,6 +59,22 @@ def upgrade():
         JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
     """)
 
+    op.execute(f"""
+        INSERT INTO gn_permissions.t_permissions (id_role, id_action, id_module, id_object, scope_value)
+        SELECT
+            r.id_role,
+            a.id_action,
+            m.id_module,
+            o.id_object,
+            NULL
+        FROM (VALUES ('C'), ('U'), ('D')) AS v (action_code)
+        JOIN utilisateurs.t_roles r      ON r.nom_role    = 'Grp_admin'
+        JOIN gn_commons.t_modules m      ON m.module_code = '{MODULE_CODE}'
+        JOIN gn_permissions.t_objects o  ON o.code_object = 'INDIVIDUALS_INDIVIDUALS'
+        JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
+        ON CONFLICT DO NOTHING
+    """)
+
 
 def downgrade():
     conn = op.get_bind()
@@ -74,6 +90,16 @@ def downgrade():
         sa.text("DELETE FROM gn_permissions.t_permissions_available WHERE id_module = :module_id"),
         {"module_id": module_id},
     )
+
+    op.execute(sa.text("""
+        DELETE FROM gn_permissions.t_permissions p
+        USING utilisateurs.t_roles r,
+              gn_permissions.t_objects o
+        WHERE p.id_role   = r.id_role
+          AND p.id_object = o.id_object
+          AND r.nom_role    = 'Grp_admin'
+          AND o.code_object = 'INDIVIDUALS_INDIVIDUALS'
+    """))
 
     op.execute(sa.text("""
         DELETE FROM gn_permissions.t_objects
