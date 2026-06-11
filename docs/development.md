@@ -12,12 +12,22 @@
     - [Retirer des fichiers du commit](#retirer-des-fichiers-du-commit)
     - [Cloner une branche spécifique](#cloner-une-branche-spécifique)
     - [Renommer une branche](#renommer-une-branche)
-    - ["Merge" sur la branche de confiance](#merge-sur-la-branche-de-confiance)
+    - ["Merge" d'une branche fonctionelle sur la branche de confiance](#merge-dune-branche-fonctionelle-sur-la-branche-de-confiance)
+      - [Mise à jour de la branche `feat/dev` en local](#mise-à-jour-de-la-branche-featdev-en-local)
+      - [Rebaser la branche avec `develop` du remote](#rebaser-la-branche-avec-develop-du-remote)
+      - [Résolution des conflits et `push`](#résolution-des-conflits-et-push)
+      - [Création d'une PR sur github](#création-dune-pr-sur-github)
+      - [Mise à jour des références locales](#mise-à-jour-des-références-locales)
+      - [Les autres développeurs](#les-autres-développeurs)
+    - [Bonnes pratiques de dev](#bonnes-pratiques-de-dev)
+      - [Avant de reprendre une session de code (matin)](#avant-de-reprendre-une-session-de-code-matin)
+      - [A la fin d'une session de code (soir)](#a-la-fin-dune-session-de-code-soir)
   - [Backend](#backend)
     - [Accès aux variables de configuration du module](#accès-aux-variables-de-configuration-du-module)
     - [Logs](#logs)
     - [Alembic](#alembic)
       - [Etat des migrations](#etat-des-migrations)
+      - [Naviguer entre les migrations](#naviguer-entre-les-migrations)
       - [Générer un nouveau fichier de version](#générer-un-nouveau-fichier-de-version)
       - [Soumettre ou retirer une révision](#soumettre-ou-retirer-une-révision)
     - [SQLAlchemy](#sqlalchemy)
@@ -30,6 +40,7 @@
         - [Utilisation de `Method()` dans le schema](#utilisation-de-method-dans-le-schema)
         - [Validation d'une donnée dans le schéma](#validation-dune-donnée-dans-le-schéma)
         - [Mixin or not ?](#mixin-or-not-)
+    - [Tests](#tests)
   - [Frontend](#frontend)
     - [Utilisation des variables de configuration du module](#utilisation-des-variables-de-configuration-du-module)
     - [Mécanisme de traduction](#mécanisme-de-traduction)
@@ -269,6 +280,15 @@ geonature db status
 
 # Etat d'une branche de la BDD
 geonature db status <branch_name>
+```
+
+#### Naviguer entre les migrations
+```shell
+# Downgrade de 2 migrations
+geonature db downgrade <branch_name>@-2
+
+# Upgrade jusqu'à la tête de branche
+geonature db upgrade <branch_name>@head
 ```
 
 #### Générer un nouveau fichier de version
