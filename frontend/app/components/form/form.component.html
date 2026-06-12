@@ -1,0 +1,38 @@
+<div class="card card-custom">
+  <h2 class="card-header card-header-custom">
+    <div>
+      {{ formTitle}}
+    </div>
+    <div>
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Cancel' | translate"
+        class="mr-1 bg-secondary text-white border-0"
+        type="button"
+        [disabled]="false"
+        [routerLink]="['/' + moduleName + '/' + objectName ]"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Save' | translate"
+        class="mr-1 bg-success text-white border-0"
+        type="button"
+        [disabled]="!canSave"
+        (click)="save.emit()"
+      >
+        <mat-icon>save</mat-icon>
+      </button>
+    </div>
+  </h2>
+  <div
+    class="card-body"
+    id="card-station"
+  >
+    <ng-container
+      *ngTemplateOutlet="formTemplate; context: { dataTable: dataTable }"
+    >
+    </ng-container>
+  </div>
+</div>

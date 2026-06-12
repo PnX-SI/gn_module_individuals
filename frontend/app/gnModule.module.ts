@@ -16,11 +16,14 @@ import { I18nService } from '@geonature/shared/translate/i18n-service';
 
 import { routes } from './module.routes';
 import { MainComponent } from './components/main/main.component';
+import { DevicesService } from './services/devices.service';
+import { NomenclaturesService } from './services/nomenclature.service';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
-import { DevicesService } from './services/devices.service';
-import { DeviceResolver, DevicesResolver } from './resolvers/devices.resolver';
+import { FormComponent } from './components/form/form.component';
+import { DevicesFormComponent } from './components/devices-form/devices-form.component';
 import { InfoComponent } from './components/info/info.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
@@ -35,6 +38,8 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     DevicesListComponent,
     InfoComponent,
     DevicesInfoComponent,
+    FormComponent,
+    DevicesFormComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
@@ -58,7 +63,8 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
   providers: [
     DevicesService,
     DevicesResolver,
-    DeviceResolver
+    DeviceResolver,
+    NomenclaturesService,
   ],
 })
 export class GeonatureModule {

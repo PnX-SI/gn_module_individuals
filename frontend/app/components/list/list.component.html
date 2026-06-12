@@ -3,6 +3,27 @@
     class="col-12 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
+    <div class="action-buttons">
+      <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
+        <button
+          mat-mini-fab
+          [matTooltip]="'Individuals.Actions.Add' | translate"
+          class="custom-mini-fab mr-1 bg-primary text-white border-0"
+          [disabled]="false"
+          [routerLink]="['/' + moduleName + '/' + objectName + '/form']"
+        >
+        <mat-icon>add</mat-icon>
+        </button>
+        <button
+          mat-mini-fab
+          [matTooltip]="'Individuals.Actions.Download' | translate"
+          class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+          [disabled]="true"
+        >
+        <mat-icon>download</mat-icon>
+      </button>
+      <!-- </ng-container> -->
+    </div>
     <ngx-datatable *ngIf="dataTable$ | async as dataTable"
         #dataTable
         class="material striped margin-top-xs table-size expandable"
@@ -19,7 +40,6 @@
         (page)="onPage($event)"
         [sorts]="sorts"
         (sort)="onSort($event)"
-        (select)="onRowSelect($event)"
         [selectionType]="'single'"
     >
       <ngx-datatable-row-detail
@@ -90,8 +110,8 @@
           <button
             class="btn btn-row fa fa-pencil-square-o"
             matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
-            [routerLink]="['edit', row[idName]]"
-            [disabled]="true"
+            [routerLink]="['form', row[idName]]"
+            [disabled]="false"
           ></button>
         </ng-template>
       </ngx-datatable-column>
@@ -135,7 +155,7 @@
           maxWidth="columnMaxWidth"
         >
           <span>
-            {{ row[col.prop] }}
+            {{ row[col.prop] || "-" }}
           </span>
         </ng-template>
       </ngx-datatable-column>

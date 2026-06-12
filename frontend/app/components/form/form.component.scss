@@ -1,0 +1,17 @@
+@use '../../styles/buttons' as *;
+@use '../../styles/cards' as *;
+@use '../../styles/global' as *;
+
+/* Space between label and input */
+.form-group > small:not(:first-of-type) {
+  margin-top: 0.5rem;
+}
+
+small , label {
+  display: inline-block;
+}
+
+/* Space between inputs */
+.form-group {
+  margin-bottom: 0.6rem;
+}

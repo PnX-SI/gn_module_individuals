@@ -1,4 +1,5 @@
 export interface Device {
+  // This model is only used to display data
   id_tracking_device: number
   id_nomenclature_device_type: number,
   provider_name: string,
@@ -12,6 +13,20 @@ export interface Device {
   digitiser_name: string,
   meta_create_date : string,
   meta_update_date : string,
+}
+
+// This model is only used to POST data to the API (dto = data transfer object)
+export interface CreateDeviceDto {
+  id_nomenclature_device_type: number,
+  provider_name: string,
+  provider_device_id: string,
+  id_referer: number,
+  comment: string, 
+}
+
+// This model is only used to PUT data to the API (dto = data transfer object)
+export interface UpdateDeviceDto extends CreateDeviceDto {
+  id_tracking_device: number,
 }
 
 export const DEVICE_COLUMNS: Record<keyof Device, true> = {

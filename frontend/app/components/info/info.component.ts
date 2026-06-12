@@ -1,15 +1,6 @@
 import { ViewEncapsulation, Component, OnInit, AfterViewInit, Input, TemplateRef } from '@angular/core';
-import { Location } from '@angular/common';
-import { TranslateService } from '@ngx-translate/core';
-import { ActivatedRoute } from '@angular/router';
 
-import { Observable, of } from 'rxjs';
-
-import { ConfigService } from '@geonature/services/config.service';
-
-import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
-
-import { DevicesService } from '../../services/devices.service';  
+import { ModuleService } from '@geonature/services/module.service';
 
 @Component({
   selector: 'gn-individuals-info',
@@ -21,20 +12,18 @@ export class InfoComponent implements OnInit, AfterViewInit {
   @Input() infoTemplate!: TemplateRef<any>;
   @Input() infoTitle: string = "";
   @Input() dataTable: any;
+  @Input() objectName: string = "";
+  @Input() objectId: number | null = null;
+  public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(
-    public config: ConfigService,
-    private _location: Location,
+    private _moduleService: ModuleService,
   ) {}
 
   ngOnInit() : void {
   }
 
   ngAfterViewInit() : void {
-  }
-
-  goBack() : void {
-    this._location.back();
   }
 }
 

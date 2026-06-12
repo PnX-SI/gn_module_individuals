@@ -1,8 +1,7 @@
-
 from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
 
-from flask import request, jsonify,g
+from flask import request, jsonify, g
 from werkzeug.exceptions import NotFound, BadRequest
 
 from geonature.core.gn_permissions import decorators as permissions
@@ -12,6 +11,7 @@ from utils_flask_sqla.response import json_resp
 
 
 from ..blueprint import blueprint
+
 
 ## ########################################################################
 ## ENTITY - GET
@@ -24,33 +24,27 @@ def list_individuals():
         "features": [
             {
                 "geometry": {
-                    "coordinates": [
-                        -1.363055012466776,
-                        -5.983571570298366
-                    ],
-                    "type": "Point"
+                    "coordinates": [-1.363055012466776, -5.983571570298366],
+                    "type": "Point",
                 },
                 "id": 0,
                 "properties": {
-                    "additional_data": {
-                        "collier": "vert/rouge",
-                        "taille_cm": 40.2
-                    },
+                    "additional_data": {"collier": "vert/rouge", "taille_cm": 40.2},
                     "cd_nom": 2962,
                     "id_individual": 4,
                     "id_nomenclature_sex": 165,
                     "name": "Crâne d'oeuf",
                     "nomenclature_sex": {},
-                    "taxref": {}
+                    "taxref": {},
                 },
-                "type": "Feature"
+                "type": "Feature",
             }
         ],
-        "type": "FeatureCollection"
+        "type": "FeatureCollection",
     }
 
     return {
-        "total": len(geojson["features"]),   # or real pagination values
+        "total": len(geojson["features"]),  # or real pagination values
         "page": 0,
-        "items": geojson
+        "items": geojson,
     }

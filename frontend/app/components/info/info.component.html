@@ -1,26 +1,17 @@
-<div class="card border-primary bg-light">
-  <h2 class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+<!-- <div class="card bg-light"> -->
+<div class="card card-custom">
+  <h2 class="card-header card-header-custom">  
     <div>
       {{ infoTitle }}
     </div>
     <div>
       <button
         mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Back' | translate"
-        class="mr-1 bg-dark text-white border-0"
+        [matTooltip]="'Individuals.Actions.Edit' | translate"
+        class="custom-mini-fab mr-1 bg-success text-white border-0"
         type="button"
         [disabled]="false"
-        (click)="goBack()"
-      >
-        <mat-icon>arrow_back</mat-icon>
-      </button>
-      <button
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Edit' | translate"
-        class="mr-1 bg-success text-white border-0"
-        type="button"
-        [disabled]="true"
-        [routerLink]=""
+        [routerLink]="['/' + moduleName + '/' + objectName + '/form/',objectId]"
       >
         <mat-icon>edit</mat-icon>
       </button>
@@ -37,7 +28,6 @@
   </h2>
   <div
     class="card-body"
-    id="card-station"
   >
     <ng-container
       *ngTemplateOutlet="infoTemplate; context: { dataTable: dataTable }"

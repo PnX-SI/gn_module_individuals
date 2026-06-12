@@ -6,43 +6,60 @@
             "Captures": "Captures",
             "TrackingDevices": "Dispositifs de suivi"
         },
-        "DevicesFields": {
-            "id_tracking_device" : "ID du dispositif",
-            "id_nomenclature_device_type" : "ID du type de dispositif",
-            "provider_name" : "Fournisseur",
-            "provider_device_id" : "ID chez le fournisseur",
-            "id_referer" : "ID du référent",
-            "comment" : "Commentaire",
-            "id_digitiser" : "ID digitaliseur",
-            "meta_create_date" : "Date de création",
-            "meta_update_date" : "Date de mise à jour",
-            "nomenclature_device_type_name" : "Type de dispositif",
-            "referer_name" : "Nom du référent",
-            "digitiser_name" : "Nom du digitaliseur",
-            "last_individual_equipped_name" : "Dernier individu équipé",
-            "deployments" : "Liste des déploiements associés"
+        "Devices": {
+            "Fields": {
+                "id_tracking_device" : "ID du dispositif",
+                "id_nomenclature_device_type" : "Type de dispositif",
+                "provider_name" : "Fournisseur",
+                "provider_device_id" : "ID chez le fournisseur",
+                "id_referer" : "Référent",
+                "comment" : "Commentaire",
+                "id_digitiser" : "Digitaliseur",
+                "meta_create_date" : "Date de création",
+                "meta_update_date" : "Date de mise à jour",
+                "nomenclature_device_type_name" : "Type de dispositif",
+                "referer_name" : "Référent",
+                "digitiser_name" : "Digitaliseur",
+                "last_individual_equipped_name" : "Dernier individu équipé",
+                "deployments" : "Liste des déploiements associés"
+            },
+            "Titles": {
+                "Info": "Dispositif de suivi n°{{ id }}",
+                "Add" : "Ajout d'un dispositif de suivi",
+                "Edit" : "Modification du dispositif de suivi n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "Le dispositif de suivi a été créé.",
+                "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
+                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé."
+            },
+            "Errors": {
+                "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
+                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}"
+            }
         },
-        "DeploymentsFields": {
-            "id_deployment" : "ID du déploiement",
-            "id_tracking_device" : "ID du dispositif de suivi",
-            "id_individual" : "ID de l'individu",
-            "install_date" : "Date de déploiement",
-            "removal_date" : "Date de retrait",
-            "comment" : "Commentaire",
-            "id_digitiser" : "ID digitaliseur",
-            "meta_create_date" : "Date de création",
-            "meta_update_date" : "Date de mise à jour",
-            "individual_name" : "Nom de l'individu",
-            "digitiser_name" : "Nom du digitaliseur"
-        },
-        "DevicesTexts": {
-            "InfoTitle" : "Dispositif de suivi n°"
+        "Deployments": {
+            "Fields": {
+                "id_deployment" : "ID du déploiement",
+                "id_tracking_device" : "ID du dispositif de suivi",
+                "id_individual" : "ID de l'individu",
+                "install_date" : "Date de déploiement",
+                "removal_date" : "Date de retrait",
+                "comment" : "Commentaire",
+                "id_digitiser" : "ID digitaliseur",
+                "meta_create_date" : "Date de création",
+                "meta_update_date" : "Date de mise à jour",
+                "individual_name" : "Nom de l'individu",
+                "digitiser_name" : "Nom du digitaliseur"
+            }
         },
         "Error": {
             "Required" : "Ce champs est requis.",
-            "MinLength" : "Vous devez choisir au moins une valeur."
-        },
-        "Export" : "",       
+            "MinLength" : "Vous devez choisir au moins une valeur.",
+            "PatternText1" : "Seulement des lettres, des chiffres, des espaces et les - ou _.",
+            "PatternText2" : "Seulement des lettres (sans accent), des chiffres et les - ou _.",
+            "PatternText3" : "Ne doit pas contenir de < ou >."
+        },      
         "DeletingPopup" : {
             "Warning" : "Attention",
             "WarningDelete" : "Vous êtes sur le point de supprimer : ",
@@ -54,9 +71,10 @@
             "ValidateEnter" : "Valider et saisir des ",
             "ValidateChain" : "Valider et enchainer les saisies",
             "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet"
+
         },
         "Actions" : {
-            "Add" : "Ajouter ",
+            "Add" : "Ajouter",
             "Validate" : "Valider",
             "Cancel" : "Annuler",
             "Back" : "Retour",
@@ -64,8 +82,7 @@
             "Summary" : "Afficher / Cacher le résumé",
             "Informations" : "Détail complet",
             "Edit" : "Modifier",
-            "Done" : "",
-            "Deleted" : ""
+            "Save" : "Enregistrer"
         }
     }
 }

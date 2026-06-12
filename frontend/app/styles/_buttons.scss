@@ -1,0 +1,10 @@
+button[disabled].mat-mdc-mini-fab {
+  opacity: 0.5;
+  /*filter: grayscale(100%);*/
+  cursor: not-allowed;
+}
+
+button.mdc-fab--mini {
+  width: 2.5rem;
+  height: 2.5rem;
+}
