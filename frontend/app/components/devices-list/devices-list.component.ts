@@ -9,7 +9,7 @@ import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
 import { Sort, PaginatedItemCollection, APIParamsPagination } from '../../models/common.models';
 
 import { DevicesService } from '../../services/devices.service';  
-import { DEVICES_DEFAULT_SORT } from '../../utils/constants.util';
+import { DEVICES_DEFAULT_SORT, DATA_TABLE_CONFIG } from '../../utils/constants.util';
 
 @Component({
   selector: 'gn-individuals-devices-list',
@@ -23,7 +23,7 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<PaginatedItemCollection<Device>>();
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public idName: string = "id_tracking_device";
-  private _per_page!: number;
+  private _per_page: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
 
   constructor(
     private _config: ConfigService,
@@ -38,7 +38,6 @@ export class DevicesListComponent implements OnInit, AfterViewInit {
     });
 
     this.displayedColumnsParams = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_DISPLAYED_COLUMNS?? [];
-    this._per_page = this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE;
   }
 
   ngAfterViewInit() : void {}
