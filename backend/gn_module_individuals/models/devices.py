@@ -1,17 +1,16 @@
 from geonature.utils.env import DB
 from flask import g
-from pypnnomenclature.models import TNomenclatures
+from sqlalchemy.dialects.postgresql import JSONB
 from geonature.core.gn_monitoring.models import TIndividuals
 from pypnusershub.db.models import User
-from sqlalchemy.dialects.postgresql import JSONB
+from pypnnomenclature.models import TNomenclatures
+from pypnnomenclature.utils import NomenclaturesMixin
 
-
-class TrackingDevices(DB.Model):
+class TrackingDevices(NomenclaturesMixin, DB.Model):
     __tablename__ = "bib_tracking_devices"
     __table_args__ = {"schema": "gn_individual"}
 
     id_tracking_device = DB.Column(
-        "id_tracking_device",
         DB.Integer,
         primary_key=True,
         autoincrement=True,
@@ -20,8 +19,8 @@ class TrackingDevices(DB.Model):
     id_nomenclature_device_type = DB.Column(
         "id_nomenclature_device_type",
         DB.Integer,
-        DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-        nullable=True,
+        # DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
+        DB.ForeignKey(TNomenclatures.id_nomenclature),
     )
 
     provider_name = DB.Column(
@@ -52,27 +51,24 @@ class TrackingDevices(DB.Model):
         "id_digitiser",
         DB.Integer,
         DB.ForeignKey("utilisateurs.t_roles.id_role"),
-        nullable=True,
     )
 
     meta_create_date = DB.Column(
         "meta_create_date",
         DB.DateTime,
-        nullable=True,
     )
 
     meta_update_date = DB.Column(
         "meta_update_date",
         DB.DateTime,
-        nullable=True,
     )
 
     # Relationships
     nomenclature_device_type = DB.relationship(
         TNomenclatures,
-        primaryjoin=(TNomenclatures.id_nomenclature == id_nomenclature_device_type),
+        # primaryjoin=(TNomenclatures.id_nomenclature == id_nomenclature_device_type),
         foreign_keys=[id_nomenclature_device_type],
-        lazy="select",
+        # lazy="select",
     )
 
     referer = DB.relationship(
