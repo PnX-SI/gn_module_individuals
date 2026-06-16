@@ -51,7 +51,7 @@
       *ngIf="'deployments' as field"
       class="col-12 padding-sm">
       <h3 class="text-muted"> {{ 'Individuals.Devices.Fields.' + field | translate }}</h3>
-        <p *ngIf="dataTable[field].length > 0">
+        <p *ngIf="dataTable[field]?.length > 0">
           <ngx-datatable
             class="material striped margin-top-xs table-size expandable"
             [columnMode]="'force'"
@@ -101,5 +101,7 @@
   [infoTitle]="'Individuals.Devices.Titles.Info' | translate:{id:dataTable.id_tracking_device}"
   [objectName]="'devices'"
   [objectId]="dataTable.id_tracking_device"
+  [canBedeleted]="canBeDeleted"
+  (delete)="onDelete()"
 >
 </gn-individuals-info>

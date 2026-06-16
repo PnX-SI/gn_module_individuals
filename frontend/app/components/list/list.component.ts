@@ -4,11 +4,11 @@ import { ViewEncapsulation, Component, OnInit, ViewChild,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
-
 import { Subject, Observable, combineLatest, of } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 import { DatatableComponent } from '@swimlane/ngx-datatable';
+import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
@@ -53,6 +53,7 @@ export class ListComponent implements OnInit, AfterViewInit {
     private _translate: TranslateService,
     private _activatedRoute: ActivatedRoute,
     private _moduleService: ModuleService,
+    private _ngbModal: NgbModal,
   ) {}
 
   ngOnInit() : void {
@@ -123,6 +124,16 @@ export class ListComponent implements OnInit, AfterViewInit {
     if (this.dataTable) {
       this.dataTable.rowDetail.toggleExpandRow(row);
     }
+  }
+
+  openDeleteModal(event, modal, iElement, row) {
+    // this.mapListService.urlQuery;
+    // this.mapListService.selectedRow = [];
+    // this.mapListService.selectedRow.push(row);
+    // event.stopPropagation();
+    // // prevent erreur link to the component
+    // iElement?.parentElement?.parentElement?.blur();
+    // this._ngbModal.open(modal);
   }
 }
 

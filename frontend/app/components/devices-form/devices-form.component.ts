@@ -93,7 +93,7 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   
   patchForm(device: any) : void { /// Modifier par : Device au lieu de any et faire le mapping si besoin
     this.form.patchValue(device);
-    console.log(device);
+    
     this.form.patchValue({
       id_nomenclature_device_type: device.nomenclature_device_type.id_nomenclature,
       id_referer: device.referer

@@ -27,4 +27,4 @@ export const DEVICE_FORM_CONSTRAINTS = {
     }
 }
 
-export const DEVICES_DEFAULT_SORT = { prop: "meta_create_date", dir: "asc" }
+export const DEVICES_DEFAULT_SORT = { prop: "id_tracking_device", dir: "desc" }

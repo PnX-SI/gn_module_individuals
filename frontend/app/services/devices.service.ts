@@ -51,10 +51,10 @@ export class DevicesService {
 
   createOrUpdateDevice(device: any, formAction: string, id: number | null = null, params: Record<string, string> = {}): Observable<Device> {
     params['format'] = 'json';
-
+    console.log(device)
     // Map form to Dto
     let payload: CreateDeviceDto | UpdateDeviceDto = {
-      id_nomenclature_device_type: device.id_nomenclature_device_type.id_nomenclature,
+      id_nomenclature_device_type: device.id_nomenclature_device_type,
       provider_name: device.provider_name,
       provider_device_id: device.provider_device_id,
       id_referer: device.id_referer.id_role,
@@ -73,5 +73,9 @@ export class DevicesService {
     else {
       return this._http.put<Device>(`${this._OBJECT_API}/${id}`,payload,{ params: params, headers: this._headers });
     }
+  }
+
+  deleteDevice(id: number | null = null): Observable<Device> {
+    return this._http.delete<Device>(`${this._OBJECT_API}/${id}`);
   }
 }
