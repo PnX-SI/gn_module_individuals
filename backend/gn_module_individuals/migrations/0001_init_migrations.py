@@ -18,6 +18,7 @@ depends_on = None
 MODULE_CODE = "INDIVIDUALS"
 SCHEMA_NAME = "gn_individual"
 
+
 def upgrade():
     conn = op.get_bind()
     op.execute(sa.text(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME}"))

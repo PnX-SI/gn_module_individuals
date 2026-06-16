@@ -30,11 +30,11 @@ from ..blueprint import blueprint
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def device(id_tracking_device, scope):
-    # Build nomenclatures fields list to serialize 
+    # Build nomenclatures fields list to serialize
     nomenclatures = list(TrackingDevices.__nomenclatures__)
     nomenclatures_fields = [n for n in nomenclatures]
 
-    schema = TrackingDevicesListSchema(only=["+cruved","referer"] + nomenclatures_fields)
+    schema = TrackingDevicesDetailSchema(only=["+cruved", "referer"] + nomenclatures_fields)
 
     query = (
         db.select(TrackingDevices)
@@ -60,7 +60,7 @@ def device(id_tracking_device, scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def list_devices(scope):
-    # Build nomenclatures fields list to serialize 
+    # Build nomenclatures fields list to serialize
     nomenclatures = list(TrackingDevices.__nomenclatures__)
     nomenclatures_fields = [n for n in nomenclatures]
 
@@ -77,7 +77,7 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
-    schema = TrackingDevicesListSchema(only=["+cruved","referer"] + nomenclatures_fields)
+    schema = TrackingDevicesListSchema(only=["+cruved", "referer"] + nomenclatures_fields)
 
     sort_col = getattr(TrackingDevices, prop, None)
 
@@ -119,10 +119,13 @@ def list_devices(scope):
 
 @blueprint.route("/devices", methods=["POST"])
 @login_required
-@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
 @json_resp
 def create_device(scope):
     data = request.get_json()
+    print(f"POST data: {data}")
 
     if not data:
         raise BadRequest("Corps de requête JSON manquant.")
@@ -143,7 +146,9 @@ def create_device(scope):
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
 @login_required
-@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
 @json_resp
 def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
@@ -174,7 +179,9 @@ def update_device(id_tracking_device, scope):
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])
 @login_required
-@permissions.check_cruved_scope("D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
 def delete_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:

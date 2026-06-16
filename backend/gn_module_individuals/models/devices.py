@@ -6,6 +6,7 @@ from pypnusershub.db.models import User
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.utils import NomenclaturesMixin
 
+
 class TrackingDevices(NomenclaturesMixin, DB.Model):
     __tablename__ = "bib_tracking_devices"
     __table_args__ = {"schema": "gn_individual"}
@@ -26,19 +27,16 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
     provider_name = DB.Column(
         "provider_name",
         DB.Text,
-        nullable=True,
     )
 
     provider_device_id = DB.Column(
         "provider_device_id",
         DB.Text,
-        nullable=True,
     )
 
     id_referer = DB.Column(
         "id_referer",
         DB.Integer,
-        nullable=True,
     )
 
     comment = DB.Column(
@@ -61,6 +59,7 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
     meta_update_date = DB.Column(
         "meta_update_date",
         DB.DateTime,
+        nullable=True,
     )
 
     # Relationships
