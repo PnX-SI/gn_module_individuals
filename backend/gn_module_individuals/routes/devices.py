@@ -30,6 +30,12 @@ from ..blueprint import blueprint
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def device(id_tracking_device, scope):
+    # Build nomenclatures fields list to serialize
+    nomenclatures = list(TrackingDevices.__nomenclatures__)
+    nomenclatures_fields = [n for n in nomenclatures]
+
+    schema = TrackingDevicesDetailSchema(only=["+cruved", "referer"] + nomenclatures_fields)
+
     query = (
         db.select(TrackingDevices)
         .options(
@@ -46,7 +52,7 @@ def device(id_tracking_device, scope):
     if device is None:
         raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
 
-    return TrackingDevicesDetailSchema(only=["nomenclature_device_type", "referer", "+cruved"]).dump(device)
+    return schema.dump(device)
 
 
 @blueprint.route("/devices", methods=["GET"])
@@ -54,7 +60,11 @@ def device(id_tracking_device, scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def list_devices(scope):
-    # Scope not used 
+    # Build nomenclatures fields list to serialize
+    nomenclatures = list(TrackingDevices.__nomenclatures__)
+    nomenclatures_fields = [n for n in nomenclatures]
+
+    # Scope not yet used -------------
     device_type = request.args.get("type", type=int)
     provider_name = request.args.get("providerName", type=str)
     provider_id = request.args.get("providerDeviceId", type=str)
@@ -67,7 +77,7 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
-    schema = TrackingDevicesListSchema(many=True, only=["+cruved"])
+    schema = TrackingDevicesListSchema(only=["+cruved", "referer"] + nomenclatures_fields)
 
     sort_col = getattr(TrackingDevices, prop, None)
 
@@ -92,7 +102,7 @@ def list_devices(scope):
     if paginated:
         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
         return {
-            "items": schema.dump(pagination.items),
+            "items": schema.dump(pagination.items, many=True),
             "page": pagination.page,
             "per_page": pagination.per_page,
             "total": pagination.total,
@@ -104,20 +114,23 @@ def list_devices(scope):
         }
     else:
         items = db.session.execute(query).unique().scalars().all()
-        return schema.dump(items)
+        return schema.dump(items, many=True)
 
 
 @blueprint.route("/devices", methods=["POST"])
 @login_required
-@permissions.check_cruved_scope("C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
 @json_resp
 def create_device(scope):
     data = request.get_json()
+    print(f"POST data: {data}")
 
     if not data:
         raise BadRequest("Corps de requête JSON manquant.")
 
-    schema = TrackingDevicesWriteSchema(exclude=("deployments",), unknown=EXCLUDE)
+    schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data)
     except ValidationError as e:
@@ -133,7 +146,9 @@ def create_device(scope):
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
 @login_required
-@permissions.check_cruved_scope("U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
 @json_resp
 def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
@@ -164,7 +179,9 @@ def update_device(id_tracking_device, scope):
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])
 @login_required
-@permissions.check_cruved_scope("D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
 def delete_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:

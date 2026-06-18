@@ -82,12 +82,12 @@ def ensure_individuals_module(app, users):
     # Permissions sur ALL (lecture globale du module)
     all_permissions = {
         "admin_user": {"actions": "RV", "scope": None},
-        "self_user":  {"actions": "R",  "scope": 1},
+        "self_user": {"actions": "R", "scope": 1},
     }
     # Permissions sur INDIVIDUALS_INDIVIDUALS (C/U/D discriminés)
     individuals_permissions = {
         "admin_user": {"actions": "CUD", "scope": None},
-        "self_user":  {"actions": "U",   "scope": 1},
+        "self_user": {"actions": "U", "scope": 1},
     }
 
     def _add_permissions(target_map, perm_object):
@@ -109,13 +109,15 @@ def ensure_individuals_module(app, users):
                         )
                     )
                     if exists is None:
-                        db.session.add(Permission(
-                            id_role=user.id_role,
-                            id_module=module.id_module,
-                            id_action=action.id_action,
-                            id_object=perm_object.id_object,
-                            scope_value=config["scope"],
-                        ))
+                        db.session.add(
+                            Permission(
+                                id_role=user.id_role,
+                                id_module=module.id_module,
+                                id_action=action.id_action,
+                                id_object=perm_object.id_object,
+                                scope_value=config["scope"],
+                            )
+                        )
 
     _add_permissions(all_permissions, object_all)
     _add_permissions(individuals_permissions, object_individuals)

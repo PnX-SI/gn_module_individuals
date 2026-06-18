@@ -15,7 +15,9 @@ from .deployments import DeploymentSummarySchema
 from .utils import get_label
 
 
-class TrackingDevicesBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+class TrackingDevicesBaseSchema(
+    CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
+):
     class Meta:
         model = TrackingDevices
         include_fk = True
@@ -31,7 +33,7 @@ class TrackingDevicesBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.S
     id_tracking_device = ma.auto_field(dump_only=True)
     meta_create_date = fields.Date(format="%Y-%m-%d", dump_only=True)
     meta_update_date = fields.Date(format="%Y-%m-%d", dump_only=True)
-    comment = fields.Method("get_comment", dump_only=True)
+    comment = ma.auto_field()
 
     nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
     digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
@@ -75,11 +77,6 @@ class TrackingDevicesBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.S
         return value
 
     # Serialisation
-
-    def get_comment(self, obj):
-        if obj.comment:
-            return obj.comment.replace("\n", "<br>")
-        return None
 
     def get_nomenclature_name(self, obj):
         if obj.nomenclature_device_type:
