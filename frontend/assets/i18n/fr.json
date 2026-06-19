@@ -38,11 +38,11 @@
                 "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}"
             },
             "ApiErrors": {
-                "DEVICE_NOT_FOUND":          "Le dispositif de suivi n°{{ id }} est introuvable.",
-                "DEVICE_HAS_DEPLOYMENTS":    "Le dispositif de suivi n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
-                "MISSING_JSON_BODY":         "Les données du dispositif de suivi sont manquantes ou mal formées.",
-                "VALIDATION_ERROR":          "Les données du dispositif de suivi sont invalides. Veuillez vérifier le formulaire.",
-                "INSUFFICIENT_PERMISSIONS":  "Vous n'avez pas les permissions nécessaires pour modifier ce dispositif de suivi."
+                "DeviceNotFound": "Le dispositif de suivi n°{{ id }} est introuvable.",
+                "DeviceHasDeployment": "Le dispositif de suivi n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
+                "JsonBodyMissing": "Les données du dispositif de suivi sont manquantes ou mal formées.",
+                "ValidationError": "Les données du dispositif de suivi sont invalides. Veuillez vérifier le formulaire.",
+                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier ce dispositif de suivi."
             }
         },
         "Deployments": {
@@ -68,10 +68,10 @@
             "PatternText3" : "Ne doit pas contenir de < ou >."
         },
         "ApiErrors": {
-            "MISSING_JSON_BODY":        "Le corps de la requête est manquant ou invalide.",
-            "VALIDATION_ERROR":         "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
-            "INSUFFICIENT_PERMISSIONS": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
-            "UNKNOWN_ERROR":            "Une erreur inattendue s'est produite."
+            "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
+            "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
+            "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
+            "UnknownError": "Une erreur inattendue s'est produite."
         },    
         "DeletingPopup" : {
             "Warning" : "Attention",

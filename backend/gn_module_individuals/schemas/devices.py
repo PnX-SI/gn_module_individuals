@@ -13,7 +13,7 @@ from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .deployments import DeploymentSummarySchema
 from .utils import get_label
-
+from ..utils.errors import APIError, DevicesErrorCode
 
 class TrackingDevicesBaseSchema(
     CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
@@ -44,14 +44,21 @@ class TrackingDevicesBaseSchema(
     @validates("provider_name")
     def validate_provider_name(self, value, **kwargs):
         if not value or not value.strip():
-            # raise ValidationError("Individuals.Devices.Errors.ProviderNameEmpty")
-            raise ValidationError("provider_name ne peut pas être vide.")
+            raise APIError(
+                DeviceErrorCode.VALIDATION_ERROR,
+                "The provider name can't be empty",
+                400,
+            )
         return value
 
     @validates("provider_device_id")
     def validate_provider_device_id(self, value, **kwargs):
         if not value or not value.strip():
-            raise ValidationError("provider_device_id ne peut pas être vide.")
+            raise APIError(
+                DeviceErrorCode.VALIDATION_ERROR,
+                "The provider device id can't be empty",
+                400,
+            )
         return value
 
     @validates("id_nomenclature_device_type")
@@ -62,8 +69,10 @@ class TrackingDevicesBaseSchema(
             db.select(TNomenclatures).filter_by(id_nomenclature=value)
         ).scalar_one_or_none()
         if exists is None:
-            raise ValidationError(
-                f"La nomenclature id={value} n'existe pas dans ref_nomenclatures."
+            raise APIError(
+                DeviceErrorCode.VALIDATION_ERROR,
+                f"The #{value} nomenclature is not found in configured nomenclatures",
+                400,
             )
         return value
 
@@ -73,7 +82,11 @@ class TrackingDevicesBaseSchema(
             return value
         user = db.session.execute(db.select(User).filter_by(id_role=value)).scalar_one_or_none()
         if user is None:
-            raise ValidationError(f"L'utilisateur id_role={value} (référent) n'existe pas.")
+            raise APIError(
+                DeviceErrorCode.VALIDATION_ERROR,
+                f"The #{value} referer (user) do not exist.",
+                400,
+            )
         return value
 
     # Serialisation
