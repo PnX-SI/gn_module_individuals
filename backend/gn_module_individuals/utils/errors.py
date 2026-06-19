@@ -9,14 +9,14 @@ class DevicesErrorCode(str, Enum):
 
     Ces codes constituent le contrat entre backend et frontend :
     le frontend utilise la valeur comme suffixe de clé de traduction
-    (ex. Individuals.ApiErrors.DEVICE_NOT_FOUND).
+    (ex. Individuals.ApiErrors.DeviceNotFound).
     """
 
-    DEVICE_NOT_FOUND = "DEVICE_NOT_FOUND"
-    DEVICE_HAS_DEPLOYMENTS = "DEVICE_HAS_DEPLOYMENTS"
-    MISSING_JSON_BODY = "MISSING_JSON_BODY"
-    VALIDATION_ERROR = "VALIDATION_ERROR"
-    INSUFFICIENT_PERMISSIONS = "INSUFFICIENT_PERMISSIONS"
+    DEVICE_NOT_FOUND = "DeviceNotFound"
+    DEVICE_HAS_DEPLOYMENTS = "DeviceHasDeployment"
+    MISSING_JSON_BODY = "JsonBodyMissing"
+    VALIDATION_ERROR = "ValidationError"
+    INSUFFICIENT_PERMISSIONS = "InsufficientPermissions"
 
 
 class APIError(Exception):
