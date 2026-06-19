@@ -25,6 +25,12 @@ export interface PaginatedItemCollection<T> extends APIParamsPagination {
   has_prev: boolean;
 }
 
+export interface ApiError {
+  name: string;
+  description: string;
+  params?: Record<string, unknown>;
+}
+
 // export interface SimplePagination {
 //   page: number;
 //   per_page: number; // Alias for per_page, to be used in the frontend for consistency with other modules

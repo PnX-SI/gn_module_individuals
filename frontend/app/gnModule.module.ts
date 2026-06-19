@@ -15,6 +15,8 @@ import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-transla
 import { I18nService } from '@geonature/shared/translate/i18n-service';
 
 import { routes } from './module.routes';
+
+import { ErrorHandlerService } from './services/errors-handler.service';
 import { MainComponent } from './components/main/main.component';
 import { DevicesService } from './services/devices.service';
 import { NomenclaturesService } from './services/nomenclature.service';
@@ -65,6 +67,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     DevicesResolver,
     DeviceResolver,
     NomenclaturesService,
+    ErrorHandlerService,
   ],
 })
 export class GeonatureModule {

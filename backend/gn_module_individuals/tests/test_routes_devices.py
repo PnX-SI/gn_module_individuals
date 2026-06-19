@@ -4,6 +4,7 @@ from flask import url_for, g
 from pypnusershub.tests.utils import set_logged_user
 
 from gn_module_individuals.schemas import TrackingDevicesDetailSchema, TrackingDevicesWriteSchema
+from gn_module_individuals.utils.errors import DeviceErrorCode
 
 # ===========================================================================
 # GET /devices  (list_devices)
@@ -96,6 +97,13 @@ class TestGetDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.device", id_tracking_device=-1))
         assert r.status_code == 404
+
+    def test_not_found_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.device", id_tracking_device=-1))
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.DEVICE_NOT_FOUND
+        assert "description" in payload
 
     def test_returns_200_for_existing_device(self, users, device):
         set_logged_user(self.client, users["admin_user"])
@@ -228,6 +236,29 @@ class TestCreateDevice:
         )
         assert r.status_code == 201
 
+    def test_missing_body_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_device"),
+            data="not-json",
+            content_type="text/plain",
+        )
+        assert r.status_code == 400
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.MISSING_JSON_BODY
+        assert "description" in payload
+
+    def test_validation_error_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_device"),
+            json={"provider_name": "   ", "provider_device_id": "X"},
+        )
+        assert r.status_code == 400
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.VALIDATION_ERROR
+        assert "description" in payload
+
 
 # ===========================================================================
 # PUT /devices/<id>  (update_device)
@@ -272,6 +303,30 @@ class TestUpdateDevice:
             json={"provider_name": "X", "provider_device_id": "Y"},
         )
         assert r.status_code == 404
+
+    def test_not_found_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_device", id_tracking_device=-1),
+            json={"provider_name": "X", "provider_device_id": "Y"},
+        )
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.DEVICE_NOT_FOUND
+        assert "description" in payload
+
+    def test_forbidden_scope_returns_structured_error(self, users, devices):
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.put(
+            url_for(
+                "individuals.update_device",
+                id_tracking_device=devices[0].id_tracking_device,
+            ),
+            json={"provider_name": "X", "provider_device_id": "Y"},
+        )
+        assert r.status_code == 403
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.INSUFFICIENT_PERMISSIONS
+        assert "description" in payload
 
     def test_returns_200_with_valid_payload(self, users, device):
         set_logged_user(self.client, users["admin_user"])
@@ -404,3 +459,24 @@ class TestDeleteDevice:
             )
         )
         assert r.status_code == 409
+
+    def test_not_found_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(url_for("individuals.delete_device", id_tracking_device=-1))
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.DEVICE_NOT_FOUND
+        assert "description" in payload
+
+    def test_conflict_returns_structured_error(self, users, device_with_deployment):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_device",
+                id_tracking_device=device_with_deployment.id_tracking_device,
+            )
+        )
+        payload = r.get_json()
+        assert payload.get("name") == DeviceErrorCode.DEVICE_HAS_DEPLOYMENTS
+        assert "description" in payload
+        assert payload.get("params", {}).get("id") == device_with_deployment.id_tracking_device
+        assert payload.get("params", {}).get("nb") == 1
