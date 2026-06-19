@@ -8,14 +8,11 @@
     <div *ngIf="'id_nomenclature_device_type' as field"
       class="form-group w-50"
     >
-      <pnx-dumb-select
+      <pnx-nomenclature
         label="{{ 'Individuals.Devices.Fields.' + field | translate }}"
         [parentFormControl]="form.get(field)"
-        [items]="nomenclatureService.items.TYPE_DISPO_SUIVI"
-        comparedKey="cd_nomenclature"
-        displayedKey="label_{{ lang }}"
-        titleKey="definition_{{ lang }}"
-      ></pnx-dumb-select>
+        codeNomenclatureType="TYPE_DISPO_SUIVI"
+      ></pnx-nomenclature>
     </div>
 
     <!-- provider_name -->
@@ -59,9 +56,10 @@
       class="form-group"
     >
       <pnx-observers
-        label="{{'Individuals.Devices.Fields.' + field | translate}}"
+        [label]="'Individuals.Devices.Fields.' + field | translate"
         [parentFormControl]="form.get(field)"
         [bindAllItem]="true"
+        [placeHolder]="'Sélectionner le référent'"
       ></pnx-observers>
     </div>     
 
