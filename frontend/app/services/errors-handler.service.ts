@@ -22,7 +22,7 @@ import { ApiError } from '../models/common.models';
 @Injectable()
 export class ErrorHandlerService {
   private readonly GENERIC_PREFIX = 'Individuals.ApiErrors';
-  private readonly FALLBACK_KEY   = 'Individuals.ApiErrors.UNKNOWN_ERROR';
+  private readonly FALLBACK_KEY   = 'UnknownError';
 
   constructor(
     private _commonService: CommonService,
@@ -43,7 +43,7 @@ export class ErrorHandlerService {
   ): void {
     const apiError = this._extractApiError(err);
     const mergedParams = { ...(apiError?.params ?? {}), ...params };
-    const code     = apiError?.name ?? 'UNKNOWN_ERROR';
+    const code     = apiError?.name ?? this.FALLBACK_KEY;
     const key      = this._resolveKey(code, mergedParams, entityPrefix);
     this._commonService.translateToaster('error', key, mergedParams);
   }
@@ -63,7 +63,7 @@ export class ErrorHandlerService {
     }
     const genericKey = `${this.GENERIC_PREFIX}.${code}`;
     const resolved   = this._translateService.instant(genericKey, params);
-    return resolved !== genericKey ? genericKey : this.FALLBACK_KEY;
+    return resolved !== genericKey ? genericKey : `${this.GENERIC_PREFIX}.${this.FALLBACK_KEY}`;
   }
 
   private _extractApiError(err: HttpErrorResponse): ApiError | null {
