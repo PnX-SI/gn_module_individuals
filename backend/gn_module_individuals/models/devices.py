@@ -1,6 +1,6 @@
-from geonature.utils.env import DB
 from flask import g
-from sqlalchemy.dialects.postgresql import JSONB
+
+from geonature.utils.env import DB
 from geonature.core.gn_monitoring.models import TIndividuals
 from pypnusershub.db.models import User
 from pypnnomenclature.models import TNomenclatures

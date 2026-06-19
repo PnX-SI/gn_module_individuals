@@ -32,7 +32,7 @@
         class="text-danger d-block d-flex justify-content-end"
         *ngIf="form.get(field)?.dirty && form.get(field)?.errors?.['pattern']"
       >
-        {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
+        {{ 'Individuals.Errors.' + [formConstraints[field].help] | translate }}
       </small>
     </div>
 
@@ -50,7 +50,7 @@
         class="text-danger d-block d-flex justify-content-end"
         *ngIf="form.get(field)?.dirty && form.get(field)?.errors?.['pattern']"
       >
-        {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
+        {{ 'Individuals.Errors.' + [formConstraints[field].help] | translate }}
       </small>
     </div> 
 
@@ -81,7 +81,7 @@
         class="text-danger d-block d-flex justify-content-end"
         *ngIf="form.get(field)?.dirty && form.get(field)?.errors?.['pattern']"
       >
-        {{ 'Individuals.Error.' + [formConstraints[field].help] | translate }}
+        {{ 'Individuals.Errors.' + [formConstraints[field].help] | translate }}
       </small>
     </div>
   </div>  

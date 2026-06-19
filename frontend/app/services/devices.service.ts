@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
@@ -11,6 +12,9 @@ import { DATA_TABLE_CONFIG, DEVICES_DEFAULT_SORT } from '..//utils/constants.uti
 @Injectable()
 export class DevicesService {
   private _OBJECT_API: string;
+  // Désactive l'interceptor global (MyCustomInterceptor) pour que le composant
+  // puisse afficher un toast traduit à partir du code d'erreur backend.
+  private _headers = new HttpHeaders({ 'not-to-handle': 'true' });
 
   constructor(
     private _http: HttpClient,
@@ -64,10 +68,10 @@ export class DevicesService {
       };
     }
     if (formAction === "ADD") {
-      return this._http.post<Device>(`${this._OBJECT_API}`,payload,{params: params});
+      return this._http.post<Device>(`${this._OBJECT_API}`,payload,{ params: params, headers: this._headers });
     }
     else {
-      return this._http.put<Device>(`${this._OBJECT_API}/${id}`,payload,{params: params});
+      return this._http.put<Device>(`${this._OBJECT_API}/${id}`,payload,{ params: params, headers: this._headers });
     }
   }
 }

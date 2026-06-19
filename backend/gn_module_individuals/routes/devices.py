@@ -1,11 +1,9 @@
-from geonature.utils.json import pagination_schema, MyJSONProvider
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.orm import joinedload, selectinload
-
 from flask import request, jsonify, g, make_response
 from marshmallow import EXCLUDE, ValidationError
+
+from sqlalchemy import func
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError
-from werkzeug.exceptions import Forbidden, NotFound, BadRequest, Conflict
 
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
@@ -13,6 +11,7 @@ from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
 from pypnnomenclature.schemas import NomenclatureSchema
+from ..utils.errors import APIError, DevicesErrorCode
 
 from .. import MODULE_CODE
 from ..schemas import (
@@ -48,10 +47,13 @@ def device(id_tracking_device, scope):
     )
 
     device = db.session.execute(query).unique().scalar_one_or_none()
-
+   
     if device is None:
-        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-
+        raise APIError(
+            DeviceErrorCode.DEVICE_NOT_FOUND,
+            f"Tracking device with id {id_tracking_device} was not found.",
+            404,
+        )
     return schema.dump(device)
 
 
@@ -125,16 +127,23 @@ def list_devices(scope):
 @json_resp
 def create_device(scope):
     data = request.get_json()
-    print(f"POST data: {data}")
 
     if not data:
-        raise BadRequest("Corps de requête JSON manquant.")
+        raise APIError(
+            DeviceErrorCode.MISSING_JSON_BODY,
+            "Missing JSON request body.",
+            400,
+        )
 
     schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data)
     except ValidationError as e:
-        raise BadRequest(e.messages)
+        raise APIError(
+            DeviceErrorCode.VALIDATION_ERROR,
+            f"Validation failed: {json.dumps(e.messages)}",
+            400,
+        )
 
     device.id_digitiser = g.current_user.id_role
 
@@ -153,22 +162,35 @@ def create_device(scope):
 def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
-        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-
+        raise APIError(
+            DeviceErrorCode.DEVICE_NOT_FOUND,
+            f"Tracking device with id {id_tracking_device} was not found.",
+            404,
+        )
     data = request.get_json()
 
     if not data:
-        raise BadRequest("Corps de requête JSON manquant.")
+        raise APIError(
+            DeviceErrorCode.MISSING_JSON_BODY,
+            "Missing JSON request body.",
+            400,
+        )
     if not device.has_instance_permission(scope):
-        raise Forbidden(
-            f"Vous n'avez pas la permission de mettre à jour le dispositif {id_tracking_device} "
+        raise APIError(
+            DeviceErrorCode.INSUFFICIENT_PERMISSIONS,
+            f"You do not have permission to update device {id_tracking_device}.",
+            403,
         )
 
     schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data, instance=device)
     except ValidationError as e:
-        raise BadRequest(e.messages)
+        raise APIError(
+            DeviceErrorCode.VALIDATION_ERROR,
+            f"Validation failed: {json.dumps(e.messages)}",
+            400,
+        )
 
     device.id_digitiser = g.current_user.id_role
 
@@ -185,16 +207,23 @@ def update_device(id_tracking_device, scope):
 def delete_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
-        raise NotFound(f"Le matériel de suivi {id_tracking_device} n'a pas été trouvé")
-
-    has_deployments = db.session.scalar(
-        db.select(
-            db.exists().where(IndividualDeployments.id_tracking_device == id_tracking_device)
+        raise APIError(
+            DeviceErrorCode.DEVICE_NOT_FOUND,
+            f"Tracking device with id {id_tracking_device} was not found.",
+            404,
         )
+
+    deployment_count = db.session.scalar(
+        db.select(func.count())
+        .select_from(IndividualDeployments)
+        .where(IndividualDeployments.id_tracking_device == id_tracking_device)
     )
-    if has_deployments:
-        raise Conflict(
-            "Ce dispositif ne peut pas être supprimé car il est associé à des déploiements."
+    if deployment_count:
+        raise APIError(
+            DeviceErrorCode.DEVICE_HAS_DEPLOYMENTS,
+            "This device cannot be deleted because it is associated with deployments.",
+            409,
+            params={"id": id_tracking_device, "nb": deployment_count},
         )
 
     db.session.delete(device)

@@ -2,11 +2,12 @@ import { ViewEncapsulation, Component, OnInit, AfterViewInit } from '@angular/co
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable, combineLatest } from 'rxjs';
-import { filter, take, switchMap, map } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
+
+import { ErrorHandlerService } from '../../services/errors-handler.service';
 import { Device } from '../../models/devices.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { DevicesService } from '../../services/devices.service';
@@ -34,7 +35,8 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
     private _fb: FormBuilder,
     public nomenclatureService: NomenclaturesService,
     private _service: DevicesService,
-    private _location: Location
+    private _location: Location,
+    private _errorHandler: ErrorHandlerService,
   ) {}
 
   ngOnInit() : void {
@@ -105,13 +107,15 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
 
     this._service.createOrUpdateDevice(device, this.formAction, this.deviceId).subscribe({
       next: (res) => {
-        this._commonService.translateToaster('info', this.formAction === 'ADD' ? 'Individuals.Devices.Messages.Added' : 'Individuals.Devices.Messages.Edited', {id: this.deviceId});
+        const successKey = this.formAction === 'ADD'
+          ? 'Individuals.Devices.Messages.Added'
+          : 'Individuals.Devices.Messages.Edited';
+        this._commonService.translateToaster('info', successKey, { id: this.deviceId });
         this.form.markAsPristine();
         this._location.back();
       },
       error: (err) => {
-          const msg = err.name + ':' + err.message || JSON.stringify(err);
-          this._commonService.translateToaster('error', this.formAction === 'ADD' ? 'Individuals.Devices.Errors.AddedNOK' : 'Individuals.Devices.Errors.EditedNOK', {id: this.deviceId, error: msg });
+          this._errorHandler.handleHttpError(err, { id: this.deviceId }, 'Individuals.Devices.ApiErrors');
       }
     });
   }
