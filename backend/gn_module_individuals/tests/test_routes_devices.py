@@ -259,6 +259,7 @@ class TestCreateDevice:
         assert payload.get("name") == DeviceErrorCode.VALIDATION_ERROR
         assert "description" in payload
 
+
 # ===========================================================================
 # PUT /devices/<id>  (update_device)
 # ===========================================================================

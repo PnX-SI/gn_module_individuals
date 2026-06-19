@@ -43,8 +43,13 @@ class APIError(Exception):
 
 def handle_error(error: APIError):
     """Sérialiseur Flask enregistré sur le blueprint individuals."""
-    return jsonify({
-        "name": error.error_code.value,
-        "description": error.description,
-        "params": error.params,
-    }), error.status
+    return (
+        jsonify(
+            {
+                "name": error.error_code.value,
+                "description": error.description,
+                "params": error.params,
+            }
+        ),
+        error.status,
+    )

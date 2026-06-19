@@ -14,6 +14,7 @@ from ..models import TrackingDevices, IndividualDeployments
 from .deployments import DeploymentSummarySchema
 from .utils import get_label
 
+
 class TrackingDevicesBaseSchema(
     CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
 ):

@@ -47,7 +47,7 @@ def device(id_tracking_device, scope):
     )
 
     device = db.session.execute(query).unique().scalar_one_or_none()
-   
+
     if device is None:
         raise APIError(
             DeviceErrorCode.DEVICE_NOT_FOUND,
