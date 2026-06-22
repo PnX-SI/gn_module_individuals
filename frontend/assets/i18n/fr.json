@@ -82,8 +82,10 @@
             "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
             "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
             "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
+            "IndividualNotFound": "L'individu n°{{ id }} est introuvable.",
+            "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
             "UnknownError": "Une erreur inattendue s'est produite."
-        },    
+        },
         "DeletingPopup" : {
             "Warning" : "Attention",
             "WarningDelete" : "Vous êtes sur le point de supprimer : ",

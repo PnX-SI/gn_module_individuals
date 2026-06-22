@@ -19,6 +19,18 @@ class DevicesErrorCode(str, Enum):
     INSUFFICIENT_PERMISSIONS = "InsufficientPermissions"
 
 
+class IndividualsErrorCode(str, Enum):
+    """Nomenclature des codes d'erreur pour les individus.
+
+    Ces codes constituent le contrat entre backend et frontend :
+    le frontend utilise la valeur comme suffixe de clé de traduction
+    (ex. Individuals.ApiErrors.IndividualNotFound).
+    """
+
+    INDIVIDUAL_NOT_FOUND = "IndividualNotFound"
+    INVALID_FILTER = "InvalidFilter"
+
+
 class APIError(Exception):
     """Exception structurée produisant {name, description} attendu par MyCustomInterceptor.
 

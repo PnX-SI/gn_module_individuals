@@ -1,7 +1,6 @@
 from flask import jsonify, request
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload, raiseload, selectinload
-from werkzeug.exceptions import BadRequest, NotFound
 
 from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_permissions import decorators as permissions
@@ -18,6 +17,7 @@ from ..models.individuals import (
     temporary_individual_observers_expression,
 )
 from ..schemas.individuals import IndividualsListSchema, IndividualsMapSchema
+from ..utils.errors import APIError, IndividualsErrorCode
 
 
 def _parse_filters(args):
@@ -36,7 +36,7 @@ def _parse_bool(value):
         return True
     if normalized in ("false", "0", "no", "n"):
         return False
-    raise BadRequest("Unsupported active value")
+    raise APIError(IndividualsErrorCode.INVALID_FILTER, "Unsupported active value", 400)
 
 
 def _parse_bbox(value):
@@ -45,9 +45,15 @@ def _parse_bbox(value):
     try:
         west, south, east, north = [float(part) for part in value.split(",")]
     except ValueError as exc:
-        raise BadRequest("bbox must be formatted as west,south,east,north") from exc
+        raise APIError(
+            IndividualsErrorCode.INVALID_FILTER,
+            "bbox must be formatted as west,south,east,north",
+            400,
+        ) from exc
     if west >= east or south >= north:
-        raise BadRequest("bbox coordinates are inconsistent")
+        raise APIError(
+            IndividualsErrorCode.INVALID_FILTER, "bbox coordinates are inconsistent", 400
+        )
     return west, south, east, north
 
 
@@ -71,7 +77,7 @@ def _apply_filters(query, filters):
 def _parse_sort(args):
     direction = args.get("dir", "asc", type=str).lower()
     if direction not in ("asc", "desc"):
-        raise BadRequest("dir must be asc or desc")
+        raise APIError(IndividualsErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
     return {
         "prop": args.get("prop", "id_individual", type=str),
         "dir": direction,
@@ -210,7 +216,7 @@ def individual_page(scope, id_individual):
     sort = _parse_sort(request.args)
     per_page = request.args.get("per_page", 20, type=int)
     if per_page < 1:
-        raise BadRequest("per_page must be greater than 0")
+        raise APIError(IndividualsErrorCode.INVALID_FILTER, "per_page must be greater than 0", 400)
 
     query = _build_individuals_query(scope, filters, sort, eager_load=False)
     ranked = (
@@ -224,7 +230,12 @@ def individual_page(scope, id_individual):
 
     rank = db.session.scalar(select(ranked.c.rank).where(ranked.c.id_individual == id_individual))
     if rank is None:
-        raise NotFound("Individual not found in current filtered result")
+        raise APIError(
+            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            "Individual not found in current filtered result",
+            404,
+            params={"id": id_individual},
+        )
 
     return jsonify(
         {
