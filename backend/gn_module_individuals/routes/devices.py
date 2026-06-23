@@ -50,7 +50,7 @@ def device(id_tracking_device, scope):
 
     if device is None:
         raise APIError(
-            DeviceErrorCode.DEVICE_NOT_FOUND,
+            DevicesErrorCode.DEVICE_NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
@@ -130,7 +130,7 @@ def create_device(scope):
 
     if not data:
         raise APIError(
-            DeviceErrorCode.MISSING_JSON_BODY,
+            DevicesErrorCode.MISSING_JSON_BODY,
             "Missing JSON request body.",
             400,
         )
@@ -140,7 +140,7 @@ def create_device(scope):
         device = schema.load(data)
     except ValidationError as e:
         raise APIError(
-            DeviceErrorCode.VALIDATION_ERROR,
+            DevicesErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",
             400,
         )
@@ -163,7 +163,7 @@ def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
-            DeviceErrorCode.DEVICE_NOT_FOUND,
+            DevicesErrorCode.DEVICE_NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
@@ -171,13 +171,13 @@ def update_device(id_tracking_device, scope):
 
     if not data:
         raise APIError(
-            DeviceErrorCode.MISSING_JSON_BODY,
+            DevicesErrorCode.MISSING_JSON_BODY,
             "Missing JSON request body.",
             400,
         )
     if not device.has_instance_permission(scope):
         raise APIError(
-            DeviceErrorCode.INSUFFICIENT_PERMISSIONS,
+            DevicesErrorCode.INSUFFICIENT_PERMISSIONS,
             f"You do not have permission to update device {id_tracking_device}.",
             403,
         )
@@ -187,7 +187,7 @@ def update_device(id_tracking_device, scope):
         device = schema.load(data, instance=device)
     except ValidationError as e:
         raise APIError(
-            DeviceErrorCode.VALIDATION_ERROR,
+            DevicesErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",
             400,
         )
@@ -208,7 +208,7 @@ def delete_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
-            DeviceErrorCode.DEVICE_NOT_FOUND,
+            DevicesErrorCode.DEVICE_NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
@@ -220,7 +220,7 @@ def delete_device(id_tracking_device, scope):
     )
     if deployment_count:
         raise APIError(
-            DeviceErrorCode.DEVICE_HAS_DEPLOYMENTS,
+            DevicesErrorCode.DEVICE_HAS_DEPLOYMENTS,
             "This device cannot be deleted because it is associated with deployments.",
             409,
             params={"id": id_tracking_device, "nb": deployment_count},
