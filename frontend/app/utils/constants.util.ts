@@ -1,30 +1,30 @@
 export const CONTENT_CONFIG = {
-    "MIN_HEIGHT": 350,
-}
+  MIN_HEIGHT: 350,
+};
 
 export const DATA_TABLE_CONFIG = {
-    "TABLE_ROW_HEIGHT": 40, // Think to change the list.component.css .ngx-datatable .datatable-header-cell line-height if you change this value
-    "PER_PAGE_OPTION": 10,
-    "ACTION_COLUMNS_WIDTH": 10,
-    "COLUMN_MAX_WIDTH": 50,
-}
+  TABLE_ROW_HEIGHT: 40, // Think to change the list.component.css .ngx-datatable .datatable-header-cell line-height if you change this value
+  PER_PAGE_OPTION: 10,
+  ACTION_COLUMNS_WIDTH: 10,
+  COLUMN_MAX_WIDTH: 50,
+};
 
 export const DEVICE_FORM_CONSTRAINTS = {
-    "provider_name": {
-        "maxLength": 50,
-        "pattern": '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
-        "help": 'PatternText1'
-    },
-    "provider_device_id": {
-        "maxLength": 50,
-        "pattern": '^[a-zA-Z0-9_-]*$',
-        "help": 'PatternText2'
-    },
-    "comment": {
-        "maxLength": 255,
-        "pattern": '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
-        "help": 'PatternText3'
-    }
-}
+  provider_name: {
+    maxLength: 50,
+    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
+    help: 'PatternText1',
+  },
+  provider_device_id: {
+    maxLength: 50,
+    pattern: '^[a-zA-Z0-9_-]*$',
+    help: 'PatternText2',
+  },
+  comment: {
+    maxLength: 255,
+    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
+    help: 'PatternText3',
+  },
+};
 
-export const DEVICES_DEFAULT_SORT = { prop: "meta_create_date", dir: "asc" }
+export const DEVICES_DEFAULT_SORT = { prop: 'id_tracking_device', dir: 'desc' };

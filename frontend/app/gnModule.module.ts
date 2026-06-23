@@ -60,7 +60,6 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
       },
       isolate: true,
     }),
-    
   ],
   providers: [
     DevicesService,

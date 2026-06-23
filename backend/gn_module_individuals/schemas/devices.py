@@ -45,7 +45,7 @@ class TrackingDevicesBaseSchema(
     def validate_provider_name(self, value, **kwargs):
         if not value or not value.strip():
             raise APIError(
-                DeviceErrorCode.VALIDATION_ERROR,
+                DevicesErrorCode.VALIDATION_ERROR,
                 "The provider name can't be empty",
                 400,
             )
@@ -55,7 +55,7 @@ class TrackingDevicesBaseSchema(
     def validate_provider_device_id(self, value, **kwargs):
         if not value or not value.strip():
             raise APIError(
-                DeviceErrorCode.VALIDATION_ERROR,
+                DevicesErrorCode.VALIDATION_ERROR,
                 "The provider device id can't be empty",
                 400,
             )
@@ -70,7 +70,7 @@ class TrackingDevicesBaseSchema(
         ).scalar_one_or_none()
         if exists is None:
             raise APIError(
-                DeviceErrorCode.VALIDATION_ERROR,
+                DevicesErrorCode.VALIDATION_ERROR,
                 f"The #{value} nomenclature is not found in configured nomenclatures",
                 400,
             )
@@ -83,7 +83,7 @@ class TrackingDevicesBaseSchema(
         user = db.session.execute(db.select(User).filter_by(id_role=value)).scalar_one_or_none()
         if user is None:
             raise APIError(
-                DeviceErrorCode.VALIDATION_ERROR,
+                DevicesErrorCode.VALIDATION_ERROR,
                 f"The #{value} referer (user) do not exist.",
                 400,
             )

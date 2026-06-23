@@ -1,31 +1,30 @@
 <ng-template
- #formTemplate
- let-dataTable="dataTable"
+  #formTemplate
+  let-dataTable="dataTable"
 >
   <div class="col-6 padding-sm">
-
     <!-- id_nomenclature_device_type -->
-    <div *ngIf="'id_nomenclature_device_type' as field"
+    <div
+      *ngIf="'id_nomenclature_device_type' as field"
       class="form-group w-50"
     >
-      <pnx-dumb-select
+      <pnx-nomenclature
         label="{{ 'Individuals.Devices.Fields.' + field | translate }}"
-        [parentFormControl]="form.get(field)"
-        [items]="nomenclatureService.items.TYPE_DISPO_SUIVI"
-        comparedKey="cd_nomenclature"
-        displayedKey="label_{{ lang }}"
-        titleKey="definition_{{ lang }}"
-      ></pnx-dumb-select>
+        [parentFormControl]="$any(form.get(field))"
+        codeNomenclatureType="TYPE_DISPO_SUIVI"
+      ></pnx-nomenclature>
     </div>
 
     <!-- provider_name -->
-    <div *ngIf="'provider_name' as field"
-      class="form-group w-50">
+    <div
+      *ngIf="'provider_name' as field"
+      class="form-group w-50"
+    >
       <label class="small">{{ 'Individuals.Devices.Fields.' + field | translate }}</label>
       <input
         type="text"
         class="form-control form-control-sm"
-        [formControl]="form.get(field)"
+        [formControl]="$any(form.get(field))"
         maxlength="{{ formConstraints[field].maxLength }}"
       />
       <small
@@ -37,13 +36,15 @@
     </div>
 
     <!-- provider_device_id -->
-    <div *ngIf="'provider_device_id' as field"
-      class="form-group w-50">
+    <div
+      *ngIf="'provider_device_id' as field"
+      class="form-group w-50"
+    >
       <label class="small">{{ 'Individuals.Devices.Fields.' + field | translate }}</label>
       <input
         type="text"
         class="form-control form-control-sm"
-        [formControl]="form.get(field)"
+        [formControl]="$any(form.get(field))"
         maxlength="{{ formConstraints[field].maxLength }}"
       />
       <small
@@ -52,27 +53,31 @@
       >
         {{ 'Individuals.Errors.' + [formConstraints[field].help] | translate }}
       </small>
-    </div> 
+    </div>
 
     <!-- id_referer -->
-    <div *ngIf="'id_referer' as field"
+    <div
+      *ngIf="'id_referer' as field"
       class="form-group"
     >
       <pnx-observers
-        label="{{'Individuals.Devices.Fields.' + field | translate}}"
-        [parentFormControl]="form.get(field)"
+        [label]="'Individuals.Devices.Fields.' + field | translate"
+        [parentFormControl]="$any(form.get(field))"
         [bindAllItem]="true"
+        [placeHolder]="'Sélectionner le référent'"
       ></pnx-observers>
-    </div>     
+    </div>
 
     <!-- comment -->
-    <div *ngIf="'comment' as field"
-      class="form-group">
-      <label class="small">{{'Individuals.Devices.Fields.' + field | translate}}</label>
+    <div
+      *ngIf="'comment' as field"
+      class="form-group"
+    >
+      <label class="small">{{ 'Individuals.Devices.Fields.' + field | translate }}</label>
       <textarea
         type="textarea"
         class="form-control form-control-sm"
-        [formControl]="form.get(field)"
+        [formControl]="$any(form.get(field))"
       ></textarea>
       <small class="d-flex justify-content-end text-muted">
         {{ form.get(field)?.value?.length || 0 }}/{{ formConstraints[field].maxLength }}
@@ -84,29 +89,30 @@
         {{ 'Individuals.Errors.' + [formConstraints[field].help] | translate }}
       </small>
     </div>
-  </div>  
+  </div>
 </ng-template>
 
-<gn-individuals-form *ngIf="formAction === 'ADD';else editMode"
+<gn-individuals-form
+  *ngIf="formAction === 'ADD'; else editMode"
   [formTitle]="'Individuals.Devices.Titles.Add' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
   [objectName]="'devices'"
   [canSave]="form.valid"
   (save)="onSave()"
->
-</gn-individuals-form>
+></gn-individuals-form>
 
 <ng-template #editMode>
   <gn-individuals-form
     *ngIf="dataTable$ | async as dataTable"
-    [formTitle]="'Individuals.Devices.Titles.Edit' | translate:{id:dataTable.id_tracking_device}"
+    [formTitle]="
+      'Individuals.Devices.Titles.Edit' | translate: { id: dataTable.id_tracking_device }
+    "
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [objectName]="'devices'"
     [dataTable]="dataTable"
     [canSave]="form.valid && form.dirty"
     (save)="onSave()"
-  >
-  </gn-individuals-form>
+  ></gn-individuals-form>
 </ng-template>

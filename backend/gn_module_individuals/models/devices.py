@@ -20,7 +20,6 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
     id_nomenclature_device_type = DB.Column(
         "id_nomenclature_device_type",
         DB.Integer,
-        # DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
         DB.ForeignKey(TNomenclatures.id_nomenclature),
     )
 
@@ -65,9 +64,7 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
     # Relationships
     nomenclature_device_type = DB.relationship(
         TNomenclatures,
-        # primaryjoin=(TNomenclatures.id_nomenclature == id_nomenclature_device_type),
         foreign_keys=[id_nomenclature_device_type],
-        # lazy="select",
     )
 
     referer = DB.relationship(

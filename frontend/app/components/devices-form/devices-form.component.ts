@@ -7,11 +7,12 @@ import { Observable } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
-import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Device } from '../../models/devices.models';
-import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
-import { DevicesService } from '../../services/devices.service';
-import { NomenclaturesService } from '../../services/nomenclature.service';
+import { ErrorHandlerService } from 'app/services/errors-handler.service';
+import { Device } from 'app/models/devices.models';
+import { FormConstraint } from 'app/models/common.models';
+import { DEVICE_FORM_CONSTRAINTS } from 'app/utils/constants.util';
+import { DevicesService } from 'app/services/devices.service';
+import { NomenclaturesService } from 'app/services/nomenclature.service';
 
 @Component({
   selector: 'gn-individuals-devices-form',
@@ -25,7 +26,7 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
   public deviceId!: number;
   public formAction!: string;
   public form!: FormGroup;
-  public formConstraints = DEVICE_FORM_CONSTRAINTS;
+  public formConstraints: Record<string,FormConstraint> = DEVICE_FORM_CONSTRAINTS;
   public lang = this._config.DEFAULT_LANGUAGE;
 
   constructor(
@@ -36,87 +37,86 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
     public nomenclatureService: NomenclaturesService,
     private _service: DevicesService,
     private _location: Location,
-    private _errorHandler: ErrorHandlerService,
+    private _errorHandler: ErrorHandlerService
   ) {}
 
-  ngOnInit() : void {
+  ngOnInit(): void {
     // Form initialization
     this.form = this._fb.group({
       id_nomenclature_device_type: [null, Validators.required],
       provider_name: [
-        null, 
+        null,
         [
-          Validators.required, 
+          Validators.required,
           Validators.maxLength(this.formConstraints.provider_name.maxLength),
-          Validators.pattern(this.formConstraints.provider_name.pattern)
-        ]
+          Validators.pattern(this.formConstraints.provider_name.pattern),
+        ],
       ],
       provider_device_id: [
-        null, 
+        null,
         [
-          Validators.required, 
-          Validators.maxLength(this.formConstraints.provider_device_id.maxLength), 
-          Validators.pattern(this.formConstraints.provider_device_id.pattern)
-        ]
+          Validators.required,
+          Validators.maxLength(this.formConstraints.provider_device_id.maxLength),
+          Validators.pattern(this.formConstraints.provider_device_id.pattern),
+        ],
       ],
-      id_referer: [
-        null, 
-        Validators.required
-      ],
+      id_referer: [null, Validators.required],
       comment: [
-        null, 
+        null,
         [
           Validators.maxLength(this.formConstraints.comment.maxLength),
-          Validators.pattern(this.formConstraints.comment.pattern)
-        ]
+          Validators.pattern(this.formConstraints.comment.pattern),
+        ],
       ],
     });
 
     this._route.params.subscribe((params) => {
-        if (params['id_tracking_device']) {
-          this.deviceId = params['id_tracking_device'];
-          this.formAction = 'EDIT';
-          // Peut-être pas utile le dataTable$
-          this.dataTable$ = this._service.getDevice(params['id_tracking_device']);
-          this._service.getDevice(params['id_tracking_device'])
-            .subscribe((device: any) => {
-              this.patchForm(device);
-            });
-        } else {
-          this.formAction = 'ADD';
-        }
+      if (params['id_tracking_device']) {
+        this.deviceId = params['id_tracking_device'];
+        this.formAction = 'EDIT';
+        // Peut-être pas utile le dataTable$
+        this.dataTable$ = this._service.getDevice(params['id_tracking_device']);
+        this._service.getDevice(params['id_tracking_device']).subscribe((device: any) => {
+          this.patchForm(device);
+        });
+      } else {
+        this.formAction = 'ADD';
+      }
     });
   }
 
-  ngAfterViewInit() : void {
-  }
-  
-  patchForm(device: any) : void { /// Modifier par : Device au lieu de any et faire le mapping si besoin
-    console.log('Device à patcher dans le form :', device);
-    console.log('Nomenclature à patcher dans le form :', device.nomenclature_device_type);
+  ngAfterViewInit(): void {}
+
+  patchForm(device: any): void {
+    /// Modifier par : Device au lieu de any et faire le mapping si besoin
     this.form.patchValue(device);
 
     this.form.patchValue({
-      id_nomenclature_device_type: device.nomenclature_device_type,
-      id_referer: device.referer
-    });   
+      id_nomenclature_device_type: device.nomenclature_device_type.id_nomenclature,
+      id_referer: device.referer,
+    });
   }
 
-  onSave() : void {
+  onSave(): void {
     const device = this.form.getRawValue();
 
     this._service.createOrUpdateDevice(device, this.formAction, this.deviceId).subscribe({
       next: (res) => {
-        const successKey = this.formAction === 'ADD'
-          ? 'Individuals.Devices.Messages.Added'
-          : 'Individuals.Devices.Messages.Edited';
+        const successKey =
+          this.formAction === 'ADD'
+            ? 'Individuals.Devices.Messages.Added'
+            : 'Individuals.Devices.Messages.Edited';
         this._commonService.translateToaster('info', successKey, { id: this.deviceId });
         this.form.markAsPristine();
         this._location.back();
       },
       error: (err) => {
-          this._errorHandler.handleHttpError(err, { id: this.deviceId }, 'Individuals.Devices.ApiErrors');
-      }
+        this._errorHandler.handleHttpError(
+          err,
+          { id: this.deviceId },
+          'Individuals.Devices.ApiErrors'
+        );
+      },
     });
   }
 }

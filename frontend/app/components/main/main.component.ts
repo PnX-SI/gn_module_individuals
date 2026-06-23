@@ -7,12 +7,7 @@ import { ConfigService } from '@geonature/services/config.service';
   styleUrls: ['main.component.scss'],
 })
 export class MainComponent implements OnInit {
-  
-  constructor(
-    private config: ConfigService,
-  ) {}
+  constructor(private config: ConfigService) {}
 
-  ngOnInit() {
-  }
-
+  ngOnInit() {}
 }

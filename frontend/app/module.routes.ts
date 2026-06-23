@@ -8,46 +8,46 @@ import { DevicesInfoComponent } from './components/devices-info/devices-info.com
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
 
 export const routes: Routes = [
-    { 
-        path: '', 
-        component: MainComponent ,
-        children: [
-            { 
-                path: '', 
-                redirectTo: 'devices', // Next will be 'individuals'
-                pathMatch: 'full'
-            },
-            {
-                path: 'individuals',
-                component: MapListComponent,
-            },
-            {
-                path: 'observations',
-                component: MapListComponent,
-            },
-            {
-                path: 'captures',
-                component: MapListComponent,
-            },
-            {
-                path: 'devices',
-                component: DevicesListComponent,
-                resolve: { data: DevicesResolver }
-            },
-            {
-                path: 'devices/form',
-                component: DevicesFormComponent,
-            },
-            {
-                path: 'devices/form/:id_tracking_device',
-                component: DevicesFormComponent,
-                resolve: { data: DeviceResolver }
-            },
-            {
-                path: 'devices/info/:id_tracking_device',
-                component: DevicesInfoComponent,
-                resolve:{ data: DeviceResolver },
-            }
-        ]
-    }
+  {
+    path: '',
+    component: MainComponent,
+    children: [
+      {
+        path: '',
+        redirectTo: 'devices', // Next will be 'individuals'
+        pathMatch: 'full',
+      },
+      {
+        path: 'individuals',
+        component: MapListComponent,
+      },
+      {
+        path: 'observations',
+        component: MapListComponent,
+      },
+      {
+        path: 'captures',
+        component: MapListComponent,
+      },
+      {
+        path: 'devices',
+        component: DevicesListComponent,
+        resolve: { data: DevicesResolver },
+      },
+      {
+        path: 'devices/form',
+        component: DevicesFormComponent,
+      },
+      {
+        path: 'devices/form/:id_tracking_device',
+        component: DevicesFormComponent,
+        resolve: { data: DeviceResolver },
+      },
+      {
+        path: 'devices/info/:id_tracking_device',
+        component: DevicesInfoComponent,
+        resolve: { data: DeviceResolver },
+      },
+    ],
+  },
 ];

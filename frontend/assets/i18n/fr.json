@@ -26,7 +26,8 @@
             "Titles": {
                 "Info": "Dispositif de suivi n°{{ id }}",
                 "Add" : "Ajout d'un dispositif de suivi",
-                "Edit" : "Modification du dispositif de suivi n°{{ id }}"
+                "Edit" : "Modification du dispositif de suivi n°{{ id }}",
+                "Delete" : "Suppression du dispositif de suivi n°{{ id }}"
             },
             "Messages": {
                 "Added" : "Le dispositif de suivi a été créé.",
@@ -35,7 +36,8 @@
             },
             "Errors": {
                 "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
-                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}"
+                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+                "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             },
             "ApiErrors": {
                 "DeviceNotFound": "Le dispositif de suivi n°{{ id }} est introuvable.",

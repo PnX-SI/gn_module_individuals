@@ -6,7 +6,6 @@ import { CommonService } from '@geonature_common/service/common.service';
 
 import { ApiError } from '../models/common.models';
 
-
 /**
  * Traduit et affiche les erreurs HTTP du module individuals.
  *
@@ -22,11 +21,11 @@ import { ApiError } from '../models/common.models';
 @Injectable()
 export class ErrorHandlerService {
   private readonly GENERIC_PREFIX = 'Individuals.ApiErrors';
-  private readonly FALLBACK_KEY   = 'UnknownError';
+  private readonly FALLBACK_KEY = 'UnknownError';
 
   constructor(
     private _commonService: CommonService,
-    private _translateService: TranslateService,
+    private _translateService: TranslateService
   ) {}
 
   /**
@@ -39,19 +38,19 @@ export class ErrorHandlerService {
   handleHttpError(
     err: HttpErrorResponse,
     params: Record<string, unknown> = {},
-    entityPrefix?: string,
+    entityPrefix?: string
   ): void {
     const apiError = this._extractApiError(err);
     const mergedParams = { ...(apiError?.params ?? {}), ...params };
-    const code     = apiError?.name ?? this.FALLBACK_KEY;
-    const key      = this._resolveKey(code, mergedParams, entityPrefix);
+    const code = apiError?.name ?? this.FALLBACK_KEY;
+    const key = this._resolveKey(code, mergedParams, entityPrefix);
     this._commonService.translateToaster('error', key, mergedParams);
   }
 
   private _resolveKey(
     code: string,
     params: Record<string, unknown>,
-    entityPrefix?: string,
+    entityPrefix?: string
   ): string {
     if (entityPrefix) {
       const specificKey = `${entityPrefix}.${code}`;
@@ -62,7 +61,7 @@ export class ErrorHandlerService {
       }
     }
     const genericKey = `${this.GENERIC_PREFIX}.${code}`;
-    const resolved   = this._translateService.instant(genericKey, params);
+    const resolved = this._translateService.instant(genericKey, params);
     return resolved !== genericKey ? genericKey : `${this.GENERIC_PREFIX}.${this.FALLBACK_KEY}`;
   }
 
