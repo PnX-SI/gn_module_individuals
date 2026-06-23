@@ -29,12 +29,12 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this.userCruved = currentModule.cruved;
     // Get current url to know if we are on devices, individuals, observations or captures
     this.currentTabCode = this._route.snapshot.url[0].path;
-    
+
     this.mapListService.refreshUrlQuery();
     // Set zoom on layer to true
     // zoom only when search data
     this.mapListService.zoomOnLayer = true;
-    
+
     // mapListService config
     this.mapListService.idName = 'id_tracking_device';
     this.apiEndPoint = `${this._moduleService.currentModule.module_url}/${this.currentTabCode}`;
@@ -47,7 +47,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     ];
 
     this.mapListService.refreshUrlQuery();
-    this.mapListService.getData(this.apiEndPoint,[{ param: 'limit', value: 1 }])
+    this.mapListService.getData(this.apiEndPoint, [{ param: 'limit', value: 1 }]);
   }
 
   ngAfterViewInit() {
@@ -84,5 +84,3 @@ export class MapListComponent implements OnInit, AfterViewInit {
     }
   }
 }
-
-

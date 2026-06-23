@@ -1,6 +1,6 @@
 <div class="map-list-container">
-
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
+  <div
+    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
     <pnx-map-list
@@ -8,13 +8,14 @@
       height="100%"
     ></pnx-map-list>
   </div>
-  <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
+  <div
+    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
     <ngx-datatable
-        class="material striped margin-top-xs table-size expandable"
-        [columnMode]="'force'"
-        [columns]="mapListService.displayColumns"
+      class="material striped margin-top-xs table-size expandable"
+      [columnMode]="'force'"
+      [columns]="mapListService.displayColumns"
     ></ngx-datatable>
   </div>
 </div>

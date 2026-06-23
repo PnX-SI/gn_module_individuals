@@ -1,62 +1,59 @@
 <div class="list-container">
-  <div 
+  <div
     class="col-12 padding-sm-occ"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
     <div class="action-buttons">
       <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
-        <button
-          mat-mini-fab
-          [matTooltip]="'Individuals.Actions.Add' | translate"
-          class="custom-mini-fab mr-1 bg-primary text-white border-0"
-          [disabled]="false"
-          [routerLink]="['/' + moduleName + '/' + objectName + '/form']"
-        >
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Add' | translate"
+        class="custom-mini-fab mr-1 bg-primary text-white border-0"
+        [disabled]="false"
+        [routerLink]="['/' + moduleName + '/' + objectName + '/form']"
+      >
         <mat-icon>add</mat-icon>
-        </button>
-        <button
-          mat-mini-fab
-          [matTooltip]="'Individuals.Actions.Download' | translate"
-          class="custom-mini-fab mr-1 bg-secondary text-white border-0"
-          [disabled]="true"
-        >
+      </button>
+      <button
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Download' | translate"
+        class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+        [disabled]="true"
+      >
         <mat-icon>download</mat-icon>
       </button>
       <!-- </ng-container> -->
     </div>
-    <ngx-datatable *ngIf="dataTable$ | async as dataTable"
-        #dataTable
-        class="material striped margin-top-xs table-size expandable"
-        [columnMode]="'force'"
-        [columns]="displayedColumns"
-        [rowHeight]="rowHeight"
-        [headerHeight]="rowHeight + 10"
-        [footerHeight]="rowHeight + 10"
-        [externalPaging]="true"
-        [count]="dataTable.total"
-        [limit]="nbRowsToDisplay"
-        [offset]="dataTable.page - 1"
-        [rows]="dataTable.items"
-        (page)="onPage($event)"
-        [sorts]="sorts"
-        (sort)="onSort($event)"
-        [selectionType]="'single'"
+    <ngx-datatable
+      *ngIf="dataTable$ | async as dataTable"
+      #dataTable
+      class="material striped margin-top-xs table-size expandable"
+      [columnMode]="'force'"
+      [columns]="displayedColumns"
+      [rowHeight]="rowHeight"
+      [headerHeight]="rowHeight + 10"
+      [footerHeight]="rowHeight + 10"
+      [externalPaging]="true"
+      [count]="dataTable.total"
+      [limit]="nbRowsToDisplay"
+      [offset]="dataTable.page - 1"
+      [rows]="dataTable.items"
+      (page)="onPage($event)"
+      [sorts]="sorts"
+      (sort)="onSort($event)"
+      [selectionType]="selectionType.single"
     >
-      <ngx-datatable-row-detail
-        rowHeight="auto"
-      >
+      <ngx-datatable-row-detail>
         <ng-template
           ngx-datatable-row-detail-template
           let-row="row"
           let-expanded="expanded"
         >
-          <ng-container
-            *ngTemplateOutlet="summaryTemplate; context: { row: row }"
-          >
-          </ng-container>
+          <ng-container *ngTemplateOutlet="summaryTemplate; context: { row: row }"></ng-container>
         </ng-template>
       </ngx-datatable-row-detail>
-      <ngx-datatable-column id="summary"
+      <ngx-datatable-column
+        id="summary"
         [width]="actionColumnsWidth"
         [resizeable]="false"
         [sortable]="false"
@@ -77,7 +74,8 @@
           ></button>
         </ng-template>
       </ngx-datatable-column>
-      <ngx-datatable-column id="informations"
+      <ngx-datatable-column
+        id="informations"
         [width]="actionColumnsWidth"
         [resizeable]="false"
         [sortable]="false"
@@ -91,12 +89,13 @@
           <button
             class="btn btn-row fa fa-info-circle"
             matTooltip="{{ 'Individuals.Actions.Informations' | translate }}"
-            [routerLink]="['info', row[idName]]"
+            [routerLink]="['info', row[idFieldName]]"
             [disabled]="false"
           ></button>
         </ng-template>
       </ngx-datatable-column>
-      <ngx-datatable-column id="edit"
+      <ngx-datatable-column
+        id="edit"
         [width]="actionColumnsWidth"
         [resizeable]="false"
         [sortable]="false"
@@ -110,12 +109,13 @@
           <button
             class="btn btn-row fa fa-pencil-square-o"
             matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
-            [routerLink]="['form', row[idName]]"
+            [routerLink]="['form', row[idFieldName]]"
             [disabled]="false"
           ></button>
         </ng-template>
       </ngx-datatable-column>
-      <ngx-datatable-column id="delete"
+      <ngx-datatable-column
+        id="delete"
         [width]="actionColumnsWidth"
         [resizeable]="false"
         [sortable]="false"
@@ -129,8 +129,8 @@
           <button
             class="btn btn-row fa fa-trash-o"
             matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
-            (click)="openDeleteModal(row, deleteModal)"
-            [disabled]="true"
+            (click)="onDelete(row[idFieldName])"
+            [disabled]="!allowedToDelete[row.id_tracking_device]"
           ></button>
         </ng-template>
         <ngx-datatable-column name="Date min">
@@ -145,25 +145,21 @@
           </ng-template>
         </ngx-datatable-column>
       </ngx-datatable-column>
-      <ngx-datatable-column 
+      <ngx-datatable-column
         *ngFor="let col of displayedColumns"
         [name]="col.name"
-        [prop]="col.prop">
+        [prop]="col.prop"
+      >
         <ng-template
           ngx-datatable-cell-template
           let-row="row"
           maxWidth="columnMaxWidth"
         >
           <span>
-            {{ row[col.prop] || "-" }}
+            {{ row[col.prop] || '-' }}
           </span>
         </ng-template>
       </ngx-datatable-column>
     </ngx-datatable>
   </div>
 </div>
-
-<!-- Sur datatable-body-cell pour centrer le contenu des lignes du tableau :
-display: flex;
-align-items: center; /* centre verticalement */
-justify-content: flex-start; /* alignement horizontal inchangé */ -->

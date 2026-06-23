@@ -11,8 +11,8 @@ export interface Sort {
 
 // Partial : Sort attributes not mandatory
 export interface APIParamsPagination extends Partial<Sort> {
-  page: number,
-  per_page: number,
+  page: number;
+  per_page: number;
 }
 
 export interface PaginatedItemCollection<T> extends APIParamsPagination {
@@ -31,7 +31,11 @@ export interface ApiError {
   params?: Record<string, unknown>;
 }
 
-// export interface SimplePagination {
+export interface FormConstraint {
+  maxLength: number;
+  pattern: string;
+  help: string;
+}// export interface SimplePagination {
 //   page: number;
 //   per_page: number; // Alias for per_page, to be used in the frontend for consistency with other modules
 // }

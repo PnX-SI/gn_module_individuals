@@ -12,9 +12,10 @@
   margin-bottom: 0.6rem;
 }
 
-.form-group small, .form-group label{
+.form-group small,
+.form-group label {
   display: inline-block;
-  margin-bottom: 0.5rem
+  margin-bottom: 0.5rem;
 }
 
 /* 
@@ -30,26 +31,26 @@ To adapt ng-select (pnx-observers, pnx-nomenclature) to bootstrap .form-control-
 
 // Select options
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
-  font-size: .875rem;
+  font-size: 0.875rem;
   font-weight: 400;
   color: #495057;
 }
 
 // Select options : info, message
 .cdk-describedby-message-container {
-  font-size: .875rem;
+  font-size: 0.875rem;
   font-weight: 400;
 }
 
 // Select input
 .ng-select .ng-select-container .ng-value-container {
-  padding-left: .5rem
+  padding-left: 0.5rem;
 }
 
 .ng-select.auto .ng-select-container {
   height: calc(1.5em + 0.5rem + 2px);
   min-height: calc(1.5em + 0.5rem + 2px);
-  border-radius: .2rem;
+  border-radius: 0.2rem;
   border: 1px solid #ced4da;
 }
 

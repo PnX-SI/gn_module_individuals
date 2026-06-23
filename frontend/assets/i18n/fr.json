@@ -26,7 +26,8 @@
             "Titles": {
                 "Info": "Dispositif de suivi n°{{ id }}",
                 "Add" : "Ajout d'un dispositif de suivi",
-                "Edit" : "Modification du dispositif de suivi n°{{ id }}"
+                "Edit" : "Modification du dispositif de suivi n°{{ id }}",
+                "Delete" : "Suppression du dispositif de suivi n°{{ id }}"
             },
             "Messages": {
                 "Added" : "Le dispositif de suivi a été créé.",

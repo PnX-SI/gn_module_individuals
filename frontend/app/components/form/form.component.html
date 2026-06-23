@@ -1,7 +1,7 @@
 <div class="card card-custom">
   <h2 class="card-header card-header-custom">
     <div>
-      {{ formTitle}}
+      {{ formTitle }}
     </div>
     <div>
       <button
@@ -10,7 +10,7 @@
         class="mr-1 bg-secondary text-white border-0"
         type="button"
         [disabled]="false"
-        [routerLink]="['/' + moduleName + '/' + objectName ]"
+        [routerLink]="['/' + moduleName + '/' + objectName]"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -32,7 +32,6 @@
   >
     <ng-container
       *ngTemplateOutlet="formTemplate; context: { dataTable: dataTable }"
-    >
-    </ng-container>
+    ></ng-container>
   </div>
 </div>

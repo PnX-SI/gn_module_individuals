@@ -7,7 +7,7 @@ import { ModuleService } from '@geonature/services/module.service';
 
 import { Device, CreateDeviceDto, UpdateDeviceDto } from '../models/devices.models';
 import { PaginatedItemCollection, APIParamsPagination } from '../models/common.models';
-import { DATA_TABLE_CONFIG, DEVICES_DEFAULT_SORT } from '..//utils/constants.util';
+import { DATA_TABLE_CONFIG, DEVICES_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
 export class DevicesService {
@@ -24,34 +24,38 @@ export class DevicesService {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
   }
 
-  getDevices(params: APIParamsPagination = {page:1, per_page:DATA_TABLE_CONFIG.PER_PAGE_OPTION}): Observable<PaginatedItemCollection<Device>> {
+  getDevices(
+    params: APIParamsPagination = { page: 1, per_page: DATA_TABLE_CONFIG.PER_PAGE_OPTION }
+  ): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
-    console.log("Parameters sent to API",params)
-    params.prop ??= DEVICES_DEFAULT_SORT.prop
-    params.dir ??= DEVICES_DEFAULT_SORT.dir
+    console.log('Parameters sent to API', params);
+    params.prop ??= DEVICES_DEFAULT_SORT.prop;
+    params.dir ??= DEVICES_DEFAULT_SORT.dir;
 
-
-    Object.keys(params).forEach(key => {
+    Object.keys(params).forEach((key) => {
       const value = params[key as keyof APIParamsPagination];
-      if (value != null) { 
+      if (value != null) {
         httpParams = httpParams.set(key, String(value));
       }
     });
 
-    return this._http.get<PaginatedItemCollection<Device>>(
-      `${this._OBJECT_API}`, { params: httpParams }
-    );
+    return this._http.get<PaginatedItemCollection<Device>>(`${this._OBJECT_API}`, {
+      params: httpParams,
+    });
   }
 
   getDevice(id_tracking_device: number): Observable<Device> {
-    return this._http.get<Device>(
-      `${this._OBJECT_API}/${id_tracking_device}`
-    );
+    return this._http.get<Device>(`${this._OBJECT_API}/${id_tracking_device}`);
   }
 
-  createOrUpdateDevice(device: any, formAction: string, id: number | null = null, params: Record<string, string> = {}): Observable<Device> {
+  createOrUpdateDevice(
+    device: any,
+    formAction: string,
+    id: number | null = null,
+    params: Record<string, string> = {}
+  ): Observable<Device> {
     params['format'] = 'json';
-    console.log(device)
+    console.log(device);
     // Map form to Dto
     let payload: CreateDeviceDto | UpdateDeviceDto = {
       id_nomenclature_device_type: device.id_nomenclature_device_type,
@@ -61,21 +65,26 @@ export class DevicesService {
       comment: device.comment,
     };
 
-    if (formAction === "EDIT") {
+    if (formAction === 'EDIT') {
       payload = {
         ...payload,
         id_tracking_device: device.id,
       };
     }
-    if (formAction === "ADD") {
-      return this._http.post<Device>(`${this._OBJECT_API}`,payload,{ params: params, headers: this._headers });
-    }
-    else {
-      return this._http.put<Device>(`${this._OBJECT_API}/${id}`,payload,{ params: params, headers: this._headers });
+    if (formAction === 'ADD') {
+      return this._http.post<Device>(`${this._OBJECT_API}`, payload, {
+        params: params,
+        headers: this._headers,
+      });
+    } else {
+      return this._http.put<Device>(`${this._OBJECT_API}/${id}`, payload, {
+        params: params,
+        headers: this._headers,
+      });
     }
   }
 
-  deleteDevice(id: number | null = null): Observable<Device> {
+  deleteDevice(id: number): Observable<Device> {
     return this._http.delete<Device>(`${this._OBJECT_API}/${id}`);
   }
 }

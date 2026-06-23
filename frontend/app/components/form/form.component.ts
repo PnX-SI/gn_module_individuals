@@ -1,5 +1,13 @@
-import { ViewEncapsulation, Component, OnInit, AfterViewInit, Input, 
-  TemplateRef, Output, EventEmitter } from '@angular/core';
+import {
+  ViewEncapsulation,
+  Component,
+  OnInit,
+  AfterViewInit,
+  Input,
+  TemplateRef,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
@@ -13,11 +21,11 @@ import { ModuleService } from '@geonature/services/module.service';
 export class FormComponent implements OnInit, AfterViewInit {
   @Output() save: EventEmitter<any> = new EventEmitter();
   @Input() formTemplate!: TemplateRef<any>;
-  @Input() formTitle: string = "";
-  @Input() formAction: string = "";
+  @Input() formTitle: string = '';
+  @Input() formAction: string = '';
   @Input() canSave: boolean = false;
   @Input() dataTable: any;
-  @Input() objectName: string = "";
+  @Input() objectName: string = '';
   public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(
@@ -25,11 +33,7 @@ export class FormComponent implements OnInit, AfterViewInit {
     private _moduleService: ModuleService
   ) {}
 
-  ngOnInit() : void {
-  }
+  ngOnInit(): void {}
 
-  ngAfterViewInit() : void {
-  }
+  ngAfterViewInit(): void {}
 }
-
-

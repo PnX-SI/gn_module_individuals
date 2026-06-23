@@ -1,49 +1,87 @@
-<ng-template 
+<!-- SUMMARY TEMPLATE -->
+<ng-template
   #summaryTemplate
   let-row="row"
 >
   <div class="row mx-0">
     <div class="col-12 col-md-6 px-0">
-      <strong>{{ 'Individuals.Devices.Fields.id_tracking_device' | translate}} :</strong>
+      <strong>{{ 'Individuals.Devices.Fields.id_tracking_device' | translate }} :</strong>
       {{ row.id_tracking_device }}
     </div>
     <div class="col-12 col-md-6 px-0">
-      <strong>{{ 'Individuals.Devices.Fields.meta_create_date' | translate}} :</strong>
+      <strong>{{ 'Individuals.Devices.Fields.meta_create_date' | translate }} :</strong>
       {{ row.meta_create_date }}
     </div>
     <div class="col-12 col-md-6 px-0">
-      <strong>{{ 'Individuals.Devices.Fields.digitiser_name' | translate}} :</strong>
+      <strong>{{ 'Individuals.Devices.Fields.digitiser_name' | translate }} :</strong>
       {{ row.digitiser_name }}
     </div>
     <div class="col-12 col-md-6 px-0">
-      <strong>{{ 'Individuals.Devices.Fields.provider_name' | translate}} :</strong>
+      <strong>{{ 'Individuals.Devices.Fields.provider_name' | translate }} :</strong>
       {{ row.provider_name }}
     </div>
     <div class="col-12 col-md-6 px-0">
-      <strong>{{ 'Individuals.Devices.Fields.provider_device_id' | translate}} :</strong>
+      <strong>{{ 'Individuals.Devices.Fields.provider_device_id' | translate }} :</strong>
       {{ row.provider_device_id }}
     </div>
     <div class="col-12 col-md-6 px-0">
-      <strong>{{ 'Individuals.Devices.Fields.nomenclature_device_type_name' | translate}} :</strong>
+      <strong>
+        {{ 'Individuals.Devices.Fields.nomenclature_device_type_name' | translate }} :
+      </strong>
       {{ row.nomenclature_device_type_name }}
     </div>
     <div class="col-12 col-md-6 px-0">
       <strong>{{ 'Individuals.Devices.Fields.referer_name' | translate }} :</strong>
       {{ row.referer_name }}
-    </div>  
+    </div>
+  </div>
+</ng-template>
+
+<!-- DELETE MODAL TEMPLATE -->
+<ng-template
+  #deleteModalTemplate
+  let-c="close"
+  let-d="dismiss"
+  let-id="id"
+>
+  <div class="modal-header">
+    <h5 class="modal-title">
+      {{ 'Individuals.Devices.Titles.Delete' | translate: { id: selectedId } }}
+    </h5>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      mat-stroked-button
+      (click)="c()"
+    >
+      {{ 'Actions.Cancel' | translate }}
+    </button>
+
+    <button
+      type="button"
+      mat-raised-button
+      color="warn"
+      (click)="confirmDelete(); c()"
+    >
+      <mat-icon>delete</mat-icon>
+      {{ 'Actions.Delete' | translate }}
+    </button>
   </div>
 </ng-template>
 
 <gn-individuals-list
+  [objectName]="'devices'"
+  [idFieldName]="'id_tracking_device'"
   [displayedColumnsParams]="displayedColumnsParams"
   [availableColumnsParams]="availableColumnsParams"
   [dataTable$]="dataTable$"
   [sorts]="sorts"
-  [idName]="idName"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
+  [summaryTemplate]="summaryTemplate"
+  [deleteModalTemplate]="deleteModalTemplate"
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
-  (rows)="onNbRowsReceived($event)"
-  [summaryTemplate]="summaryTemplate"
-  [objectName]="'devices'"
->
-</gn-individuals-list>
+  (delete)="onDelete($event, deleteModalTemplate)"
+></gn-individuals-list>

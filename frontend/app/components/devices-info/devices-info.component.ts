@@ -1,7 +1,7 @@
 import { ViewEncapsulation, Component, OnInit, AfterViewInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of, forkJoin} from 'rxjs';
+import { Observable, of, forkJoin } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConfigService } from '@geonature/services/config.service';
@@ -35,21 +35,20 @@ export class DevicesInfoComponent implements OnInit, AfterViewInit {
     private _location: Location
   ) {}
 
-  ngOnInit() : void {
+  ngOnInit(): void {
     // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
-    this._route.data.subscribe(({data}) => {
+    this._route.data.subscribe(({ data }) => {
       this.dataTable$ = of(data);
       this._deviceId = data.id_tracking_device;
 
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
       if (data.deployments?.length > 0) {
-        const props = this._config.INDIVIDUALS.DEVICES.DEFAULT_DEPLOY_DISPLAYED_COLUMNS as (keyof Deployment)[];
+        const props = this._config.INDIVIDUALS.DEVICES
+          .DEFAULT_DEPLOY_DISPLAYED_COLUMNS as (keyof Deployment)[];
 
         forkJoin(
-          props.map(
-            prop => this._translate.get(`Individuals.Deployments.Fields.${prop}`)
-          )
-        ).subscribe(translations => {
+          props.map((prop) => this._translate.get(`Individuals.Deployments.Fields.${prop}`))
+        ).subscribe((translations) => {
           this.deploymentsColumns = props.map((prop, name) => ({
             prop: prop,
             name: translations[name],
@@ -57,38 +56,38 @@ export class DevicesInfoComponent implements OnInit, AfterViewInit {
           }));
         });
         this.canBedeleted = true;
-      }
-      else {
+      } else {
         data.deployments = [];
       }
 
       // Search null values in deployments data and replace them by "-"
-      Object.keys(data['deployments']).forEach(dep => {
-        Object.keys(data['deployments'][dep]).forEach(key => {
+      Object.keys(data['deployments']).forEach((dep) => {
+        Object.keys(data['deployments'][dep]).forEach((key) => {
           if (data['deployments'][dep][key] == null) {
             data['deployments'][dep][key] = '-';
           }
         });
       });
     });
-    
   }
 
-  ngAfterViewInit() : void {
-  }
+  ngAfterViewInit(): void {}
 
-  onDelete() : void {
+  onDelete(): void {
     this._service.deleteDevice(this._deviceId).subscribe({
       next: (res) => {
-        this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {id: this._deviceId});
+        this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
+          id: this._deviceId,
+        });
         this._location.back();
       },
       error: (err) => {
-          const msg = err.name + ':' + err.message || JSON.stringify(err);
-          this._commonService.translateToaster('error','Individuals.Devices.Errors.DeletedNOK', {id: this._deviceId, error: msg });
-      }
+        const msg = err.name + ':' + err.message || JSON.stringify(err);
+        this._commonService.translateToaster('error', 'Individuals.Devices.Errors.DeletedNOK', {
+          id: this._deviceId,
+          error: msg,
+        });
+      },
     });
   }
 }
-
-
