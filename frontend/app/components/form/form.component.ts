@@ -16,7 +16,9 @@ import { ModuleService } from '@geonature/services/module.service';
   selector: 'gn-individuals-form',
   templateUrl: 'form.component.html',
   styleUrls: ['form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  // SCSS used only in this component and not in the global CSS
+  encapsulation: ViewEncapsulation.None, 
+  standalone: false,
 })
 export class FormComponent implements OnInit, AfterViewInit {
   @Output() save: EventEmitter<any> = new EventEmitter();

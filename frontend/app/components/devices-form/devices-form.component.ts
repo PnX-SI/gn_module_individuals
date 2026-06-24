@@ -1,4 +1,4 @@
-import { ViewEncapsulation, Component, OnInit, AfterViewInit } from '@angular/core';
+import { ViewEncapsulation, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -7,20 +7,21 @@ import { Observable } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
-import { ErrorHandlerService } from 'app/services/errors-handler.service';
-import { Device } from 'app/models/devices.models';
-import { FormConstraint } from 'app/models/common.models';
-import { DEVICE_FORM_CONSTRAINTS } from 'app/utils/constants.util';
-import { DevicesService } from 'app/services/devices.service';
-import { NomenclaturesService } from 'app/services/nomenclature.service';
+import { ErrorHandlerService } from '../../services/errors-handler.service';
+import { Device } from '../../models/devices.models';
+import { FormConstraint } from '../../models/common.models';
+import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
+import { DevicesService } from '../../services/devices.service';
+import { NomenclaturesService } from '../../services/nomenclature.service';
 
 @Component({
   selector: 'gn-individuals-devices-form',
   templateUrl: 'devices-form.component.html',
   styleUrls: ['devices-form.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
-export class DevicesFormComponent implements OnInit, AfterViewInit {
+export class DevicesFormComponent implements OnInit {
   public dataTable$: Observable<Device> = new Observable<Device>();
   public availableFields!: Device;
   public deviceId!: number;
@@ -84,8 +85,6 @@ export class DevicesFormComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
-  ngAfterViewInit(): void {}
 
   patchForm(device: any): void {
     /// Modifier par : Device au lieu de any et faire le mapping si besoin
