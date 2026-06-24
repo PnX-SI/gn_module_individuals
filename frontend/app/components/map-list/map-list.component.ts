@@ -9,6 +9,7 @@ import { ModuleService } from '@geonature/services/module.service';
   selector: 'gn-individuals-map-list',
   templateUrl: 'map-list.component.html',
   styleUrls: ['map-list.component.scss'],
+  standalone: false,
 })
 export class MapListComponent implements OnInit, AfterViewInit {
   public userCruved: any;

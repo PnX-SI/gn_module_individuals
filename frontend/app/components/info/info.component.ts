@@ -16,6 +16,7 @@ import { ModuleService } from '@geonature/services/module.service';
   templateUrl: 'info.component.html',
   styleUrls: ['info.component.scss'],
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class InfoComponent implements OnInit, AfterViewInit {
   @Output() delete: EventEmitter<any> = new EventEmitter();
