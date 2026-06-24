@@ -47,7 +47,7 @@ To adapt ng-select (pnx-observers, pnx-nomenclature) to bootstrap .form-control-
   padding-left: 0.5rem;
 }
 
-.ng-select.auto .ng-select-container {
+.ng-select.auto .ng-select-container, .ng-select.ng-select-single .ng-select-container {
   height: calc(1.5em + 0.5rem + 2px);
   min-height: calc(1.5em + 0.5rem + 2px);
   border-radius: 0.2rem;
@@ -67,4 +67,14 @@ To adapt ng-select (pnx-observers, pnx-nomenclature) to bootstrap .form-control-
 
 .ng-select .ng-arrow-wrapper .ng-arrow {
   border-width: 0.4rem 0.4rem 0.2rem;
+}
+
+/*
+ To homogenize form-control place holder with <div class="ng-placeholder"> of ng-select component
+*/
+
+.form-control::placeholder, .ng-select .ng-select-container .ng-value-container .ng-placeholder {
+  color: #6c757d;
+  opacity: 1;
+  font-size: 0.875rem;
 }

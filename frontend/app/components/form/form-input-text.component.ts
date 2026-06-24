@@ -36,4 +36,9 @@ export class FormInputTextComponent {
      * CSS classes added to the input element classes (form-control and form-control-sm).
      */
     @Input() inputClass = '';
+
+    /**
+     * Place holder for the input text. Default set with label
+     */
+    @Input() placeHolder: string | null = null;
 }

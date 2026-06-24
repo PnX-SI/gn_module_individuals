@@ -23,6 +23,14 @@
                 "last_individual_equipped_name" : "Dernier individu équipé",
                 "deployments" : "Liste des déploiements associés"
             },
+            "Form": {
+                "PlaceHolder": {
+                    "provider_name": "Indiquer le nom du fournisseur",
+                    "provider_device_id": "Indiquer l'identifiant du dispositif",
+                    "id_referer": "Sélectionner le référent",
+                    "comment": "En dire plus ..."
+                }
+            },
             "Titles": {
                 "Info": "Dispositif de suivi n°{{ id }}",
                 "Add" : "Ajout d'un dispositif de suivi",

@@ -20,7 +20,9 @@
       [parentFormControl]="form.get(field)"
       [maxLength]="formConstraints[field].maxLength"
       [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+      [placeHolder]="'Individuals.Devices.Form.PlaceHolder.' + field | translate"
     ></gn-individuals-form-input-text>
+    
 
     <!-- provider_device_id -->
     <gn-individuals-form-input-text 
@@ -30,6 +32,7 @@
       [parentFormControl]="form.get(field)"
       [maxLength]="formConstraints[field].maxLength"
       [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+      [placeHolder]="'Individuals.Devices.Form.PlaceHolder.' + field | translate"
     ></gn-individuals-form-input-text>
 
     <!-- id_referer -->
@@ -39,7 +42,7 @@
       [label]="'Individuals.Devices.Fields.' + field | translate"
       [parentFormControl]="$any(form.get(field))"
       [bindAllItem]="true"
-      [placeHolder]="'Sélectionner le référent'"
+      [placeHolder]="'Individuals.Devices.Form.PlaceHolder.' + field | translate"
     ></pnx-observers>
 
     <!-- comment -->
@@ -49,6 +52,7 @@
       [parentFormControl]="form.get(field)"
       [maxLength]="formConstraints[field].maxLength"
       [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+      [placeHolder]="'Individuals.Devices.Form.PlaceHolder.' + field | translate"
     ></gn-individuals-form-textarea>
   </div>
 </ng-template>
