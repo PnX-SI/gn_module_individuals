@@ -35,7 +35,9 @@ export interface FormConstraint {
   maxLength: number;
   pattern: string;
   help: string;
-}// export interface SimplePagination {
+}
+
+// export interface SimplePagination {
 //   page: number;
 //   per_page: number; // Alias for per_page, to be used in the frontend for consistency with other modules
 // }

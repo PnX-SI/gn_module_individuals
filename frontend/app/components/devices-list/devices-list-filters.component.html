@@ -1,0 +1,21 @@
+<div class="col-6 padding-sm">
+<!-- provider_name -->
+    <div
+        *ngIf="'provider_name' as field"
+        class="form-group w-50"
+    >
+        <label class="small">{{ 'Individuals.Devices.Fields.' + field | translate }}</label>
+        <input
+        type="text"
+        class="form-control form-control-sm"
+        [formControl]="$any(filtersForm.get(field))"
+        maxlength="{{ formConstraints[field].maxLength }}"
+        />
+        <small
+        class="text-danger d-block d-flex justify-content-end"
+        *ngIf="filtersForm.get(field)?.dirty && filtersForm.get(field)?.errors?.['pattern']"
+        >
+        {{ 'Individuals.Errors.' + [formConstraints[field].help] | translate }}
+        </small>
+    </div>
+</div>    

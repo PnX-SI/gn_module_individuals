@@ -1,6 +1,6 @@
-import { ViewEncapsulation, Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-
+import { TranslateService } from '@ngx-translate/core';
 import { Subject, Observable, of } from 'rxjs';
 import { takeUntil, tap } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -8,17 +8,19 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
-import { ErrorHandlerService } from 'app/services/errors-handler.service';
-import { Device, DEVICE_COLUMNS } from 'app/models/devices.models';
-import { Sort, PaginatedItemCollection, APIParamsPagination } from 'app/models/common.models';
-import { DevicesService } from 'app/services/devices.service';
-import { DEVICES_DEFAULT_SORT, DATA_TABLE_CONFIG } from 'app/utils/constants.util';
+import { ErrorHandlerService } from '../../services/errors-handler.service';
+import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
+import { Sort, PaginatedItemCollection, APIParamsPagination } from '../../models/common.models';
+import { DevicesService } from '../../services/devices.service';
+import { DEVICES_DEFAULT_SORT, DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
+
 
 @Component({
   selector: 'gn-individuals-devices-list',
   templateUrl: 'devices-list.component.html',
   styleUrls: ['devices-list.component.scss'],
-  encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class DevicesListComponent implements OnInit, OnDestroy {
   public availableColumnsParams: Record<keyof Device, true> = DEVICE_COLUMNS;
@@ -29,8 +31,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public allowedToEdit: boolean[] = [];
   public allowedToDelete: Record<number, boolean> = {};
-  public selectedId!: number;
-  // private _per_page: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  public selectedRow!: Device;
   private _destroy$ = new Subject<void>();
   private _APIparams!: APIParamsPagination;
 
@@ -40,7 +41,8 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     private _commonService: CommonService,
     private _activatedRoute: ActivatedRoute,
     private _ngbModal: NgbModal,
-    private _errorHandler: ErrorHandlerService
+    private _errorHandler: ErrorHandlerService,
+    private _translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -81,24 +83,53 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     this._loadData();
   }
 
-  onDelete($event: any, template: TemplateRef<any>) {
-    this.selectedId = $event;
-    this._ngbModal.open(template);
+  /**
+   *
+   *
+   * @param {*} $event Current row
+   * @param {TemplateRef<any>} template Delete modal Template reference
+   * @memberof DevicesListComponent
+   */
+  // openDeleteModal($event: any, template: TemplateRef<any>) {
+  //   this.selectedRow = $event;
+  //   this._ngbModal.open(template);
+  // }
+
+  openDeleteModal($event: any) {
+    this.selectedRow = $event;
+    const modalRef = this._ngbModal.open(DeleteModalComponent);
+    // modalRef.componentInstance.objectId = this.selectedRow.id_tracking_device;
+
+    modalRef.componentInstance.title =
+      this._translate.instant(
+        'Individuals.Devices.Titles.Delete',
+        { id: this.selectedRow.id_tracking_device }
+      );
+
+    modalRef.componentInstance.body = `
+      ${this._translate.instant('Individuals.Devices.Fields.provider_name')} : ${this.selectedRow.provider_name}<br>
+      ${this._translate.instant('Individuals.Devices.Fields.provider_device_id')} : ${this.selectedRow.provider_device_id}
+    `;
+
+    modalRef.componentInstance.confirm.subscribe((id: number) => {
+      this.onDelete();
+    });
   }
 
-  confirmDelete() {
-    if (this.selectedId) {
-      this._devicesService.deleteDevice(this.selectedId).subscribe({
+  onDelete() {
+    if (this.selectedRow) {
+      const selectedId = this.selectedRow.id_tracking_device;
+      this._devicesService.deleteDevice(selectedId).subscribe({
         next: (res) => {
           this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
-            id: this.selectedId,
+            id: selectedId,
           });
           this._loadData();
         },
         error: (err) => {
           this._errorHandler.handleHttpError(
             err,
-            { id: this.selectedId },
+            { id: selectedId },
             'Individuals.Devices.ApiErrors'
           );
         },

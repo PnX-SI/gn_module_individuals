@@ -5,7 +5,7 @@
   >
     <div class="action-buttons">
       <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
-      <button
+      <button id="add"
         mat-mini-fab
         [matTooltip]="'Individuals.Actions.Add' | translate"
         class="custom-mini-fab mr-1 bg-primary text-white border-0"
@@ -14,7 +14,16 @@
       >
         <mat-icon>add</mat-icon>
       </button>
-      <button
+      <button id="filter"
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Filter' | translate"
+        class="custom-mini-fab mr-1 bg-info text-white border-0"
+        [disabled]="false"
+        (click)="toggleShowFilters()"
+      >
+        <mat-icon>tune</mat-icon>
+      </button>
+      <button id="download"
         mat-mini-fab
         [matTooltip]="'Individuals.Actions.Download' | translate"
         class="custom-mini-fab mr-1 bg-secondary text-white border-0"
@@ -24,12 +33,19 @@
       </button>
       <!-- </ng-container> -->
     </div>
+    <div *ngIf="showFilters"
+      class="ngx-datatable material filters">
+      <ng-container
+        *ngTemplateOutlet="filtersTemplate">
+      </ng-container>
+    </div>
     <ngx-datatable
       *ngIf="dataTable$ | async as dataTable"
       #dataTable
       class="material striped margin-top-xs table-size expandable"
       [columnMode]="'force'"
       [columns]="displayedColumns"
+      [scrollbarH]="true"
       [rowHeight]="rowHeight"
       [headerHeight]="rowHeight + 10"
       [footerHeight]="rowHeight + 10"
@@ -43,7 +59,9 @@
       (sort)="onSort($event)"
       [selectionType]="selectionType.single"
     >
-      <ngx-datatable-row-detail>
+      <ngx-datatable-row-detail
+        [rowHeight]="$any('auto')"
+      >
         <ng-template
           ngx-datatable-row-detail-template
           let-row="row"
@@ -129,7 +147,7 @@
           <button
             class="btn btn-row fa fa-trash-o"
             matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
-            (click)="onDelete(row[idFieldName])"
+            (click)="onDelete(row)"
             [disabled]="!allowedToDelete[row.id_tracking_device]"
           ></button>
         </ng-template>

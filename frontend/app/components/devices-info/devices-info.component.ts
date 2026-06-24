@@ -17,7 +17,9 @@ import { DevicesService } from '../../services/devices.service';
   selector: 'gn-individuals-devices-info',
   templateUrl: 'devices-info.component.html',
   styleUrls: ['devices-info.component.scss'],
+  // SCSS used only in this component and not in the global CSS
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
 export class DevicesInfoComponent implements OnInit, AfterViewInit {
   public dataTable$: Observable<Device> = new Observable<Device>();

@@ -97,7 +97,9 @@
             "Summary" : "Afficher / Cacher le résumé",
             "Informations" : "Détail complet",
             "Edit" : "Modifier",
-            "Save" : "Enregistrer"
+            "Save" : "Enregistrer",
+            "Download" : "Télécharger",
+            "Filter" : "Filtrer"
         }
     }
 }
