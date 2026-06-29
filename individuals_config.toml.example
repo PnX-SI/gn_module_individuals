@@ -1,11 +1,17 @@
-# Individuals configuration
+# Module configuration
+[GLOBAL]
+# Id of the taxref list (created in the admin interface) to use for this module
+# If not set, API queries will return all taxons
+ID_TAXON_LIST=
+
+# Individuals object configuration
 [INDIVIDUALS]
 
-# Observations configuration
+# Observations object configuration
 [OBSERVATIONS]
 
-# Captures configuration
-[CAPTURE]
+# Captures object configuration
+[CAPTURES]
 
 # Tracking devices configuration
 [DEVICES]

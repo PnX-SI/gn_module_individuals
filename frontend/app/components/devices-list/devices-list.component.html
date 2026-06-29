@@ -37,37 +37,10 @@
   </div>
 </ng-template>
 
-<!-- DELETE MODAL TEMPLATE -->
-<ng-template
-  #deleteModalTemplate
-  let-c="close"
-  let-d="dismiss"
-  let-id="id"
->
-  <div class="modal-header">
-    <h5 class="modal-title">
-      {{ 'Individuals.Devices.Titles.Delete' | translate: { id: selectedId } }}
-    </h5>
-  </div>
-  <div class="modal-footer">
-    <button
-      type="button"
-      mat-stroked-button
-      (click)="c()"
-    >
-      {{ 'Actions.Cancel' | translate }}
-    </button>
-
-    <button
-      type="button"
-      mat-raised-button
-      color="warn"
-      (click)="confirmDelete(); c()"
-    >
-      <mat-icon>delete</mat-icon>
-      {{ 'Actions.Delete' | translate }}
-    </button>
-  </div>
+<ng-template #filtersTemplate>
+  <gn-individuals-devices-list-filters
+    (filters)="onFilters($event)"
+  ></gn-individuals-devices-list-filters>
 </ng-template>
 
 <gn-individuals-list
@@ -80,8 +53,8 @@
   [allowedToEdit]="allowedToEdit"
   [allowedToDelete]="allowedToDelete"
   [summaryTemplate]="summaryTemplate"
-  [deleteModalTemplate]="deleteModalTemplate"
+  [filtersTemplate]="filtersTemplate"
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
-  (delete)="onDelete($event, deleteModalTemplate)"
+  (delete)="openDeleteModal($event)"
 ></gn-individuals-list>

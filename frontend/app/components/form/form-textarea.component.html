@@ -1,0 +1,22 @@
+<div
+  class="form-group"
+  [ngClass]="containerClass"
+>
+  <label class="small">{{ label }}</label>
+  <textarea
+    type="textarea"
+    class="form-control form-control-sm"
+    [formControl]="$any(parentFormControl)"
+    [maxlength]="maxLength"
+    [placeholder]="placeHolder || label"
+  ></textarea>
+  <small class="d-flex justify-content-end text-muted">
+    {{ parentFormControl?.value?.length || 0 }}/{{ maxLength }}
+  </small>
+  <small
+    class="text-danger d-block d-flex justify-content-end"
+    *ngIf="errorKey && parentFormControl?.dirty && parentFormControl?.errors?.['pattern']"
+  >
+    {{ errorKey }}
+  </small>
+</div>

@@ -3,7 +3,6 @@ import {
   Component,
   OnInit,
   ViewChild,
-  AfterViewInit,
   EventEmitter,
   Output,
   Input,
@@ -13,21 +12,22 @@ import { TranslateService } from '@ngx-translate/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, combineLatest, of } from 'rxjs';
 import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from 'app/utils/constants.util';
-import { Column, PaginatedItemCollection } from 'app/models/common.models';
+import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { Column, PaginatedItemCollection } from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-list',
   templateUrl: 'list.component.html',
   styleUrls: ['list.component.scss'],
+  // SCSS used only in this component and not in the global CSS
   encapsulation: ViewEncapsulation.None,
+  standalone: false,
 })
-export class ListComponent implements OnInit, AfterViewInit {
+export class ListComponent implements OnInit {
   // ViewChild : To be visible dynamicaly in the parent component linked with the #dataTable reference in the child template
   @ViewChild('dataTable') dataTable: DatatableComponent | undefined;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
@@ -44,9 +44,9 @@ export class ListComponent implements OnInit, AfterViewInit {
   >();
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
-  @Input() allowedToDelete: Record<number,boolean> = {};
+  @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
-  @Input() deleteModalTemplate!: TemplateRef<any>;
+  @Input() filtersTemplate!: TemplateRef<any>;
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
@@ -57,13 +57,13 @@ export class ListComponent implements OnInit, AfterViewInit {
   public availableColumns!: Column<undefined>[];
   public moduleName: string = this._moduleService.currentModule.module_url;
   public selectionType = SelectionType;
+  public showFilters: boolean = false;
 
   constructor(
     public config: ConfigService,
     private _translate: TranslateService,
     private _activatedRoute: ActivatedRoute,
-    private _moduleService: ModuleService,
-    private _ngbModal: NgbModal
+    private _moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {
@@ -80,7 +80,7 @@ export class ListComponent implements OnInit, AfterViewInit {
       this.displayedColumnsParams.includes(column.prop)
     );
 
-    // // Build an array of translation observables for each column name
+    // Build an array of translation observables for each column name
     const translateTab$ = this.availableColumns.map(
       // An observable is returned which emits the translation of this key
       (column) => this._translate.get(`Individuals.Devices.Fields.${column.prop}`)
@@ -102,8 +102,6 @@ export class ListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {}
-
   onPage($event: any): void {
     this.pagination.emit($event);
   }
@@ -118,7 +116,22 @@ export class ListComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /**
+   * Emit a delete event
+   *
+   * @param {*} $event Current row.
+   * @memberof ListComponent
+   */
   onDelete($event: any): void {
     this.delete.emit($event);
+  }
+
+  /**
+   * Show the filters
+   *
+   * @memberof ListComponent
+   */
+  toggleShowFilters(): void {
+    this.showFilters = !this.showFilters;
   }
 }

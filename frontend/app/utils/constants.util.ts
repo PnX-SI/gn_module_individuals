@@ -13,7 +13,7 @@ export const DEVICE_FORM_CONSTRAINTS = {
   provider_name: {
     maxLength: 50,
     pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
-    help: 'PatternText1',
+    help: 'PatternText1', // Refer to i18n files
   },
   provider_device_id: {
     maxLength: 50,

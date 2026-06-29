@@ -10,12 +10,12 @@ export interface Sort {
 }
 
 // Partial : Sort attributes not mandatory
-export interface APIParamsPagination extends Partial<Sort> {
+export interface APIPaginationParams extends Partial<Sort> {
   page: number;
   per_page: number;
 }
 
-export interface PaginatedItemCollection<T> extends APIParamsPagination {
+export interface PaginatedItemCollection<T> extends APIPaginationParams {
   items: T[];
   total: number;
   pages: number;
@@ -35,7 +35,9 @@ export interface FormConstraint {
   maxLength: number;
   pattern: string;
   help: string;
-}// export interface SimplePagination {
+}
+
+// export interface SimplePagination {
 //   page: number;
 //   per_page: number; // Alias for per_page, to be used in the frontend for consistency with other modules
 // }

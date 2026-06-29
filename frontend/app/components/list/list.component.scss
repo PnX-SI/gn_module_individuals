@@ -1,3 +1,5 @@
+@use '../../styles/buttons' as *;
+
 .list-container {
   display: flex;
   flex-wrap: wrap;
@@ -45,4 +47,9 @@
 .btn:focus {
   outline: none;
   box-shadow: none;
+}
+
+// To select the filters div
+.filters {
+  margin-bottom: 0.7rem;
 }

@@ -1,15 +1,11 @@
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { HttpClient, HttpClientXsrfModule } from '@angular/common/http';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+
 import { GN2CommonModule } from '@geonature_common/GN2Common.module';
-
-import { HttpClient } from '@angular/common/http';
-import { HttpClientXsrfModule } from '@angular/common/http';
-
 import { ConfigService as cs } from '@geonature/services/config.service';
-
 import { CustomTranslateLoader } from '@geonature/shared/translate/custom-loader';
 import { TranslateModule, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { I18nService } from '@geonature/shared/translate/i18n-service';
@@ -24,7 +20,11 @@ import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
+import { DevicesListFiltersComponent } from './components/devices-list/devices-list-filters.component';
+import { DeleteModalComponent } from './components/delete-modal/delete-modal.component';
 import { FormComponent } from './components/form/form.component';
+import { FormInputTextComponent } from './components/form/form-input-text.component';
+import { FormTextareaComponent } from './components/form/form-textarea.component';
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
 import { InfoComponent } from './components/info/info.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
@@ -38,10 +38,14 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     MapListComponent,
     ListComponent,
     DevicesListComponent,
+    DevicesListFiltersComponent,
     InfoComponent,
     DevicesInfoComponent,
     FormComponent,
     DevicesFormComponent,
+    FormInputTextComponent,
+    FormTextareaComponent,
+    DeleteModalComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({

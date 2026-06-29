@@ -1,0 +1,49 @@
+<div class="d-flex flex-wrap filters-form">
+  <!-- cd_nom : taxon -->
+  <pnx-taxonomy
+    *ngIf="'cd_nom' as field"
+    [ngClass]="'form-group w-25'"
+    [label]="'Individuals.Devices.Filters.' + field | translate"
+    [parentFormControl]="$any(filtersForm.get(field))"
+    [idList]="taxonListId"
+    [charNumber]="3"
+  ></pnx-taxonomy>
+
+  <!-- id_nomenclature_device_type -->
+  <pnx-nomenclature
+    *ngIf="'id_nomenclature_device_type' as field"
+    [ngClass]="'form-group'"
+    [label]="'Individuals.Devices.Fields.' + field | translate"
+    [parentFormControl]="$any(filtersForm.get(field))"
+    codeNomenclatureType="TYPE_DISPO_SUIVI"
+  ></pnx-nomenclature>
+
+  <!-- provider_name -->
+  <gn-individuals-form-input-text
+    *ngIf="'provider_name' as field"
+    [label]="'Individuals.Devices.Fields.' + field | translate"
+    [parentFormControl]="filtersForm.get(field)"
+    [maxLength]="formConstraints[field].maxLength"
+    [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+    [placeHolder]="'Individuals.Form.firstLetters' | translate"
+  ></gn-individuals-form-input-text>
+
+  <!-- referer_name -->
+  <pnx-observers
+    *ngIf="'id_referer' as field"
+    [ngClass]="'form-group w-25'"
+    [label]="'Individuals.Devices.Fields.' + field | translate"
+    [parentFormControl]="$any(filtersForm.get(field))"
+    [bindAllItem]="true"
+    [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
+  ></pnx-observers>
+
+  <button
+    mat-mini-fab
+    [matTooltip]="'Actions.Reset' | translate"
+    class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+    (click)="onResetFilters()"
+  >
+    <mat-icon>restart_alt</mat-icon>
+  </button>
+</div>
