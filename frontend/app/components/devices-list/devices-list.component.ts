@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, Observable, of } from 'rxjs';
@@ -9,12 +9,11 @@ import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Device, DEVICE_COLUMNS } from '../../models/devices.models';
-import { Sort, PaginatedItemCollection, APIParamsPagination } from '../../models/common.models';
+import { Device, DEVICE_COLUMNS, APIDevicesFiltersParams } from '../../models/devices.models';
+import { Sort, PaginatedItemCollection, APIPaginationParams } from '../../models/common.models';
 import { DevicesService } from '../../services/devices.service';
 import { DEVICES_DEFAULT_SORT, DATA_TABLE_CONFIG } from '../../utils/constants.util';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
-
 
 @Component({
   selector: 'gn-individuals-devices-list',
@@ -33,7 +32,13 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   public allowedToDelete: Record<number, boolean> = {};
   public selectedRow!: Device;
   private _destroy$ = new Subject<void>();
-  private _APIparams!: APIParamsPagination;
+  private _APIPaginationParams: APIPaginationParams = {
+    page: 1,
+    per_page: DATA_TABLE_CONFIG.PER_PAGE_OPTION,
+    prop: DEVICES_DEFAULT_SORT.prop,
+    dir: DEVICES_DEFAULT_SORT.dir,
+  };
+  private _APIFiltersParams: APIDevicesFiltersParams = {};
 
   constructor(
     private _config: ConfigService,
@@ -57,12 +62,13 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    console.log('ngOnDestroy');
     this._destroy$.next();
     this._destroy$.complete();
   }
 
   onPage($event: any): void {
-    this._APIparams = {
+    this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: Number($event.limit ?? this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
       prop: this.sorts[0].prop,
@@ -72,7 +78,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   }
 
   onSort($event: any): void {
-    this._APIparams = {
+    this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: DATA_TABLE_CONFIG.PER_PAGE_OPTION,
       prop: $event.sorts[0].prop,
@@ -84,27 +90,20 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   *
+   * Open the delete modal
    *
    * @param {*} $event Current row
    * @param {TemplateRef<any>} template Delete modal Template reference
    * @memberof DevicesListComponent
    */
-  // openDeleteModal($event: any, template: TemplateRef<any>) {
-  //   this.selectedRow = $event;
-  //   this._ngbModal.open(template);
-  // }
-
   openDeleteModal($event: any) {
     this.selectedRow = $event;
     const modalRef = this._ngbModal.open(DeleteModalComponent);
-    // modalRef.componentInstance.objectId = this.selectedRow.id_tracking_device;
 
-    modalRef.componentInstance.title =
-      this._translate.instant(
-        'Individuals.Devices.Titles.Delete',
-        { id: this.selectedRow.id_tracking_device }
-      );
+    modalRef.componentInstance.title = this._translate.instant(
+      'Individuals.Devices.Titles.Delete',
+      { id: this.selectedRow.id_tracking_device }
+    );
 
     modalRef.componentInstance.body = `
       ${this._translate.instant('Individuals.Devices.Fields.provider_name')} : ${this.selectedRow.provider_name}<br>
@@ -116,7 +115,25 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onDelete() {
+  onFilters($event: {
+    key: keyof APIDevicesFiltersParams;
+    value: string | number | undefined;
+  }): void {
+    console.log('pagination', this._APIPaginationParams);
+    console.log('filters', this._APIFiltersParams);
+    if (!$event) {
+      this._APIFiltersParams = {};
+    } else {
+      if ($event.value) {
+        console.log('event:', $event);
+        this._APIFiltersParams[$event.key] = $event.value;
+        this._APIPaginationParams['page'] = 1;
+      }
+    }
+    this._loadData();
+  }
+
+  onDelete(): void {
     if (this.selectedRow) {
       const selectedId = this.selectedRow.id_tracking_device;
       this._devicesService.deleteDevice(selectedId).subscribe({
@@ -137,22 +154,28 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     }
   }
 
+  private _loadData(): void {
+    const APIParams = {
+      ...this._APIPaginationParams,
+      ...this._APIFiltersParams,
+    };
+    this.dataTable$ = this._devicesService
+      .getDevices(APIParams)
+      .pipe(tap((data) => this._initPermissions(data)));
+  }
+
   private _initPermissions(data: PaginatedItemCollection<Device>): void {
     this.allowedToDelete = [];
 
     // Not allowed to delete if deployments exists
     // Have to be changed with scope and cruved
-    data.items.forEach((item: Device) => {
-      this.allowedToDelete[item.id_tracking_device] = item.last_individual_equipped_name == null;
-    });
+    if (data.items) {
+      data.items.forEach((item: Device) => {
+        this.allowedToDelete[item.id_tracking_device] = item.last_individual_equipped_name == null;
+      });
 
-    // Have to be changed with scope and cruved
-    this.allowedToEdit = data.items.map(() => true);
-  }
-
-  private _loadData(): void {
-    this.dataTable$ = this._devicesService
-      .getDevices(this._APIparams)
-      .pipe(tap((data) => this._initPermissions(data)));
+      // Have to be changed with scope and cruved
+      this.allowedToEdit = data.items.map(() => true);
+    }
   }
 }

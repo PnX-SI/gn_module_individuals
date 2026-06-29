@@ -44,3 +44,17 @@ export const DEVICE_COLUMNS: Record<keyof Device, true> = {
   meta_create_date: true,
   meta_update_date: true,
 };
+
+export interface APIDevicesFiltersParams {
+  // This line help to use
+  // $event: {
+  //   key: keyof APIDevicesFiltersParams;
+  //   value: string | number | undefined;
+  // }
+  [key: string]: string | number | undefined;
+
+  cd_nom?: number;
+  id_nomenclature_device_type?: number;
+  provider_name?: string;
+  id_referer?: number;
+}

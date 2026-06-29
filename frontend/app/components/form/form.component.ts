@@ -17,7 +17,7 @@ import { ModuleService } from '@geonature/services/module.service';
   templateUrl: 'form.component.html',
   styleUrls: ['form.component.scss'],
   // SCSS used only in this component and not in the global CSS
-  encapsulation: ViewEncapsulation.None, 
+  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class FormComponent implements OnInit, AfterViewInit {

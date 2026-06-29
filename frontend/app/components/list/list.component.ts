@@ -44,7 +44,7 @@ export class ListComponent implements OnInit {
   >();
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
-  @Input() allowedToDelete: Record<number,boolean> = {};
+  @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
 
@@ -63,7 +63,7 @@ export class ListComponent implements OnInit {
     public config: ConfigService,
     private _translate: TranslateService,
     private _activatedRoute: ActivatedRoute,
-    private _moduleService: ModuleService,
+    private _moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {

@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-
 @Component({
   selector: 'gn-individuals-delete-modal',
   templateUrl: './delete-modal.component.html',
@@ -12,21 +11,19 @@ export class DeleteModalComponent {
   /**
    * Modal title displayed in the header.
    */
-  @Input() title: string = "";
+  @Input() title: string = '';
 
   /**
    * HTML content displayed in the modal body.
    */
-  @Input() body: string = "";
+  @Input() body: string = '';
 
   /**
    * Emits when the user confirms the deletion.
    */
   @Output() confirm = new EventEmitter<void>();
 
-  constructor(
-    private _activeModal: NgbActiveModal
-  ) {}
+  constructor(private _activeModal: NgbActiveModal) {}
 
   onConfirm(): void {
     this.confirm.emit();

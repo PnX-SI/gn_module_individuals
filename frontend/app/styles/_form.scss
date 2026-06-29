@@ -1,0 +1,81 @@
+/* Space between label and input */
+.form-group {
+  display: flex;
+  // To be sure that the label stay over the input
+  flex-direction: column;
+  // Space between inputs
+  margin-bottom: 0.6rem;
+}
+
+.form-group > small:not(:first-of-type) {
+  margin-top: 0.5rem;
+}
+
+.form-group small,
+.form-group label {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+/* 
+To homogenize ng-select components (pnx-observers, pnx-nomenclature) 
+with bootstrap components (.form-control-sm) 
+
+.form-control-sm {
+    height: calc(1.5em + .5rem + 2px);
+    padding: .25rem .5rem;
+    font-size: .875rem;
+    line-height: 1.5;
+    border-radius: .2rem;
+}
+*/
+// Select options
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #495057;
+}
+
+// Select options : info, message
+.cdk-describedby-message-container {
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+// Select input
+.ng-select .ng-select-container .ng-value-container {
+  padding-left: 0.5rem;
+}
+
+.ng-select.auto .ng-select-container,
+.ng-select.ng-select-single .ng-select-container {
+  height: calc(1.5em + 0.5rem + 2px);
+  min-height: calc(1.5em + 0.5rem + 2px);
+  border-radius: 0.2rem;
+  border: 1px solid #ced4da;
+}
+
+.ng-select.auto .ng-value {
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #495057;
+}
+
+// Clear and arrow icons
+.ng-select .ng-clear-wrapper .ng-clear {
+  font-size: 1.3rem;
+}
+
+.ng-select .ng-arrow-wrapper .ng-arrow {
+  border-width: 0.4rem 0.4rem 0.2rem;
+}
+
+/*
+ To homogenize form-control place holder with <div class="ng-placeholder"> of ng-select component
+*/
+.form-control::placeholder,
+.ng-select .ng-select-container .ng-value-container .ng-placeholder {
+  color: #6c757d;
+  opacity: 1;
+  font-size: 0.875rem;
+}

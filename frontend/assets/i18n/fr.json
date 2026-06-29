@@ -23,13 +23,14 @@
                 "last_individual_equipped_name" : "Dernier individu équipé",
                 "deployments" : "Liste des déploiements associés"
             },
-            "Form": {
-                "PlaceHolder": {
-                    "provider_name": "Indiquer le nom du fournisseur",
-                    "provider_device_id": "Indiquer l'identifiant du dispositif",
-                    "id_referer": "Sélectionner le référent",
-                    "comment": "En dire plus ..."
-                }
+            "PlaceHolder": {
+                "provider_name": "Indiquer le nom du fournisseur",
+                "provider_device_id": "Indiquer l'identifiant du dispositif",
+                "id_referer": "Sélectionner le référent",
+                "comment": "En dire plus ..."
+            },
+            "Filters":{
+                "cd_nom": "Taxon"
             },
             "Titles": {
                 "Info": "Dispositif de suivi n°{{ id }}",
@@ -90,9 +91,7 @@
         },
         "Form" : {
             "PickGeom" : " Veuillez saisir une géométrie sur la carte ",
-            "AssignedFields" : "Champs associés au type : ",
-            "ValidateEnter" : "Valider et saisir des ",
-            "ValidateChain" : "Valider et enchainer les saisies",
+            "firstLetters": "Saisir les premières lettres",
             "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet"
 
         },
@@ -107,7 +106,8 @@
             "Edit" : "Modifier",
             "Save" : "Enregistrer",
             "Download" : "Télécharger",
-            "Filter" : "Filtrer"
+            "Filter" : "Filtrer",
+            "Reset" : "Réinitialiser"
         }
     }
 }

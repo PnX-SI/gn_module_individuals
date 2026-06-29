@@ -4,7 +4,6 @@ import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 
-import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
@@ -12,7 +11,6 @@ import { Device } from '../../models/devices.models';
 import { FormConstraint } from '../../models/common.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { DevicesService } from '../../services/devices.service';
-import { NomenclaturesService } from '../../services/nomenclature.service';
 
 @Component({
   selector: 'gn-individuals-devices-form',
@@ -27,15 +25,11 @@ export class DevicesFormComponent implements OnInit {
   public deviceId!: number;
   public formAction!: string;
   public form!: FormGroup;
-  public formConstraints: Record<string,FormConstraint> = DEVICE_FORM_CONSTRAINTS;
-  public lang = this._config.DEFAULT_LANGUAGE;
-
+  public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
   constructor(
-    private _config: ConfigService,
     private _route: ActivatedRoute,
     private _commonService: CommonService,
     private _fb: FormBuilder,
-    public nomenclatureService: NomenclaturesService,
     private _service: DevicesService,
     private _location: Location,
     private _errorHandler: ErrorHandlerService

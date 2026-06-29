@@ -1,16 +1,19 @@
-import { ViewEncapsulation, Component, OnInit } from '@angular/core';
+import {
+  ViewEncapsulation,
+  Component,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 import { ConfigService } from '@geonature/services/config.service';
-import { CommonService } from '@geonature_common/service/common.service';
 
-import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Device } from '../../models/devices.models';
 import { FormConstraint } from '../../models/common.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
-import { DevicesService } from '../../services/devices.service';
-import { NomenclaturesService } from '../../services/nomenclature.service';
 
 @Component({
   selector: 'gn-individuals-devices-list-filters',
@@ -19,51 +22,49 @@ import { NomenclaturesService } from '../../services/nomenclature.service';
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class DevicesListFiltersComponent implements OnInit {
+export class DevicesListFiltersComponent implements OnInit, OnDestroy {
+  @Output() filters = new EventEmitter<{ key: string; value: any } | null>();
   public filtersForm!: FormGroup;
-  public formConstraints: Record<string,FormConstraint> = DEVICE_FORM_CONSTRAINTS;
+  public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
+  public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
+  private _destroy$ = new Subject<void>();
 
   constructor(
-    private _fb: FormBuilder,
-    public nomenclatureService: NomenclaturesService,
-    private _service: DevicesService,
+    private _config: ConfigService,
+    private _fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
     // Form initialization
     this.filtersForm = this._fb.group({
-    //   id_nomenclature_device_type: [null, Validators.required],
-      provider_name: [
-        null,
-        [
-          Validators.required,
-          Validators.maxLength(this.formConstraints.provider_name.maxLength),
-          Validators.pattern(this.formConstraints.provider_name.pattern),
-        ],
-      ],
+      cd_nom: [null, null],
+      id_nomenclature_device_type: [null, null],
+      provider_name: [null, [Validators.pattern(this.formConstraints.provider_name.pattern)]],
+      id_referer: [null, null],
+    });
+
+    // Call API on change event
+    Object.keys(this.filtersForm.controls).forEach((field) => {
+      this.filtersForm
+        .get(field)
+        ?.valueChanges.pipe(
+          debounceTime(500),
+          distinctUntilChanged(), // Ignore equals consecutives value
+          takeUntil(this._destroy$)
+        )
+        .subscribe((value) => {
+          this.filters.emit({ key: field, value: value?.id_role ?? value?.cd_nom ?? value });
+        });
     });
   }
 
-  onSubmit(): void {
-//     const device = this.form.getRawValue();
+  onResetFilters() {
+    this.filtersForm.reset();
+    this.filters.emit(null);
+  }
 
-//     this._service.createOrUpdateDevice(device, this.formAction, this.deviceId).subscribe({
-//       next: (res) => {
-//         const successKey =
-//           this.formAction === 'ADD'
-//             ? 'Individuals.Devices.Messages.Added'
-//             : 'Individuals.Devices.Messages.Edited';
-//         this._commonService.translateToaster('info', successKey, { id: this.deviceId });
-//         this.form.markAsPristine();
-//         this._location.back();
-//       },
-//       error: (err) => {
-//         this._errorHandler.handleHttpError(
-//           err,
-//           { id: this.deviceId },
-//           'Individuals.Devices.ApiErrors'
-//         );
-//       },
-//     });
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.complete();
   }
 }

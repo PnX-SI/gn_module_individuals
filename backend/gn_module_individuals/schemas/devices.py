@@ -15,6 +15,7 @@ from .deployments import DeploymentSummarySchema
 from .utils import get_label
 from ..utils.errors import APIError, DevicesErrorCode
 
+
 class TrackingDevicesBaseSchema(
     CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
 ):
