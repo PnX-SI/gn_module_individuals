@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
+from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
@@ -67,9 +68,10 @@ def list_devices(scope):
     nomenclatures_fields = [n for n in nomenclatures]
 
     # Scope not yet used -------------
-    device_type = request.args.get("type", type=int)
-    provider_name = request.args.get("providerName", type=str)
-    provider_id = request.args.get("providerDeviceId", type=str)
+    cd_nom = request.args.get("cd_nom", type=int)
+    device_type = request.args.get("id_nomenclature_device_type", type=int)
+    provider_name = request.args.get("provider_name", type=str)
+    id_referer = request.args.get("id_referer", type=int)
 
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
@@ -98,8 +100,18 @@ def list_devices(scope):
         query = query.where(TrackingDevices.id_nomenclature_device_type == device_type)
     if provider_name:
         query = query.where(TrackingDevices.provider_name.ilike(f"%{provider_name}%"))
-    if provider_id:
-        query = query.where(TrackingDevices.provider_device_id.ilike(f"%{provider_id}%"))
+    if id_referer is not None:
+        query = query.where(TrackingDevices.id_referer == id_referer)
+    if cd_nom is not None:
+        query = query.where(
+            db.select(IndividualDeployments.id_deployment)
+            .join(TIndividuals, TIndividuals.id_individual == IndividualDeployments.id_individual)
+            .where(
+                IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device,
+                TIndividuals.cd_nom == cd_nom,
+            )
+            .exists()
+        )
 
     if paginated:
         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
