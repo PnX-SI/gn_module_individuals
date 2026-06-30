@@ -8,7 +8,7 @@
         },
         "Devices": {
             "Fields": {
-                "id_tracking_device" : "ID du dispositif",
+                "id_tracking_device" : "Identifiant",
                 "id_nomenclature_device_type" : "Type de dispositif",
                 "provider_name" : "Fournisseur",
                 "provider_device_id" : "ID chez le fournisseur",
@@ -70,6 +70,60 @@
                 "individual_name" : "Nom de l'individu",
                 "digitiser_name" : "Nom du digitaliseur"
             }
+        },
+        "Individuals": {
+            "Fields": {
+                "id_individual" : "Identifiant",
+                "uuid_individual" : "Identifiant unique de l'individus",
+                "individual_name": "Nom",
+                "active" : "Actif",
+                "comment" : "Commentaire",
+                "meta_create_date" : "Date de création",
+                "meta_update_date" : "Date de mise à jour",
+                "digitiser_name" : "Digitaliseur",
+                "nomenclature_sex_name" : "Sexe",
+                "last_observation_date" : "Dernière observation",
+                "last_observation_observers_name" : "Dernier(s) observateur(s)",
+                "nom_ver" : "Nom de l'espèce",
+                "device_type_name_deployments" : "Type de dispositif de suivi",
+                "marking_codes" : "Marquage(s)"
+            },
+            "PlaceHolder": {
+                "provider_name": "Indiquer le nom du fournisseur",
+                "provider_device_id": "Indiquer l'identifiant du dispositif",
+                "id_referer": "Sélectionner le référent",
+                "comment": "En dire plus ..."
+            },
+            "Filters":{
+                "cd_nom": "Taxon"
+            },
+            "Titles": {
+                "Info": "Dispositif de suivi n°{{ id }}",
+                "Add" : "Ajout d'un dispositif de suivi",
+                "Edit" : "Modification du dispositif de suivi n°{{ id }}",
+                "Delete" : "Suppression du dispositif de suivi n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "Le dispositif de suivi a été créé.",
+                "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
+                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé."
+            },
+            "Errors": {
+                "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
+                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+                "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+            },
+            "ApiErrors": {
+                "DeviceNotFound": "Le dispositif de suivi n°{{ id }} est introuvable.",
+                "DeviceHasDeployment": "Le dispositif de suivi n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
+                "JsonBodyMissing": "Les données du dispositif de suivi sont manquantes ou mal formées.",
+                "ValidationError": "Les données du dispositif de suivi sont invalides. Veuillez vérifier le formulaire.",
+                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier ce dispositif de suivi."
+            }
+        },
+        "Messages": {
+            "EmptyListMessage" : "Aucune donnée à afficher",
+            "TotalListMessage" : "ligne(s) au total"
         },
         "Errors": {
             "Required" : "Ce champs est requis.",

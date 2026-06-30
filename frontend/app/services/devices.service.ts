@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { Device, CreateDeviceDto, UpdateDeviceDto } from '../models/devices.models';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
-import { DATA_TABLE_CONFIG, DEVICES_DEFAULT_SORT } from '../utils/constants.util';
-
+import { DEVICES_DEFAULT_SORT } from '../utils/constants.util';
 @Injectable()
 export class DevicesService {
   private _OBJECT_API: string;
@@ -25,12 +24,12 @@ export class DevicesService {
   }
 
   getDevices(
-    params: APIPaginationParams = { page: 1, per_page: DATA_TABLE_CONFIG.PER_PAGE_OPTION }
+    params: APIPaginationParams
   ): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
-    console.log('Parameters sent to API', params);
     params.prop ??= DEVICES_DEFAULT_SORT.prop;
     params.dir ??= DEVICES_DEFAULT_SORT.dir;
+    console.log('Parameters sent to API (Devices)', params);
 
     Object.keys(params).forEach((key) => {
       const value = params[key as keyof APIPaginationParams];
@@ -55,7 +54,6 @@ export class DevicesService {
     params: Record<string, string> = {}
   ): Observable<Device> {
     params['format'] = 'json';
-    console.log(device);
     // Map form to Dto
     let payload: CreateDeviceDto | UpdateDeviceDto = {
       id_nomenclature_device_type: device.id_nomenclature_device_type,

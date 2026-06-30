@@ -3,7 +3,7 @@
   #summaryTemplate
   let-row="row"
 >
-  <div class="row mx-0">
+  <!-- <div class="row mx-0">
     <div class="col-12 col-md-6 px-0">
       <strong>{{ 'Individuals.Devices.Fields.id_tracking_device' | translate }} :</strong>
       {{ row.id_tracking_device }}
@@ -34,18 +34,18 @@
       <strong>{{ 'Individuals.Devices.Fields.referer_name' | translate }} :</strong>
       {{ row.referer_name }}
     </div>
-  </div>
+  </div> -->
 </ng-template>
 
 <ng-template #filtersTemplate>
-  <gn-individuals-devices-list-filters
+  <!-- <gn-individuals-devices-list-filters
     (filters)="onFilters($event)"
-  ></gn-individuals-devices-list-filters>
+  ></gn-individuals-devices-list-filters> -->
 </ng-template>
 
-<gn-individuals-list
-  [objectName]="'devices'"
-  [idFieldName]="'id_tracking_device'"
+<gn-individuals-map-list
+  [objectName]="'individuals'"
+  [idFieldName]="'id_individual'"
   [displayedColumnsParams]="displayedColumnsParams"
   [availableColumnsParams]="availableColumnsParams"
   [dataTable$]="dataTable$"
@@ -59,4 +59,4 @@
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
   (delete)="openDeleteModal($event)"
-></gn-individuals-list>
+></gn-individuals-map-list>

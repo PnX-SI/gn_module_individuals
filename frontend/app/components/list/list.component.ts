@@ -9,11 +9,9 @@ import {
   TemplateRef,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { ActivatedRoute } from '@angular/router';
 import { Observable, combineLatest, of } from 'rxjs';
 import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 
-import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
@@ -37,9 +35,11 @@ export class ListComponent implements OnInit {
   @Output() delete: EventEmitter<any> = new EventEmitter();
   @Input() objectName: string = '';
   @Input() idFieldName: string = '';
-  @Input() availableColumnsParams!: Record<keyof any, true>;
+  @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
   @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = of();
+  @Input() nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
   @Input() allowedToDelete: Record<number, boolean> = {};
@@ -48,19 +48,18 @@ export class ListComponent implements OnInit {
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
-  public nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
   public actionColumnsWidth: number = DATA_TABLE_CONFIG.ACTION_COLUMNS_WIDTH;
   public columnMaxWidth: number = DATA_TABLE_CONFIG.COLUMN_MAX_WIDTH;
   public displayedColumns!: Column<undefined>[];
   public availableColumns!: Column<undefined>[];
   public moduleName: string = this._moduleService.currentModule.module_url;
   public selectionType = SelectionType;
+  public tableMessages = {};
+
   public showFilters: boolean = false;
 
   constructor(
-    public config: ConfigService,
     private _translate: TranslateService,
-    // private _activatedRoute: ActivatedRoute,
     private _moduleService: ModuleService
   ) {}
 
@@ -68,6 +67,20 @@ export class ListComponent implements OnInit {
     if (!this.availableColumnsParams) {
       return;
     }
+
+    // ngx-datatable messages translation
+    this._translate
+      .get([
+        'Individuals.Messages.EmptyListMessage',
+        'Individuals.Messages.TotalListMessage',
+      ])
+      .subscribe(translations => {
+        this.tableMessages = {
+          emptyMessage: translations['Individuals.Messages.EmptyListMessage'],
+          totalMessage: translations['Individuals.Messages.TotalListMessage'],
+          selectedMessage: '',
+        };
+      });
 
     // Columns initialization with prop and empty name, to be filled with translations after
     this.availableColumns = this.availableColumnsParams ? (Object.keys(this.availableColumnsParams) as (keyof undefined)[]).map(
@@ -82,7 +95,7 @@ export class ListComponent implements OnInit {
     // Translate the displayed column labels.
     const translations$ = this.displayedColumns.map(column =>
       // An observable is returned which emits the translation of this key
-      this._translate.get(`Individuals.Devices.Fields.${column.prop}`)
+      this._translate.get(`${this.fieldsTranslation}.${column.prop}`)
     );
 
     combineLatest(translations$).subscribe(labels => {

@@ -9,7 +9,7 @@ import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Device, DEVICE_COLUMNS, APIDevicesFiltersParams } from '../../models/devices.models';
+import { Device, APIDevicesFiltersParams, DEVICE_MODEL } from '../../models/devices.models';
 import { Sort, PaginatedItemCollection, APIPaginationParams } from '../../models/common.models';
 import { DevicesService } from '../../services/devices.service';
 import { DEVICES_DEFAULT_SORT, DATA_TABLE_CONFIG } from '../../utils/constants.util';
@@ -18,15 +18,16 @@ import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 @Component({
   selector: 'gn-individuals-devices-list',
   templateUrl: 'devices-list.component.html',
-  styleUrls: ['devices-list.component.scss'],
   standalone: false,
 })
 export class DevicesListComponent implements OnInit, OnDestroy {
-  public availableColumnsParams: Record<keyof Device, true> = DEVICE_COLUMNS;
-  public displayedColumnsParams: string[] = [];
+  public availableColumnsParams = DEVICE_MODEL;
+  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_DISPLAYED_COLUMNS ?? [];
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<
     PaginatedItemCollection<Device>
   >();
+  public nbRowsToDisplay = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  public fieldsTranslation = "Individuals.Devices.Fields";
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public allowedToEdit: boolean[] = [];
   public allowedToDelete: Record<number, boolean> = {};
@@ -34,7 +35,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
     page: 1,
-    per_page: DATA_TABLE_CONFIG.PER_PAGE_OPTION,
+    per_page: this.nbRowsToDisplay,
     prop: DEVICES_DEFAULT_SORT.prop,
     dir: DEVICES_DEFAULT_SORT.dir,
   };
@@ -48,21 +49,18 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     private _ngbModal: NgbModal,
     private _errorHandler: ErrorHandlerService,
     private _translate: TranslateService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     // Resolver : First initialisation of the table
     this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ data }) => {
       this.dataTable$ = of(data);
       this._initPermissions(data);
-    });
-
-    this.displayedColumnsParams =
-      this._config.INDIVIDUALS?.DEVICES?.DEFAULT_DISPLAYED_COLUMNS ?? [];
+    });     
   }
 
   ngOnDestroy() {
-    console.log('ngOnDestroy');
     this._destroy$.next();
     this._destroy$.complete();
   }
@@ -70,7 +68,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   onPage($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
-      per_page: Number($event.limit ?? this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE),
+      per_page: Number($event.limit),
       prop: this.sorts[0].prop,
       dir: this.sorts[0].dir,
     };
@@ -79,8 +77,8 @@ export class DevicesListComponent implements OnInit, OnDestroy {
 
   onSort($event: any): void {
     this._APIPaginationParams = {
-      page: Number($event.offset ?? 0) + 1,
-      per_page: DATA_TABLE_CONFIG.PER_PAGE_OPTION,
+      page: 1,
+      per_page: this.nbRowsToDisplay,
       prop: $event.sorts[0].prop,
       dir: $event.sorts[0].dir,
     };
@@ -115,17 +113,11 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onFilters($event: {
-    key: keyof APIDevicesFiltersParams;
-    value: string | number | undefined;
-  }): void {
-    console.log('pagination', this._APIPaginationParams);
-    console.log('filters', this._APIFiltersParams);
+  onFilters($event: {key: keyof APIDevicesFiltersParams; value: string | number | undefined;} | null): void {
     if (!$event) {
       this._APIFiltersParams = {};
     } else {
       if ($event.value) {
-        console.log('event:', $event);
         this._APIFiltersParams[$event.key] = $event.value;
         this._APIPaginationParams['page'] = 1;
       }

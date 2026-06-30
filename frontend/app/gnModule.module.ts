@@ -14,20 +14,25 @@ import { routes } from './module.routes';
 
 import { ErrorHandlerService } from './services/errors-handler.service';
 import { MainComponent } from './components/main/main.component';
-import { DevicesService } from './services/devices.service';
-import { NomenclaturesService } from './services/nomenclature.service';
-import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
-import { DevicesListComponent } from './components/devices-list/devices-list.component';
-import { DevicesListFiltersComponent } from './components/devices-list/devices-list-filters.component';
+import { InfoComponent } from './components/info/info.component';
 import { DeleteModalComponent } from './components/delete-modal/delete-modal.component';
 import { FormComponent } from './components/form/form.component';
 import { FormInputTextComponent } from './components/form/form-input-text.component';
 import { FormTextareaComponent } from './components/form/form-textarea.component';
+
+import { DevicesService } from './services/devices.service';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+import { DevicesListComponent } from './components/devices-list/devices-list.component';
+import { DevicesListFiltersComponent } from './components/devices-list/devices-list-filters.component';
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
-import { InfoComponent } from './components/info/info.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
+
+import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component';
+import { IndividualsService } from './services/individuals.service';
+import { IndividualsResolver } from './resolvers/individuals.resolver';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -35,17 +40,18 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
 @NgModule({
   declarations: [
     MainComponent,
-    MapListComponent,
     ListComponent,
-    DevicesListComponent,
-    DevicesListFiltersComponent,
+    MapListComponent,
     InfoComponent,
-    DevicesInfoComponent,
     FormComponent,
-    DevicesFormComponent,
     FormInputTextComponent,
     FormTextareaComponent,
     DeleteModalComponent,
+    DevicesListComponent,
+    DevicesListFiltersComponent,
+    DevicesInfoComponent,
+    DevicesFormComponent,
+    IndividualsMapListComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
@@ -66,11 +72,12 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     }),
   ],
   providers: [
+    ErrorHandlerService,
     DevicesService,
     DevicesResolver,
     DeviceResolver,
-    NomenclaturesService,
-    ErrorHandlerService,
+    IndividualsService,
+    IndividualsResolver,
   ],
 })
 export class GeonatureModule {

@@ -1,24 +1,31 @@
-<div class="map-list-container">
-  <div class="map-container"
-    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
+<div id="map-list-container">
+  
+  <div id="map-container"
+    [ngStyle]="{ 'min-height.px': contentHeight }"
   >
     <pnx-map
-      height="100%"
+      [height]="contentHeight + 'px'"
+      [searchBar]="true"
     ></pnx-map>
   </div>
-  <gn-individuals-list
-    [objectName]="objectName"
-    [idFieldName]="idFieldName"
-    [displayedColumnsParams]="displayedColumnsParams"
-    [availableColumnsParams]="availableColumnsParams"
-    [dataTable$]="dataTable$"
-    [sorts]="sorts"
-    [allowedToEdit]="allowedToEdit"
-    [allowedToDelete]="allowedToDelete"
-    [summaryTemplate]="summaryTemplate"
-    [filtersTemplate]="filtersTemplate"
-    (pagination)="onPage($event)"
-    (sort)="onSort($event)"
-    (delete)="openDeleteModal($event)"
-  ></gn-individuals-list>
+
+  <div id="list-container">
+    <gn-individuals-list
+      [objectName]="objectName"
+      [idFieldName]="idFieldName"
+      [displayedColumnsParams]="displayedColumnsParams"
+      [availableColumnsParams]="availableColumnsParams"
+      [dataTable$]="dataTable$"
+      [nbRowsToDisplay]="nbRowsToDisplay"
+      [fieldsTranslation]="fieldsTranslation"
+      [sorts]="sorts"
+      [allowedToEdit]="allowedToEdit"
+      [allowedToDelete]="allowedToDelete"
+      [summaryTemplate]="summaryTemplate"
+      [filtersTemplate]="filtersTemplate"
+      (pagination)="onPage($event)"
+      (sort)="onSort($event)"
+      (delete)="openDeleteModal($event)"
+    ></gn-individuals-list>
+  </div>
 </div>

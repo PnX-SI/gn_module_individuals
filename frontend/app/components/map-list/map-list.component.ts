@@ -6,6 +6,8 @@ import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { Column, PaginatedItemCollection } from '../../models/common.models';
+import { CONTENT_CONFIG } from '../../utils/constants.util';
+import { calcContentHeight } from '../../utils/functions.util';
 
 @Component({
   selector: 'gn-individuals-map-list',
@@ -15,16 +17,18 @@ import { Column, PaginatedItemCollection } from '../../models/common.models';
 })
 export class MapListComponent implements OnInit, AfterViewInit {
   // public userCruved: any;
-  // public contentHeight: number;
+  public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   // public currentTabCode: string;
   // public apiEndPoint: string;
   @Input() objectName!: string;
   @Input() idFieldName!: string;
-  @Input() availableColumnsParams!: Record<keyof any, true>;
+  @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
   @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
     PaginatedItemCollection<unknown>
   >();
+  @Input() nbRowsToDisplay!: number;
+  @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
   @Input() allowedToDelete: Record<number, boolean> = {};
@@ -38,6 +42,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
+    this.contentHeight = calcContentHeight();
     // // Get current module and current user CRUVED
     // const currentModule = this._moduleService.currentModule;
     // this.userCruved = currentModule.cruved;

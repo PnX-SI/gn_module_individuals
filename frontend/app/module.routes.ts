@@ -1,11 +1,15 @@
 import { Routes } from '@angular/router';
 
-import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { MainComponent } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
+
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+
+import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component'; 
+import { IndividualsResolver } from './resolvers/individuals.resolver';
 
 export const routes: Routes = [
   {
@@ -19,7 +23,8 @@ export const routes: Routes = [
       },
       {
         path: 'individuals',
-        component: MapListComponent,
+        component: IndividualsMapListComponent,
+        resolve: { data: IndividualsResolver },
       },
       {
         path: 'observations',
