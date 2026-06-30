@@ -1,26 +1,24 @@
 <div class="map-list-container">
-  <div
+  <div class="map-container"
     class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
-    [ngStyle]="{ 'min-height.px': contentHeight }"
   >
-    <pnx-map-list
-      [idName]="mapListService.idName"
+    <pnx-map
       height="100%"
-    ></pnx-map-list>
+    ></pnx-map>
   </div>
-  <div
-    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
-    [ngStyle]="{ 'min-height.px': contentHeight }"
-  >
-    <ngx-datatable
-      class="material striped margin-top-xs table-size expandable"
-      [columnMode]="'force'"
-      [columns]="mapListService.displayColumns"
-    ></ngx-datatable>
-  </div>
+  <gn-individuals-list
+    [objectName]="objectName"
+    [idFieldName]="idFieldName"
+    [displayedColumnsParams]="displayedColumnsParams"
+    [availableColumnsParams]="availableColumnsParams"
+    [dataTable$]="dataTable$"
+    [sorts]="sorts"
+    [allowedToEdit]="allowedToEdit"
+    [allowedToDelete]="allowedToDelete"
+    [summaryTemplate]="summaryTemplate"
+    [filtersTemplate]="filtersTemplate"
+    (pagination)="onPage($event)"
+    (sort)="onSort($event)"
+    (delete)="openDeleteModal($event)"
+  ></gn-individuals-list>
 </div>
-
-<!-- Sur datatable-body-cell pour centrer le contenu des lignes du tableau :
-display: flex;
-align-items: center; /* centre verticalement */
-justify-content: flex-start; /* alignement horizontal inchangé */ -->

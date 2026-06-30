@@ -39,9 +39,7 @@ export class ListComponent implements OnInit {
   @Input() idFieldName: string = '';
   @Input() availableColumnsParams!: Record<keyof any, true>;
   @Input() displayedColumnsParams: string[] = [];
-  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
-    PaginatedItemCollection<unknown>
-  >();
+  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = of();
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
   @Input() allowedToDelete: Record<number, boolean> = {};
@@ -62,54 +60,67 @@ export class ListComponent implements OnInit {
   constructor(
     public config: ConfigService,
     private _translate: TranslateService,
-    private _activatedRoute: ActivatedRoute,
+    // private _activatedRoute: ActivatedRoute,
     private _moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {
-    this._activatedRoute.data.subscribe(({ data }) => {
-      this.dataTable$ = of(data);
-    });
+    if (!this.availableColumnsParams) {
+      return;
+    }
 
     // Columns initialization with prop and empty name, to be filled with translations after
-    this.availableColumns = (Object.keys(this.availableColumnsParams) as (keyof undefined)[]).map(
+    this.availableColumns = this.availableColumnsParams ? (Object.keys(this.availableColumnsParams) as (keyof undefined)[]).map(
       (prop) => ({ prop, name: '' })
-    );
+    ):[];
 
+    // Keep only the configured columns to display
     this.displayedColumns = this.availableColumns.filter((column) =>
       this.displayedColumnsParams.includes(column.prop)
     );
 
-    // Build an array of translation observables for each column name
-    const translateTab$ = this.availableColumns.map(
+    // Translate the displayed column labels.
+    const translations$ = this.displayedColumns.map(column =>
       // An observable is returned which emits the translation of this key
-      (column) => this._translate.get(`Individuals.Devices.Fields.${column.prop}`)
+      this._translate.get(`Individuals.Devices.Fields.${column.prop}`)
     );
 
-    // Translation with CombineLatest will wait for all translations to be loaded before updating
-    // the column names, avoiding multiple updates and ensuring all names are translated at once.
-    combineLatest(translateTab$).subscribe((translations) => {
-      this.availableColumns = this.availableColumns.map((col, index) => ({
-        ...col,
-        name: translations[index],
-      }));
-
-      // Update displayedColumns with the translated names
-      this.displayedColumns = this.displayedColumns.map((col) => ({
-        ...col,
-        name: this.availableColumns.find((c) => c.prop === col.prop)?.name || '',
+    combineLatest(translations$).subscribe(labels => {
+      this.displayedColumns = this.displayedColumns.map((column, index) => ({
+        ...column,
+        name: labels[index],
       }));
     });
   }
 
+  /**
+   * Emit a pagination event
+   *
+   * @param {*} $event
+   * @memberof ListComponent
+   */
   onPage($event: any): void {
     this.pagination.emit($event);
   }
 
+
+  /**
+   * Emit a sort event
+   *
+   * @param {*} $event
+   * @memberof ListComponent
+   */
   onSort($event: any): void {
     this.sort.emit($event);
   }
 
+
+  /**
+   * Expand or not the row detail 
+   *
+   * @param {*} row
+   * @memberof ListComponent
+   */
   toggleExpandRow(row: any): void {
     if (this.dataTable) {
       this.dataTable.rowDetail.toggleExpandRow(row);
