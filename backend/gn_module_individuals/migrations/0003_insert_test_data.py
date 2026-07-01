@@ -18,7 +18,9 @@ depends_on = None
 
 def upgrade():
     conn = op.get_bind()
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
             INSERT INTO gn_individual.bib_tracking_devices (
     id_nomenclature_device_type,
     provider_name,
@@ -60,8 +62,12 @@ FROM (
 ) AS v(mnemonique, provider_name, provider_device_id, id_referer, comment, id_digitiser)
 JOIN ref_nomenclatures.t_nomenclatures n
     ON n.mnemonique = v.mnemonique;
-            """))
-    op.execute(sa.text("""
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
             INSERT INTO gn_monitoring.t_individuals
             (individual_name, cd_nom, id_nomenclature_sex, active, "comment", id_digitiser)
             VALUES
@@ -77,8 +83,12 @@ JOIN ref_nomenclatures.t_nomenclatures n
             ('Quechua',61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'),TRUE,'Bouquetin marqué',3 ),
             ('Kalinka',61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'),FALSE,'Bouquetin marqué inactif',4 ),
             ('Pavot',61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'),TRUE,'JBouquetin marqué',4 )
-            """))
-    op.execute(sa.text("""
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
             INSERT INTO gn_individual.t_individual_deployments (
                 id_capture,
                 id_individual,
@@ -135,12 +145,16 @@ JOIN ref_nomenclatures.t_nomenclatures n
             FROM data d
             JOIN individuals i ON i.individual_name = d.individual_name
             JOIN devices dev ON dev.provider_device_id = d.provider_device_id
-            """))
+            """
+        )
+    )
 
 
 def downgrade():
     conn = op.get_bind()
-    op.execute(sa.text(f"""
+    op.execute(
+        sa.text(
+            f"""
             DO $$
 BEGIN
     IF EXISTS (
@@ -170,4 +184,6 @@ BEGIN
         DELETE FROM gn_monitoring.t_individuals;
     END IF;
 END $$;
-            """))
+            """
+        )
+    )

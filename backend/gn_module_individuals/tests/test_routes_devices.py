@@ -255,8 +255,8 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            data="not-json",
-            content_type="text/plain",
+            data="",
+            content_type="application/json",
         )
         assert r.status_code == 400
         payload = r.get_json()

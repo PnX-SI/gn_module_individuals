@@ -171,7 +171,7 @@ def list_devices(scope):
 )
 @json_resp
 def create_device(scope):
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
         raise APIError(
@@ -212,7 +212,7 @@ def update_device(id_tracking_device, scope):
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
-    data = request.get_json()
+    data = request.get_json(silent=True)
 
     if not data:
         raise APIError(

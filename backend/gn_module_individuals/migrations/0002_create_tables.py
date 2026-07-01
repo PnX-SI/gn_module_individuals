@@ -153,7 +153,8 @@ def upgrade():
         schema=SCHEMA_NAME,
     )
 
-    op.execute(f"""
+    op.execute(
+        f"""
         CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.set_meta_dates()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -165,21 +166,26 @@ def upgrade():
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
-    """)
+    """
+    )
 
-    op.execute(f"""
+    op.execute(
+        f"""
         CREATE TRIGGER tr_meta_dates_bib_tracking_devices
         BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.bib_tracking_devices
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
-    """)
+    """
+    )
 
-    op.execute(f"""
+    op.execute(
+        f"""
         CREATE TRIGGER tr_meta_dates_individual_deployments
         BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.t_individual_deployments
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
-    """)
+    """
+    )
 
     bib_nomencl = table(
         "bib_nomenclatures_types",
@@ -294,11 +300,13 @@ def downgrade():
     op.execute(f"DROP FUNCTION IF EXISTS {SCHEMA_NAME}.set_meta_dates();")
     op.drop_table("t_individual_deployments", schema=SCHEMA_NAME, if_exists=True)
     op.drop_table("bib_tracking_devices", schema=SCHEMA_NAME, if_exists=True)
-    op.execute(f"""DELETE FROM ref_nomenclatures.t_nomenclatures t
+    op.execute(
+        f"""DELETE FROM ref_nomenclatures.t_nomenclatures t
             USING ref_nomenclatures.bib_nomenclatures_types b
             WHERE t.id_type = b.id_type
             AND b.mnemonique = 'TYPE_DISPO_SUIVI';
-        """)
+        """
+    )
     op.execute(
         f"DELETE FROM ref_nomenclatures.bib_nomenclatures_types WHERE mnemonique = 'TYPE_DISPO_SUIVI';"
     )

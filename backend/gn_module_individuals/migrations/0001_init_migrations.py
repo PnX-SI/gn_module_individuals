@@ -23,15 +23,20 @@ def upgrade():
     conn = op.get_bind()
     op.execute(sa.text(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME}"))
 
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
         INSERT INTO gn_permissions.t_objects (code_object, description_object)
         VALUES
             ('INDIVIDUALS_INDIVIDUALS', 'Gestion des individus'),
             ('INDIVIDUALS_SAMPLES',     'Gestion des échantillons dans Individus')
         ON CONFLICT (code_object) DO NOTHING
-    """))
+    """
+        )
+    )
 
-    op.execute(f"""
+    op.execute(
+        f"""
         INSERT INTO gn_permissions.t_permissions_available (
             id_module,
             id_object,
@@ -58,9 +63,11 @@ def upgrade():
         JOIN gn_commons.t_modules m     ON m.module_code  = v.module_code
         JOIN gn_permissions.t_objects o ON o.code_object  = v.object_code
         JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
-    """)
+    """
+    )
 
-    op.execute(f"""
+    op.execute(
+        f"""
         INSERT INTO gn_permissions.t_permissions (id_role, id_action, id_module, id_object, scope_value)
         SELECT
             r.id_role,
@@ -74,16 +81,19 @@ def upgrade():
         JOIN gn_permissions.t_objects o  ON o.code_object = 'INDIVIDUALS_INDIVIDUALS'
         JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
         ON CONFLICT DO NOTHING
-    """)
+    """
+    )
 
 
 def downgrade():
     conn = op.get_bind()
     module_id = conn.execute(
-        sa.text("""
+        sa.text(
+            """
             SELECT id_module FROM gn_commons.t_modules
             WHERE module_code = :module_code
-        """),
+        """
+        ),
         {"module_code": MODULE_CODE},
     ).scalar()
 
@@ -92,7 +102,9 @@ def downgrade():
         {"module_id": module_id},
     )
 
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
         DELETE FROM gn_permissions.t_permissions p
         USING utilisateurs.t_roles r,
               gn_permissions.t_objects o
@@ -100,11 +112,17 @@ def downgrade():
           AND p.id_object = o.id_object
           AND r.nom_role    = 'Grp_admin'
           AND o.code_object = 'INDIVIDUALS_INDIVIDUALS'
-    """))
+    """
+        )
+    )
 
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
         DELETE FROM gn_permissions.t_objects
         WHERE code_object IN ('INDIVIDUALS_INDIVIDUALS', 'INDIVIDUALS_SAMPLES')
-    """))
+    """
+        )
+    )
 
     op.execute(sa.text(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE"))
