@@ -12,6 +12,8 @@ from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
 from pypnnomenclature.schemas import NomenclatureSchema
+from pypnnomenclature.models import TNomenclatures
+from pypnusershub.db.models import User
 from ..utils.errors import APIError, DevicesErrorCode
 
 from .. import MODULE_CODE
@@ -83,7 +85,38 @@ def list_devices(scope):
 
     schema = TrackingDevicesListSchema(only=["+cruved", "referer"] + nomenclatures_fields)
 
-    sort_col = getattr(TrackingDevices, prop, None)
+    virtual_sort_cols = {
+        "referer_name": (
+            db.select(func.concat(User.prenom_role, " ", User.nom_role))
+            .where(User.id_role == TrackingDevices.id_referer)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+        "nomenclature_device_type_name": (
+            db.select(TNomenclatures.label_default)
+            .where(TNomenclatures.id_nomenclature == TrackingDevices.id_nomenclature_device_type)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+        "last_individual_equipped_name": (
+            db.select(TIndividuals.individual_name)
+            .join(
+                IndividualDeployments,
+                IndividualDeployments.id_individual == TIndividuals.id_individual,
+            )
+            .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
+            .order_by(IndividualDeployments.install_date.desc())
+            .limit(1)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+    }
+
+    sort_col = virtual_sort_cols.get(prop)
+    if sort_col is None:
+        sort_col = getattr(TrackingDevices, prop, None)
+    if sort_col is None:
+        sort_col = TrackingDevices.meta_create_date
 
     query = (
         db.select(TrackingDevices)
