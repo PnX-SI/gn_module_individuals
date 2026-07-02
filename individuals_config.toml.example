@@ -4,6 +4,12 @@
     # If not set, API queries will return all taxons
     ID_TAXON_LIST=101
 
+    # Colors used for the map layers
+    # SELECTED_LAYER_COLOR=#d7191c
+    # UNSELECTED_LAYER_COLOR=#2c7bb6
+    # SELECTED_LAYER_OPACITY: 0.9,
+    # UNSELECTED_LAYER_OPACITY: 0.55,
+
 # Individuals object configuration
     # Pagination : Nb max of lines displayed per page (default 10)
     DEFAULT_PAGE_SIZE=7

@@ -17,10 +17,10 @@ export const DEVICE_MODEL = {
 
 export type Device = typeof DEVICE_MODEL;
 
-export interface APIDevicesFiltersParams {
+export interface APIDeviceFiltersParams {
   // This line help to use
   // $event: {
-  //   key: keyof APIDevicesFiltersParams;
+  //   key: keyof APIDeviceFiltersParams;
   //   value: string | number | undefined;
   // }
   [key: string]: string | number | undefined;

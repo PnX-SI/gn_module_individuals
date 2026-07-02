@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Device, CreateDeviceDto, UpdateDeviceDto } from '../models/devices.models';
+import { Device, CreateDeviceDto, UpdateDeviceDto, APIDeviceFiltersParams } from '../models/devices.models';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
 import { DEVICES_DEFAULT_SORT } from '../utils/constants.util';
 @Injectable()
@@ -24,7 +24,7 @@ export class DevicesService {
   }
 
   getDevices(
-    params: APIPaginationParams
+    params: APIPaginationParams & APIDeviceFiltersParams
   ): Observable<PaginatedItemCollection<Device>> {
     let httpParams = new HttpParams();
     params.prop ??= DEVICES_DEFAULT_SORT.prop;
@@ -32,9 +32,8 @@ export class DevicesService {
     console.log('Parameters sent to API (Devices)', params);
 
     Object.keys(params).forEach((key) => {
-      const value = params[key as keyof APIPaginationParams];
-      if (value != null) {
-        httpParams = httpParams.set(key, String(value));
+      if (params[key] != null) {
+        httpParams = httpParams.set(key, String(params[key]));
       }
     });
 

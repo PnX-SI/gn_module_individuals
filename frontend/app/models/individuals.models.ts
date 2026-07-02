@@ -21,19 +21,18 @@ export const INDIVIDUAL_MODEL = {
 
 export type Individual = typeof INDIVIDUAL_MODEL;
 
-// export interface APIDevicesFiltersParams {
-//   // This line help to use
-//   // $event: {
-//   //   key: keyof APIDevicesFiltersParams;
-//   //   value: string | number | undefined;
-//   // }
-//   [key: string]: string | number | undefined;
+export interface APIIndividualFiltersParams {
+  // This line help to use
+  // $event: {
+  //   key: keyof APIDevicesFiltersParams;
+  //   value: string | number | undefined;
+  // }
+  [key: string]: string | number | undefined;
 
-//   cd_nom?: number;
-//   id_nomenclature_device_type?: number;
-//   provider_name?: string;
-//   id_referer?: number;
-// }
+  cd_nom?: number;
+  id_nomenclature_sex?: number;
+  active?: string;
+}
 
 // This model is only used to POST data to the API (dto = data transfer object)
 // export interface CreateDeviceDto {

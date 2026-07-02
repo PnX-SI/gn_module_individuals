@@ -13,7 +13,7 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { ConfigService } from '@geonature/services/config.service';
 
 import { FormConstraint } from '../../models/common.models';
-import { APIDevicesFiltersParams } from '../../models/devices.models';
+import { APIDeviceFiltersParams } from '../../models/devices.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 
 @Component({
@@ -24,7 +24,7 @@ import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
   standalone: false,
 })
 export class DevicesListFiltersComponent implements OnInit, OnDestroy {
-  @Output() filters = new EventEmitter<{key: keyof APIDevicesFiltersParams; value: string | number | undefined;} | null>();
+  @Output() filters = new EventEmitter<{key: keyof APIDeviceFiltersParams; value: string | number | undefined;} | null>();
   public filtersForm!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
   public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;

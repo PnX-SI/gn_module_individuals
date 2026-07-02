@@ -4,10 +4,10 @@ import { Observable } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 
-import { PaginatedItemCollection } from '../models/common.models';
+import { FeatureCollection, PaginatedItemCollection } from '../models/common.models';
 import { IndividualsService } from '../services/individuals.service';
 import { Individual } from '../models/individuals.models';
-import { DATA_TABLE_CONFIG } from '../utils/constants.util';
+import { DATATABLE_CONFIG } from '../utils/constants.util';
 
 @Injectable({ providedIn: 'root' })
 export class IndividualsResolver implements Resolve<PaginatedItemCollection<Individual>> {
@@ -22,10 +22,25 @@ export class IndividualsResolver implements Resolve<PaginatedItemCollection<Indi
   ): Observable<PaginatedItemCollection<Individual>> {
     const params = {
       page: 1,
-      per_page: this._config.INDIVIDUALS.INDIVIDUALS.DEFAULT_PAGE_SIZE ?? DATA_TABLE_CONFIG.PER_PAGE_OPTION,
+      per_page: this._config.INDIVIDUALS.INDIVIDUALS.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION,
     };
 
     return this._service.getIndividuals(params);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class IndividualsMapResolver implements Resolve<FeatureCollection<Individual>> {
+  constructor(
+    private _config: ConfigService,
+    private _service: IndividualsService
+  ) {}
+
+  resolve(
+    route: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot
+  ): Observable<FeatureCollection<Individual>> {
+    return this._service.getIndividualsForMap({});
   }
 }
 

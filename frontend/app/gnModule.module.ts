@@ -32,7 +32,7 @@ import { DevicesInfoComponent } from './components/devices-info/devices-info.com
 
 import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component';
 import { IndividualsService } from './services/individuals.service';
-import { IndividualsResolver } from './resolvers/individuals.resolver';
+import { IndividualsMapResolver, IndividualsResolver } from './resolvers/individuals.resolver';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -78,6 +78,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     DeviceResolver,
     IndividualsService,
     IndividualsResolver,
+    IndividualsMapResolver
   ],
 })
 export class GeonatureModule {

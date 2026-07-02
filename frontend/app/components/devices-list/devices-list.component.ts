@@ -9,10 +9,10 @@ import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Device, APIDevicesFiltersParams, DEVICE_MODEL } from '../../models/devices.models';
+import { Device, APIDeviceFiltersParams, DEVICE_MODEL } from '../../models/devices.models';
 import { Sort, PaginatedItemCollection, APIPaginationParams } from '../../models/common.models';
 import { DevicesService } from '../../services/devices.service';
-import { DEVICES_DEFAULT_SORT, DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { DEVICES_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 
 @Component({
@@ -26,7 +26,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<
     PaginatedItemCollection<Device>
   >();
-  public nbRowsToDisplay = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  public nbRowsToDisplay = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = "Individuals.Devices.Fields";
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public allowedToEdit: boolean[] = [];
@@ -39,7 +39,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     prop: DEVICES_DEFAULT_SORT.prop,
     dir: DEVICES_DEFAULT_SORT.dir,
   };
-  private _APIFiltersParams: APIDevicesFiltersParams = {};
+  private _APIFiltersParams: APIDeviceFiltersParams = {};
 
   constructor(
     private _config: ConfigService,
@@ -54,9 +54,9 @@ export class DevicesListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Resolver : First initialisation of the table
-    this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ data }) => {
-      this.dataTable$ = of(data);
-      this._initPermissions(data);
+    this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable }) => {
+      this.dataTable$ = of(datatable);
+      this._initPermissions(datatable);
     });     
   }
 
@@ -113,7 +113,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onFilters($event: {key: keyof APIDevicesFiltersParams; value: string | number | undefined;} | null): void {
+  onFilters($event: {key: keyof APIDeviceFiltersParams; value: string | number | undefined;} | null): void {
     if (!$event) {
       this._APIFiltersParams = {};
     } else {

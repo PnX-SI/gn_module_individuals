@@ -5,9 +5,9 @@ import { Observable, of } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Individual } from '../models/individuals.models';
-import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
-import { DATA_TABLE_CONFIG, INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
+import { Individual, APIIndividualFiltersParams } from '../models/individuals.models';
+import { PaginatedItemCollection, APIPaginationParams, FeatureCollection } from '../models/common.models';
+import { DATATABLE_CONFIG, INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
 export class IndividualsService {
@@ -25,7 +25,7 @@ export class IndividualsService {
   }
 
   getIndividuals(
-    params: APIPaginationParams
+    params: APIPaginationParams & APIIndividualFiltersParams
   ): Observable<PaginatedItemCollection<Individual>> {
     let httpParams = new HttpParams();
     params.prop ??= INDIVIDUALS_DEFAULT_SORT.prop;
@@ -33,9 +33,8 @@ export class IndividualsService {
     console.log('Parameters sent to API (Individuals)', params);
 
     Object.keys(params).forEach((key) => {
-      const value = params[key as keyof APIPaginationParams];
-      if (value != null) {
-        httpParams = httpParams.set(key, String(value));
+      if (params[key] != null) {
+        httpParams = httpParams.set(key, String(params[key]));
       }
     });
 
@@ -44,6 +43,23 @@ export class IndividualsService {
     });
   }
 
+  getIndividualsForMap(
+    params: APIIndividualFiltersParams
+  ): Observable<FeatureCollection<Individual>> {
+    let httpParams = new HttpParams();
+    console.log('Parameters sent to API (Individuals Map)', params);
+
+    Object.keys(params).forEach((key) => {
+      if (params[key] != null) {
+        httpParams = httpParams.set(key, String(params[key]));
+      }
+    });
+
+    return this._http.get<FeatureCollection<Individual>>(`${this._OBJECT_API}/map`, {
+      params: httpParams,
+    });
+  }
+  
 //   getDevice(id_tracking_device: number): Observable<Device> {
 //     return this._http.get<Device>(`${this._OBJECT_API}/${id_tracking_device}`);
 //   }

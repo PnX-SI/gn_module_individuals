@@ -9,11 +9,11 @@ import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Individual, INDIVIDUAL_MODEL } from '../../models/individuals.models';
-import { Sort, PaginatedItemCollection, APIPaginationParams } from '../../models/common.models';
+import { Individual, INDIVIDUAL_MODEL, APIIndividualFiltersParams } from '../../models/individuals.models';
+import { Sort, PaginatedItemCollection, APIPaginationParams, FeatureCollection } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
-import { INDIVIDUALS_DEFAULT_SORT, DATA_TABLE_CONFIG } from '../../utils/constants.util';
-import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
+import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
+// import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 
 @Component({
   selector: 'gn-individuals-individuals-map-list',
@@ -26,12 +26,13 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public dataTable$: Observable<PaginatedItemCollection<Individual>> = new Observable<
     PaginatedItemCollection<Individual>
   >();
-  public nbRowsToDisplay = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  public nbRowsToDisplay = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = "Individuals.Individuals.Fields";
   public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
   public allowedToEdit: boolean[] = [];
   public allowedToDelete: Record<number, boolean> = {};
   public selectedRow!: Individual;
+  public mapData$: Observable<FeatureCollection<Individual>> = new Observable<FeatureCollection<Individual>>();
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
     page: 1,
@@ -39,7 +40,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     prop: INDIVIDUALS_DEFAULT_SORT.prop,
     dir: INDIVIDUALS_DEFAULT_SORT.dir,
   };
-  // private _APIFiltersParams: APIDevicesFiltersParams = {};
+  private _APIFiltersParams: APIIndividualFiltersParams = {};
 
   constructor(
     private _config: ConfigService,
@@ -53,14 +54,14 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Resolver : First initialisation of the table
-    this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ data }) => {
-      this.dataTable$ = of(data);
+    this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, mapData }) => {
+      this.dataTable$ = of(datatable);
+      this.mapData$ = of(mapData);
       // this._initPermissions(data);
     });
-
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
   }
@@ -154,6 +155,21 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this.dataTable$ = this._individualsService
       .getIndividuals(APIParams)
       // .pipe(tap((data) => this._initPermissions(data)));
+  }
+
+  private loadMapData(): void {
+    const APIParams = {
+      ...this._APIFiltersParams,
+      // bbox: this.getMapBbox(), 
+    }
+
+    this.mapData$ = this._individualsService
+      .getIndividualsForMap(APIParams)
+      // .subscribe((featureCollection) => {
+      //   this.mapLayerByIndividualId = {};
+      //   this._selectedLayer = null;
+      //   this.featureCollection = featureCollection;
+      // });
   }
 
   // private _initPermissions(data: PaginatedItemCollection<Device>): void {

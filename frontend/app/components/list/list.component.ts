@@ -14,7 +14,7 @@ import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 
 import { ModuleService } from '@geonature/services/module.service';
 
-import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { CONTENT_CONFIG, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Column, PaginatedItemCollection } from '../../models/common.models';
 
 @Component({
@@ -38,7 +38,7 @@ export class ListComponent implements OnInit {
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
   @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = of();
-  @Input() nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
+  @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
   @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
@@ -47,9 +47,9 @@ export class ListComponent implements OnInit {
   @Input() filtersTemplate!: TemplateRef<any>;
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
-  public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
-  public actionColumnsWidth: number = DATA_TABLE_CONFIG.ACTION_COLUMNS_WIDTH;
-  public columnMaxWidth: number = DATA_TABLE_CONFIG.COLUMN_MAX_WIDTH;
+  public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
+  public actionColumnsWidth: number = DATATABLE_CONFIG.ACTION_COLUMNS_WIDTH;
+  public columnMaxWidth: number = DATATABLE_CONFIG.COLUMN_MAX_WIDTH;
   public displayedColumns!: Column<undefined>[];
   public availableColumns!: Column<undefined>[];
   public moduleName: string = this._moduleService.currentModule.module_url;

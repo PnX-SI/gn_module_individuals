@@ -9,7 +9,7 @@ import { DevicesFormComponent } from './components/devices-form/devices-form.com
 import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 
 import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component'; 
-import { IndividualsResolver } from './resolvers/individuals.resolver';
+import { IndividualsResolver, IndividualsMapResolver } from './resolvers/individuals.resolver';
 
 export const routes: Routes = [
   {
@@ -18,13 +18,16 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'devices', // Next will be 'individuals'
+        redirectTo: 'individuals',
         pathMatch: 'full',
       },
       {
         path: 'individuals',
         component: IndividualsMapListComponent,
-        resolve: { data: IndividualsResolver },
+        resolve: {
+          datatable: IndividualsResolver,
+          mapData: IndividualsMapResolver,
+        },
       },
       {
         path: 'observations',
@@ -37,7 +40,7 @@ export const routes: Routes = [
       {
         path: 'devices',
         component: DevicesListComponent,
-        resolve: { data: DevicesResolver },
+        resolve: { datatable: DevicesResolver },
       },
       {
         path: 'devices/form',

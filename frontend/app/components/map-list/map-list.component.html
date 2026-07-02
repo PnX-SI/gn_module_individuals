@@ -7,6 +7,12 @@
       [height]="contentHeight + 'px'"
       [searchBar]="true"
     ></pnx-map>
+    <pnx-geojson
+      *ngIf="mapReady"
+      [geojson]="mapData$ | async"
+      [zoomOnLayer]="false"
+      [onEachFeature]="onEachFeature.bind(this)"
+    ></pnx-geojson>
   </div>
 
   <div id="list-container">
