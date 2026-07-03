@@ -4,7 +4,7 @@ import { CONTENT_CONFIG } from './constants.util';
 export function calcContentHeight(): number {
   let windowH = window.innerHeight;
   const toolbarElement = document.getElementById('individuals-tab');
-  let toolbarH = toolbarElement ? toolbarElement.getBoundingClientRect().height : 0;
-  let height = windowH - toolbarH;
+  let toolbarBottom = toolbarElement ? toolbarElement.getBoundingClientRect().bottom : 0;
+  let height = windowH - (toolbarBottom + 10 + 10); // 10px for the individuals-tab and + 10px for the content padding bottom
   return height >= CONTENT_CONFIG.MIN_HEIGHT ? height : CONTENT_CONFIG.MIN_HEIGHT;
 }

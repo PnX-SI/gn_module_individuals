@@ -51,3 +51,9 @@ export interface FeatureCollection<T> {
   type: 'FeatureCollection';
   features: Feature<T>[];
 }
+
+export interface RankAndPage {
+  page: number;
+  per_page: number;
+  rank: number;
+}

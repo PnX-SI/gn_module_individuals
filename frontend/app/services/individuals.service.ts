@@ -5,7 +5,7 @@ import { Observable, of } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Individual, APIIndividualFiltersParams } from '../models/individuals.models';
+import { Individual, APIIndividualFiltersParams, IndividualRankAndPage } from '../models/individuals.models';
 import { PaginatedItemCollection, APIPaginationParams, FeatureCollection } from '../models/common.models';
 import { DATATABLE_CONFIG, INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
 
@@ -60,6 +60,29 @@ export class IndividualsService {
     });
   }
   
+  /**
+   * Return un observable with the rank and page in the individuals list of the individual given id
+   * with current filters and sort applied.
+   *
+   * @param {number} id
+   * @param {(APIPaginationParams & APIIndividualFiltersParams)} params
+   * @return {*}  {Observable<IndividualRankAndPage>}
+   * @memberof IndividualsService
+   */
+  getIndividualRankAndPage(id: number, params: APIPaginationParams & APIIndividualFiltersParams): Observable<IndividualRankAndPage> {
+    let httpParams = new HttpParams();
+
+    Object.keys(params).forEach((key) => {
+      if (params[key] != null) {
+        httpParams = httpParams.set(key, String(params[key]));
+      }
+    });
+    console.log('Parameters sent to API (Individual Rank and Page)', params, 'for individual id', id);
+    return this._http.get<IndividualRankAndPage>(`${this._OBJECT_API}/${id}/page`, {
+      params: httpParams,
+    });
+  }
+
 //   getDevice(id_tracking_device: number): Observable<Device> {
 //     return this._http.get<Device>(`${this._OBJECT_API}/${id_tracking_device}`);
 //   }

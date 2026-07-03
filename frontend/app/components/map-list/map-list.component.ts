@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, HostListener, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
 import { Observable } from 'rxjs';
+import * as L from 'leaflet';
 
 import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 import { ModuleService } from '@geonature/services/module.service';
@@ -23,6 +24,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   // public apiEndPoint: string;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
+  @Output() pageId: EventEmitter<number> = new EventEmitter();
   @Input() objectName!: string;
   @Input() idFieldName!: string;
   @Input() availableColumnsParams!: Record<string, unknown>;
@@ -40,8 +42,12 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<FeatureCollection<unknown>>(); 
   
   public mapReady: boolean = false;
-  public mapLayersById: Record<number, L.Layer> = {};
+  public selectedRows: unknown[] = [];
   private _selectedId: number | null = null;
+  private _selectedLayer: L.Layer | null = null;
+  private _mapLayersById: Record<number, L.Layer> = {};
+  // private _lastBbox: string | null = null;
+  // private _mapMoveHandler: (() => void) | null = null;
 
   constructor(
     private _moduleService: ModuleService,
@@ -50,38 +56,14 @@ export class MapListComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit() {
-    this.contentHeight = calcContentHeight();
-    // // Get current module and current user CRUVED
-    // const currentModule = this._moduleService.currentModule;
-    // this.userCruved = currentModule.cruved;
-    // // Get current url to know if we are on devices, individuals, observations or captures
-    // this.currentTabCode = this._route.snapshot.url[0].path;
-
-    // this.mapListService.refreshUrlQuery();
-    // // Set zoom on layer to true
-    // // zoom only when search data
-    // this.mapListService.zoomOnLayer = true;
-
-    // // mapListService config
-    // this.mapListService.idName = 'id_tracking_device';
-    // this.apiEndPoint = `${this._moduleService.currentModule.module_url}/${this.currentTabCode}`;
-    // console.log('API endpoint:', this.apiEndPoint);
-
-    // this.mapListService.displayColumns = [
-    //   { name: 'Individu', prop: 'name' },
-    //   { name: 'CD Nom', prop: 'cd_nom' },
-    //   { name: 'Sexe', prop: 'id_nomenclature_sex' },
-    // ];
-
-    // this.mapListService.refreshUrlQuery();
-    // this.mapListService.getData(this.apiEndPoint, [{ param: 'limit', value: 1 }]);
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.mapReady = true;
+      this.contentHeight = calcContentHeight();
+      this._zoomOnFeatures();
       // this.bindMapMove();
-      // this.loadMapFeatures();
       // this.resizeMap();
     }, 0);
   }
@@ -91,23 +73,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
   onWindowResize($event: any): void {
     this.contentHeight = calcContentHeight();
   }
-
-  // Fonction that return the size of the content of the card, to set the height of the map
-  // calcContentHeight() {
-  //   let windowH = window.innerHeight;
-  //   let toolbarH = document.getElementById('individuals-tab')
-  //     ? document.getElementById('individuals-tab').getBoundingClientRect().top
-  //     : 0;
-  //   let height = windowH - (toolbarH + 80);
-
-  //   this.contentHeight = height >= 350 ? height : 350;
-  //   // Resize map after resize container
-  //   if (this._mapService.map) {
-  //     setTimeout(() => {
-  //       this._mapService.map.invalidateSize();
-  //     }, 10);
-  //   }
-  // }
 
   onPage($event: any): void {
     this.pagination.emit($event);
@@ -133,18 +98,18 @@ export class MapListComponent implements OnInit, AfterViewInit {
     // so TypeScript cannot verify the property at compile time. The identifier field
     // is guaranteed by the component contract to be a number.
     const id = (feature.properties as Record<string, unknown>)[this.idFieldName] as number;
-    this.mapLayersById[id] = layer;
+    this._mapLayersById[id] = layer;
     this._setLayerStyle(layer, id === this._selectedId);
-    layer.on('click', () => this.onMapFeatureClick(feature, layer));
+    layer.on('click', () => this._onMapFeatureClick(feature, layer));
 
     // if (feature.properties) {
     //   layer.bindPopup(this.buildPopup(feature));
     // }
 
-    // if (id === this._selectedId) {
-    //   this._selectedLayer = layer;
+    if (id === this._selectedId) {
+      this._selectedLayer = layer;
     //   this.openLayerPopup(layer);
-    // }
+    }
   }
 
   /**
@@ -160,7 +125,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (!(layer as any).setStyle) {
       return;
     }
-    console.log("color:",this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR);
     
     (layer as any).setStyle({
       color: selected ? 
@@ -172,6 +136,104 @@ export class MapListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private onMapFeatureClick(feature: Feature<unknown>, layer: L.Layer): void {
+  private _onMapFeatureClick(feature: Feature<unknown>, layer: L.Layer): void {
+    console.log('Feature clicked:', feature);
+    const id = (feature.properties as Record<string, unknown>)[this.idFieldName] as number;
+    this._selectedId = id;
+    this._highlightLayer(layer);
+    this.pageId.emit(id);
+    // this.openLayerPopup(layer);
   }
+
+  /**
+   * Toggle the layers colors (selected or not) and the layer position (bring to front or not)
+   *
+   * @private
+   * @param {L.Layer} layer
+   * @memberof MapListComponent
+   */
+  private _highlightLayer(layer: L.Layer): void {
+    // Old selected layer: reset style
+    if (this._selectedLayer) {
+      this._setLayerStyle(this._selectedLayer, false);
+    }
+    // New selected layer: set style and bring to front
+    this._selectedLayer = layer;
+    this._setLayerStyle(layer, true);
+    if ((layer as any).bringToFront) {
+      (layer as any).bringToFront();
+    }
+  }
+
+  /**
+   * Zoom the map on current features
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  private _zoomOnFeatures(): void {
+    this.mapData$.subscribe(mapData => {
+      const layer = L.geoJSON(mapData);
+      this._mapService.getMap()?.fitBounds(layer.getBounds(),{padding: [20, 20]});
+    });
+  }
+
+  /**
+   * Reload data whenever the map extent changes (bbox). 
+   *
+   * @private
+   * @return {*}  {void}
+   * @memberof MapListComponent
+   */
+  // private _bindMapMove(): void {
+  //   const map = this._mapService.getMap();
+  //   if (!map) {
+  //     return;
+  //   }
+  //   // Store the map move function in a property so we can remove it later if needed
+  //   this._mapMoveHandler = () => {
+  //     const bbox = this.getMapBbox();
+  //     if (bbox !== undefined && bbox !== this._lastBbox) {
+  //       this._lastBbox = bbox;
+  //       // this.loadMapFeatures();
+  //     }
+  //   };
+  //   map.on('moveend', this._mapMoveHandler);
+  // }
+
+  /**
+   * Return the bbox of current map
+   *
+   * @private
+   * @return {*}  {(string | undefined)}
+   * @memberof MapListComponent
+   */
+  // private _getMapBbox(): string | undefined {
+  //   const map = this._mapService.getMap();
+  //   if (!map) {
+  //     return undefined;
+  //   }
+  //   const bounds = map.getBounds();
+  //   return [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
+  //     .map((value) => value.toFixed(6))
+  //     .join(',');
+  // }
+
+
+  /**
+   * Ask leaflet to recalculate the size of the map
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  // private _resizeMap(): void {
+  //   setTimeout(() => {
+  //     const map = this._mapService.getMap();
+  //     if (map) {
+  //       // Wait for the view to finish rendering, then force Leaflet to recalculate
+  //       // the map size in case the container dimensions have changed.
+  //       map.invalidateSize();
+  //     }
+  //   }, 10);
+  // }
 }

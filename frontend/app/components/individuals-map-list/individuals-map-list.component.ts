@@ -146,6 +146,29 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     //   });
     // }
   }
+  
+  /**
+   * API call to get the page corresponding to the given id and reload data with this page.
+   * Used when a map feature is clicked and want to display the corresponding row in the paginated table. 
+   *
+   * @param {*} $event
+   * @memberof IndividualsMapListComponent
+   */
+  public onPageId($event: number): void {
+    const APIParams = {
+      ...this._APIPaginationParams,
+      // ...this._APIFiltersParams,
+    };
+
+    if($event) {
+      const IdRankAndPage$ = this._individualsService.getIndividualRankAndPage($event, APIParams);
+
+      IdRankAndPage$.subscribe((rankAndPage) => {
+        this._APIPaginationParams.page = rankAndPage.page;
+        this._loadData();
+      });
+    }
+  }
 
   private _loadData(): void {
     const APIParams = {

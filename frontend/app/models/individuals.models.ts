@@ -1,3 +1,5 @@
+import { RankAndPage } from './common.models';
+
 // This model is only used to read data
 export const INDIVIDUAL_MODEL = {
     id_individual: 0,
@@ -20,6 +22,10 @@ export const INDIVIDUAL_MODEL = {
 }
 
 export type Individual = typeof INDIVIDUAL_MODEL;
+
+export interface IndividualRankAndPage extends RankAndPage { 
+    "id_individual": 36,
+}
 
 export interface APIIndividualFiltersParams {
   // This line help to use
