@@ -23,7 +23,7 @@ import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constant
 export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public availableColumnsParams = INDIVIDUAL_MODEL;
   public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_DISPLAYED_COLUMNS ?? [];
-  public dataTable$: Observable<PaginatedItemCollection<Individual>> = new Observable<
+  public datatable$: Observable<PaginatedItemCollection<Individual>> = new Observable<
     PaginatedItemCollection<Individual>
   >();
   public nbRowsToDisplay = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
@@ -31,7 +31,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
   public allowedToEdit: boolean[] = [];
   public allowedToDelete: Record<number, boolean> = {};
-  public selectedRow!: Individual;
+  public selectedRows: Individual[] = [];
   public mapData$: Observable<FeatureCollection<Individual>> = new Observable<FeatureCollection<Individual>>();
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
@@ -41,6 +41,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     dir: INDIVIDUALS_DEFAULT_SORT.dir,
   };
   private _APIFiltersParams: APIIndividualFiltersParams = {};
+  private _selectedId: number | null = null;
 
   constructor(
     private _config: ConfigService,
@@ -55,7 +56,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Resolver : First initialisation of the table
     this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, mapData }) => {
-      this.dataTable$ = of(datatable);
+      this.datatable$ = of(datatable);
       this.mapData$ = of(mapData);
       // this._initPermissions(data);
     });
@@ -96,55 +97,9 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @memberof DevicesListComponent
    */
   openDeleteModal($event: any) {
-    // this.selectedRow = $event;
-    // const modalRef = this._ngbModal.open(DeleteModalComponent);
-
-    // modalRef.componentInstance.title = this._translate.instant(
-    //   'Individuals.Devices.Titles.Delete',
-    //   { id: this.selectedRow.id_tracking_device }
-    // );
-
-    // modalRef.componentInstance.body = `
-    //   ${this._translate.instant('Individuals.Devices.Fields.provider_name')} : ${this.selectedRow.provider_name}<br>
-    //   ${this._translate.instant('Individuals.Devices.Fields.provider_device_id')} : ${this.selectedRow.provider_device_id}
-    // `;
-
-    // modalRef.componentInstance.confirm.subscribe((id: number) => {
-    //   this.onDelete();
-    // });
   }
 
-  // onFilters($event: {key: keyof APIDevicesFiltersParams; value: string | number | undefined;} | null): void {
-  //   if (!$event) {
-  //     this._APIFiltersParams = {};
-  //   } else {
-  //     if ($event.value) {
-  //       this._APIFiltersParams[$event.key] = $event.value;
-  //       this._APIPaginationParams['page'] = 1;
-  //     }
-  //   }
-  //   this._loadData();
-  // }
-
   onDelete(): void {
-    // if (this.selectedRow) {
-    //   const selectedId = this.selectedRow.id_tracking_device;
-    //   this._devicesService.deleteDevice(selectedId).subscribe({
-    //     next: (res) => {
-    //       this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
-    //         id: selectedId,
-    //       });
-    //       this._loadData();
-    //     },
-    //     error: (err) => {
-    //       this._errorHandler.handleHttpError(
-    //         err,
-    //         { id: selectedId },
-    //         'Individuals.Devices.ApiErrors'
-    //       );
-    //     },
-    //   });
-    // }
   }
   
   /**
@@ -154,17 +109,19 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @param {*} $event
    * @memberof IndividualsMapListComponent
    */
-  public onPageId($event: number): void {
+  public onIdPage($event: any): void {
+    this._selectedId = $event;
     const APIParams = {
       ...this._APIPaginationParams,
       // ...this._APIFiltersParams,
     };
 
-    if($event) {
+    if ($event) {
       const IdRankAndPage$ = this._individualsService.getIndividualRankAndPage($event, APIParams);
 
       IdRankAndPage$.subscribe((rankAndPage) => {
         this._APIPaginationParams.page = rankAndPage.page;
+        console.log('onPageId called with id:', $event, ' get page:', rankAndPage, ' with params:', APIParams);
         this._loadData();
       });
     }
@@ -175,9 +132,20 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       ...this._APIPaginationParams,
       // ...this._APIFiltersParams,
     };
-    this.dataTable$ = this._individualsService
-      .getIndividuals(APIParams)
-      // .pipe(tap((data) => this._initPermissions(data)));
+    this.datatable$ = this._individualsService
+      .getIndividuals(APIParams).pipe(
+        tap((data) => {
+          if (this._selectedId !== null) {
+            const selected = data.items.find(
+              (item) => item.id_individual === this._selectedId
+            );
+            this.selectedRows = selected ? [selected] : [];
+          } else {
+            this.selectedRows = [];
+          }
+          // this._initPermissions(data)
+        })
+      )
   }
 
   private loadMapData(): void {

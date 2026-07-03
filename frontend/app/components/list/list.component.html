@@ -56,10 +56,11 @@
     [limit]="nbRowsToDisplay"
     [offset]="dataTable.page - 1"
     [rows]="dataTable.items"
-    (page)="onPage($event)"
     [sorts]="sorts"
-    (sort)="onSort($event)"
     [selectionType]="selectionType.single"
+    [selected]="selectedRows"
+    (page)="onPage($event)"
+    (sort)="onSort($event)"
   >
     <ngx-datatable-row-detail [rowHeight]="$any('auto')">
       <ng-template

@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, HostListener, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
 import { Observable } from 'rxjs';
+import { take}  from 'rxjs/operators';
 import * as L from 'leaflet';
 
 import { MapService } from '@geonature/GN2CommonModule/map/map.service';
@@ -24,12 +25,12 @@ export class MapListComponent implements OnInit, AfterViewInit {
   // public apiEndPoint: string;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
-  @Output() pageId: EventEmitter<number> = new EventEmitter();
+  @Output() idPage: EventEmitter<number> = new EventEmitter();
   @Input() objectName!: string;
   @Input() idFieldName!: string;
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
-  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
+  @Input() datatable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
     PaginatedItemCollection<unknown>
   >();
   @Input() nbRowsToDisplay!: number;
@@ -39,10 +40,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
+  @Input() selectedRows: unknown[] = [];
   @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<FeatureCollection<unknown>>(); 
-  
+
   public mapReady: boolean = false;
-  public selectedRows: unknown[] = [];
   private _selectedId: number | null = null;
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
@@ -100,7 +101,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     const id = (feature.properties as Record<string, unknown>)[this.idFieldName] as number;
     this._mapLayersById[id] = layer;
     this._setLayerStyle(layer, id === this._selectedId);
-    layer.on('click', () => this._onMapFeatureClick(feature, layer));
+    layer.on('click', () => this.onMapFeatureClick(feature, layer));
 
     // if (feature.properties) {
     //   layer.bindPopup(this.buildPopup(feature));
@@ -136,13 +137,15 @@ export class MapListComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private _onMapFeatureClick(feature: Feature<unknown>, layer: L.Layer): void {
-    console.log('Feature clicked:', feature);
+  public onMapFeatureClick(feature: Feature<unknown>, layer: L.Layer): void {
     const id = (feature.properties as Record<string, unknown>)[this.idFieldName] as number;
     this._selectedId = id;
     this._highlightLayer(layer);
-    this.pageId.emit(id);
-    // this.openLayerPopup(layer);
+
+    // Emit the selected id to the parent component, 
+    // which call the API to get the page, reload the datatable with it,
+    // set the selectRows attribute to the corresponding row in the datatable
+    this.idPage.emit(id);
   }
 
   /**

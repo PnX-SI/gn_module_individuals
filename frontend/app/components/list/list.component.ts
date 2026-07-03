@@ -45,6 +45,7 @@ export class ListComponent implements OnInit {
   @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
+  @Input() selectedRows: unknown[] = [];
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
@@ -138,6 +139,7 @@ export class ListComponent implements OnInit {
     if (this.dataTable) {
       this.dataTable.rowDetail.toggleExpandRow(row);
     }
+    this.selectedRows = [row];
   }
 
   /**

@@ -19,7 +19,7 @@
                 "meta_update_date" : "Date de mise à jour",
                 "nomenclature_device_type_name" : "Type de dispositif",
                 "referer_name" : "Référent",
-                "digitiser_name" : "Digitaliseur",
+                "digitiser_name" : "Numériseur",
                 "last_individual_equipped_name" : "Dernier individu équipé",
                 "deployments" : "Liste des déploiements associés"
             },
@@ -68,7 +68,7 @@
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
                 "individual_name" : "Nom de l'individu",
-                "digitiser_name" : "Nom du digitaliseur"
+                "digitiser_name" : "Numériseur"
             }
         },
         "Individuals": {
@@ -80,7 +80,7 @@
                 "comment" : "Commentaire",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
-                "digitiser_name" : "Digitaliseur",
+                "digitiser_name" : "Numériseur",
                 "nomenclature_sex_name" : "Sexe",
                 "last_observation_date" : "Dernière observation",
                 "last_observation_observers_name" : "Dernier(s) observateur(s)",
