@@ -32,6 +32,7 @@
       [selectedRows]="selectedRows"
       (pagination)="onPage($event)"
       (sort)="onSort($event)"
+      (select)="onTableSelect($event)"
       (delete)="openDeleteModal($event)"
     ></gn-individuals-list>
   </div>

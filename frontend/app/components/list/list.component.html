@@ -61,6 +61,7 @@
     [selected]="selectedRows"
     (page)="onPage($event)"
     (sort)="onSort($event)"
+    (select)="onSelect($event)"
   >
     <ngx-datatable-row-detail [rowHeight]="$any('auto')">
       <ng-template

@@ -108,6 +108,15 @@ export class ListComponent implements OnInit {
   }
 
   /**
+   * Emit a select event
+   *
+   * @param {*} $event Current row.
+   * @memberof ListComponent
+   */
+  onSelect($event: any): void {
+    this.select.emit($event);
+  }
+  /**
    * Emit a pagination event
    *
    * @param {*} $event
@@ -128,6 +137,15 @@ export class ListComponent implements OnInit {
     this.sort.emit($event);
   }
 
+  /**
+   * Emit a delete event
+   *
+   * @param {*} $event Current row.
+   * @memberof ListComponent
+   */
+  onDelete($event: any): void {
+    this.delete.emit($event);
+  }
 
   /**
    * Expand or not the row detail 
@@ -140,16 +158,6 @@ export class ListComponent implements OnInit {
       this.dataTable.rowDetail.toggleExpandRow(row);
     }
     this.selectedRows = [row];
-  }
-
-  /**
-   * Emit a delete event
-   *
-   * @param {*} $event Current row.
-   * @memberof ListComponent
-   */
-  onDelete($event: any): void {
-    this.delete.emit($event);
   }
 
   /**

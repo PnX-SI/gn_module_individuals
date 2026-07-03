@@ -42,6 +42,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() filtersTemplate!: TemplateRef<any>;
   @Input() selectedRows: unknown[] = [];
   @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<FeatureCollection<unknown>>(); 
+  @Input() featurePopupTemplate!: TemplateRef<{ feature: Feature<unknown> }>;
 
   public mapReady: boolean = false;
   private _selectedId: number | null = null;
@@ -75,6 +76,18 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this.contentHeight = calcContentHeight();
   }
 
+  onTableSelect($event: any): void {
+    const selected = $event.selected?.[0];
+    if (!selected) {
+      return;
+    }
+    this.selectedRows = [selected];
+    this._selectedId = selected[this.idFieldName];
+    if (this._selectedId) {
+      this._selectMapFeature(this._selectedId, true);
+    }
+  }
+
   onPage($event: any): void {
     this.pagination.emit($event);
   }
@@ -103,13 +116,13 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this._setLayerStyle(layer, id === this._selectedId);
     layer.on('click', () => this.onMapFeatureClick(feature, layer));
 
-    // if (feature.properties) {
-    //   layer.bindPopup(this.buildPopup(feature));
-    // }
+    if (feature.properties) {
+      layer.bindPopup(this._buildPopupContent(feature));
+    }
 
     if (id === this._selectedId) {
       this._selectedLayer = layer;
-    //   this.openLayerPopup(layer);
+      this._openLayerPopup(layer);
     }
   }
 
@@ -182,6 +195,80 @@ export class MapListComponent implements OnInit, AfterViewInit {
   }
 
   /**
+   * Build popup content from the parent-provided template.
+   *
+   * If the parent passes a featurePopupTemplate, this method creates
+   * an embedded view for the clicked feature and renders its DOM nodes
+   * into a container element. The resulting HTMLElement is returned so
+   * Leaflet can display it inside the popup.
+   *
+   * If no template is provided, the popup content is empty.
+   *
+   * @param {Feature<unknown>} feature - The clicked GeoJSON feature.
+   * @returns {HTMLElement | string} Rendered popup content.
+   */
+  private _buildPopupContent(feature: Feature<unknown>): HTMLElement | string {
+    if (!this.featurePopupTemplate) {
+      return '';
+    }
+
+    // Create an embedded view using the parent template and the current feature.
+    const view = this.featurePopupTemplate.createEmbeddedView({ feature });
+    view.detectChanges();
+
+    const HTMLDom = document.createElement('div');
+
+    // Append each rendered DOM node from the template into the container.
+    view.rootNodes.forEach(node => {
+      if (node instanceof Node) {
+        HTMLDom.appendChild(node);
+      }
+    });
+
+    return HTMLDom;
+  }
+
+  /**
+   * Open the given layer popup
+   *
+   * @private
+   * @param {L.Layer} layer
+   * @memberof MapListComponent
+   */
+  private _openLayerPopup(layer: L.Layer): void {
+    if ((layer as any).openPopup) {
+      setTimeout(() => (layer as any).openPopup(), 0);
+    }
+  }
+
+  
+  /**
+   * According to the given id, highlight the layer 
+   * and open it's popup.
+   *
+   * @private
+   * @param {number} id
+   * @param {boolean} zoom
+   * @return {*}  {void}
+   * @memberof MapListComponent
+   */
+  private _selectMapFeature(id: number, zoom: boolean): void {
+    const layer = this._mapLayersById[id];
+    if (!layer) {
+      // if (zoom) {
+      //   this.focusMissingMapFeature(idIndividual);
+      // }
+      return;
+    }
+    this._selectedId = id;
+    this._highlightLayer(layer);
+    this._openLayerPopup(layer);
+    // if (zoom) {
+    //   this.zoomOnLayer(layer);
+    // }
+  }
+  
+    /**
    * Reload data whenever the map extent changes (bbox). 
    *
    * @private

@@ -10,7 +10,12 @@
 
 .datatable-body-row {
   height: auto !important;
+
+  :hover {
+    cursor: pointer;
+  }
 }
+
 
 // Is used only if in the component the decorator encapsulation is set to ViewEncapsulation.None
 // This style set the vertical align to center of the datatable cells

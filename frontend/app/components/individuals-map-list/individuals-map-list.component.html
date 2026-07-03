@@ -43,6 +43,23 @@
   ></gn-individuals-devices-list-filters> -->
 </ng-template>
 
+<ng-template #featurePopupTemplate let-feature="feature">
+  <div>
+    <span>
+      <strong>{{'Individuals.Individuals.Fields.individual_name' | translate }} : </strong>
+      {{ feature.properties.individual_name }}<br>
+    </span>
+    <span>
+      <strong>{{'Individuals.Individuals.Fields.last_observation_date' | translate }} : </strong>
+      {{ feature.properties.last_observation_date }}<br>
+    </span>
+    <span>
+      <strong>{{'Individuals.Individuals.Fields.last_observation_observers_name' | translate }} : </strong>
+      {{ feature.properties.last_observation_observers_name }}
+    </span>
+  </div>
+</ng-template>
+
 <gn-individuals-map-list
   [objectName]="'individuals'"
   [idFieldName]="'id_individual'"
@@ -56,6 +73,7 @@
   [allowedToDelete]="allowedToDelete"
   [summaryTemplate]="summaryTemplate"
   [filtersTemplate]="filtersTemplate"
+  [featurePopupTemplate]="featurePopupTemplate"
   [mapData$]="mapData$"
   [selectedRows]="selectedRows"
   (pagination)="onPage($event)"
