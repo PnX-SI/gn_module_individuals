@@ -17,7 +17,9 @@ depends_on = None
 
 
 def upgrade():
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
             INSERT INTO gn_individual.bib_tracking_devices (
     id_nomenclature_device_type,
     provider_name,
@@ -80,8 +82,12 @@ JOIN ref_nomenclatures.t_nomenclatures n
             ('Quechua',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               3, '{"birth_year": 2012}'),
             ('Kalinka',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       4, '{"birth_year": 2011}'),
             ('Pavot',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               4, '{"birth_year": 2019}')
-            """))
-    op.execute(sa.text("""
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
             INSERT INTO gn_individual.t_individual_deployments (
                 id_capture,
                 id_individual,
@@ -138,11 +144,15 @@ JOIN ref_nomenclatures.t_nomenclatures n
             FROM data d
             JOIN individuals i ON i.individual_name = d.individual_name
             JOIN devices dev ON dev.provider_device_id = d.provider_device_id
-            """))
+            """
+        )
+    )
 
     # Marquages physiques : Patastrophe et Evasion (sans GPS), Obiwan (avec GPS)
     # Chaque animal : 2 couleurs par oreille (OD_AV/OD_AR, OG_AV/OG_AR) + collier coloré à l'encolure
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
         INSERT INTO gn_individual.t_individual_deployments (
             id_capture, id_individual,
             id_nomenclature_deployment_type, id_nomenclature_deployment_location,
@@ -199,11 +209,15 @@ JOIN ref_nomenclatures.t_nomenclatures n
         JOIN individuals i  ON i.individual_name = d.individual_name
         JOIN n_type nt       ON nt.mnemonique     = d.type_mnemo
         JOIN n_loc nl        ON nl.mnemonique      = d.loc_mnemo;
-    """))
+    """
+        )
+    )
 
 
 def downgrade():
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            """
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables
@@ -221,4 +235,6 @@ BEGIN
         DELETE FROM gn_monitoring.t_individuals;
     END IF;
 END $$;
-    """))
+    """
+        )
+    )
