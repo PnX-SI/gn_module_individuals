@@ -87,6 +87,9 @@ class TestIndividualsDeploymentsSchema:
 
     # --- validate_tracking_device  ---------------------------
 
+    def test_validate_tracking_device_accepts_none(self, app):
+        assert IndividualsDeploymentsSchema().validate_tracking_device(None) is None
+
     def test_validate_tracking_device_accepts_valid_id(self, app, device):
         result = IndividualsDeploymentsSchema().validate_tracking_device(device.id_tracking_device)
         assert result == device.id_tracking_device
@@ -97,8 +100,9 @@ class TestIndividualsDeploymentsSchema:
 
     # --- validate_nomenclature_deployment_type  --------------
 
-    def test_validate_nomenclature_deployment_type_accepts_none(self, app):
-        assert IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(None) is None
+    def test_validate_nomenclature_deployment_type_rejects_none(self, app):
+        with pytest.raises(ValidationError, match="n'existe pas"):
+            IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(None)
 
     def test_validate_nomenclature_deployment_type_accepts_valid_id(self, app):
         valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
@@ -111,10 +115,9 @@ class TestIndividualsDeploymentsSchema:
 
     # --- validate_nomenclature_deployment_location ----------
 
-    def test_validate_nomenclature_deployment_location_accepts_none(self, app):
-        assert (
-            IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(None) is None
-        )
+    def test_validate_nomenclature_deployment_location_rejects_none(self, app):
+        with pytest.raises(ValidationError, match="n'existe pas"):
+            IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(None)
 
     def test_validate_nomenclature_deployment_location_accepts_valid_id(self, app):
         valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
@@ -156,21 +159,21 @@ class TestIndividualsDeploymentsSchema:
         result = IndividualsDeploymentsSchema().get_individual_name(deployment)
         assert result is not None
 
-    def test_dump_nomenclature_deployment_type_is_none_when_unset(
+    def test_dump_nomenclature_deployment_type_returns_nomenclature(
         self, app, device_with_deployment
     ):
         deployment = device_with_deployment.deployments[0]
         only = [f"+{n}" for n in IndividualDeployments.__nomenclatures__]
         dumped = IndividualsDeploymentsSchema(only=only).dump(deployment)
-        assert dumped["nomenclature_deployment_type"] is None
+        assert dumped["nomenclature_deployment_type"]["cd_nomenclature"] == "4"
 
-    def test_dump_nomenclature_deployment_location_is_none_when_unset(
+    def test_dump_nomenclature_deployment_location_returns_nomenclature(
         self, app, device_with_deployment
     ):
         deployment = device_with_deployment.deployments[0]
         only = [f"+{n}" for n in IndividualDeployments.__nomenclatures__]
         dumped = IndividualsDeploymentsSchema(only=only).dump(deployment)
-        assert dumped["nomenclature_deployment_location"] is None
+        assert dumped["nomenclature_deployment_location"]["cd_nomenclature"] == "3"
 
     def test_get_digitiser_returns_none_when_unset(self, app, device_with_deployment):
         deployment = device_with_deployment.deployments[0]
@@ -245,18 +248,19 @@ class TestIndividualsMapSchema:
 @pytest.mark.usefixtures("temporary_transaction")
 class TestDeploymentsBaseSchema:
 
-    def test_get_type_label_returns_none_when_no_nomenclature(
+    def test_get_type_label_returns_nomenclature_label(
         self, app, device_with_deployment, individual
     ):
         deployment = individual.deployments[0]
-        # device_with_deployment sets no nomenclature → None
-        assert DeploymentsBaseSchema().get_type_label(deployment) is None
+        # device_with_deployment sets id_nomenclature_deployment_type to DISPO_SUIVI
+        assert DeploymentsBaseSchema().get_type_label(deployment) == "Dispositif de suivi"
 
-    def test_get_location_label_returns_none_when_no_nomenclature(
+    def test_get_location_label_returns_nomenclature_label(
         self, app, device_with_deployment, individual
     ):
         deployment = individual.deployments[0]
-        assert DeploymentsBaseSchema().get_location_label(deployment) is None
+        # device_with_deployment sets id_nomenclature_deployment_location to ENCOLURE
+        assert DeploymentsBaseSchema().get_location_label(deployment) == "Encolure"
 
     def test_get_type_label_returns_string_when_nomenclature_set(
         self, app, device_with_deployment, individual

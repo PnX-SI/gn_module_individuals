@@ -37,21 +37,21 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
         "id_nomenclature_deployment_type",
         DB.Integer,
         DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-        nullable=True,
+        nullable=False,
     )
 
     id_nomenclature_deployment_location = DB.Column(
         "id_nomenclature_deployment_location",
         DB.Integer,
         DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-        nullable=True,
+        nullable=False,
     )
 
     id_tracking_device = DB.Column(
         "id_tracking_device",
         DB.Integer,
         DB.ForeignKey("gn_individual.bib_tracking_devices.id_tracking_device"),
-        nullable=False,
+        nullable=True,
     )
 
     marking_code = DB.Column(

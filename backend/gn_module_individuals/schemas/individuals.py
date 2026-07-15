@@ -137,22 +137,20 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     @validates("id_tracking_device")
     def validate_tracking_device(self, value, **kwargs):
+        if value is None:
+            return value
         if db.session.get(TrackingDevices, value) is None:
             raise ValidationError(f"Le dispositif de suivi {value} n'existe pas.")
         return value
 
     @validates("id_nomenclature_deployment_type")
     def validate_nomenclature_deployment_type(self, value, **kwargs):
-        if value is None:
-            return value
         if db.session.get(TNomenclatures, value) is None:
             raise ValidationError(f"La nomenclature {value} (type de déploiement) n'existe pas.")
         return value
 
     @validates("id_nomenclature_deployment_location")
     def validate_nomenclature_deployment_location(self, value, **kwargs):
-        if value is None:
-            return value
         if db.session.get(TNomenclatures, value) is None:
             raise ValidationError(
                 f"La nomenclature {value} (localisation du déploiement) n'existe pas."
