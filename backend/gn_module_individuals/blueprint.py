@@ -1,6 +1,4 @@
-"""
-Définition des routes du module individus
-"""
+"""Individuals module blueprint: registers routes and error handling."""
 
 from flask import Blueprint
 

@@ -138,10 +138,7 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
 
     @classmethod
     def register_individual_backref(cls):
-        """
-        Attache TIndividuals.deployments depuis le côté module,
-        après que les deux classes sont définies.
-        """
+        """Attaches TIndividuals.deployments from the module side, once both classes exist."""
         if not hasattr(TIndividuals, "deployments"):
             TIndividuals.deployments = DB.relationship(
                 cls,

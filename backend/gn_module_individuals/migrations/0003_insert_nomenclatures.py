@@ -121,7 +121,7 @@ def upgrade():
         )
     )
 
-    # --- TYPE_MARQUAGE : type de marquage physique de l'animal ---
+    # --- TYPE_MARQUAGE: physical marking type applied to the animal ---
     op.execute(
         sa.insert(bib_nomencl).values(
             [
@@ -193,7 +193,7 @@ def upgrade():
         )
     )
 
-    # --- LOC_MARQUAGE : localisation du marquage sur le corps de l'animal ---
+    # --- LOC_MARQUAGE: marking location on the animal's body ---
     op.execute(
         sa.insert(bib_nomencl).values(
             [
@@ -313,10 +313,9 @@ def upgrade():
         )
     )
 
-    # Les id_type ci-dessus sont insérés explicitement (hors du nextval de la
-    # séquence) : il faut donc la resynchroniser, sinon la prochaine insertion
-    # de type de nomenclature passant par l'ORM (un autre module par exemple)
-    # entrera en collision avec ces id_type.
+    # The id_type values above are inserted explicitly (bypassing the sequence's
+    # nextval), so it must be resynced — otherwise the next nomenclature type
+    # inserted through the ORM (e.g. by another module) would collide with them.
     conn.execute(
         select(
             sa.func.setval(

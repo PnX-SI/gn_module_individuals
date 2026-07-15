@@ -55,7 +55,7 @@ export class IndividualsService {
       }
     });
 
-    return this._http.get<FeatureCollection<Individual>>(`${this._OBJECT_API}/map`, {
+    return this._http.get<FeatureCollection<Individual>>(`${this._OBJECT_API}/geometry`, {
       params: httpParams,
     });
   }

@@ -1,10 +1,9 @@
 from apptax.taxonomie.models import Taxref
-from geoalchemy2 import Geometry
 from geonature.core.gn_monitoring.models import TIndividuals
+from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import DB
 from pypnnomenclature.models import TNomenclatures as Nomenclature
-from sqlalchemy import func, case, inspect
-from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy import select, inspect
 
 
 def _add_mapper_property(name, prop):
@@ -13,14 +12,13 @@ def _add_mapper_property(name, prop):
 
 
 def _register_nomenclatures_attribute():
-    """
-    Équivalent de pypnnomenclature.utils.NomenclaturesMixin.__declare_last__,
-    appliqué en surcouche : TIndividuals est un modèle core, on ne peut pas le
-    faire hériter du mixin (qui doit être dans les bases à la déclaration de
-    la classe). On reproduit donc son effet ici : __nomenclatures__ devient la
-    liste des relations de TIndividuals pointant vers TNomenclatures, utilisée
-    ensuite dans routes/individuals.py (eager loading + only du schéma),
-    comme le fait gn_module_occhab avec Station.__nomenclatures__.
+    """Reproduces NomenclaturesMixin.__declare_last__ for TIndividuals.
+
+    TIndividuals is a core model, so it can't inherit the mixin (which must be
+    in the class bases at declaration time). Instead we set __nomenclatures__
+    here to the list of TIndividuals relationships pointing to TNomenclatures,
+    used by routes/individuals.py (eager loading + schema `only`), the same
+    way gn_module_occhab does with Station.__nomenclatures__.
     """
     if hasattr(TIndividuals, "__nomenclatures__"):
         return
@@ -45,34 +43,30 @@ def register_individual_extensions():
 
 
 # ---------------------------------------------------------------------------
-# TEMPORAIRE : tant que la jointure occtax (cor_counting_occtax.id_individual)
-# n'est pas réintégrée, fonction qui génère une fausse "dernière observation"
-# (position, date, observateurs), par individu  : simples expressions SQL,
-#  assignées en attributs Python après coup via une requête annexe
-#  — voir routes/individuals.py).
-# À supprimer/remplacer dès que l'intégration réelle revient.
+# An individual's last observation (position, date, observers) is read from
+# gn_synthese.synthese (fed by Occtax's real-time trigger and by manual sync
+# of Monitoring sub-modules), not computed here.
 # ---------------------------------------------------------------------------
 
-FAKE_OBSERVERS_POOL = ["Jean Dupont, Marie Martin", "Alice Durand", "Paul Bernard, Sophie Leroy"]
 
-
-def temporary_individual_geom_expression():
-    return func.ST_SetSRID(
-        func.ST_MakePoint(
-            6.0 + (func.mod(TIndividuals.id_individual, 1000) * 0.001),
-            45.0 + (func.mod(TIndividuals.id_individual, 1000) * 0.001),
-        ),
-        4326,
-        type_=Geometry("POINT", srid=4326),
+def _individual_last_synthese_column(column):
+    return (
+        select(column)
+        .where(Synthese.id_individual == TIndividuals.id_individual)
+        .order_by(Synthese.date_max.desc())
+        .limit(1)
+        .correlate(TIndividuals)
+        .scalar_subquery()
     )
 
 
-def temporary_individual_date_expression():
-    days_ago = func.mod(TIndividuals.id_individual, 365)
-    return func.now() - func.cast(func.concat(days_ago, " days"), INTERVAL)
+def individual_last_observation_geom_expression():
+    return _individual_last_synthese_column(Synthese.the_geom_point)
 
 
-def temporary_individual_observers_expression():
-    idx = func.mod(TIndividuals.id_individual, len(FAKE_OBSERVERS_POOL))
-    whens = [(idx == i, name) for i, name in enumerate(FAKE_OBSERVERS_POOL)]
-    return case(*whens, else_=FAKE_OBSERVERS_POOL[0])
+def individual_last_observation_date_expression():
+    return _individual_last_synthese_column(Synthese.date_max)
+
+
+def individual_last_observation_observers_expression():
+    return _individual_last_synthese_column(Synthese.observers)

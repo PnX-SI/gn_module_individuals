@@ -5,11 +5,10 @@ from flask import jsonify
 
 
 class DevicesErrorCode(str, Enum):
-    """Nomenclature des codes d'erreur pour les dispositifs de suivi.
+    """Error codes for tracking devices.
 
-    Ces codes constituent le contrat entre backend et frontend :
-    le frontend utilise la valeur comme suffixe de clé de traduction
-    (ex. Individuals.ApiErrors.DeviceNotFound).
+    Backend/frontend contract: the frontend uses the value as a translation
+    key suffix (e.g. Individuals.ApiErrors.DeviceNotFound).
     """
 
     DEVICE_NOT_FOUND = "DeviceNotFound"
@@ -20,11 +19,10 @@ class DevicesErrorCode(str, Enum):
 
 
 class IndividualsErrorCode(str, Enum):
-    """Nomenclature des codes d'erreur pour les individus.
+    """Error codes for individuals.
 
-    Ces codes constituent le contrat entre backend et frontend :
-    le frontend utilise la valeur comme suffixe de clé de traduction
-    (ex. Individuals.ApiErrors.IndividualNotFound).
+    Backend/frontend contract: the frontend uses the value as a translation
+    key suffix (e.g. Individuals.ApiErrors.IndividualNotFound).
     """
 
     INDIVIDUAL_NOT_FOUND = "IndividualNotFound"
@@ -32,11 +30,11 @@ class IndividualsErrorCode(str, Enum):
 
 
 class APIError(Exception):
-    """Exception structurée produisant {name, description} attendu par MyCustomInterceptor.
+    """Structured exception producing {name, description}, as expected by MyCustomInterceptor.
 
-    Le champ ``name`` est le code machine (DevicesErrorCode), utilisé côté frontend
-    comme clé de traduction.  Le champ ``description`` est le message anglais par
-    défaut, affiché tel quel si aucune traduction n'est disponible.
+    ``name`` is the machine code (e.g. DevicesErrorCode), used by the frontend as a
+    translation key. ``description`` is the default English message, shown as-is if
+    no translation is available.
     """
 
     def __init__(
@@ -54,7 +52,7 @@ class APIError(Exception):
 
 
 def handle_error(error: APIError):
-    """Sérialiseur Flask enregistré sur le blueprint individuals."""
+    """Flask error handler registered on the individuals blueprint."""
     return (
         jsonify(
             {

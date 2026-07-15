@@ -2,7 +2,7 @@ from flask import current_app
 
 
 def get_label(nomenclature):
-    #  Retourne le label dans la langue configurée (DEFAULT_LANGUAGE), avec fallback.
+    # Label in the configured language (DEFAULT_LANGUAGE), falling back to default.
     if nomenclature is None:
         return None
     lang = current_app.config.get("DEFAULT_LANGUAGE")

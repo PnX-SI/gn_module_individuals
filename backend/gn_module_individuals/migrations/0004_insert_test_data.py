@@ -161,8 +161,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
         )
     )
 
-    # Marquages physiques : Patastrophe et Evasion (sans GPS), Obiwan (avec GPS)
-    # Chaque animal : 2 couleurs par oreille (OD, OG) + collier coloré à l'encolure
+    # Physical markings: Patastrophe and Evasion (no GPS), Obiwan (with GPS).
+    # Each animal: 2 colors per ear (OD, OG) + a colored collar at the neck.
     op.execute(
         sa.text(
             """
@@ -189,19 +189,19 @@ JOIN ref_nomenclatures.t_nomenclatures n
         ),
         data AS (
             SELECT * FROM (VALUES
-                -- Patastrophe : orange/jaune, collier vert (capture 17)
+                -- Patastrophe: orange/yellow, green collar (capture 17)
                 ('Patastrophe', 17, 'PLAQUE', 'OD',       'Orange', '2023-01-15', 3),
                 ('Patastrophe', 17, 'PLAQUE', 'OD',       'Jaune',  '2023-01-15', 3),
                 ('Patastrophe', 17, 'PLAQUE', 'OG',       'Orange', '2023-01-15', 3),
                 ('Patastrophe', 17, 'PLAQUE', 'OG',       'Jaune',  '2023-01-15', 3),
                 ('Patastrophe', 17, 'PLAQUE', 'ENCOLURE', 'Vert',   '2023-01-15', 3),
-                -- Evasion : violet/rouge, collier jaune (capture 18)
+                -- Evasion: purple/red, yellow collar (capture 18)
                 ('Evasion', 18, 'PLAQUE', 'OD',       'Violet', '2022-11-20', 6),
                 ('Evasion', 18, 'PLAQUE', 'OD',       'Rouge',  '2022-11-20', 6),
                 ('Evasion', 18, 'PLAQUE', 'OG',       'Violet', '2022-11-20', 6),
                 ('Evasion', 18, 'PLAQUE', 'OG',       'Rouge',  '2022-11-20', 6),
                 ('Evasion', 18, 'PLAQUE', 'ENCOLURE', 'Jaune',  '2022-11-20', 6),
-                -- Obiwan : bleu/blanc, collier rouge (capture 19, même date que pose GPS)
+                -- Obiwan: blue/white, red collar (capture 19, same date as GPS deployment)
                 ('Obiwan', 19, 'PLAQUE', 'OD',       'Bleu',  '2024-01-10', 4),
                 ('Obiwan', 19, 'PLAQUE', 'OD',       'Blanc', '2024-01-10', 4),
                 ('Obiwan', 19, 'PLAQUE', 'OG',       'Bleu',  '2024-01-10', 4),
@@ -226,7 +226,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
         )
     )
 
-    # --- Intégration Occtax : quelques relevés en Vanoise référençant nos individus ---
+    # --- Occtax integration: a few Vanoise records referencing our individuals ---
 
     op.execute(
         sa.text(
@@ -317,9 +317,9 @@ JOIN ref_nomenclatures.t_nomenclatures n
         )
     )
 
-    # Observations de terrain identifiées par marquage physique (pas de nom de lieu,
-    # positions aléatoires en Vanoise) : Patastrophe (5), Evasion (3), Obiwan (0)
-    # pour couvrir la fourchette 0 à 5 demandée et pouvoir tester les déplacements.
+    # Field sightings identified by physical marking (no place name, random
+    # positions in Vanoise): Patastrophe (5), Evasion (3), Obiwan (0), covering
+    # the requested 0-5 range so movement can be tested.
     op.execute(
         sa.text(
             """
@@ -399,8 +399,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
         )
     )
 
-    # Simulation de données de balise GPS : 4 points/jour pendant 3 jours,
-    # espacés de 100 mètres, pour un seul animal (Cynthia).
+    # Simulated GPS tag data: 4 points/day over 3 days, 100m apart,
+    # for a single animal (Cynthia).
     op.execute(
         sa.text(
             """
@@ -465,9 +465,9 @@ JOIN ref_nomenclatures.t_nomenclatures n
         )
     )
 
-    # --- Intégration Monitoring : sous-module CMR_BOUQUETIN sur nos bouquetins marqués ---
-    # Le sous-module doit avoir été installé au préalable via
-    # ./scripts/setup_cmr_demo.sh (voir ce script pour le détail).
+    # --- Monitoring integration: CMR_BOUQUETIN sub-module on our marked ibex ---
+    # The sub-module must have been installed beforehand via
+    # ./scripts/setup_cmr_demo.sh (see that script for details).
     cmr_installed = conn.execute(
         sa.text(
             "SELECT EXISTS (SELECT 1 FROM gn_commons.t_modules WHERE module_code = 'CMR_BOUQUETIN')"
@@ -475,8 +475,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
     ).scalar()
 
     if cmr_installed:
-        # Jeu de données dédié : le dataset "1" réutilisé pour Occtax est associé
-        # (gn_commons.cor_module_dataset) au seul module OCCTAX, pas à CMR_BOUQUETIN.
+        # Dedicated dataset: the dataset "1" reused for Occtax is associated
+        # (gn_commons.cor_module_dataset) with the OCCTAX module only, not CMR_BOUQUETIN.
         op.execute(
             sa.text(
                 """
@@ -583,9 +583,9 @@ JOIN ref_nomenclatures.t_nomenclatures n
 def downgrade():
     conn = op.get_bind()
 
-    # Les DELETE sur t_base_sites / t_releves_occtax cascadent (ON DELETE CASCADE)
-    # vers visites/observations et occurrences/comptages, synthèse comprise
-    # (triggers de suppression synthese sur occtax et monitoring).
+    # DELETEs on t_base_sites / t_releves_occtax cascade (ON DELETE CASCADE) to
+    # visits/observations and occurrences/counts, including synthese
+    # (synthese deletion triggers on occtax and monitoring).
     if conn.execute(
         sa.text(
             "SELECT EXISTS (SELECT 1 FROM gn_commons.t_modules WHERE module_code = 'CMR_BOUQUETIN')"
@@ -601,7 +601,7 @@ def downgrade():
                 """
             )
         )
-        # cor_module_dataset est supprimé en cascade avec le dataset.
+        # cor_module_dataset is deleted in cascade with the dataset.
         op.execute(
             sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'CMR_BOUQUETIN'")
         )

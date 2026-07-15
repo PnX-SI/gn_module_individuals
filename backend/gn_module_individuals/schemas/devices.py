@@ -5,6 +5,7 @@ from utils_flask_sqla.schema import SmartRelationshipsMixin
 from geonature.utils.schema import CruvedSchemaMixin
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
+from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.schemas import UserSchema
 from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
@@ -19,12 +20,15 @@ from ..utils.errors import APIError, DevicesErrorCode
 class TrackingDevicesBaseSchema(
     CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema
 ):
+    """Raw columns plus computed labels. No relationships exposed: see
+    TrackingDevicesDetailSchema for the full nested objects."""
+
     class Meta:
         model = TrackingDevices
         include_fk = True
         load_instance = True
         sqla_session = db.session
-        include_relationships = True
+        include_relationships = False
         model_converter = NomenclaturesConverter
         feature_id = "id_tracking_device"
 
@@ -90,7 +94,7 @@ class TrackingDevicesBaseSchema(
             )
         return value
 
-    # Serialisation
+    # Serialization
 
     def get_nomenclature_name(self, obj):
         if obj.nomenclature_device_type:
@@ -109,6 +113,7 @@ class TrackingDevicesBaseSchema(
 
 
 class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
+    """Adds only computed fields on top of the base: no relationships."""
 
     __module_code__ = MODULE_CODE
     __object_code__ = "INDIVIDUALS_INDIVIDUALS"
@@ -131,12 +136,15 @@ class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
 
 
 class TrackingDevicesDetailSchema(TrackingDevicesBaseSchema):
+    """All of the model's relationships, in addition to the base fields."""
 
     __module_code__ = MODULE_CODE
     __object_code__ = "INDIVIDUALS_INDIVIDUALS"
 
-    deployments = fields.Method("get_deployments", dump_only=True)
+    nomenclature_device_type = fields.Nested(NomenclatureSchema, dump_only=True)
     referer = fields.Nested(UserSchema, dump_only=True)
+    digitiser = fields.Nested(UserSchema, dump_only=True)
+    deployments = fields.Method("get_deployments", dump_only=True)
 
     def get_deployments(self, obj):
         if not obj.deployments:

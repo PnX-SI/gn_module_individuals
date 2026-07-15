@@ -10,13 +10,17 @@ from utils_flask_sqla_geo.utils import geojsonify
 
 from .. import MODULE_CODE
 from ..blueprint import blueprint
-from ..models import IndividualDeployments
+from ..models import IndividualDeployments, TrackingDevices
 from ..models.individuals import (
-    temporary_individual_date_expression,
-    temporary_individual_geom_expression,
-    temporary_individual_observers_expression,
+    individual_last_observation_date_expression,
+    individual_last_observation_geom_expression,
+    individual_last_observation_observers_expression,
 )
-from ..schemas.individuals import IndividualsListSchema, IndividualsMapSchema
+from ..schemas.individuals import (
+    IndividualsDetailSchema,
+    IndividualsListSchema,
+    IndividualsMapSchema,
+)
 from ..utils.errors import APIError, IndividualsErrorCode
 
 
@@ -69,17 +73,19 @@ def _apply_filters(query, filters):
     if bbox is not None:
         west, south, east, north = bbox
         envelope = func.ST_MakeEnvelope(west, south, east, north, 4326)
-        query = query.where(func.ST_Intersects(temporary_individual_geom_expression(), envelope))
+        query = query.where(
+            func.ST_Intersects(individual_last_observation_geom_expression(), envelope)
+        )
 
     return query
 
 
 def _parse_sort(args):
-    direction = args.get("dir", "asc", type=str).lower()
+    direction = args.get("dir", "desc", type=str).lower()
     if direction not in ("asc", "desc"):
         raise APIError(IndividualsErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
     return {
-        "prop": args.get("prop", "id_individual", type=str),
+        "prop": args.get("prop", "last_obs_date", type=str),
         "dir": direction,
     }
 
@@ -93,7 +99,7 @@ def _sort_expression(sort):
         "id_digitiser": TIndividuals.id_digitiser,
         "meta_create_date": TIndividuals.meta_create_date,
         "meta_update_date": TIndividuals.meta_update_date,
-        "last_obs_date": temporary_individual_date_expression(),
+        "last_obs_date": individual_last_observation_date_expression(),
     }
     column = sort_columns.get(sort["prop"], TIndividuals.id_individual)
     expression = column.desc() if sort["dir"] == "desc" else column.asc()
@@ -115,6 +121,9 @@ def _build_individuals_query(scope, filters, sort, *, eager_load=True):
             selectinload(TIndividuals.deployments).options(
                 joinedload(IndividualDeployments.nomenclature_deployment_type),
                 joinedload(IndividualDeployments.nomenclature_deployment_location),
+                joinedload(IndividualDeployments.tracking_device).joinedload(
+                    TrackingDevices.nomenclature_device_type
+                ),
             ),
         )
     query = _apply_filters(query, filters)
@@ -122,17 +131,17 @@ def _build_individuals_query(scope, filters, sort, *, eager_load=True):
     return _ordered(query, sort)
 
 
-def _assign_temporary_observation(individuals):
-    """TEMPORAIRE : peuple geom/last_obs_date/last_obs_observers (voir models/individuals.py)."""
+def _assign_last_observation(individuals):
+    """Populates geom/last_obs_date/last_obs_observers from gn_synthese.synthese."""
     if not individuals:
         return
     ids = [individual.id_individual for individual in individuals]
     rows = db.session.execute(
         select(
             TIndividuals.id_individual,
-            temporary_individual_geom_expression().label("geom"),
-            temporary_individual_date_expression().label("obs_date"),
-            temporary_individual_observers_expression().label("observers"),
+            individual_last_observation_geom_expression().label("geom"),
+            individual_last_observation_date_expression().label("obs_date"),
+            individual_last_observation_observers_expression().label("observers"),
         ).where(TIndividuals.id_individual.in_(ids))
     )
     by_id = {row.id_individual: row for row in rows}
@@ -143,7 +152,7 @@ def _assign_temporary_observation(individuals):
         individual.last_obs_observers = row.observers if row else None
 
 
-def _pagination_payload(paginated, schema):
+def _pagination_payload(paginated, schema, sort):
     return {
         "items": schema.dump(paginated.items),
         "total": paginated.total,
@@ -154,21 +163,25 @@ def _pagination_payload(paginated, schema):
         "has_prev": paginated.has_prev,
         "next_num": paginated.next_num,
         "prev_num": paginated.prev_num,
+        "prop": sort["prop"],
+        "dir": sort["dir"],
     }
 
 
-@blueprint.route("/individuals/map", methods=["GET"])
+@blueprint.route("/individuals/geometry", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
-def individuals_map(scope):
+def individuals_geometry(scope):
     filters = _parse_filters(request.args)
     sort = {"prop": "id_individual", "dir": "asc"}
 
-    query = _build_individuals_query(scope, filters, sort, eager_load=False).options(
-        joinedload(TIndividuals.taxon),
+    query = (
+        _build_individuals_query(scope, filters, sort, eager_load=False)
+        .options(joinedload(TIndividuals.taxon))
+        .where(individual_last_observation_geom_expression().isnot(None))
     )
     individuals = db.session.scalars(query).unique().all()
-    _assign_temporary_observation(individuals)
+    _assign_last_observation(individuals)
 
     schema = IndividualsMapSchema(
         many=True,
@@ -177,11 +190,48 @@ def individuals_map(scope):
             "id_individual",
             "individual_name",
             "geom",
-            "nom_vern",
-            "last_observation",
+            "taxon_vern_nom",
+            "last_observation_date",
+            "last_observation_observers_name",
         ),
     )
     return geojsonify(schema.dump(individuals))
+
+
+@blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["GET"])
+@login_required
+@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+def individual(scope, id_individual):
+    query = (
+        select(TIndividuals)
+        .options(
+            raiseload("*"),
+            joinedload(TIndividuals.taxon),
+            joinedload(TIndividuals.nomenclature_sex),
+            joinedload(TIndividuals.digitiser),
+            selectinload(TIndividuals.deployments).options(
+                joinedload(IndividualDeployments.nomenclature_deployment_type),
+                joinedload(IndividualDeployments.nomenclature_deployment_location),
+                joinedload(IndividualDeployments.tracking_device).joinedload(
+                    TrackingDevices.nomenclature_device_type
+                ),
+            ),
+        )
+        .where(TIndividuals.id_individual == id_individual)
+    )
+    query = TIndividuals.filter_by_scope(query, scope)
+    result = db.session.execute(query).unique().scalar_one_or_none()
+
+    if result is None:
+        raise APIError(
+            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            f"Individual with id {id_individual} was not found.",
+            404,
+            params={"id": id_individual},
+        )
+
+    schema = IndividualsDetailSchema(only=["+cruved", "nomenclature_sex", "digitiser"])
+    return jsonify(schema.dump(result))
 
 
 @blueprint.route("/individuals", methods=["GET"])
@@ -194,18 +244,16 @@ def list_individuals(scope):
     per_page = request.args.get("per_page", type=int)
 
     query = _build_individuals_query(scope, filters, sort)
-    schema = IndividualsListSchema(
-        many=True, only=["+taxref", *[f"+{n}" for n in TIndividuals.__nomenclatures__]]
-    )
+    schema = IndividualsListSchema(many=True, only=["+cruved"])
 
     if page is not None and per_page is not None:
         paginated = db.paginate(query, page=page, per_page=per_page)
-        _assign_temporary_observation(paginated.items)
-        return jsonify(_pagination_payload(paginated, schema))
+        _assign_last_observation(paginated.items)
+        return jsonify(_pagination_payload(paginated, schema, sort))
 
     individuals = db.session.scalars(query).unique().all()
-    _assign_temporary_observation(individuals)
-    return jsonify({"items": schema.dump(individuals)})
+    _assign_last_observation(individuals)
+    return jsonify({"items": schema.dump(individuals), "prop": sort["prop"], "dir": sort["dir"]})
 
 
 @blueprint.route("/individuals/<int:id_individual>/page", methods=["GET"])

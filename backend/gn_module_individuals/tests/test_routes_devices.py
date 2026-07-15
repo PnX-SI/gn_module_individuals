@@ -86,6 +86,60 @@ class TestListDevices:
         r = self.client.get(url_for("individuals.list_devices", cd_nom=-1))
         assert r.get_json() == []
 
+    # --- sorting -----------------------------------------------------
+
+    def test_sort_by_provider_name_asc(self, users, devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", prop="provider_name", dir="asc"))
+        names = [item["provider_name"] for item in r.get_json()]
+        assert names == sorted(names)
+
+    def test_sort_by_provider_name_desc(self, users, devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", prop="provider_name", dir="desc"))
+        names = [item["provider_name"] for item in r.get_json()]
+        assert names == sorted(names, reverse=True)
+
+    @pytest.mark.parametrize(
+        "prop",
+        [
+            "nomenclature_device_type_name",
+            "digitiser_name",
+            "referer_name",
+            "last_individual_equipped_name",
+        ],
+    )
+    def test_sort_by_computed_field_does_not_error(self, users, devices, prop):
+        """Regression test: these `prop` values only exist as computed schema
+        fields, not as TrackingDevices model columns. Sorting on them used to
+        raise AttributeError ('NoneType' object has no attribute 'desc')."""
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", prop=prop, dir="asc"))
+        assert r.status_code == 200
+        # The DB is shared with seed/migration data, so we only check that our
+        # fixture devices are present, not that they are the only ones returned.
+        returned_ids = {item["id_tracking_device"] for item in r.get_json()}
+        expected_ids = {d.id_tracking_device for d in devices}
+        assert expected_ids <= returned_ids
+
+    def test_sort_unknown_prop_falls_back_without_error(self, users, devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", prop="not_a_real_field"))
+        assert r.status_code == 200
+        returned_ids = {item["id_tracking_device"] for item in r.get_json()}
+        expected_ids = {d.id_tracking_device for d in devices}
+        assert expected_ids <= returned_ids
+
+    def test_sort_tie_breaker_is_stable_across_requests(self, users, devices):
+        """devices[0] and devices[3] share the same provider_name ('Ornitela'):
+        the id_tracking_device tie-breaker must keep their relative order
+        identical across repeated requests."""
+        set_logged_user(self.client, users["admin_user"])
+        url = url_for("individuals.list_devices", prop="provider_name", dir="asc")
+        ids_first = [item["id_tracking_device"] for item in self.client.get(url).get_json()]
+        ids_second = [item["id_tracking_device"] for item in self.client.get(url).get_json()]
+        assert ids_first == ids_second
+
 
 # ===========================================================================
 # GET /devices/<id>  (device)
