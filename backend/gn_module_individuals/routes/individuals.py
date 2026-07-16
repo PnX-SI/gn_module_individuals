@@ -1,4 +1,7 @@
-from flask import jsonify, request
+import json
+
+from flask import jsonify, request, g
+from marshmallow import EXCLUDE, ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload, raiseload, selectinload
 
@@ -20,6 +23,7 @@ from ..schemas.individuals import (
     IndividualsDetailSchema,
     IndividualsListSchema,
     IndividualsMapSchema,
+    IndividualsWriteSchema,
 )
 from ..utils.errors import APIError, IndividualsErrorCode
 
@@ -232,6 +236,86 @@ def individual(scope, id_individual):
 
     schema = IndividualsDetailSchema(only=["+cruved", "nomenclature_sex", "digitiser"])
     return jsonify(schema.dump(result))
+
+
+@blueprint.route("/individuals", methods=["POST"])
+@login_required
+@permissions.check_cruved_scope(
+    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
+def create_individual(scope):
+    data = request.get_json(silent=True)
+
+    if not data:
+        raise APIError(
+            IndividualsErrorCode.MISSING_JSON_BODY,
+            "Missing JSON request body.",
+            400,
+        )
+
+    schema = IndividualsWriteSchema(unknown=EXCLUDE)
+    try:
+        individual = schema.load(data)
+    except ValidationError as e:
+        raise APIError(
+            IndividualsErrorCode.VALIDATION_ERROR,
+            f"Validation failed: {json.dumps(e.messages)}",
+            400,
+        )
+
+    individual.id_digitiser = g.current_user.id_role
+
+    db.session.add(individual)
+    db.session.commit()
+
+    return jsonify(schema.dump(individual)), 201
+
+
+@blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["PUT"])
+@login_required
+@permissions.check_cruved_scope(
+    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
+def update_individual(scope, id_individual):
+    individual = db.session.get(TIndividuals, id_individual)
+    if individual is None:
+        raise APIError(
+            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            f"Individual with id {id_individual} was not found.",
+            404,
+            params={"id": id_individual},
+        )
+
+    data = request.get_json(silent=True)
+    if not data:
+        raise APIError(
+            IndividualsErrorCode.MISSING_JSON_BODY,
+            "Missing JSON request body.",
+            400,
+        )
+
+    if not individual.has_instance_permission(scope):
+        raise APIError(
+            IndividualsErrorCode.INSUFFICIENT_PERMISSIONS,
+            f"You do not have permission to update individual {id_individual}.",
+            403,
+        )
+
+    schema = IndividualsWriteSchema(unknown=EXCLUDE)
+    try:
+        individual = schema.load(data, instance=individual)
+    except ValidationError as e:
+        raise APIError(
+            IndividualsErrorCode.VALIDATION_ERROR,
+            f"Validation failed: {json.dumps(e.messages)}",
+            400,
+        )
+
+    individual.id_digitiser = g.current_user.id_role
+
+    db.session.commit()
+
+    return jsonify(schema.dump(individual)), 200
 
 
 @blueprint.route("/individuals", methods=["GET"])

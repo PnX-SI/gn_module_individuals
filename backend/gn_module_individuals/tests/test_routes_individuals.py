@@ -2,8 +2,9 @@ import datetime
 
 import pytest
 from flask import url_for
-from sqlalchemy import func
+from sqlalchemy import func, select
 
+from apptax.taxonomie.models import Taxref
 from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import db
 from pypnusershub.tests.utils import set_logged_user
@@ -499,6 +500,235 @@ class TestGetIndividual:
         assert dep["marking_code"] is None
         assert dep["deployment_location_name"] == "Encolure"
         assert dep["deployment_type_name"] == "Dispositif de suivi"
+
+
+# ===========================================================================
+# POST /individuals/individuals  (create_individual)
+# ===========================================================================
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestCreateIndividual:
+
+    @pytest.fixture
+    def valid_payload(self):
+        cd_nom = db.session.scalar(select(Taxref.cd_nom).limit(1))
+        return {"individual_name": "New Individual", "cd_nom": cd_nom}
+
+    def test_unauthenticated_returns_401(self, valid_payload):
+        r = self.client.post(url_for("individuals.create_individual"), json=valid_payload)
+        assert r.status_code == 401
+
+    def test_forbidden_without_create_permission(self, users, valid_payload):
+        set_logged_user(self.client, users["noright_user"])
+        r = self.client.post(url_for("individuals.create_individual"), json=valid_payload)
+        assert r.status_code == 403
+
+    def test_returns_201_with_valid_payload(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(url_for("individuals.create_individual"), json=valid_payload)
+        assert r.status_code == 201
+
+    def test_response_contains_id(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(url_for("individuals.create_individual"), json=valid_payload)
+        payload = r.get_json()
+        assert "id_individual" in payload
+        assert payload["id_individual"] is not None
+
+    def test_digitiser_is_set_from_authenticated_user(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(url_for("individuals.create_individual"), json=valid_payload)
+        individual_id = r.get_json()["id_individual"]
+        detail = self.client.get(
+            url_for("individuals.individual", id_individual=individual_id)
+        ).get_json()
+        assert detail["digitiser"]["id_role"] == users["admin_user"].id_role
+
+    def test_empty_individual_name_returns_400(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={**valid_payload, "individual_name": "   "},
+        )
+        assert r.status_code == 400
+
+    def test_invalid_cd_nom_returns_400(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={**valid_payload, "cd_nom": -999},
+        )
+        assert r.status_code == 400
+
+    def test_invalid_nomenclature_sex_returns_400(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={**valid_payload, "id_nomenclature_sex": -999},
+        )
+        assert r.status_code == 400
+
+    def test_computed_fields_in_payload_are_ignored(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={**valid_payload, "digitiser_name": "Test Agent", "deployed_devices": {}},
+        )
+        assert r.status_code == 201
+
+    def test_missing_body_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            data="not-json",
+            content_type="text/plain",
+        )
+        assert r.status_code == 400
+        payload = r.get_json()
+        assert payload.get("name") == IndividualsErrorCode.MISSING_JSON_BODY
+        assert "description" in payload
+
+    def test_validation_error_returns_structured_error(self, users, valid_payload):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={**valid_payload, "individual_name": "   "},
+        )
+        assert r.status_code == 400
+        payload = r.get_json()
+        assert payload.get("name") == IndividualsErrorCode.VALIDATION_ERROR
+        assert "description" in payload
+
+
+# ===========================================================================
+# PUT /individuals/individuals/<id>  (update_individual)
+# ===========================================================================
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestUpdateIndividual:
+
+    def test_unauthenticated_returns_401(self, individual):
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "X", "cd_nom": individual.cd_nom},
+        )
+        assert r.status_code == 401
+
+    def test_forbidden_without_update_permission(self, users, individual):
+        set_logged_user(self.client, users["noright_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "X", "cd_nom": individual.cd_nom},
+        )
+        assert r.status_code == 403
+
+    def test_forbidden_without_scope_permission(self, users, individuals):
+        """individuals[0] is digitised by admin_user; self_user (U, scope=1) can't edit it."""
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individuals[0].id_individual),
+            json={"individual_name": "X", "cd_nom": individuals[0].cd_nom},
+        )
+        assert r.status_code == 403
+
+    def test_not_found_returns_404(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=-1),
+            json={"individual_name": "X", "cd_nom": 1},
+        )
+        assert r.status_code == 404
+
+    def test_not_found_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=-1),
+            json={"individual_name": "X", "cd_nom": 1},
+        )
+        payload = r.get_json()
+        assert payload.get("name") == IndividualsErrorCode.INDIVIDUAL_NOT_FOUND
+        assert "description" in payload
+
+    def test_forbidden_scope_returns_structured_error(self, users, individuals):
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individuals[0].id_individual),
+            json={"individual_name": "X", "cd_nom": individuals[0].cd_nom},
+        )
+        assert r.status_code == 403
+        payload = r.get_json()
+        assert payload.get("name") == IndividualsErrorCode.INSUFFICIENT_PERMISSIONS
+        assert "description" in payload
+
+    def test_returns_200_with_valid_payload(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "Updated Name", "cd_nom": individual.cd_nom},
+        )
+        assert r.status_code == 200
+
+    def test_response_reflects_updated_fields(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "New Name", "cd_nom": individual.cd_nom},
+        )
+        data = r.get_json()
+        assert data["individual_name"] == "New Name"
+
+    def test_digitiser_is_set_from_authenticated_user(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "X", "cd_nom": individual.cd_nom},
+        )
+        detail = self.client.get(
+            url_for("individuals.individual", id_individual=individual.id_individual)
+        ).get_json()
+        assert detail["digitiser"]["id_role"] == users["admin_user"].id_role
+
+    def test_empty_individual_name_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "", "cd_nom": individual.cd_nom},
+        )
+        assert r.status_code == 400
+
+    def test_invalid_cd_nom_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": "X", "cd_nom": -999},
+        )
+        assert r.status_code == 400
+
+    def test_invalid_nomenclature_sex_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": "X",
+                "cd_nom": individual.cd_nom,
+                "id_nomenclature_sex": -999,
+            },
+        )
+        assert r.status_code == 400
+
+    def test_missing_body_returns_structured_error(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            data="not-json",
+            content_type="text/plain",
+        )
+        assert r.status_code == 400
+        payload = r.get_json()
+        assert payload.get("name") == IndividualsErrorCode.MISSING_JSON_BODY
+        assert "description" in payload
 
 
 # ===========================================================================

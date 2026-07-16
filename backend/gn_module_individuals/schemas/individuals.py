@@ -1,3 +1,4 @@
+from apptax.taxonomie.models import Taxref
 from geonature.utils.env import db, ma
 from marshmallow import fields, validates, validates_schema, ValidationError, Schema
 from utils_flask_sqla.schema import SmartRelationshipsMixin
@@ -15,6 +16,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .utils import get_label
+from ..utils.errors import APIError, IndividualsErrorCode
 
 
 class IndividualsMapConverter(NomenclaturesConverter, GeoModelConverter):
@@ -198,6 +200,57 @@ class IndividualsDetailSchema(IndividualsBaseSchema):
     def get_deployments(self, obj):
         active = [d for d in obj.deployments if d.removal_date is None]
         return IndividualDetailDeploymentSchema(many=True).dump(active)
+
+
+class IndividualsWriteSchema(IndividualsBaseSchema):
+    """Used to create/update an individual. id_digitiser is always set by the
+    route from the current user, regardless of what is submitted here."""
+
+    __module_code__ = MODULE_CODE
+    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
+
+    uuid_individual = fields.UUID(dump_only=True)
+    # id_digitiser is NOT NULL on the model but always set by the route from the
+    # current user, so it must not be required at load time.
+    id_digitiser = fields.Integer(dump_only=True)
+
+    # Validators
+
+    @validates("individual_name")
+    def validate_individual_name(self, value, **kwargs):
+        if not value or not value.strip():
+            raise APIError(
+                IndividualsErrorCode.VALIDATION_ERROR,
+                "The individual name can't be empty",
+                400,
+            )
+        return value
+
+    @validates("cd_nom")
+    def validate_cd_nom(self, value, **kwargs):
+        exists = db.session.execute(db.select(Taxref).filter_by(cd_nom=value)).scalar_one_or_none()
+        if exists is None:
+            raise APIError(
+                IndividualsErrorCode.VALIDATION_ERROR,
+                f"The #{value} taxon (cd_nom) does not exist.",
+                400,
+            )
+        return value
+
+    @validates("id_nomenclature_sex")
+    def validate_id_nomenclature_sex(self, value, **kwargs):
+        if value is None:
+            return value
+        exists = db.session.execute(
+            db.select(TNomenclatures).filter_by(id_nomenclature=value)
+        ).scalar_one_or_none()
+        if exists is None:
+            raise APIError(
+                IndividualsErrorCode.VALIDATION_ERROR,
+                f"The #{value} nomenclature is not found in configured nomenclatures",
+                400,
+            )
+        return value
 
 
 class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):

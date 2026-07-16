@@ -27,6 +27,9 @@ class IndividualsErrorCode(str, Enum):
 
     INDIVIDUAL_NOT_FOUND = "IndividualNotFound"
     INVALID_FILTER = "InvalidFilter"
+    MISSING_JSON_BODY = "JsonBodyMissing"
+    VALIDATION_ERROR = "ValidationError"
+    INSUFFICIENT_PERMISSIONS = "InsufficientPermissions"
 
 
 class APIError(Exception):
