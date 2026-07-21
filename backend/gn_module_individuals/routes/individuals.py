@@ -26,6 +26,7 @@ from ..schemas.individuals import (
     IndividualsWriteSchema,
 )
 from ..utils.errors import APIError, IndividualsErrorCode
+from ..utils.common import sql_log
 
 
 def _parse_filters(args):
@@ -184,6 +185,9 @@ def individuals_geometry(scope):
         .options(joinedload(TIndividuals.taxon))
         .where(individual_last_observation_geom_expression().isnot(None))
     )
+
+    sql_log(query)  # Log the SQL query for debugging purposes
+    
     individuals = db.session.scalars(query).unique().all()
     _assign_last_observation(individuals)
 
