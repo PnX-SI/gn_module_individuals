@@ -47,7 +47,7 @@ export class IndividualsService {
     params: APIIndividualFiltersParams
   ): Observable<FeatureCollection<Individual>> {
     let httpParams = new HttpParams();
-    console.log('Parameters sent to API (Individuals Map)', params);
+    console.log('Parameters sent to API (Individuals Geometry)', params);
 
     Object.keys(params).forEach((key) => {
       if (params[key] != null) {

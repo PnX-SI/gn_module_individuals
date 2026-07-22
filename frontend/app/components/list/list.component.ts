@@ -21,8 +21,7 @@ import { Column, PaginatedItemCollection } from '../../models/common.models';
   selector: 'gn-individuals-list',
   templateUrl: 'list.component.html',
   styleUrls: ['list.component.scss'],
-  // SCSS used only in this component and not in the global CSS
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None, // SCSS used only in this component and not in the global CSS
   standalone: false,
 })
 export class ListComponent implements OnInit {
@@ -72,13 +71,13 @@ export class ListComponent implements OnInit {
     // ngx-datatable messages translation
     this._translate
       .get([
-        'Individuals.Messages.EmptyListMessage',
-        'Individuals.Messages.TotalListMessage',
+        'Individuals.Messages.EmptyList',
+        'Individuals.Messages.TotalList',
       ])
       .subscribe(translations => {
         this.tableMessages = {
-          emptyMessage: translations['Individuals.Messages.EmptyListMessage'],
-          totalMessage: translations['Individuals.Messages.TotalListMessage'],
+          emptyMessage: translations['Individuals.Messages.EmptyList'],
+          totalMessage: translations['Individuals.Messages.TotalList'],
           selectedMessage: '',
         };
       });

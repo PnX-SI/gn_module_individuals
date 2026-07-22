@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit, HostListener, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
 import { Observable } from 'rxjs';
-import { take}  from 'rxjs/operators';
 import * as L from 'leaflet';
+import {TranslateService} from '@ngx-translate/core';
 
 import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 import { ModuleService } from '@geonature/services/module.service';
@@ -43,8 +43,11 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() selectedRows: unknown[] = [];
   @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<FeatureCollection<unknown>>(); 
   @Input() featurePopupTemplate!: TemplateRef<{ feature: Feature<unknown> }>;
+  @Input() noGeometryMessage: string | null = null;
 
   public mapReady: boolean = false;
+  public noGeometry: boolean = false;
+
   private _selectedId: number | null = null;
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
@@ -54,10 +57,19 @@ export class MapListComponent implements OnInit, AfterViewInit {
   constructor(
     private _moduleService: ModuleService,
     private _mapService: MapService,
-    private _config: ConfigService
+    private _config: ConfigService,
+    private _translate: TranslateService
   ) {}
 
   ngOnInit() {
+    // No geometry default message translation
+    if (!this.noGeometryMessage) {
+      this._translate
+      .get('Individuals.Messages.NoGeometry')
+      .subscribe(translations => {
+        this.noGeometryMessage = translations;
+      });
+    }
   }
 
   ngAfterViewInit(): void {
@@ -190,7 +202,9 @@ export class MapListComponent implements OnInit, AfterViewInit {
   private _zoomOnFeatures(): void {
     this.mapData$.subscribe(mapData => {
       const layer = L.geoJSON(mapData);
-      this._mapService.getMap()?.fitBounds(layer.getBounds(),{padding: [20, 20]});
+      if (layer.getBounds().isValid()) {
+        this._mapService.getMap()?.fitBounds(layer.getBounds(), { padding: [20, 20] });
+      }
     });
   }
 
@@ -237,7 +251,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
    */
   private _openLayerPopup(layer: L.Layer): void {
     if ((layer as any).openPopup) {
-      setTimeout(() => (layer as any).openPopup(), 0);
+      (layer as any).openPopup();
     }
   }
 
@@ -254,7 +268,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
    */
   private _selectMapFeature(id: number, zoom: boolean): void {
     const layer = this._mapLayersById[id];
+    console.log('Selecting map feature with id:', id, 'Layer found:', !!layer);
     if (!layer) {
+      this._showNoGeometryMessage();
+      this._selectedLayer?.closePopup();
       // if (zoom) {
       //   this.focusMissingMapFeature(idIndividual);
       // }
@@ -266,6 +283,19 @@ export class MapListComponent implements OnInit, AfterViewInit {
     // if (zoom) {
     //   this.zoomOnLayer(layer);
     // }
+  }
+
+  /**
+   * Show a message explaining that the selected list element as no corresponding geometry
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  private _showNoGeometryMessage(): void {
+    this.noGeometry = true;
+    setTimeout(() => {
+      this.noGeometry = false;
+    }, 1000);
   }
   
     /**

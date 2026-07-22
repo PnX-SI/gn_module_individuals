@@ -23,6 +23,23 @@
   overflow: hidden;
 }
 
+.map-overlay-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 1000;
+
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+
+  pointer-events: none;
+}
+
 // :host ::ng-deep #list-container {
 //   width: 100%;
 //   min-width: 0;

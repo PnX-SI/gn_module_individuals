@@ -14,12 +14,11 @@
                 "provider_device_id" : "ID chez le fournisseur",
                 "id_referer" : "Référent",
                 "comment" : "Commentaire",
-                "id_digitiser" : "Digitaliseur",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
                 "nomenclature_device_type_name" : "Type de dispositif",
                 "referer_name" : "Référent",
-                "digitiser_name" : "Numériseur",
+                "digitiser_name" : "Rédacteur",
                 "last_individual_equipped_name" : "Dernier individu équipé",
                 "deployments" : "Liste des déploiements associés"
             },
@@ -64,11 +63,10 @@
                 "install_date" : "Date de déploiement",
                 "removal_date" : "Date de retrait",
                 "comment" : "Commentaire",
-                "id_digitiser" : "ID digitaliseur",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
                 "individual_name" : "Nom de l'individu",
-                "digitiser_name" : "Numériseur"
+                "digitiser_name" : "Rédacteur"
             }
         },
         "Individuals": {
@@ -80,13 +78,15 @@
                 "comment" : "Commentaire",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
-                "digitiser_name" : "Numériseur",
+                "digitiser_name" : "Rédacteur",
                 "nomenclature_sex_name" : "Sexe",
                 "last_observation_date" : "Dernière observation",
                 "last_observation_observers_name" : "Dernier(s) observateur(s)",
-                "nom_ver" : "Nom de l'espèce",
+                "taxon_vern_nom" : "Taxon",
                 "device_type_name_deployments" : "Type de dispositif de suivi",
-                "marking_codes" : "Marquage(s)"
+                "marking_codes" : "Marquage(s)",
+                "deployed_devices" : "Dispositif(s) de suivi déployé(s)",
+                "deployed_markings" : "Marquage(s) déployé(s)"
             },
             "PlaceHolder": {
                 "provider_name": "Indiquer le nom du fournisseur",
@@ -106,7 +106,8 @@
             "Messages": {
                 "Added" : "Le dispositif de suivi a été créé.",
                 "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
-                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé."
+                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé.",
+                "NoGeometry" : "Cet individu ne dispose pas encore d'observation"
             },
             "Errors": {
                 "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
@@ -122,8 +123,9 @@
             }
         },
         "Messages": {
-            "EmptyListMessage" : "Aucune donnée à afficher",
-            "TotalListMessage" : "ligne(s) au total"
+            "EmptyList" : "Aucune donnée à afficher",
+            "TotalList" : "ligne(s) au total",
+            "NoGeometry" : "Cet élément ne dispose pas de géométrie."
         },
         "Errors": {
             "Required" : "Ce champs est requis.",
