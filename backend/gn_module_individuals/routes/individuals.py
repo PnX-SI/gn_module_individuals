@@ -187,7 +187,7 @@ def individuals_geometry(scope):
     )
 
     sql_log(query)  # Log the SQL query for debugging purposes
-    
+
     individuals = db.session.scalars(query).unique().all()
     _assign_last_observation(individuals)
 
