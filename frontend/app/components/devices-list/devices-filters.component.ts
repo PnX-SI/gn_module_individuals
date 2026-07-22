@@ -17,13 +17,13 @@ import { APIDeviceFiltersParams } from '../../models/devices.models';
 import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
 
 @Component({
-  selector: 'gn-individuals-devices-list-filters',
-  templateUrl: 'devices-list-filters.component.html',
-  styleUrls: ['devices-list-filters.component.scss'],
+  selector: 'gn-individuals-devices-filters',
+  templateUrl: 'devices-filters.component.html',
+  styleUrls: ['devices-filters.component.scss'],
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class DevicesListFiltersComponent implements OnInit, OnDestroy {
+export class DevicesFiltersComponent implements OnInit, OnDestroy {
   @Output() filters = new EventEmitter<{key: keyof APIDeviceFiltersParams; value: string | number | undefined;} | null>();
   public filtersForm!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;

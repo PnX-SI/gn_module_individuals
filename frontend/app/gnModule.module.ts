@@ -26,7 +26,7 @@ import { FormTextareaComponent } from './components/form/form-textarea.component
 import { DevicesService } from './services/devices.service';
 import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
-import { DevicesListFiltersComponent } from './components/devices-list/devices-list-filters.component';
+import { DevicesFiltersComponent } from './components/devices-list/devices-filters.component';
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
@@ -48,7 +48,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     FormTextareaComponent,
     DeleteModalComponent,
     DevicesListComponent,
-    DevicesListFiltersComponent,
+    DevicesFiltersComponent,
     DevicesInfoComponent,
     DevicesFormComponent,
     IndividualsMapListComponent,
