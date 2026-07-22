@@ -33,6 +33,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public allowedToDelete: Record<number, boolean> = {};
   public selectedRows: Individual[] = [];
   public mapData$: Observable<FeatureCollection<Individual>> = new Observable<FeatureCollection<Individual>>();
+  public defaultFilters: APIIndividualFiltersParams = {};
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
     page: 1,
@@ -40,7 +41,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     prop: INDIVIDUALS_DEFAULT_SORT.prop,
     dir: INDIVIDUALS_DEFAULT_SORT.dir,
   };
-  private _APIFiltersParams: APIIndividualFiltersParams = {};
+  private _APIFiltersParams: APIIndividualFiltersParams = {'active': 'true'};
   private _selectedId: number | null = null;
 
   constructor(
@@ -60,6 +61,8 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       this.mapData$ = of(mapData);
       // this._initPermissions(data);
     });
+
+    this.defaultFilters = this._APIFiltersParams;
   }
 
   ngOnDestroy(): void {
@@ -99,6 +102,24 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   openDeleteModal($event: any) {
   }
 
+  /**
+   * Call API with given filter value
+   *
+   * @param {({key: keyof APIIndividualFiltersParams; value: string | number | undefined;} | null)} $event Filter value {key, value} or null to reset filters
+   * @memberof IndividualsMapListComponent
+   */
+  onFilters($event: {key: keyof APIIndividualFiltersParams; value: string | number | undefined;} | null): void {
+      if (!$event) {
+        this._APIFiltersParams = {};
+      } else {
+        if ($event.value) {
+          this._APIFiltersParams[$event.key] = $event.value;
+          this._APIPaginationParams['page'] = 1;
+        }
+      }
+      this._loadData();
+  }
+
   onDelete(): void {
   }
   
@@ -130,7 +151,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   private _loadData(): void {
     const APIParams = {
       ...this._APIPaginationParams,
-      // ...this._APIFiltersParams,
+      ...this._APIFiltersParams,
     };
     this.datatable$ = this._individualsService
       .getIndividuals(APIParams).pipe(

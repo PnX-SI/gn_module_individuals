@@ -15,8 +15,6 @@ import { DevicesService } from '../../services/devices.service';
 @Component({
   selector: 'gn-individuals-devices-form',
   templateUrl: 'devices-form.component.html',
-  styleUrls: ['devices-form.component.scss'],
-  encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
 export class DevicesFormComponent implements OnInit {

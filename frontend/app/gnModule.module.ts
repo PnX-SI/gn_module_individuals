@@ -20,8 +20,9 @@ import { ListComponent } from './components/list/list.component';
 import { InfoComponent } from './components/info/info.component';
 import { DeleteModalComponent } from './components/delete-modal/delete-modal.component';
 import { FormComponent } from './components/form/form.component';
-import { FormInputTextComponent } from './components/form/form-input-text.component';
-import { FormTextareaComponent } from './components/form/form-textarea.component';
+import { InputTextComponent } from './components/input/input-text.component';
+import { TextareaComponent } from './components/input/textarea.component';
+import { InputRadioComponent } from './components/input/input-radio.component';
 
 import { DevicesService } from './services/devices.service';
 import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
@@ -30,9 +31,10 @@ import { DevicesFiltersComponent } from './components/devices-list/devices-filte
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
-import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component';
 import { IndividualsService } from './services/individuals.service';
 import { IndividualsMapResolver, IndividualsResolver } from './resolvers/individuals.resolver';
+import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component';
+import { IndividualsFiltersComponent } from './components/individuals-map-list/individuals-filters.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -44,14 +46,16 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     MapListComponent,
     InfoComponent,
     FormComponent,
-    FormInputTextComponent,
-    FormTextareaComponent,
+    InputTextComponent,
+    TextareaComponent,
+    InputRadioComponent,
     DeleteModalComponent,
     DevicesListComponent,
     DevicesFiltersComponent,
     DevicesInfoComponent,
     DevicesFormComponent,
     IndividualsMapListComponent,
+    IndividualsFiltersComponent
   ],
   imports: [
     HttpClientXsrfModule.withOptions({

@@ -30,6 +30,7 @@ export class IndividualsService {
     let httpParams = new HttpParams();
     params.prop ??= INDIVIDUALS_DEFAULT_SORT.prop;
     params.dir ??= INDIVIDUALS_DEFAULT_SORT.dir;
+
     console.log('Parameters sent to API (Individuals)', params);
 
     Object.keys(params).forEach((key) => {

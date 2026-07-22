@@ -29,7 +29,7 @@
         {{ 'Individuals.Individuals.Fields.deployed_devices' | translate }} :
       </strong>
       <span *ngFor="let device of row.deployed_devices | keyvalue; let last = last">
-          <span>{{ device.value.name }} ({{ device.value.location_name }})</span>
+          <span>{{ $any(device.value).name }} ({{ $any(device.value).location_name }})</span>
           <span *ngIf="!last">, </span>
       </span>
     </div>
@@ -38,7 +38,7 @@
         {{ 'Individuals.Individuals.Fields.deployed_markings' | translate }} :
       </strong>
       <span *ngFor="let marking of row.deployed_markings | keyvalue; let last = last">
-          <span>{{ marking.value.type_name }} : {{ marking.value.code }} ({{ marking.value.location_name }})</span>
+          <span>{{ $any(marking.value).type_name }} : {{ $any(marking.value).code }} ({{ $any(marking.value).location_name }})</span>
           <span *ngIf="!last">, </span>
       </span>
     </div>
@@ -46,9 +46,10 @@
 </ng-template>
 
 <ng-template #filtersTemplate>
-  <!-- <gn-individuals-devices-list-filters
-    (filters)="onFilters($event)"
-  ></gn-individuals-devices-list-filters> -->
+  <gn-individuals-individuals-filters
+    [defaultValues]="defaultFilters"
+    (filters)="onFilters($event)">
+  </gn-individuals-individuals-filters>
 </ng-template>
 
 <ng-template #featurePopupTemplate let-feature="feature">

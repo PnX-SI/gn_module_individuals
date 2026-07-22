@@ -1,3 +1,8 @@
+$input-font-size: 0.875rem;
+$input-font-weight: 400;
+$input-color: #495057;
+$input-place-holder-color: #6c757d;
+
 /* Space between label and input */
 .form-group {
   display: flex;
@@ -31,15 +36,15 @@ with bootstrap components (.form-control-sm)
 */
 // Select options
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: #495057;
+  font-size: $input-font-size;
+  font-weight: $input-font-weight;
+  color: $input-color;
 }
 
 // Select options : info, message
 .cdk-describedby-message-container {
-  font-size: 0.875rem;
-  font-weight: 400;
+  font-size: $input-font-size;
+  font-weight: $input-font-weight;
 }
 
 // Select input
@@ -56,9 +61,9 @@ with bootstrap components (.form-control-sm)
 }
 
 .ng-select.auto .ng-value {
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: #495057;
+  font-size: $input-font-size;
+  font-weight: $input-font-weight;
+  color: $input-color;
 }
 
 // Clear and arrow icons
@@ -75,7 +80,18 @@ with bootstrap components (.form-control-sm)
 */
 .form-control::placeholder,
 .ng-select .ng-select-container .ng-value-container .ng-placeholder {
-  color: #6c757d;
+  color: $input-place-holder-color;
   opacity: 1;
-  font-size: 0.875rem;
+  font-size: $input-font-size;
+}
+
+// To configure the display of input radio buttons
+.form-check {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 1.5rem;
+}
+
+.form-check-input {
+  accent-color: $input-color;
 }

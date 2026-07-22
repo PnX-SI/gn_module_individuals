@@ -1,0 +1,16 @@
+.filters-form {
+  gap: 1rem;
+  padding: 0.5rem;
+  // For the reset button
+  align-items: flex-end;
+
+  button {
+    margin-bottom: 0.6rem;
+  }
+}
+
+// To show the lists content
+.ngx-datatable.filters {
+  overflow: visible;
+  z-index: 4000;
+}

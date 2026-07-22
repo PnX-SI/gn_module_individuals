@@ -166,6 +166,11 @@
             "Download" : "Télécharger",
             "Filter" : "Filtrer",
             "Reset" : "Réinitialiser"
+        },
+        "Others" : {
+            "Yes" : "Oui",
+            "No" : "Non",
+            "Unknown" : "Inconnu"
         }
     }
 }

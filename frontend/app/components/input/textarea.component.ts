@@ -3,10 +3,10 @@ import { AbstractControl, ɵInternalFormsSharedModule } from '@angular/forms';
 
 @Component({
   selector: 'gn-individuals-form-textarea',
-  templateUrl: './form-textarea.component.html',
+  templateUrl: './textarea.component.html',
   standalone: false,
 })
-export class FormTextareaComponent {
+export class TextareaComponent {
   /**
    * Input Label
    */

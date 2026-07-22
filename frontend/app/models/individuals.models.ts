@@ -35,6 +35,7 @@ export interface APIIndividualFiltersParams {
   // }
   [key: string]: string | number | undefined;
 
+  individual_name?: string;
   cd_nom?: number;
   id_nomenclature_sex?: number;
   active?: string;
