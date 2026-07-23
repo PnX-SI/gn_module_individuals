@@ -8,18 +8,17 @@
         },
         "Devices": {
             "Fields": {
-                "id_tracking_device" : "ID du dispositif",
+                "id_tracking_device" : "Identifiant",
                 "id_nomenclature_device_type" : "Type de dispositif",
                 "provider_name" : "Fournisseur",
                 "provider_device_id" : "ID chez le fournisseur",
                 "id_referer" : "Référent",
                 "comment" : "Commentaire",
-                "id_digitiser" : "Digitaliseur",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
                 "nomenclature_device_type_name" : "Type de dispositif",
                 "referer_name" : "Référent",
-                "digitiser_name" : "Digitaliseur",
+                "digitiser_name" : "Rédacteur",
                 "last_individual_equipped_name" : "Dernier individu équipé",
                 "deployments" : "Liste des déploiements associés"
             },
@@ -64,12 +63,69 @@
                 "install_date" : "Date de déploiement",
                 "removal_date" : "Date de retrait",
                 "comment" : "Commentaire",
-                "id_digitiser" : "ID digitaliseur",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
                 "individual_name" : "Nom de l'individu",
-                "digitiser_name" : "Nom du digitaliseur"
+                "digitiser_name" : "Rédacteur"
             }
+        },
+        "Individuals": {
+            "Fields": {
+                "id_individual" : "Identifiant",
+                "uuid_individual" : "Identifiant unique de l'individus",
+                "individual_name": "Nom",
+                "active" : "Actif",
+                "comment" : "Commentaire",
+                "meta_create_date" : "Date de création",
+                "meta_update_date" : "Date de mise à jour",
+                "digitiser_name" : "Rédacteur",
+                "nomenclature_sex_name" : "Sexe",
+                "last_observation_date" : "Dernière observation",
+                "last_observation_observers_name" : "Dernier(s) observateur(s)",
+                "taxon_vern_nom" : "Taxon",
+                "device_type_name_deployments" : "Type de dispositif de suivi",
+                "marking_codes" : "Marquage(s)",
+                "deployed_devices" : "Dispositif(s) de suivi déployé(s)",
+                "deployed_markings" : "Marquage(s) déployé(s)"
+            },
+            "PlaceHolder": {
+                "provider_name": "Indiquer le nom du fournisseur",
+                "provider_device_id": "Indiquer l'identifiant du dispositif",
+                "id_referer": "Sélectionner le référent",
+                "comment": "En dire plus ..."
+            },
+            "Filters":{
+                "cd_nom": "Taxon"
+            },
+            "Titles": {
+                "Info": "Dispositif de suivi n°{{ id }}",
+                "Add" : "Ajout d'un dispositif de suivi",
+                "Edit" : "Modification du dispositif de suivi n°{{ id }}",
+                "Delete" : "Suppression du dispositif de suivi n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "Le dispositif de suivi a été créé.",
+                "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
+                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé.",
+                "NoGeometry" : "Cet individu ne dispose pas encore d'observation"
+            },
+            "Errors": {
+                "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
+                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+                "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+            },
+            "ApiErrors": {
+                "DeviceNotFound": "Le dispositif de suivi n°{{ id }} est introuvable.",
+                "DeviceHasDeployment": "Le dispositif de suivi n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
+                "JsonBodyMissing": "Les données du dispositif de suivi sont manquantes ou mal formées.",
+                "ValidationError": "Les données du dispositif de suivi sont invalides. Veuillez vérifier le formulaire.",
+                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier ce dispositif de suivi."
+            }
+        },
+        "Messages": {
+            "EmptyList" : "Aucune donnée à afficher",
+            "TotalList" : "ligne(s) au total",
+            "NoGeometry" : "Cet élément ne dispose pas de géométrie."
         },
         "Errors": {
             "Required" : "Ce champs est requis.",
@@ -82,8 +138,10 @@
             "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
             "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
             "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
+            "IndividualNotFound": "L'individu n°{{ id }} est introuvable.",
+            "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
             "UnknownError": "Une erreur inattendue s'est produite."
-        },    
+        },
         "DeletingPopup" : {
             "Warning" : "Attention",
             "WarningDelete" : "Vous êtes sur le point de supprimer : ",
@@ -108,6 +166,11 @@
             "Download" : "Télécharger",
             "Filter" : "Filtrer",
             "Reset" : "Réinitialiser"
+        },
+        "Others" : {
+            "Yes" : "Oui",
+            "No" : "Non",
+            "Unknown" : "Inconnu"
         }
     }
 }

@@ -1,184 +1,174 @@
-<div class="list-container">
-  <div
-    class="col-12 padding-sm-occ"
-    [ngStyle]="{ 'min-height.px': contentHeight }"
-  >
-    <div class="action-buttons">
-      <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
-      <button
-        id="add"
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Add' | translate"
-        class="custom-mini-fab mr-1 bg-primary text-white border-0"
-        [disabled]="false"
-        [routerLink]="['/' + moduleName + '/' + objectName + '/form']"
-      >
-        <mat-icon>add</mat-icon>
-      </button>
-      <button
-        id="filter"
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Filter' | translate"
-        class="custom-mini-fab mr-1 bg-info text-white border-0"
-        [disabled]="false"
-        (click)="toggleShowFilters()"
-      >
-        <mat-icon>tune</mat-icon>
-      </button>
-      <button
-        id="download"
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Download' | translate"
-        class="custom-mini-fab mr-1 bg-secondary text-white border-0"
-        [disabled]="true"
-      >
-        <mat-icon>download</mat-icon>
-      </button>
-      <!-- </ng-container> -->
-    </div>
-    <div
-      *ngIf="showFilters"
-      class="ngx-datatable material filters"
+<div
+  [ngStyle]="{ 'min-height.px': contentHeight }"
+>
+  <div class="action-buttons">
+    <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
+    <button
+      id="add"
+      mat-mini-fab
+      [matTooltip]="'Individuals.Actions.Add' | translate"
+      class="custom-mini-fab mr-1 bg-primary text-white border-0"
+      [disabled]="false"
+      [routerLink]="['/' + moduleName + '/' + objectName + '/form']"
     >
-      <ng-container *ngTemplateOutlet="filtersTemplate"></ng-container>
-    </div>
-    <ngx-datatable
-      *ngIf="dataTable$ | async as dataTable"
-      #dataTable
-      class="material striped margin-top-xs table-size expandable"
-      [columnMode]="'force'"
-      [columns]="displayedColumns"
-      [scrollbarH]="true"
-      [rowHeight]="rowHeight"
-      [headerHeight]="rowHeight + 10"
-      [footerHeight]="rowHeight + 10"
-      [externalPaging]="true"
-      [count]="dataTable.total"
-      [limit]="nbRowsToDisplay"
-      [offset]="dataTable.page - 1"
-      [rows]="dataTable.items"
-      (page)="onPage($event)"
-      [sorts]="sorts"
-      (sort)="onSort($event)"
-      [selectionType]="selectionType.single"
+      <mat-icon>add</mat-icon>
+    </button>
+    <button
+      id="filter"
+      mat-mini-fab
+      [matTooltip]="'Individuals.Actions.Filter' | translate"
+      class="custom-mini-fab mr-1 bg-info text-white border-0"
+      [disabled]="false"
+      (click)="toggleShowFilters()"
     >
-      <ngx-datatable-row-detail [rowHeight]="$any('auto')">
-        <ng-template
-          ngx-datatable-row-detail-template
-          let-row="row"
-          let-expanded="expanded"
-        >
-          <ng-container *ngTemplateOutlet="summaryTemplate; context: { row: row }"></ng-container>
-        </ng-template>
-      </ngx-datatable-row-detail>
-      <ngx-datatable-column
-        id="summary"
-        [width]="actionColumnsWidth"
-        [resizeable]="false"
-        [sortable]="false"
-        [draggable]="false"
-        [canAutoResize]="false"
-      >
-        <ng-template
-          ngx-datatable-cell-template
-          let-row="row"
-          let-expanded="expanded"
-        >
-          <button
-            class="btn btn-row"
-            matTooltip="{{ 'Individuals.Actions.Summary' | translate }}"
-            [class.datatable-icon-right]="!expanded"
-            [class.datatable-icon-down]="expanded"
-            (click)="toggleExpandRow(row)"
-          ></button>
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column
-        id="informations"
-        [width]="actionColumnsWidth"
-        [resizeable]="false"
-        [sortable]="false"
-        [draggable]="false"
-        [canAutoResize]="false"
-      >
-        <ng-template
-          ngx-datatable-cell-template
-          let-row="row"
-        >
-          <button
-            class="btn btn-row fa fa-info-circle"
-            matTooltip="{{ 'Individuals.Actions.Informations' | translate }}"
-            [routerLink]="['info', row[idFieldName]]"
-            [disabled]="false"
-          ></button>
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column
-        id="edit"
-        [width]="actionColumnsWidth"
-        [resizeable]="false"
-        [sortable]="false"
-        [draggable]="false"
-        [canAutoResize]="false"
-      >
-        <ng-template
-          ngx-datatable-cell-template
-          let-row="row"
-        >
-          <button
-            class="btn btn-row fa fa-pencil-square-o"
-            matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
-            [routerLink]="['form', row[idFieldName]]"
-            [disabled]="false"
-          ></button>
-        </ng-template>
-      </ngx-datatable-column>
-      <ngx-datatable-column
-        id="delete"
-        [width]="actionColumnsWidth"
-        [resizeable]="false"
-        [sortable]="false"
-        [draggable]="false"
-        [canAutoResize]="false"
-      >
-        <ng-template
-          ngx-datatable-cell-template
-          let-row="row"
-        >
-          <button
-            class="btn btn-row fa fa-trash-o"
-            matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
-            (click)="onDelete(row)"
-            [disabled]="!allowedToDelete[row.id_tracking_device]"
-          ></button>
-        </ng-template>
-        <ngx-datatable-column name="Date min">
-          <ng-template
-            ngx-datatable-cell-template
-            let-row="row"
-            maxWidth="columnMaxWidth"
-          >
-            <span matTooltip="{{ row.date_min | date: 'dd-MM-yyyy' }}">
-              {{ row.date_min | date: 'dd-MM-yyyy' }}
-            </span>
-          </ng-template>
-        </ngx-datatable-column>
-      </ngx-datatable-column>
-      <ngx-datatable-column
-        *ngFor="let col of displayedColumns"
-        [name]="col.name"
-        [prop]="col.prop"
-      >
-        <ng-template
-          ngx-datatable-cell-template
-          let-row="row"
-          maxWidth="columnMaxWidth"
-        >
-          <span>
-            {{ row[col.prop] || '-' }}
-          </span>
-        </ng-template>
-      </ngx-datatable-column>
-    </ngx-datatable>
+      <mat-icon>tune</mat-icon>
+    </button>
+    <button
+      id="download"
+      mat-mini-fab
+      [matTooltip]="'Individuals.Actions.Download' | translate"
+      class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+      [disabled]="true"
+    >
+      <mat-icon>download</mat-icon>
+    </button>
+    <!-- </ng-container> -->
   </div>
+  <div
+    *ngIf="showFilters"
+    class="ngx-datatable material filters"
+  >
+    <ng-container *ngTemplateOutlet="filtersTemplate"></ng-container>
+  </div>
+  <ngx-datatable
+    *ngIf="dataTable$ | async as dataTable"
+    #dataTable
+    class="material striped margin-top-xs table-size expandable"
+    [columnMode]="'force'"
+    [columns]="displayedColumns"
+    [scrollbarH]="true"
+    [rowHeight]="rowHeight"
+    [headerHeight]="rowHeight + 10"
+    [footerHeight]="rowHeight + 10"
+    [externalPaging]="true"
+    [messages]="tableMessages"
+    [count]="dataTable.total"
+    [limit]="nbRowsToDisplay"
+    [offset]="dataTable.page - 1"
+    [rows]="dataTable.items"
+    [sorts]="sorts"
+    [selectionType]="selectionType.single"
+    [selected]="selectedRows"
+    (page)="onPage($event)"
+    (sort)="onSort($event)"
+    (select)="onSelect($event)"
+  >
+    <ngx-datatable-row-detail [rowHeight]="$any('auto')">
+      <ng-template
+        ngx-datatable-row-detail-template
+        let-row="row"
+        let-expanded="expanded"
+      >
+        <ng-container *ngTemplateOutlet="summaryTemplate; context: { row: row }"></ng-container>
+      </ng-template>
+    </ngx-datatable-row-detail>
+    <ngx-datatable-column
+      id="summary"
+      [width]="actionColumnsWidth"
+      [resizeable]="false"
+      [sortable]="false"
+      [draggable]="false"
+      [canAutoResize]="false"
+    >
+      <ng-template
+        ngx-datatable-cell-template
+        let-row="row"
+        let-expanded="expanded"
+      >
+        <button
+          class="btn btn-row"
+          matTooltip="{{ 'Individuals.Actions.Summary' | translate }}"
+          [class.datatable-icon-right]="!expanded"
+          [class.datatable-icon-down]="expanded"
+          (click)="toggleExpandRow(row)"
+        ></button>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column
+      id="informations"
+      [width]="actionColumnsWidth"
+      [resizeable]="false"
+      [sortable]="false"
+      [draggable]="false"
+      [canAutoResize]="false"
+    >
+      <ng-template
+        ngx-datatable-cell-template
+        let-row="row"
+      >
+        <button
+          class="btn btn-row fa fa-info-circle"
+          matTooltip="{{ 'Individuals.Actions.Informations' | translate }}"
+          [routerLink]="['info', row[idFieldName]]"
+          [disabled]="false"
+        ></button>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column
+      id="edit"
+      [width]="actionColumnsWidth"
+      [resizeable]="false"
+      [sortable]="false"
+      [draggable]="false"
+      [canAutoResize]="false"
+    >
+      <ng-template
+        ngx-datatable-cell-template
+        let-row="row"
+      >
+        <button
+          class="btn btn-row fa fa-pencil-square-o"
+          matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
+          [routerLink]="['form', row[idFieldName]]"
+          [disabled]="false"
+        ></button>
+      </ng-template>
+    </ngx-datatable-column>
+    <ngx-datatable-column
+      id="delete"
+      [width]="actionColumnsWidth"
+      [resizeable]="false"
+      [sortable]="false"
+      [draggable]="false"
+      [canAutoResize]="false"
+    >
+      <ng-template
+        ngx-datatable-cell-template
+        let-row="row"
+      >
+        <button
+          class="btn btn-row fa fa-trash-o"
+          matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
+          (click)="onDelete(row)"
+          [disabled]="!allowedToDelete[row.id_tracking_device]"
+        ></button>
+      </ng-template>
+    </ngx-datatable-column>
+    <!-- Displayed data columns -->
+    <ngx-datatable-column
+      *ngFor="let col of displayedColumns"
+      [name]="col.name"
+      [prop]="col.prop"
+    >
+      <ng-template
+        ngx-datatable-cell-template
+        let-row="row"
+        maxWidth="columnMaxWidth"
+      >
+        <span>
+          {{ row[col.prop] === null || row[col.prop] === undefined ? '-' : row[col.prop] === false ? ('Individuals.Others.No' | translate) : row[col.prop] === true ? ('Individuals.Others.Yes' | translate) : row[col.prop] }}
+        </span>
+      </ng-template>
+    </ngx-datatable-column>
+  </ngx-datatable>
 </div>

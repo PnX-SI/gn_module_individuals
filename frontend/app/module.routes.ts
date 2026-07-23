@@ -1,11 +1,15 @@
 import { Routes } from '@angular/router';
 
-import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { MainComponent } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
+
 import { DevicesListComponent } from './components/devices-list/devices-list.component';
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+
+import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component'; 
+import { IndividualsResolver, IndividualsMapResolver } from './resolvers/individuals.resolver';
 
 export const routes: Routes = [
   {
@@ -14,12 +18,16 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'devices', // Next will be 'individuals'
+        redirectTo: 'individuals',
         pathMatch: 'full',
       },
       {
         path: 'individuals',
-        component: MapListComponent,
+        component: IndividualsMapListComponent,
+        resolve: {
+          datatable: IndividualsResolver,
+          mapData: IndividualsMapResolver,
+        },
       },
       {
         path: 'observations',
@@ -32,7 +40,7 @@ export const routes: Routes = [
       {
         path: 'devices',
         component: DevicesListComponent,
-        resolve: { data: DevicesResolver },
+        resolve: { datatable: DevicesResolver },
       },
       {
         path: 'devices/form',

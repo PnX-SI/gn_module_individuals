@@ -37,35 +37,23 @@ export interface FormConstraint {
   help: string;
 }
 
-// export interface SimplePagination {
-//   page: number;
-//   per_page: number; // Alias for per_page, to be used in the frontend for consistency with other modules
-// }
+export interface Feature<T> {
+  id: number;
+  type: 'Feature';
+  geometry: {
+    type: string;
+    coordinates: [number, number];
+  };
+  properties: T;
+}
 
-// export interface SimplePaginationWithSort extends SimplePagination, Sort {
-// }
+export interface FeatureCollection<T> {
+  type: 'FeatureCollection';
+  features: Feature<T>[];
+}
 
-// export interface PaginatedItemCollection<T> extends SimplePagination {
-//   items: T[];
-//   total: number;
-//   pages: number;
-//   prev_num: number | null;
-//   next_num: number | null;
-//   has_next: boolean;
-//   has_prev: boolean;
-// }
-
-// export interface StationFeature {
-//   id?: number;
-//   type: 'Feature';
-//   geometry: {
-//     type: string;
-//     coordinates: [number, number];
-//   };
-//   properties: Station;
-// }
-
-// export interface StationFeatureCollection {
-//   type: 'FeatureCollection';
-//   features: Array<StationFeature>;
-// }
+export interface RankAndPage {
+  page: number;
+  per_page: number;
+  rank: number;
+}

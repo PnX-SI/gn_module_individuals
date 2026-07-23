@@ -1,0 +1,44 @@
+<div class="d-flex flex-wrap filters-form">
+  <!-- active -->
+  <gn-individuals-input-radio
+    [label]="'Individuals.Individuals.Fields.active'| translate"
+    [parentFormControl]="filtersForm.get('active')"
+    [options]="[{ key: 'true', value: 'Individuals.Others.Yes' | translate }, { key: 'false', value: 'Individuals.Others.No' | translate }]"
+  ></gn-individuals-input-radio>
+
+  <!-- cd_nom : taxon -->
+  <pnx-taxonomy
+    [ngClass]="'form-group w-25'"
+    [label]="'Individuals.Devices.Filters.cd_nom' | translate"
+    [parentFormControl]="$any(filtersForm.get('cd_nom'))"
+    [idList]="taxonListId"
+    [charNumber]="3"
+  ></pnx-taxonomy>
+
+  <!-- id_nomenclature_sex -->
+  <pnx-nomenclature
+    [ngClass]="'form-group'"
+    [label]="'Individuals.Individuals.Fields.nomenclature_sex_name'| translate"
+    [parentFormControl]="$any(filtersForm.get('id_nomenclature_sex'))"
+    [codeNomenclatureType]="'SEXE'"
+    [cdNomenclatures]="[2,3]"
+  ></pnx-nomenclature>
+
+  <!-- individual_name -->
+  <gn-individuals-input-text
+    [label]="'Individuals.Individuals.Fields.individual_name'| translate"
+    [parentFormControl]="filtersForm.get('individual_name')"
+    [maxLength]="formConstraints['individual_name'].maxLength"
+    [errorKey]="'Individuals.Errors.' + [formConstraints['individual_name'].help] | translate"
+    [placeHolder]="'Individuals.Form.firstLetters' | translate"
+  ></gn-individuals-input-text>
+
+  <button
+    mat-mini-fab
+    [matTooltip]="'Actions.Reset' | translate"
+    class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+    (click)="onResetFilters()"
+  >
+    <mat-icon>restart_alt</mat-icon>
+  </button>
+</div>

@@ -1,12 +1,12 @@
 import { Component, Input } from '@angular/core';
-import { AbstractControl, ɵInternalFormsSharedModule } from '@angular/forms';
+import { AbstractControl } from '@angular/forms';
 
 @Component({
-  selector: 'gn-individuals-form-input-text',
-  templateUrl: './form-input-text.component.html',
+  selector: 'gn-individuals-input-text',
+  templateUrl: './input-text.component.html',
   standalone: false,
 })
-export class FormInputTextComponent {
+export class InputTextComponent {
   /**
    * Input Label
    */

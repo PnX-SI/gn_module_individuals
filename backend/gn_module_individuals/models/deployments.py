@@ -1,6 +1,7 @@
 from geonature.utils.env import DB
 from flask import g
 from pypnnomenclature.models import TNomenclatures
+from pypnnomenclature.utils import NomenclaturesMixin
 from geonature.core.gn_monitoring.models import TIndividuals
 from pypnusershub.db.models import User
 from sqlalchemy.dialects.postgresql import JSONB
@@ -8,7 +9,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from .devices import TrackingDevices
 
 
-class IndividualDeployments(DB.Model):
+class IndividualDeployments(NomenclaturesMixin, DB.Model):
     __tablename__ = "t_individual_deployments"
     __table_args__ = {"schema": "gn_individual"}
 
@@ -36,21 +37,21 @@ class IndividualDeployments(DB.Model):
         "id_nomenclature_deployment_type",
         DB.Integer,
         DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-        nullable=True,
+        nullable=False,
     )
 
     id_nomenclature_deployment_location = DB.Column(
         "id_nomenclature_deployment_location",
         DB.Integer,
         DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-        nullable=True,
+        nullable=False,
     )
 
     id_tracking_device = DB.Column(
         "id_tracking_device",
         DB.Integer,
         DB.ForeignKey("gn_individual.bib_tracking_devices.id_tracking_device"),
-        nullable=False,
+        nullable=True,
     )
 
     marking_code = DB.Column(
@@ -103,6 +104,7 @@ class IndividualDeployments(DB.Model):
         primaryjoin=TIndividuals.id_individual == id_individual,
         foreign_keys=[id_individual],
         lazy="select",
+        back_populates="deployments",
     )
 
     tracking_device = DB.relationship(
@@ -133,6 +135,18 @@ class IndividualDeployments(DB.Model):
         foreign_keys=[id_digitiser],
         lazy="select",
     )
+
+    @classmethod
+    def register_individual_backref(cls):
+        """Attaches TIndividuals.deployments from the module side, once both classes exist."""
+        if not hasattr(TIndividuals, "deployments"):
+            TIndividuals.deployments = DB.relationship(
+                cls,
+                primaryjoin=cls.id_individual == TIndividuals.id_individual,
+                foreign_keys=[cls.id_individual],
+                lazy="select",
+                viewonly=True,
+            )
 
     def has_instance_permission(self, scope):
         if scope == 0:

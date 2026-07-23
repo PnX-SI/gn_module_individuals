@@ -1,10 +1,5 @@
 @use '../../styles/buttons' as *;
 
-.list-container {
-  display: flex;
-  flex-wrap: wrap;
-}
-
 .action-buttons {
   margin-bottom: 10px;
 }
@@ -15,7 +10,12 @@
 
 .datatable-body-row {
   height: auto !important;
+
+  :hover {
+    cursor: pointer;
+  }
 }
+
 
 // Is used only if in the component the decorator encapsulation is set to ViewEncapsulation.None
 // This style set the vertical align to center of the datatable cells

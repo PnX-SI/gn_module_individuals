@@ -1,26 +1,42 @@
-<div class="map-list-container">
-  <div
-    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
+<div id="map-list-container">
+  
+  <div id="map-container"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
-    <pnx-map-list
-      [idName]="mapListService.idName"
-      height="100%"
-    ></pnx-map-list>
+    <div *ngIf="noGeometry" class="map-overlay-message">
+      {{ noGeometryMessage }}
+    </div>
+    <pnx-map
+      [height]="contentHeight + 'px'"
+      [searchBar]="true"
+    ></pnx-map>
+    <pnx-geojson
+      *ngIf="mapReady"
+      [geojson]="mapData$ | async"
+      [zoomOnLayer]="false"
+      [onEachFeature]="onEachFeature.bind(this)"
+    ></pnx-geojson>
   </div>
-  <div
-    class="col-xs-12 col-sm-12 col-md-6 col-lg-6 padding-sm-occ"
-    [ngStyle]="{ 'min-height.px': contentHeight }"
-  >
-    <ngx-datatable
-      class="material striped margin-top-xs table-size expandable"
-      [columnMode]="'force'"
-      [columns]="mapListService.displayColumns"
-    ></ngx-datatable>
+
+  <div id="list-container">
+    <gn-individuals-list
+      [objectName]="objectName"
+      [idFieldName]="idFieldName"
+      [displayedColumnsParams]="displayedColumnsParams"
+      [availableColumnsParams]="availableColumnsParams"
+      [dataTable$]="datatable$"
+      [nbRowsToDisplay]="nbRowsToDisplay"
+      [fieldsTranslation]="fieldsTranslation"
+      [sorts]="sorts"
+      [allowedToEdit]="allowedToEdit"
+      [allowedToDelete]="allowedToDelete"
+      [summaryTemplate]="summaryTemplate"
+      [filtersTemplate]="filtersTemplate"
+      [selectedRows]="selectedRows"
+      (pagination)="onPage($event)"
+      (sort)="onSort($event)"
+      (select)="onTableSelect($event)"
+      (delete)="openDeleteModal($event)"
+    ></gn-individuals-list>
   </div>
 </div>
-
-<!-- Sur datatable-body-cell pour centrer le contenu des lignes du tableau :
-display: flex;
-align-items: center; /* centre verticalement */
-justify-content: flex-start; /* alignement horizontal inchangé */ -->

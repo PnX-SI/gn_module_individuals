@@ -9,22 +9,19 @@ import {
   TemplateRef,
 } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { ActivatedRoute } from '@angular/router';
 import { Observable, combineLatest, of } from 'rxjs';
 import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 
-import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { CONTENT_CONFIG, DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { CONTENT_CONFIG, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Column, PaginatedItemCollection } from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-list',
   templateUrl: 'list.component.html',
   styleUrls: ['list.component.scss'],
-  // SCSS used only in this component and not in the global CSS
-  encapsulation: ViewEncapsulation.None,
+  encapsulation: ViewEncapsulation.None, // SCSS used only in this component and not in the global CSS
   standalone: false,
 })
 export class ListComponent implements OnInit {
@@ -37,83 +34,107 @@ export class ListComponent implements OnInit {
   @Output() delete: EventEmitter<any> = new EventEmitter();
   @Input() objectName: string = '';
   @Input() idFieldName: string = '';
-  @Input() availableColumnsParams!: Record<keyof any, true>;
+  @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
-  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
-    PaginatedItemCollection<unknown>
-  >();
+  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = of();
+  @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
+  @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: boolean[] = [];
   @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
+  @Input() selectedRows: unknown[] = [];
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
-  public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
-  public nbRowsToDisplay: number = DATA_TABLE_CONFIG.PER_PAGE_OPTION;
-  public actionColumnsWidth: number = DATA_TABLE_CONFIG.ACTION_COLUMNS_WIDTH;
-  public columnMaxWidth: number = DATA_TABLE_CONFIG.COLUMN_MAX_WIDTH;
+  public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
+  public actionColumnsWidth: number = DATATABLE_CONFIG.ACTION_COLUMNS_WIDTH;
+  public columnMaxWidth: number = DATATABLE_CONFIG.COLUMN_MAX_WIDTH;
   public displayedColumns!: Column<undefined>[];
   public availableColumns!: Column<undefined>[];
   public moduleName: string = this._moduleService.currentModule.module_url;
   public selectionType = SelectionType;
+  public tableMessages = {};
+
   public showFilters: boolean = false;
 
   constructor(
-    public config: ConfigService,
     private _translate: TranslateService,
-    private _activatedRoute: ActivatedRoute,
     private _moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {
-    this._activatedRoute.data.subscribe(({ data }) => {
-      this.dataTable$ = of(data);
-    });
+    if (!this.availableColumnsParams) {
+      return;
+    }
+
+    // ngx-datatable messages translation
+    this._translate
+      .get([
+        'Individuals.Messages.EmptyList',
+        'Individuals.Messages.TotalList',
+      ])
+      .subscribe(translations => {
+        this.tableMessages = {
+          emptyMessage: translations['Individuals.Messages.EmptyList'],
+          totalMessage: translations['Individuals.Messages.TotalList'],
+          selectedMessage: '',
+        };
+      });
 
     // Columns initialization with prop and empty name, to be filled with translations after
-    this.availableColumns = (Object.keys(this.availableColumnsParams) as (keyof undefined)[]).map(
+    this.availableColumns = this.availableColumnsParams ? (Object.keys(this.availableColumnsParams) as (keyof undefined)[]).map(
       (prop) => ({ prop, name: '' })
-    );
+    ):[];
 
+    // Keep only the configured columns to display
     this.displayedColumns = this.availableColumns.filter((column) =>
       this.displayedColumnsParams.includes(column.prop)
     );
 
-    // Build an array of translation observables for each column name
-    const translateTab$ = this.availableColumns.map(
+    console.log("displayedColumn",this.displayedColumns)
+    // Translate the displayed column labels.
+    const translations$ = this.displayedColumns.map(column =>
       // An observable is returned which emits the translation of this key
-      (column) => this._translate.get(`Individuals.Devices.Fields.${column.prop}`)
+      this._translate.get(`${this.fieldsTranslation}.${column.prop}`)
     );
 
-    // Translation with CombineLatest will wait for all translations to be loaded before updating
-    // the column names, avoiding multiple updates and ensuring all names are translated at once.
-    combineLatest(translateTab$).subscribe((translations) => {
-      this.availableColumns = this.availableColumns.map((col, index) => ({
-        ...col,
-        name: translations[index],
-      }));
-
-      // Update displayedColumns with the translated names
-      this.displayedColumns = this.displayedColumns.map((col) => ({
-        ...col,
-        name: this.availableColumns.find((c) => c.prop === col.prop)?.name || '',
+    combineLatest(translations$).subscribe(labels => {
+      this.displayedColumns = this.displayedColumns.map((column, index) => ({
+        ...column,
+        name: labels[index],
       }));
     });
   }
 
+  /**
+   * Emit a select event
+   *
+   * @param {*} $event Current row.
+   * @memberof ListComponent
+   */
+  onSelect($event: any): void {
+    this.select.emit($event);
+  }
+  /**
+   * Emit a pagination event
+   *
+   * @param {*} $event
+   * @memberof ListComponent
+   */
   onPage($event: any): void {
     this.pagination.emit($event);
   }
 
+
+  /**
+   * Emit a sort event
+   *
+   * @param {*} $event
+   * @memberof ListComponent
+   */
   onSort($event: any): void {
     this.sort.emit($event);
-  }
-
-  toggleExpandRow(row: any): void {
-    if (this.dataTable) {
-      this.dataTable.rowDetail.toggleExpandRow(row);
-    }
   }
 
   /**
@@ -124,6 +145,19 @@ export class ListComponent implements OnInit {
    */
   onDelete($event: any): void {
     this.delete.emit($event);
+  }
+
+  /**
+   * Expand or not the row detail 
+   *
+   * @param {*} row
+   * @memberof ListComponent
+   */
+  toggleExpandRow(row: any): void {
+    if (this.dataTable) {
+      this.dataTable.rowDetail.toggleExpandRow(row);
+    }
+    this.selectedRows = [row];
   }
 
   /**

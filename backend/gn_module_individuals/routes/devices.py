@@ -1,7 +1,9 @@
+import json
+
 from flask import request, jsonify, g, make_response
 from marshmallow import EXCLUDE, ValidationError
 
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError
 
@@ -11,6 +13,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
+from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
@@ -27,16 +30,61 @@ from ..models import TrackingDevices, IndividualDeployments
 from ..blueprint import blueprint
 
 
+def _device_sort_columns():
+    """Some `prop` values correspond to computed schema fields
+    (nomenclature_device_type_name, digitiser_name, referer_name,
+    last_individual_equipped_name) that don't exist on the model: map them
+    here to an equivalent SQL expression (correlated subquery), same
+    principle as occtax.repositories (SORT_COLUMNS + dispatch)."""
+    return {
+        "id_tracking_device": TrackingDevices.id_tracking_device,
+        "id_nomenclature_device_type": TrackingDevices.id_nomenclature_device_type,
+        "provider_name": TrackingDevices.provider_name,
+        "provider_device_id": TrackingDevices.provider_device_id,
+        "id_referer": TrackingDevices.id_referer,
+        "comment": TrackingDevices.comment,
+        "id_digitiser": TrackingDevices.id_digitiser,
+        "meta_create_date": TrackingDevices.meta_create_date,
+        "meta_update_date": TrackingDevices.meta_update_date,
+        "nomenclature_device_type_name": (
+            select(TNomenclatures.label_default)
+            .where(TNomenclatures.id_nomenclature == TrackingDevices.id_nomenclature_device_type)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+        "digitiser_name": (
+            select(func.concat(User.prenom_role, " ", User.nom_role))
+            .where(User.id_role == TrackingDevices.id_digitiser)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+        "referer_name": (
+            select(func.concat(User.prenom_role, " ", User.nom_role))
+            .where(User.id_role == TrackingDevices.id_referer)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+        "last_individual_equipped_name": (
+            select(TIndividuals.individual_name)
+            .select_from(IndividualDeployments)
+            .join(TIndividuals, TIndividuals.id_individual == IndividualDeployments.id_individual)
+            .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
+            .order_by(IndividualDeployments.install_date.desc())
+            .limit(1)
+            .correlate(TrackingDevices)
+            .scalar_subquery()
+        ),
+    }
+
+
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def device(id_tracking_device, scope):
-    # Build nomenclatures fields list to serialize
-    nomenclatures = list(TrackingDevices.__nomenclatures__)
-    nomenclatures_fields = [n for n in nomenclatures]
-
-    schema = TrackingDevicesDetailSchema(only=["+cruved", "referer"] + nomenclatures_fields)
+    # Detail schema always exposes every relationship of the model.
+    relationship_fields = list(TrackingDevices.__nomenclatures__) + ["referer", "digitiser"]
+    schema = TrackingDevicesDetailSchema(only=["+cruved"] + relationship_fields)
 
     query = (
         db.select(TrackingDevices)
@@ -65,10 +113,6 @@ def device(id_tracking_device, scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def list_devices(scope):
-    # Build nomenclatures fields list to serialize
-    nomenclatures = list(TrackingDevices.__nomenclatures__)
-    nomenclatures_fields = [n for n in nomenclatures]
-
     # Scope not yet used -------------
     cd_nom = request.args.get("cd_nom", type=int)
     device_type = request.args.get("id_nomenclature_device_type", type=int)
@@ -83,7 +127,7 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
-    schema = TrackingDevicesListSchema(only=["+cruved", "referer"] + nomenclatures_fields)
+    schema = TrackingDevicesListSchema(only=["+cruved"])
 
     virtual_sort_cols = {
         "referer_name": (
@@ -119,14 +163,19 @@ def list_devices(scope):
         sort_col = TrackingDevices.meta_create_date
 
     query = (
-        db.select(TrackingDevices)
-        .options(
+        db.select(TrackingDevices).options(
             joinedload(TrackingDevices.nomenclature_device_type),
             selectinload(TrackingDevices.digitiser),
             selectinload(TrackingDevices.referer),
             joinedload(TrackingDevices.deployments).joinedload(IndividualDeployments.individual),
         )
-        .order_by(sort_col.desc() if dir == "desc" else sort_col.asc())
+        # Requested sort, then id_tracking_device desc as a mandatory tie-breaker
+        # (same convention as occtax.repositories) for stable pagination when
+        # the sort column has ties.
+        .order_by(
+            sort_col.desc() if dir == "desc" else sort_col.asc(),
+            TrackingDevices.id_tracking_device.desc(),
+        )
     )
 
     if device_type is not None:

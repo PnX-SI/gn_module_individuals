@@ -1,0 +1,20 @@
+<div
+  class="form-group"
+  [ngClass]="containerClass"
+>
+  <label class="small">{{ label }}</label>
+  <div class="form-check">
+    <div *ngFor="let option of options">
+      <input
+        type="radio"
+        class="form-check-input"
+        [id]="option.key"
+        [value]="option.key"
+        [formControl]="$any(parentFormControl)"
+      />
+      <label class="small" [for]="option.key">
+        {{ option.value }}
+      </label>
+    </div>
+  </div>
+</div>

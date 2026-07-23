@@ -1,20 +1,37 @@
 # Module configuration
 [GLOBAL]
-# Id of the taxref list (created in the admin interface) to use for this module
-# If not set, API queries will return all taxons
-ID_TAXON_LIST=
+    # Id of the taxref list (created in the admin interface) to use for this module
+    # If not set, API queries will return all taxons
+    ID_TAXON_LIST=101
+
+    # Colors used for the map layers
+    # SELECTED_LAYER_COLOR=#d7191c
+    # UNSELECTED_LAYER_COLOR=#2c7bb6
+    # SELECTED_LAYER_OPACITY: 0.9,
+    # UNSELECTED_LAYER_OPACITY: 0.55,
 
 # Individuals object configuration
-[INDIVIDUALS]
+    # Pagination : Nb max of lines displayed per page (default 10)
+    DEFAULT_PAGE_SIZE=7
+
+    # The default columns name have to be those of the corresponding db table field
+    DEFAULT_DISPLAYED_COLUMNS=["individual_name", "active", "meta_create_date"]
 
 # Observations object configuration
 [OBSERVATIONS]
+    # Pagination : Nb max of lines displayed per page (default 10)
+    # DEFAULT_PAGE_SIZE=
 
 # Captures object configuration
 [CAPTURES]
+    # Pagination : Nb max of lines displayed per page (default 10)
+    # DEFAULT_PAGE_SIZE=
 
 # Tracking devices configuration
 [DEVICES]
+    # Pagination : Nb max of lines displayed per page (default 10)
+    DEFAULT_PAGE_SIZE=15
+
     # The default columns name have to be those of the corresponding db table field
     DEFAULT_DISPLAYED_COLUMNS=["provider_name", "provider_device_id", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
     DEFAULT_DEPLOY_DISPLAYED_COLUMNS=["individual_name","install_date","removal_date","comment"]

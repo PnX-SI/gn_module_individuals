@@ -1,0 +1,16 @@
+{
+  "module_label": "CMR Bouquetins",
+  "module_desc": "Suivi CMR (capture-marquage-recapture) des bouquetins marqués de la Vanoise",
+  "specific": {
+    "cd_nom": {
+      "type_widget": "taxonomy",
+      "attribut_label": "Espèce",
+      "type_util": "taxonomy",
+      "required": true
+    },
+    "id_list_taxonomy": {
+      "hidden": true,
+      "required": false
+    }
+  }
+}

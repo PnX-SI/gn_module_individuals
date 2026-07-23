@@ -8,6 +8,7 @@ from geonature.utils.config import config as gn_config
 from geonature.utils.env import db
 from geonature.core.gn_commons.models import TModules
 from geonature.core.gn_permissions.models import PermAction, PermObject, Permission
+from geonature.tests.utils import get_id_nomenclature
 from pypnusershub.tests.fixtures import teardown_logout_user
 
 from gn_module_individuals import MODULE_CODE, MODULE_LABEL, MODULE_PICTO
@@ -35,6 +36,12 @@ def device_with_deployment(device, individual):
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
         id_capture=1,
+        id_nomenclature_deployment_type=get_id_nomenclature(
+            nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
+        ),
+        id_nomenclature_deployment_location=get_id_nomenclature(
+            nomenclature_type_mnemonique="LOC_MARQUAGE", cd_nomenclature="3"
+        ),
         install_date=dt.datetime(2024, 1, 1),
     )
     with db.session.begin_nested():

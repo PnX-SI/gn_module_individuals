@@ -38,9 +38,9 @@
 </ng-template>
 
 <ng-template #filtersTemplate>
-  <gn-individuals-devices-list-filters
+  <gn-individuals-devices-filters
     (filters)="onFilters($event)"
-  ></gn-individuals-devices-list-filters>
+  ></gn-individuals-devices-filters>
 </ng-template>
 
 <gn-individuals-list
@@ -49,6 +49,8 @@
   [displayedColumnsParams]="displayedColumnsParams"
   [availableColumnsParams]="availableColumnsParams"
   [dataTable$]="dataTable$"
+  [nbRowsToDisplay]="nbRowsToDisplay"
+  [fieldsTranslation]="fieldsTranslation"
   [sorts]="sorts"
   [allowedToEdit]="allowedToEdit"
   [allowedToDelete]="allowedToDelete"

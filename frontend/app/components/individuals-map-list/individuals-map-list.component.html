@@ -1,0 +1,97 @@
+<!-- SUMMARY TEMPLATE -->
+<ng-template
+  #summaryTemplate
+  let-row="row"
+>
+  <div class="row mx-0">
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Individuals.Fields.individual_name' | translate }} :</strong>
+      {{ row.individual_name }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Individuals.Fields.taxon_vern_nom' | translate }} :</strong>
+      {{ row.taxon_vern_nom }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Individuals.Fields.nomenclature_sex_name' | translate }} :</strong>
+      {{ row.nomenclature_sex_name }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Individuals.Fields.last_observation_date' | translate }} :</strong>
+      {{ row.last_observation_date }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Individuals.Fields.last_observation_observers_name' | translate }} :</strong>
+      {{ row.last_observation_observers_name }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>
+        {{ 'Individuals.Individuals.Fields.deployed_devices' | translate }} :
+      </strong>
+      <span *ngFor="let device of row.deployed_devices | keyvalue; let last = last">
+          <span>{{ $any(device.value).name }} ({{ $any(device.value).location_name }})</span>
+          <span *ngIf="!last">, </span>
+      </span>
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>
+        {{ 'Individuals.Individuals.Fields.deployed_markings' | translate }} :
+      </strong>
+      <span *ngFor="let marking of row.deployed_markings | keyvalue; let last = last">
+          <span>{{ $any(marking.value).type_name }} : {{ $any(marking.value).code }} ({{ $any(marking.value).location_name }})</span>
+          <span *ngIf="!last">, </span>
+      </span>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #filtersTemplate>
+  <gn-individuals-individuals-filters
+    [defaultValues]="defaultFilters"
+    (filters)="onFilters($event)">
+  </gn-individuals-individuals-filters>
+</ng-template>
+
+<ng-template #featurePopupTemplate let-feature="feature">
+  <div>
+    <span>
+      <strong>{{'Individuals.Individuals.Fields.taxon_vern_nom' | translate }} : </strong>
+      {{ feature.properties.taxon_vern_nom }}<br>
+    </span>
+        <span>
+      <strong>{{'Individuals.Individuals.Fields.individual_name' | translate }} : </strong>
+      {{ feature.properties.individual_name }}<br>
+    </span>
+    <span>
+      <strong>{{'Individuals.Individuals.Fields.last_observation_date' | translate }} : </strong>
+      {{ feature.properties.last_observation_date }}<br>
+    </span>
+    <span>
+      <strong>{{'Individuals.Individuals.Fields.last_observation_observers_name' | translate }} : </strong>
+      {{ feature.properties.last_observation_observers_name }}
+    </span>
+  </div>
+</ng-template>
+
+<gn-individuals-map-list
+  [objectName]="'individuals'"
+  [idFieldName]="'id_individual'"
+  [displayedColumnsParams]="displayedColumnsParams"
+  [availableColumnsParams]="availableColumnsParams"
+  [datatable$]="datatable$"
+  [nbRowsToDisplay]="nbRowsToDisplay"
+  [fieldsTranslation]="fieldsTranslation"
+  [sorts]="sorts"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
+  [summaryTemplate]="summaryTemplate"
+  [filtersTemplate]="filtersTemplate"
+  [featurePopupTemplate]="featurePopupTemplate"
+  [mapData$]="mapData$"
+  [selectedRows]="selectedRows"
+  [noGeometryMessage]="'Individuals.Individuals.Messages.NoGeometry' | translate"
+  (pagination)="onPage($event)"
+  (sort)="onSort($event)"
+  (delete)="openDeleteModal($event)"
+  (idPage)="onIdPage($event)"
+></gn-individuals-map-list>

@@ -5,11 +5,10 @@ from flask import jsonify
 
 
 class DevicesErrorCode(str, Enum):
-    """Nomenclature des codes d'erreur pour les dispositifs de suivi.
+    """Error codes for tracking devices.
 
-    Ces codes constituent le contrat entre backend et frontend :
-    le frontend utilise la valeur comme suffixe de clé de traduction
-    (ex. Individuals.ApiErrors.DeviceNotFound).
+    Backend/frontend contract: the frontend uses the value as a translation
+    key suffix (e.g. Individuals.ApiErrors.DeviceNotFound).
     """
 
     DEVICE_NOT_FOUND = "DeviceNotFound"
@@ -19,12 +18,26 @@ class DevicesErrorCode(str, Enum):
     INSUFFICIENT_PERMISSIONS = "InsufficientPermissions"
 
 
-class APIError(Exception):
-    """Exception structurée produisant {name, description} attendu par MyCustomInterceptor.
+class IndividualsErrorCode(str, Enum):
+    """Error codes for individuals.
 
-    Le champ ``name`` est le code machine (DeviceErrorCode), utilisé côté frontend
-    comme clé de traduction.  Le champ ``description`` est le message anglais par
-    défaut, affiché tel quel si aucune traduction n'est disponible.
+    Backend/frontend contract: the frontend uses the value as a translation
+    key suffix (e.g. Individuals.ApiErrors.IndividualNotFound).
+    """
+
+    INDIVIDUAL_NOT_FOUND = "IndividualNotFound"
+    INVALID_FILTER = "InvalidFilter"
+    MISSING_JSON_BODY = "JsonBodyMissing"
+    VALIDATION_ERROR = "ValidationError"
+    INSUFFICIENT_PERMISSIONS = "InsufficientPermissions"
+
+
+class APIError(Exception):
+    """Structured exception producing {name, description}, as expected by MyCustomInterceptor.
+
+    ``name`` is the machine code (e.g. DevicesErrorCode), used by the frontend as a
+    translation key. ``description`` is the default English message, shown as-is if
+    no translation is available.
     """
 
     def __init__(
@@ -42,7 +55,7 @@ class APIError(Exception):
 
 
 def handle_error(error: APIError):
-    """Sérialiseur Flask enregistré sur le blueprint individuals."""
+    """Flask error handler registered on the individuals blueprint."""
     return (
         jsonify(
             {

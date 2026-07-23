@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
-import { DATA_TABLE_CONFIG } from '../../utils/constants.util';
+import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Device } from '../../models/devices.models';
 import { Deployment } from '../../models/deployments.models';
 import { Column } from '../../models/common.models';
@@ -24,7 +24,7 @@ import { DevicesService } from '../../services/devices.service';
 export class DevicesInfoComponent implements OnInit, AfterViewInit {
   public dataTable$: Observable<Device> = new Observable<Device>();
   public deploymentsColumns: Column<Deployment>[] = [];
-  public rowHeight: number = DATA_TABLE_CONFIG.TABLE_ROW_HEIGHT;
+  public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public canBedeleted: boolean = false;
   private _deviceId!: number;
 
