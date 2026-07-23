@@ -20,7 +20,7 @@
                 "referer_name" : "Référent",
                 "digitiser_name" : "Rédacteur",
                 "last_individual_equipped_name" : "Dernier individu équipé",
-                "deployments" : "Liste des déploiements associés"
+                "deployments" : "Individu(s) équipé(s)"
             },
             "PlaceHolder": {
                 "provider_name": "Indiquer le nom du fournisseur",
@@ -59,9 +59,11 @@
             "Fields": {
                 "id_deployment" : "ID du déploiement",
                 "id_tracking_device" : "ID du dispositif de suivi",
-                "id_individual" : "ID de l'individu",
                 "install_date" : "Date de déploiement",
                 "removal_date" : "Date de retrait",
+                "deployment_type_name" : "Type",
+                "deployment_location_name" : "Localisation",
+                "marking_code" : "Marquage",
                 "comment" : "Commentaire",
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
@@ -83,10 +85,9 @@
                 "last_observation_date" : "Dernière observation",
                 "last_observation_observers_name" : "Dernier(s) observateur(s)",
                 "taxon_vern_nom" : "Taxon",
-                "device_type_name_deployments" : "Type de dispositif de suivi",
-                "marking_codes" : "Marquage(s)",
                 "deployed_devices" : "Dispositif(s) de suivi déployé(s)",
-                "deployed_markings" : "Marquage(s) déployé(s)"
+                "deployed_markings" : "Marquage(s) déployé(s)",
+                "deployments" : "Déploiement(s) associé(s)"
             },
             "PlaceHolder": {
                 "provider_name": "Indiquer le nom du fournisseur",
@@ -98,10 +99,10 @@
                 "cd_nom": "Taxon"
             },
             "Titles": {
-                "Info": "Dispositif de suivi n°{{ id }}",
-                "Add" : "Ajout d'un dispositif de suivi",
-                "Edit" : "Modification du dispositif de suivi n°{{ id }}",
-                "Delete" : "Suppression du dispositif de suivi n°{{ id }}"
+                "Info": "Individu n°{{ id }}",
+                "Add" : "Ajout d'un individu",
+                "Edit" : "Modification de l'individu n°{{ id }}",
+                "Delete" : "Suppression de l'individu n°{{ id }}"
             },
             "Messages": {
                 "Added" : "Le dispositif de suivi a été créé.",

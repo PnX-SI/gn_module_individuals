@@ -84,9 +84,9 @@ export class IndividualsService {
     });
   }
 
-//   getDevice(id_tracking_device: number): Observable<Device> {
-//     return this._http.get<Device>(`${this._OBJECT_API}/${id_tracking_device}`);
-//   }
+  getIndividual(id_individual: number): Observable<Individual> {
+    return this._http.get<Individual>(`${this._OBJECT_API}/${id_individual}`);
+  }
 
 //   createOrUpdateDevice(
 //     device: any,

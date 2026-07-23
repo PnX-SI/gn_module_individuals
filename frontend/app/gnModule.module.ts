@@ -32,9 +32,11 @@ import { DevicesFormComponent } from './components/devices-form/devices-form.com
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
 import { IndividualsService } from './services/individuals.service';
-import { IndividualsMapResolver, IndividualsResolver } from './resolvers/individuals.resolver';
+import { IndividualsMapResolver, IndividualsResolver, IndividualResolver } from './resolvers/individuals.resolver';
 import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component';
 import { IndividualsFiltersComponent } from './components/individuals-map-list/individuals-filters.component';
+import { IndividualsInfoComponent } from './components/individuals-info/individuals-info.component';
+import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -55,7 +57,9 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     DevicesInfoComponent,
     DevicesFormComponent,
     IndividualsMapListComponent,
-    IndividualsFiltersComponent
+    IndividualsFiltersComponent,
+    IndividualsInfoComponent,
+    IndividualsFormComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
@@ -82,7 +86,8 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     DeviceResolver,
     IndividualsService,
     IndividualsResolver,
-    IndividualsMapResolver
+    IndividualsMapResolver,
+    IndividualResolver
   ],
 })
 export class GeonatureModule {

@@ -22,7 +22,7 @@ import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 })
 export class DevicesListComponent implements OnInit, OnDestroy {
   public availableColumnsParams = DEVICE_MODEL;
-  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_DISPLAYED_COLUMNS ?? [];
+  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.DEVICES?.LIST_COLUMNS ?? [];
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<
     PaginatedItemCollection<Device>
   >();

@@ -11,11 +11,17 @@
     # UNSELECTED_LAYER_OPACITY: 0.55,
 
 # Individuals object configuration
+[INDIVIDUALS]
     # Pagination : Nb max of lines displayed per page (default 10)
     DEFAULT_PAGE_SIZE=7
 
-    # The default columns name have to be those of the corresponding db table field
-    DEFAULT_DISPLAYED_COLUMNS=["individual_name", "active", "meta_create_date"]
+    # Columns to display in the individuals list. 
+    # Have to be those of the corresponding API response /individuals/individuals
+    LIST_COLUMNS=["individual_name","taxon_vern_nom","nomenclature_sex_name","last_observation_date","active"]
+
+    # Columns to display in the individual detail page, in the section "Deployments" 
+    # Have to be those of the corresponding API response /individuals/individuals/:id
+    DEPLOYMENT_LIST_COLUMNS=["deployment_type_name","deployment_location_name","marking_code","install_date","removal_date"]
 
 # Observations object configuration
 [OBSERVATIONS]
@@ -30,8 +36,12 @@
 # Tracking devices configuration
 [DEVICES]
     # Pagination : Nb max of lines displayed per page (default 10)
-    DEFAULT_PAGE_SIZE=15
+    DEFAULT_PAGE_SIZE=10
 
-    # The default columns name have to be those of the corresponding db table field
-    DEFAULT_DISPLAYED_COLUMNS=["provider_name", "provider_device_id", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
-    DEFAULT_DEPLOY_DISPLAYED_COLUMNS=["individual_name","install_date","removal_date","comment"]
+    # Columns to display in the devices list. 
+    # Have to be those of the corresponding API response /individuals/devices
+    LIST_COLUMNS=["provider_name", "provider_device_id", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
+
+    # Columns to display in the device detail page, in the section "Deployments" 
+    # Have to be those of the corresponding API response /individuals/devices/:id
+    DEPLOYMENT_LIST_COLUMNS=["individual_name","install_date","removal_date","comment"]

@@ -32,7 +32,6 @@ export class IndividualsResolver implements Resolve<PaginatedItemCollection<Indi
 @Injectable({ providedIn: 'root' })
 export class IndividualsMapResolver implements Resolve<FeatureCollection<Individual>> {
   constructor(
-    private _config: ConfigService,
     private _service: IndividualsService
   ) {}
 
@@ -44,13 +43,13 @@ export class IndividualsMapResolver implements Resolve<FeatureCollection<Individ
   }
 }
 
-// @Injectable({
-//   providedIn: 'root',
-// })
-// export class DeviceResolver implements Resolve<Device> {
-//   constructor(private _service: DevicesService) {}
+@Injectable({
+  providedIn: 'root',
+})
+export class IndividualResolver implements Resolve<Individual> {
+  constructor(private _service: IndividualsService) {}
 
-//   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Device> {
-//     return this._service.getDevice(route.params.id_tracking_device);
-//   }
-// }
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Individual> {
+    return this._service.getIndividual(route.params.id_individual);
+  }
+}

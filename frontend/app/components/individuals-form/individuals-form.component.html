@@ -1,0 +1,82 @@
+<ng-template
+  #formTemplate
+  let-dataTable="dataTable"
+>
+  <div class="col-6 padding-sm">
+    <!-- id_nomenclature_device_type -->
+    <pnx-nomenclature
+      *ngIf="'id_nomenclature_device_type' as field"
+      class="form-group w-50"
+      label="{{ 'Individuals.Devices.Fields.' + field | translate }}"
+      [parentFormControl]="$any(form.get(field))"
+      codeNomenclatureType="TYPE_DISPO_SUIVI"
+    ></pnx-nomenclature>
+
+    <!-- provider_name -->
+    <gn-individuals-form-input-text
+      *ngIf="'provider_name' as field"
+      [label]="'Individuals.Devices.Fields.' + field | translate"
+      [containerClass]="'w-50'"
+      [parentFormControl]="form.get(field)"
+      [maxLength]="formConstraints[field].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
+    ></gn-individuals-form-input-text>
+
+    <!-- provider_device_id -->
+    <gn-individuals-form-input-text
+      *ngIf="'provider_device_id' as field"
+      [label]="'Individuals.Devices.Fields.' + field | translate"
+      [containerClass]="'w-50'"
+      [parentFormControl]="form.get(field)"
+      [maxLength]="formConstraints[field].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
+    ></gn-individuals-form-input-text>
+
+    <!-- id_referer -->
+    <pnx-observers
+      *ngIf="'id_referer' as field"
+      class="form-group"
+      [label]="'Individuals.Devices.Fields.' + field | translate"
+      [parentFormControl]="$any(form.get(field))"
+      [bindAllItem]="true"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
+    ></pnx-observers>
+
+    <!-- comment -->
+    <gn-individuals-form-textarea
+      *ngIf="'comment' as field"
+      [label]="'Individuals.Devices.Fields.' + field | translate"
+      [parentFormControl]="form.get(field)"
+      [maxLength]="formConstraints[field].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
+    ></gn-individuals-form-textarea>
+  </div>
+</ng-template>
+
+<gn-individuals-form
+  *ngIf="formAction === 'ADD'; else editMode"
+  [formTitle]="'Individuals.Devices.Titles.Add' | translate"
+  [formTemplate]="formTemplate"
+  [formAction]="formAction"
+  [objectName]="'devices'"
+  [canSave]="form.valid"
+  (save)="onSave()"
+></gn-individuals-form>
+
+<ng-template #editMode>
+  <gn-individuals-form
+    *ngIf="dataTable$ | async as dataTable"
+    [formTitle]="
+      'Individuals.Devices.Titles.Edit' | translate: { id: dataTable.id_tracking_device }
+    "
+    [formTemplate]="formTemplate"
+    [formAction]="formAction"
+    [objectName]="'devices'"
+    [dataTable]="dataTable"
+    [canSave]="form.valid && form.dirty"
+    (save)="onSave()"
+  ></gn-individuals-form>
+</ng-template>
