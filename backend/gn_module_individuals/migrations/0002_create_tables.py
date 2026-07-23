@@ -112,7 +112,7 @@ def upgrade():
             "id_tracking_device",
             sa.Integer(),
             sa.ForeignKey("gn_individual.bib_tracking_devices.id_tracking_device"),
-            nullable=False,
+            nullable=True,
         ),
         sa.Column(
             "marking_code",
@@ -239,7 +239,7 @@ def upgrade():
             [
                 {
                     "id_type": next_id,
-                    "cd_nomenclature": 1,
+                    "cd_nomenclature": "1",
                     "mnemonique": "GPS",
                     "label_default": "Balise GPS",
                     "definition_default": "Balise GPS",
@@ -251,38 +251,254 @@ def upgrade():
                 },
                 {
                     "id_type": next_id,
-                    "cd_nomenclature": 2,
+                    "cd_nomenclature": "2",
                     "mnemonique": "GSM",
                     "label_default": "Balise GSM",
                     "definition_default": "Balise GSM",
                     "label_fr": "Balise GSM",
                     "definition_fr": "Balise GSM",
                     "source": "GEONATURE",
-                    "hierarchy": "129.001",
+                    "hierarchy": "129.002",
                     "active": True,
                 },
                 {
                     "id_type": next_id,
-                    "cd_nomenclature": 3,
+                    "cd_nomenclature": "3",
                     "mnemonique": "Argos",
                     "label_default": "Balise Argos",
                     "definition_default": "Balise Argos",
                     "label_fr": "Balise Argos",
                     "definition_fr": "Balise Argos",
                     "source": "GEONATURE",
-                    "hierarchy": "129.001",
+                    "hierarchy": "129.003",
                     "active": True,
                 },
                 {
                     "id_type": next_id,
-                    "cd_nomenclature": 4,
+                    "cd_nomenclature": "4",
                     "mnemonique": "VHF",
                     "label_default": "Balise VHF",
                     "definition_default": "Balise VHF",
                     "label_fr": "Balise VHF",
                     "definition_fr": "Balise VHF",
                     "source": "GEONATURE",
-                    "hierarchy": "129.001",
+                    "hierarchy": "129.004",
+                    "active": True,
+                },
+            ]
+        )
+    )
+
+    # --- TYPE_MARQUAGE : type de marquage physique de l'animal ---
+    op.execute(
+        sa.insert(bib_nomencl).values(
+            [
+                {
+                    "id_type": next_id + 1,
+                    "mnemonique": "TYPE_MARQUAGE",
+                    "label_default": "Type de marquage physique",
+                    "definition_default": "Type de marquage physique apposé sur l'animal",
+                    "label_fr": "Type de marquage physique",
+                    "definition_fr": "Type de marquage physique apposé sur l'animal",
+                    "source": "GEONATURE",
+                },
+            ]
+        )
+    )
+
+    op.execute(
+        sa.insert(t_nomencl).values(
+            [
+                {
+                    "id_type": next_id + 1,
+                    "cd_nomenclature": "1",
+                    "mnemonique": "PLAQUE",
+                    "label_default": "Plaque",
+                    "definition_default": "Marque individuelle de type plaque (bague, plaque auriculaire…)",
+                    "label_fr": "Plaque",
+                    "definition_fr": "Marque individuelle de type plaque (bague, plaque auriculaire…)",
+                    "source": "GEONATURE",
+                    "hierarchy": "130.001",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 1,
+                    "cd_nomenclature": "2",
+                    "mnemonique": "PEINTURE",
+                    "label_default": "Peinture",
+                    "definition_default": "Marque colorée à la peinture",
+                    "label_fr": "Peinture",
+                    "definition_fr": "Marque colorée à la peinture",
+                    "source": "GEONATURE",
+                    "hierarchy": "130.002",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 1,
+                    "cd_nomenclature": "3",
+                    "mnemonique": "DECOLORATION",
+                    "label_default": "Décoloration",
+                    "definition_default": "Marque par décoloration du pelage ou du plumage",
+                    "label_fr": "Décoloration",
+                    "definition_fr": "Marque par décoloration du pelage ou du plumage",
+                    "source": "GEONATURE",
+                    "hierarchy": "130.003",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 1,
+                    "cd_nomenclature": "4",
+                    "mnemonique": "DISPO_SUIVI",
+                    "label_default": "Dispositif de suivi",
+                    "definition_default": "Dispositif électronique de suivi (collier GPS, balise, émetteur…)",
+                    "label_fr": "Dispositif de suivi",
+                    "definition_fr": "Dispositif électronique de suivi (collier GPS, balise, émetteur…)",
+                    "source": "GEONATURE",
+                    "hierarchy": "130.004",
+                    "active": True,
+                },
+            ]
+        )
+    )
+
+    # --- LOC_MARQUAGE : localisation du marquage sur le corps de l'animal ---
+    op.execute(
+        sa.insert(bib_nomencl).values(
+            [
+                {
+                    "id_type": next_id + 2,
+                    "mnemonique": "LOC_MARQUAGE",
+                    "label_default": "Localisation du marquage",
+                    "definition_default": "Partie du corps où est apposé le marquage",
+                    "label_fr": "Localisation du marquage",
+                    "definition_fr": "Partie du corps où est apposé le marquage",
+                    "source": "GEONATURE",
+                },
+            ]
+        )
+    )
+
+    op.execute(
+        sa.insert(t_nomencl).values(
+            [
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "1",
+                    "mnemonique": "OD_AV",
+                    "label_default": "Oreille droite devant",
+                    "definition_default": "Face antérieure de l'oreille droite",
+                    "label_fr": "Oreille droite devant",
+                    "definition_fr": "Face antérieure de l'oreille droite",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.001",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "2",
+                    "mnemonique": "OD_AR",
+                    "label_default": "Oreille droite derrière",
+                    "definition_default": "Face postérieure de l'oreille droite",
+                    "label_fr": "Oreille droite derrière",
+                    "definition_fr": "Face postérieure de l'oreille droite",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.002",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "3",
+                    "mnemonique": "OG_AV",
+                    "label_default": "Oreille gauche devant",
+                    "definition_default": "Face antérieure de l'oreille gauche",
+                    "label_fr": "Oreille gauche devant",
+                    "definition_fr": "Face antérieure de l'oreille gauche",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.003",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "4",
+                    "mnemonique": "OG_AR",
+                    "label_default": "Oreille gauche derrière",
+                    "definition_default": "Face postérieure de l'oreille gauche",
+                    "label_fr": "Oreille gauche derrière",
+                    "definition_fr": "Face postérieure de l'oreille gauche",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.004",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "5",
+                    "mnemonique": "ENCOLURE",
+                    "label_default": "Encolure",
+                    "definition_default": "Encolure (cou/nuque)",
+                    "label_fr": "Encolure",
+                    "definition_fr": "Encolure (cou/nuque)",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.005",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "6",
+                    "mnemonique": "DOS",
+                    "label_default": "Dos",
+                    "definition_default": "Région dorsale",
+                    "label_fr": "Dos",
+                    "definition_fr": "Région dorsale",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.006",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "7",
+                    "mnemonique": "PATTE_D",
+                    "label_default": "Patte droite",
+                    "definition_default": "Patte ou membre postérieur droit",
+                    "label_fr": "Patte droite",
+                    "definition_fr": "Patte ou membre postérieur droit",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.007",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "8",
+                    "mnemonique": "PATTE_G",
+                    "label_default": "Patte gauche",
+                    "definition_default": "Patte ou membre postérieur gauche",
+                    "label_fr": "Patte gauche",
+                    "definition_fr": "Patte ou membre postérieur gauche",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.008",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "9",
+                    "mnemonique": "AILE_D",
+                    "label_default": "Aile droite",
+                    "definition_default": "Aile droite (oiseaux)",
+                    "label_fr": "Aile droite",
+                    "definition_fr": "Aile droite (oiseaux)",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.009",
+                    "active": True,
+                },
+                {
+                    "id_type": next_id + 2,
+                    "cd_nomenclature": "10",
+                    "mnemonique": "AILE_G",
+                    "label_default": "Aile gauche",
+                    "definition_default": "Aile gauche (oiseaux)",
+                    "label_fr": "Aile gauche",
+                    "definition_fr": "Aile gauche (oiseaux)",
+                    "source": "GEONATURE",
+                    "hierarchy": "131.010",
                     "active": True,
                 },
             ]
@@ -300,13 +516,13 @@ def downgrade():
     op.execute(f"DROP FUNCTION IF EXISTS {SCHEMA_NAME}.set_meta_dates();")
     op.drop_table("t_individual_deployments", schema=SCHEMA_NAME, if_exists=True)
     op.drop_table("bib_tracking_devices", schema=SCHEMA_NAME, if_exists=True)
-    op.execute(
-        f"""DELETE FROM ref_nomenclatures.t_nomenclatures t
-            USING ref_nomenclatures.bib_nomenclatures_types b
-            WHERE t.id_type = b.id_type
-            AND b.mnemonique = 'TYPE_DISPO_SUIVI';
-        """
-    )
-    op.execute(
-        f"DELETE FROM ref_nomenclatures.bib_nomenclatures_types WHERE mnemonique = 'TYPE_DISPO_SUIVI';"
-    )
+    op.execute("""
+        DELETE FROM ref_nomenclatures.t_nomenclatures t
+        USING ref_nomenclatures.bib_nomenclatures_types b
+        WHERE t.id_type = b.id_type
+        AND b.mnemonique IN ('TYPE_DISPO_SUIVI', 'TYPE_MARQUAGE', 'LOC_MARQUAGE');
+    """)
+    op.execute("""
+        DELETE FROM ref_nomenclatures.bib_nomenclatures_types
+        WHERE mnemonique IN ('TYPE_DISPO_SUIVI', 'TYPE_MARQUAGE', 'LOC_MARQUAGE');
+    """)

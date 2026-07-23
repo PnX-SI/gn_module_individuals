@@ -1,12 +1,15 @@
 from geonature.utils.env import db, ma
-from marshmallow import fields, validates, validates_schema, ValidationError
+from marshmallow import fields, validates, validates_schema, ValidationError, Schema
 from utils_flask_sqla.schema import SmartRelationshipsMixin
+from utils_flask_sqla_geo.schema import GeoAlchemyAutoSchema, GeoModelConverter, GeometryField
 
 from geonature.utils.schema import CruvedSchemaMixin
+from geonature.core.gn_permissions.tools import get_scopes_by_action
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnusershub.schemas import UserSchema
 from pypnusershub.db.models import User
+from apptax.taxonomie.schemas import TaxrefSchema
 from geonature.core.gn_monitoring.models import TIndividuals
 
 from .. import MODULE_CODE
@@ -14,7 +17,92 @@ from ..models import TrackingDevices, IndividualDeployments
 from .utils import get_label
 
 
-class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+class IndividualsMapConverter(NomenclaturesConverter, GeoModelConverter):
+    pass
+
+
+class IndividualsMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
+    class Meta:
+        model = TIndividuals
+        include_fk = False
+        load_instance = True
+        sqla_session = db.session
+        feature_id = "id_individual"
+        feature_geometry = "geom"
+        model_converter = IndividualsMapConverter
+
+    geom = GeometryField(metadata={"exclude": True}, dump_only=True)
+    nom_vern = fields.Method("get_nom_vern", dump_only=True)
+    last_observation = fields.Method("get_last_observation", dump_only=True)
+
+    def get_nom_vern(self, obj):
+        return obj.taxon.nom_vern if obj.taxon else None
+
+    def get_last_observation(self, obj):
+        if obj.last_obs_date is None:
+            return None
+        return {
+            "date": obj.last_obs_date.strftime("%d-%m-%Y"),
+            "observateurs": obj.last_obs_observers,
+        }
+
+
+class DeploymentsBaseSchema(Schema):
+    id_tracking_device = fields.Integer(dump_default=None)
+    marking_code = fields.String(dump_default=None)
+    install_date = fields.DateTime(format="%d-%m-%Y", dump_default=None)
+    removal_date = fields.DateTime(format="%d-%m-%Y", dump_default=None, allow_none=True)
+    nomenclature_deployment_type = fields.Method("get_type_label")
+    nomenclature_deployment_location = fields.Method("get_location_label")
+
+    def get_type_label(self, obj):
+        return get_label(obj.nomenclature_deployment_type)
+
+    def get_location_label(self, obj):
+        return get_label(obj.nomenclature_deployment_location)
+
+
+class IndividualsListSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = TIndividuals
+        include_fk = True
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = True
+        model_converter = NomenclaturesConverter
+        exclude = ("uuid_individual",)
+
+    __module_code__ = MODULE_CODE
+
+    meta_create_date = fields.DateTime(format="%d-%m-%Y", dump_only=True)
+    meta_update_date = fields.DateTime(format="%d-%m-%Y", dump_only=True, allow_none=True)
+
+    # taxref and all TIndividuals.__nomenclatures__ fields (e.g. nomenclature_sex) are Nested
+    # by default (SmartRelationshipsMixin excludes them). Routes include them explicitly via
+    # only=["+taxref", *[f"+{n}" for n in TIndividuals.__nomenclatures__]].
+    taxref = ma.Nested(TaxrefSchema, attribute="taxon", dump_only=True)
+    digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
+    last_observation = fields.Method("get_last_observation", dump_only=True)
+    deployments = fields.Method("get_deployments", dump_only=True)
+
+    def get_digitiser_name(self, obj):
+        if obj.digitiser:
+            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
+        return None
+
+    def get_last_observation(self, obj):
+        if obj.last_obs_date is None:
+            return None
+        return {
+            "date": obj.last_obs_date.strftime("%d-%m-%Y"),
+            "observateurs": obj.last_obs_observers,
+        }
+
+    def get_deployments(self, obj):
+        return DeploymentsBaseSchema(many=True).dump(obj.deployments)
+
+
+class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
     class Meta:
         model = IndividualDeployments
         include_fk = True
@@ -30,8 +118,9 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
     meta_create_date = fields.Date(format="%Y-%m-%d", dump_only=True)
     meta_update_date = fields.Date(format="%Y-%m-%d", dump_only=True)
 
-    nomenclature_deployment_type = fields.Method("get_deployment_type", dump_only=True)
-    nomenclature_deployment_location = fields.Method("get_deployment_location", dump_only=True)
+    # nomenclature_deployment_type/location are Nested by default (auto-generated by
+    # NomenclaturesConverter, SmartRelationshipsMixin excludes them). Include them via
+    # only=[*[f"+{n}" for n in IndividualDeployments.__nomenclatures__]] when instantiating.
     individual_name = fields.Method("get_individual_name", dump_only=True)
     tracking_device_info = fields.Method("get_tracking_device", dump_only=True)
     name_digitiser = fields.Method("get_digitiser", dump_only=True)
@@ -81,16 +170,6 @@ class IndividualDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSche
             )
 
     # Serialisation
-
-    def get_deployment_type(self, obj):
-        if obj.nomenclature_deployment_type:
-            return get_label(obj.nomenclature_deployment_type)
-        return None
-
-    def get_deployment_location(self, obj):
-        if obj.nomenclature_deployment_location:
-            returnget_label(obj.nomenclature_deployment_location)
-        return None
 
     def get_individual_name(self, obj):
         if obj.individual:

@@ -1,6 +1,7 @@
 from geonature.utils.env import DB
 from flask import g
 from pypnnomenclature.models import TNomenclatures
+from pypnnomenclature.utils import NomenclaturesMixin
 from geonature.core.gn_monitoring.models import TIndividuals
 from pypnusershub.db.models import User
 from sqlalchemy.dialects.postgresql import JSONB
@@ -8,7 +9,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from .devices import TrackingDevices
 
 
-class IndividualDeployments(DB.Model):
+class IndividualDeployments(NomenclaturesMixin, DB.Model):
     __tablename__ = "t_individual_deployments"
     __table_args__ = {"schema": "gn_individual"}
 
@@ -103,6 +104,7 @@ class IndividualDeployments(DB.Model):
         primaryjoin=TIndividuals.id_individual == id_individual,
         foreign_keys=[id_individual],
         lazy="select",
+        back_populates="deployments",
     )
 
     tracking_device = DB.relationship(
@@ -133,6 +135,21 @@ class IndividualDeployments(DB.Model):
         foreign_keys=[id_digitiser],
         lazy="select",
     )
+
+    @classmethod
+    def register_individual_backref(cls):
+        """
+        Attache TIndividuals.deployments depuis le côté module,
+        après que les deux classes sont définies.
+        """
+        if not hasattr(TIndividuals, "deployments"):
+            TIndividuals.deployments = DB.relationship(
+                cls,
+                primaryjoin=cls.id_individual == TIndividuals.id_individual,
+                foreign_keys=[cls.id_individual],
+                lazy="select",
+                viewonly=True,
+            )
 
     def has_instance_permission(self, scope):
         if scope == 0:

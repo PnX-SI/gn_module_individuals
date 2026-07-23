@@ -22,7 +22,7 @@ class DevicesErrorCode(str, Enum):
 class APIError(Exception):
     """Exception structurée produisant {name, description} attendu par MyCustomInterceptor.
 
-    Le champ ``name`` est le code machine (DeviceErrorCode), utilisé côté frontend
+    Le champ ``name`` est le code machine (DevicesErrorCode), utilisé côté frontend
     comme clé de traduction.  Le champ ``description`` est le message anglais par
     défaut, affiché tel quel si aucune traduction n'est disponible.
     """
