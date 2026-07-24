@@ -1,7 +1,4 @@
-<ng-template
-  #formTemplate
-  let-dataTable="dataTable"
->
+<ng-template #formTemplate>
   <div class="col-6 padding-sm">
     <!-- id_nomenclature_device_type -->
     <pnx-nomenclature
@@ -63,14 +60,10 @@
 
 <ng-template #editMode>
   <gn-individuals-form
-    *ngIf="dataTable$ | async as dataTable"
-    [formTitle]="
-      'Individuals.Devices.Titles.Edit' | translate: { id: dataTable.id_tracking_device }
-    "
+    [formTitle]="'Individuals.Devices.Titles.Edit' | translate: { id: deviceId }"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [objectName]="'devices'"
-    [dataTable]="dataTable"
     [canSave]="form.valid && form.dirty"
     (save)="onSave()"
   ></gn-individuals-form>

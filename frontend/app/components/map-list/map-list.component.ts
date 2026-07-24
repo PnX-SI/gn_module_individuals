@@ -268,7 +268,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
    */
   private _selectMapFeature(id: number, zoom: boolean): void {
     const layer = this._mapLayersById[id];
-    console.log('Selecting map feature with id:', id, 'Layer found:', !!layer);
+
     if (!layer) {
       this._showNoGeometryMessage();
       this._selectedLayer?.closePopup();

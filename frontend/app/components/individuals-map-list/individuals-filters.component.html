@@ -3,8 +3,12 @@
   <gn-individuals-input-radio
     [label]="'Individuals.Individuals.Fields.active'| translate"
     [parentFormControl]="filtersForm.get('active')"
-    [name]="'active'"
-    [options]="[{ key: 'true', value: 'Individuals.Others.Yes' | translate }, { key: 'false', value: 'Individuals.Others.No' | translate }]"
+    [inputName]="'active'"
+    [options]="[
+      { value: 'true', label: 'Individuals.Others.Yes' | translate }, 
+      { value: 'false', label: 'Individuals.Others.No' | translate },
+      { value: '', label: 'Individuals.Others.All' | translate },
+    ]"
   ></gn-individuals-input-radio>
 
   <!-- cd_nom : taxon -->

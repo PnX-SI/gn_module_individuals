@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { KeyValue } from '@angular/common';
 import { AbstractControl } from '@angular/forms';
 
 @Component({
@@ -32,12 +31,16 @@ export class InputRadioComponent {
    * Input name. The different options will set with the same name, 
    * all be part of the same group
    */
-  @Input() name = '';
+  @Input() inputName = '';
   
   /**
-   * Input options defined as a key/value array
-   *
-   * @type {KeyValue<string, string>[]}
+   * Input options defined as a value/label array
+   * ex: [{value:1, label: 'Label 1'}]
    */
-  @Input() options: KeyValue<string, string>[] = [];
+  @Input() options: RadioOption[] = [];
+}
+
+export interface RadioOption {
+  value: unknown;
+  label: string;
 }

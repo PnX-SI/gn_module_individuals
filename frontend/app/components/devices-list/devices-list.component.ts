@@ -117,7 +117,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     if (!$event) {
       this._APIFiltersParams = {};
     } else {
-      if ($event.value) {
+      if ($event.value != null) {
         this._APIFiltersParams[$event.key] = $event.value;
         this._APIPaginationParams['page'] = 1;
       }

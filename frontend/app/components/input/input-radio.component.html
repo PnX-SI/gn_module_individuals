@@ -8,13 +8,13 @@
       <input
         type="radio"
         class="form-check-input"
-        [id]="option.key"
-        [value]="option.key"
-        [name]="name"
+        [id]="option.value"
+        [value]="option.value"
+        [name]="inputName"
         [formControl]="$any(parentFormControl)"
       />
       <label class="small">
-        {{ option.value }}
+        {{ option.label }}
       </label>
     </div>
   </div>

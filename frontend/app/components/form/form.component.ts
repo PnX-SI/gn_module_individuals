@@ -26,7 +26,6 @@ export class FormComponent implements OnInit, AfterViewInit {
   @Input() formTitle: string = '';
   @Input() formAction: string = '';
   @Input() canSave: boolean = false;
-  @Input() dataTable: any;
   @Input() objectName: string = '';
   public moduleName: string = this._moduleService.currentModule.module_url;
 

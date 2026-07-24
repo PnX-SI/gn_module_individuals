@@ -110,8 +110,7 @@ export class IndividualsService {
         id_individual: individual.id,
       };
     }
-    console.log("params:", params);
-    console.log("payload",payload);
+    console.log("Parameters sent to API params:", params,"payload",payload);
 
     if (formAction === 'ADD') {
       return this._http.post<Individual>(`${this._OBJECT_API}`, payload, {

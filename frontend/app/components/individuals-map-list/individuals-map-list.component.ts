@@ -105,14 +105,14 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   /**
    * Call API with given filter value
    *
-   * @param {({key: keyof APIIndividualFiltersParams; value: string | number | undefined;} | null)} $event Filter value {key, value} or null to reset filters
+   * @param {({key: keyof APIIndividualFiltersParams; value: any;} | null)} $event Filter value {key, value} or null to reset filters
    * @memberof IndividualsMapListComponent
    */
-  onFilters($event: {key: keyof APIIndividualFiltersParams; value: string | number | undefined;} | null): void {
+  onFilters($event: {key: keyof APIIndividualFiltersParams; value: any;} | null): void {
       if (!$event) {
         this._APIFiltersParams = {};
       } else {
-        if ($event.value) {
+        if ($event.value != null) {
           this._APIFiltersParams[$event.key] = $event.value;
           this._APIPaginationParams['page'] = 1;
         }
@@ -142,7 +142,6 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
 
       IdRankAndPage$.subscribe((rankAndPage) => {
         this._APIPaginationParams.page = rankAndPage.page;
-        console.log('onPageId called with id:', $event, ' get page:', rankAndPage, ' with params:', APIParams);
         this._loadData();
       });
     }

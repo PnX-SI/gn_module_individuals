@@ -1,7 +1,4 @@
-<ng-template
-  #formTemplate
-  let-dataTable="dataTable"
->
+<ng-template #formTemplate>
   <div class="col-6 padding-sm">
     <!-- individual_name -->
     <gn-individuals-input-text
@@ -36,8 +33,8 @@
     <gn-individuals-input-radio
       [label]="'Individuals.Individuals.Fields.active'| translate"
       [parentFormControl]="$any(form.get('active'))"
-      [name]="'active'"
-      [options]="[{ key: 'true', value: 'Individuals.Others.Yes' | translate }, { key: 'false', value: 'Individuals.Others.No' | translate }]"
+      [inputName]="'active'"
+      [options]="[{ value: true, label: 'Individuals.Others.Yes' | translate }, { value: false, label: 'Individuals.Others.No' | translate }]"
     ></gn-individuals-input-radio>
 
     <!-- comment -->

@@ -40,7 +40,6 @@ export class IndividualsFiltersComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Form initialization
-    console.log("default filters values",this.defaultValues);
     this.filtersForm = this._fb.group({
       active: [this.defaultValues?.active, null],
       cd_nom: [null, null],
@@ -58,7 +57,16 @@ export class IndividualsFiltersComponent implements OnInit, OnDestroy {
           takeUntil(this._destroy$)
         )
         .subscribe((value) => {
-          this.filters.emit({ key: field, value: value?.id_role ?? value?.cd_nom ?? value });
+          // Emit a change only if filtersForm change due to user action : genericForm.component emit 
+          // changes when it call setValue() 
+          if (!this.filtersForm.get(field)?.dirty) {
+            return;
+          }
+
+          // Emit to IndividualsMapList :
+          // If the value comes from pnx-taxonomy, get the value.cd_nom
+          // Else get the value
+          this.filters.emit({ key: field, value: value?.cd_nom ?? value });
         });
     });
   }
