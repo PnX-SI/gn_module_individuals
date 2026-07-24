@@ -28,5 +28,16 @@ export class InputRadioComponent {
    */
   @Input() inputClass = '';
 
+  /**
+   * Input name. The different options will set with the same name, 
+   * all be part of the same group
+   */
+  @Input() name = '';
+  
+  /**
+   * Input options defined as a key/value array
+   *
+   * @type {KeyValue<string, string>[]}
+   */
   @Input() options: KeyValue<string, string>[] = [];
 }

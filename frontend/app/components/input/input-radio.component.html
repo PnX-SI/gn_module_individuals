@@ -10,9 +10,10 @@
         class="form-check-input"
         [id]="option.key"
         [value]="option.key"
+        [name]="name"
         [formControl]="$any(parentFormControl)"
       />
-      <label class="small" [for]="option.key">
+      <label class="small">
         {{ option.value }}
       </label>
     </div>
