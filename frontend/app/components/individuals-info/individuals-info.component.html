@@ -10,15 +10,21 @@
       </p>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.taxon_vern_nom' | translate }}</h3>
+      <p>
+        {{ dataTable['nom_vern'] }} ( {{ dataTable['lb_nom'] }})
+      </p>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.nomenclature_sex_name' | translate }}</h3>
       <p>
         {{ dataTable['nomenclature_sex']?.['label_' + defaultLang] }}
       </p>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
-      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.taxon_vern_nom' | translate }}</h3>
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.comment' | translate }}</h3>
       <p>
-        {{ dataTable['nom_vern'] }} ( {{ dataTable['lb_nom'] }})
+        {{ dataTable['comment'] ?? '-' }}
       </p>
     </div>
   </div>
