@@ -112,10 +112,8 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       if (!$event) {
         this._APIFiltersParams = {};
       } else {
-        if ($event.value != null) {
           this._APIFiltersParams[$event.key] = $event.value;
           this._APIPaginationParams['page'] = 1;
-        }
       }
       this._loadData();
   }
