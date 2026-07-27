@@ -31,14 +31,16 @@ from ..utils.common import sql_log
 
 def _parse_filters(args):
     return {
-        "taxon": args.get("taxon", type=int),
+        "cd_nom": args.get("cd_nom", type=int),
         "active": args.get("active"),
         "bbox": args.get("bbox"),
+        "individual_name": args.get("individual_name"),
+        "id_nomenclature_sex": args.get("id_nomenclature_sex", type=int),
     }
 
 
 def _parse_bool(value):
-    if value is None:
+    if value is None or value == "":
         return None
     normalized = value.lower()
     if normalized in ("true", "1", "yes", "y"):
@@ -67,12 +69,18 @@ def _parse_bbox(value):
 
 
 def _apply_filters(query, filters):
-    if filters["taxon"] is not None:
-        query = query.where(TIndividuals.cd_nom == filters["taxon"])
+    if filters["cd_nom"] is not None:
+        query = query.where(TIndividuals.cd_nom == filters["cd_nom"])
 
     active = _parse_bool(filters["active"])
     if active is not None:
         query = query.where(TIndividuals.active == active)
+
+    if filters["individual_name"]:
+        query = query.where(TIndividuals.individual_name.ilike(f"%{filters['individual_name']}%"))
+
+    if filters["id_nomenclature_sex"] is not None:
+        query = query.where(TIndividuals.id_nomenclature_sex == filters["id_nomenclature_sex"])
 
     bbox = _parse_bbox(filters["bbox"])
     if bbox is not None:
@@ -186,7 +194,7 @@ def individuals_geometry(scope):
         .where(individual_last_observation_geom_expression().isnot(None))
     )
 
-    sql_log(query)  # Log the SQL query for debugging purposes
+    # sql_log(query)  # Log the SQL query for debugging purposes
 
     individuals = db.session.scalars(query).unique().all()
     _assign_last_observation(individuals)
@@ -198,7 +206,7 @@ def individuals_geometry(scope):
             "id_individual",
             "individual_name",
             "geom",
-            "taxon_vern_nom",
+            "taxref_nom_vern",
             "last_observation_date",
             "last_observation_observers_name",
         ),
@@ -218,11 +226,10 @@ def individual(scope, id_individual):
             joinedload(TIndividuals.nomenclature_sex),
             joinedload(TIndividuals.digitiser),
             selectinload(TIndividuals.deployments).options(
+                joinedload(IndividualDeployments.tracking_device),
+                joinedload(IndividualDeployments.digitiser),
                 joinedload(IndividualDeployments.nomenclature_deployment_type),
                 joinedload(IndividualDeployments.nomenclature_deployment_location),
-                joinedload(IndividualDeployments.tracking_device).joinedload(
-                    TrackingDevices.nomenclature_device_type
-                ),
             ),
         )
         .where(TIndividuals.id_individual == id_individual)

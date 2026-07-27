@@ -59,6 +59,7 @@
             "Fields": {
                 "id_deployment" : "ID du déploiement",
                 "id_tracking_device" : "ID du dispositif de suivi",
+                "tracking_device_info" : "Dispositif de suivi",
                 "install_date" : "Date de déploiement",
                 "removal_date" : "Date de retrait",
                 "deployment_type_name" : "Type",
@@ -68,7 +69,8 @@
                 "meta_create_date" : "Date de création",
                 "meta_update_date" : "Date de mise à jour",
                 "individual_name" : "Nom de l'individu",
-                "digitiser_name" : "Rédacteur"
+                "digitiser_name" : "Rédacteur",
+                "name_digitiser" : "Rédacteur"
             }
         },
         "Individuals": {
@@ -84,7 +86,7 @@
                 "nomenclature_sex_name" : "Sexe",
                 "last_observation_date" : "Dernière observation",
                 "last_observation_observers_name" : "Dernier(s) observateur(s)",
-                "taxon_vern_nom" : "Taxon",
+                "taxref_nom_vern" : "Taxon",
                 "deployed_devices" : "Dispositif(s) de suivi déployé(s)",
                 "deployed_markings" : "Marquage(s) déployé(s)",
                 "deployments" : "Déploiement(s) associé(s)"

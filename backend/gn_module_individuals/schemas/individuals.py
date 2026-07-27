@@ -1,6 +1,6 @@
 from apptax.taxonomie.models import Taxref
 from geonature.utils.env import db, ma
-from marshmallow import fields, validates, validates_schema, ValidationError, Schema
+from marshmallow import fields, validates, validates_schema, ValidationError
 from utils_flask_sqla.schema import SmartRelationshipsMixin
 from utils_flask_sqla_geo.schema import GeoAlchemyAutoSchema, GeoModelConverter, GeometryField
 
@@ -34,13 +34,13 @@ class IndividualsMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
         model_converter = IndividualsMapConverter
 
     geom = GeometryField(metadata={"exclude": True}, dump_only=True)
-    taxon_vern_nom = fields.Method("get_taxon_vern_nom", dump_only=True)
+    taxref_nom_vern = fields.Method("get_taxref_nom_vern", dump_only=True)
     last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
     last_observation_observers_name = fields.Method(
         "get_last_observation_observers_name", dump_only=True
     )
 
-    def get_taxon_vern_nom(self, obj):
+    def get_taxref_nom_vern(self, obj):
         return obj.taxon.nom_vern if obj.taxon else None
 
     def get_last_observation_date(self, obj):
@@ -50,33 +50,6 @@ class IndividualsMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
 
     def get_last_observation_observers_name(self, obj):
         return obj.last_obs_observers
-
-
-class IndividualDetailDeploymentSchema(Schema):
-    """An active deployment (removal_date NULL), as exposed by
-    IndividualsDetailSchema.deployments."""
-
-    id_tracking_device = fields.Integer(dump_default=None)
-    provider_device_id = fields.Method("get_provider_device_id", dump_only=True)
-    device_type_name = fields.Method("get_device_type_name", dump_only=True)
-    install_date = fields.DateTime(format="%d-%m-%Y", dump_only=True)
-    marking_code = fields.String(dump_default=None)
-    deployment_location_name = fields.Method("get_deployment_location_name", dump_only=True)
-    deployment_type_name = fields.Method("get_deployment_type_name", dump_only=True)
-
-    def get_provider_device_id(self, obj):
-        return obj.tracking_device.provider_device_id if obj.tracking_device else None
-
-    def get_device_type_name(self, obj):
-        if obj.tracking_device:
-            return get_label(obj.tracking_device.nomenclature_device_type)
-        return None
-
-    def get_deployment_location_name(self, obj):
-        return get_label(obj.nomenclature_deployment_location)
-
-    def get_deployment_type_name(self, obj):
-        return get_label(obj.nomenclature_deployment_type)
 
 
 class IndividualsBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
@@ -101,14 +74,14 @@ class IndividualsListSchema(IndividualsBaseSchema):
     """Adds only computed fields on top of the base: no relationships."""
 
     class Meta(IndividualsBaseSchema.Meta):
-        # cd_nom is exposed renamed as taxon_cd_nom (below), not under its column name.
+        # cd_nom is exposed renamed as taxref_cd_nom (below), not under its column name.
         exclude = ("uuid_individual", "cd_nom")
 
     __module_code__ = MODULE_CODE
 
-    taxon_cd_nom = fields.Integer(attribute="cd_nom", dump_only=True)
-    taxon_vern_nom = fields.Method("get_taxon_vern_nom", dump_only=True)
-    taxon_lb_nom = fields.Method("get_taxon_lb_nom", dump_only=True)
+    taxref_cd_nom = fields.Integer(attribute="cd_nom", dump_only=True)
+    taxref_nom_vern = fields.Method("get_taxref_nom_vern", dump_only=True)
+    taxref_lb_nom = fields.Method("get_taxref_lb_nom", dump_only=True)
 
     digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
     nomenclature_sex_name = fields.Method("get_nomenclature_sex_name", dump_only=True)
@@ -129,10 +102,10 @@ class IndividualsListSchema(IndividualsBaseSchema):
     def get_nomenclature_sex_name(self, obj):
         return get_label(obj.nomenclature_sex) if obj.nomenclature_sex else None
 
-    def get_taxon_vern_nom(self, obj):
+    def get_taxref_nom_vern(self, obj):
         return obj.taxon.nom_vern if obj.taxon else None
 
-    def get_taxon_lb_nom(self, obj):
+    def get_taxref_lb_nom(self, obj):
         return obj.taxon.lb_nom if obj.taxon else None
 
     def get_last_observation_date(self, obj):
@@ -198,8 +171,11 @@ class IndividualsDetailSchema(IndividualsBaseSchema):
         return obj.taxon.lb_nom if obj.taxon else None
 
     def get_deployments(self, obj):
-        active = [d for d in obj.deployments if d.removal_date is None]
-        return IndividualDetailDeploymentSchema(many=True).dump(active)
+        deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
+        # individual_name is redundant here: we are already on that individual's page.
+        return IndividualsDeploymentsSchema(many=True, exclude=("individual_name",)).dump(
+            deployments
+        )
 
 
 class IndividualsWriteSchema(IndividualsBaseSchema):
@@ -275,6 +251,8 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
     individual_name = fields.Method("get_individual_name", dump_only=True)
     tracking_device_info = fields.Method("get_tracking_device", dump_only=True)
     name_digitiser = fields.Method("get_digitiser", dump_only=True)
+    deployment_type_name = fields.Method("get_deployment_type_name", dump_only=True)
+    deployment_location_name = fields.Method("get_deployment_location_name", dump_only=True)
 
     __module_code__ = MODULE_CODE
 
@@ -340,3 +318,9 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
         if obj.digitiser:
             return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
         return None
+
+    def get_deployment_type_name(self, obj):
+        return get_label(obj.nomenclature_deployment_type)
+
+    def get_deployment_location_name(self, obj):
+        return get_label(obj.nomenclature_deployment_location)
