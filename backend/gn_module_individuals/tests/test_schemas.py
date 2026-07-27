@@ -17,7 +17,6 @@ from gn_module_individuals.schemas import (
 from gn_module_individuals.schemas.individuals import (
     IndividualsMapSchema,
     IndividualsListSchema,
-    IndividualDetailDeploymentSchema,
 )
 
 
@@ -179,6 +178,22 @@ class TestIndividualsDeploymentsSchema:
         deployment = device_with_deployment.deployments[0]
         assert IndividualsDeploymentsSchema().get_digitiser(deployment) is None
 
+    def test_get_deployment_type_name_returns_nomenclature_label(
+        self, app, device_with_deployment, individual
+    ):
+        deployment = individual.deployments[0]
+        # device_with_deployment sets id_nomenclature_deployment_type to DISPO_SUIVI
+        result = IndividualsDeploymentsSchema().get_deployment_type_name(deployment)
+        assert result == "Dispositif de suivi"
+
+    def test_get_deployment_location_name_returns_nomenclature_label(
+        self, app, device_with_deployment, individual
+    ):
+        deployment = individual.deployments[0]
+        # device_with_deployment sets id_nomenclature_deployment_location to ENCOLURE
+        result = IndividualsDeploymentsSchema().get_deployment_location_name(deployment)
+        assert result == "Encolure"
+
     def test_has_instance_permission_scope_0_always_false(self, app, device):
         assert device.has_instance_permission(scope=0) is False
 
@@ -204,15 +219,15 @@ class TestIndividualsDeploymentsSchema:
 @pytest.mark.usefixtures("temporary_transaction")
 class TestIndividualsMapSchema:
 
-    def test_get_taxon_vern_nom_returns_none_when_no_taxon(self, app, individual):
+    def test_get_taxref_nom_vern_returns_none_when_no_taxon(self, app, individual):
         individual.taxon = None
-        result = IndividualsMapSchema().get_taxon_vern_nom(individual)
+        result = IndividualsMapSchema().get_taxref_nom_vern(individual)
         assert result is None
 
-    def test_get_taxon_vern_nom_returns_string_or_none(self, app, individual):
+    def test_get_taxref_nom_vern_returns_string_or_none(self, app, individual):
         # Taxon is loaded via fixture (valid cd_nom).
-        # taxon_vern_nom may be None if the taxon has no vernacular name.
-        result = IndividualsMapSchema().get_taxon_vern_nom(individual)
+        # taxref_nom_vern may be None if the taxon has no vernacular name.
+        result = IndividualsMapSchema().get_taxref_nom_vern(individual)
         assert result is None or isinstance(result, str)
 
     def test_get_last_observation_date_returns_none_when_no_date(self, app, individual):
@@ -233,45 +248,6 @@ class TestIndividualsMapSchema:
         individual.last_obs_observers = None
         result = IndividualsMapSchema().get_last_observation_observers_name(individual)
         assert result is None
-
-
-# ===========================================================================
-# IndividualDetailDeploymentSchema
-# ===========================================================================
-
-
-@pytest.mark.usefixtures("temporary_transaction")
-class TestIndividualDetailDeploymentSchema:
-
-    def test_get_device_type_name_returns_none_without_device(
-        self, app, device_with_deployment, individual
-    ):
-        deployment = individual.deployments[0]
-        deployment.tracking_device = None
-        assert IndividualDetailDeploymentSchema().get_device_type_name(deployment) is None
-
-    def test_get_provider_device_id_returns_none_without_device(
-        self, app, device_with_deployment, individual
-    ):
-        deployment = individual.deployments[0]
-        deployment.tracking_device = None
-        assert IndividualDetailDeploymentSchema().get_provider_device_id(deployment) is None
-
-    def test_get_deployment_type_name_returns_nomenclature_label(
-        self, app, device_with_deployment, individual
-    ):
-        deployment = individual.deployments[0]
-        # device_with_deployment sets id_nomenclature_deployment_type to DISPO_SUIVI
-        result = IndividualDetailDeploymentSchema().get_deployment_type_name(deployment)
-        assert result == "Dispositif de suivi"
-
-    def test_get_deployment_location_name_returns_nomenclature_label(
-        self, app, device_with_deployment, individual
-    ):
-        deployment = individual.deployments[0]
-        # device_with_deployment sets id_nomenclature_deployment_location to ENCOLURE
-        result = IndividualDetailDeploymentSchema().get_deployment_location_name(deployment)
-        assert result == "Encolure"
 
 
 # ===========================================================================

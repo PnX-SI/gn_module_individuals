@@ -9,6 +9,7 @@ from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import db
 from pypnusershub.tests.utils import set_logged_user
 
+from gn_module_individuals.models import IndividualDeployments
 from gn_module_individuals.utils.errors import IndividualsErrorCode
 
 # ===========================================================================
@@ -53,7 +54,7 @@ class TestIndividualsMap:
             assert "individual_name" in props
             assert "last_observation_date" in props
             assert "last_observation_observers_name" in props
-            assert "taxon_vern_nom" in props
+            assert "taxref_nom_vern" in props
 
     def test_features_have_geometry(self, users):
         """All returned individuals have a geometry (filtered server-side)."""
@@ -137,9 +138,9 @@ class TestListIndividuals:
         "individual_name",
         "id_digitiser",
         "active",
-        "taxon_cd_nom",
-        "taxon_vern_nom",
-        "taxon_lb_nom",
+        "taxref_cd_nom",
+        "taxref_nom_vern",
+        "taxref_lb_nom",
         "meta_create_date",
         "meta_update_date",
         "id_nomenclature_sex",
@@ -165,7 +166,7 @@ class TestListIndividuals:
         assert "taxref" not in item
         assert "nomenclature_sex" not in item
         assert "deployments" not in item
-        # cd_nom/nom_vern are renamed taxon_cd_nom/taxon_vern_nom, not duplicated.
+        # cd_nom/nom_vern are renamed taxref_cd_nom/taxref_nom_vern, not duplicated.
         assert "cd_nom" not in item
         assert "nom_vern" not in item
 
@@ -244,17 +245,17 @@ class TestListIndividuals:
 
     def test_filter_by_taxon_no_match(self, users, individual):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.get(url_for("individuals.list_individuals", taxon=-999))
+        r = self.client.get(url_for("individuals.list_individuals", cd_nom=-999))
         assert r.status_code == 200
         assert r.get_json()["items"] == []
 
     def test_filter_by_taxon_matching(self, users, individual):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.get(url_for("individuals.list_individuals", taxon=individual.cd_nom))
+        r = self.client.get(url_for("individuals.list_individuals", cd_nom=individual.cd_nom))
         assert r.status_code == 200
         items = r.get_json()["items"]
         assert len(items) >= 1
-        assert all(item["taxon_cd_nom"] == individual.cd_nom for item in items)
+        assert all(item["taxref_cd_nom"] == individual.cd_nom for item in items)
 
     def test_filter_active_true_excludes_inactive(self, users, individuals):
         set_logged_user(self.client, users["admin_user"])
@@ -443,7 +444,7 @@ class TestGetIndividual:
         # Only the nested digitiser object is exposed, not the raw FK, and none
         # of the list-specific computed fields (those belong to IndividualsListSchema).
         assert "id_digitiser" not in payload
-        assert "taxon_cd_nom" not in payload
+        assert "taxref_cd_nom" not in payload
         assert "digitiser_name" not in payload
         assert "deployed_devices" not in payload
         assert "deployed_markings" not in payload
@@ -471,19 +472,21 @@ class TestGetIndividual:
         )
         assert r.get_json()["deployments"] == []
 
-    def test_deployments_excludes_removed_deployment(
+    def test_deployments_includes_removed_deployment(
         self, users, device_with_deployment, individual
     ):
-        """Only active deployments (removal_date NULL) appear in deployments."""
+        """Removed deployments (removal_date set) still appear in deployments."""
         individual.deployments[0].removal_date = datetime.datetime(2024, 6, 1)
         db.session.flush()
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(
             url_for("individuals.individual", id_individual=individual.id_individual)
         )
-        assert r.get_json()["deployments"] == []
+        deployments = r.get_json()["deployments"]
+        assert len(deployments) == 1
+        assert deployments[0]["removal_date"] == "2024-06-01"
 
-    def test_deployments_shape_for_active_device_deployment(
+    def test_deployments_shape_for_device_deployment(
         self, users, device_with_deployment, individual
     ):
         set_logged_user(self.client, users["admin_user"])
@@ -494,12 +497,53 @@ class TestGetIndividual:
         assert len(deployments) == 1
         dep = deployments[0]
         assert dep["id_tracking_device"] == device_with_deployment.id_tracking_device
-        assert dep["provider_device_id"] == device_with_deployment.provider_device_id
-        assert dep["device_type_name"] is None  # device fixture has no nomenclature type set
-        assert dep["install_date"] == "01-01-2024"
+        assert dep["id_nomenclature_deployment_type"] is not None
+        assert dep["id_nomenclature_deployment_location"] is not None
+        assert dep["tracking_device_info"] == (
+            f"{device_with_deployment.provider_name} - {device_with_deployment.provider_device_id}"
+        )
+        assert dep["install_date"] == "2024-01-01"
         assert dep["marking_code"] is None
-        assert dep["deployment_location_name"] == "Encolure"
+        assert dep["removal_date"] is None
+        assert dep["name_digitiser"] is None
         assert dep["deployment_type_name"] == "Dispositif de suivi"
+        assert dep["deployment_location_name"] == "Encolure"
+        assert "individual_name" not in dep
+
+    def test_deployments_ordered_by_install_date_desc(
+        self, users, device_with_deployment, individual
+    ):
+        """device_with_deployment already creates one deployment (install_date 2024-01-01);
+        add an earlier and a later one and check the API sorts all three DESC."""
+        existing = individual.deployments[0]
+        earlier = IndividualDeployments(
+            id_tracking_device=existing.id_tracking_device,
+            id_individual=individual.id_individual,
+            id_capture=1,
+            id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
+            id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
+            install_date=datetime.datetime(2020, 1, 1),
+        )
+        later = IndividualDeployments(
+            id_tracking_device=existing.id_tracking_device,
+            id_individual=individual.id_individual,
+            id_capture=1,
+            id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
+            id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
+            install_date=datetime.datetime(2025, 1, 1),
+        )
+        db.session.add_all([earlier, later])
+        db.session.flush()
+        # individual.deployments was already loaded above (via `existing`); the route's
+        # eager loader won't refresh an already-populated collection, so force a reload.
+        db.session.expire_all()
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(
+            url_for("individuals.individual", id_individual=individual.id_individual)
+        )
+        install_dates = [dep["install_date"] for dep in r.get_json()["deployments"]]
+        assert len(install_dates) == 3
+        assert install_dates == sorted(install_dates, reverse=True)
 
 
 # ===========================================================================
@@ -801,7 +845,7 @@ class TestIndividualPage:
                     id_individual=target.id_individual,
                     prop="individual_name",
                     dir="asc",
-                    taxon=cd_nom,
+                    cd_nom=cd_nom,
                     per_page=per_page,
                 )
             )
@@ -817,7 +861,7 @@ class TestIndividualPage:
     def test_rank_reflects_sort_prop_asc(self, users, individuals):
         """individuals: [0]='Individu Actif Admin', [1]='Individu Inactif Admin',
         [2]='Individu Actif Self'. Sorted asc by individual_name: [0],[2],[1] -> ranks 1,2,3.
-        Scoped via taxon= to just these 3 (shared DB has other individuals too)."""
+        Scoped via cd_nom= to just these 3 (shared DB has other individuals too)."""
         set_logged_user(self.client, users["admin_user"])
         cd_nom = individuals[0].cd_nom
         expected_ranks = {
@@ -832,7 +876,7 @@ class TestIndividualPage:
                     id_individual=ind_id,
                     prop="individual_name",
                     dir="asc",
-                    taxon=cd_nom,
+                    cd_nom=cd_nom,
                 )
             )
             assert r.get_json()["rank"] == expected_rank
@@ -853,7 +897,7 @@ class TestIndividualPage:
                     id_individual=ind_id,
                     prop="individual_name",
                     dir="desc",
-                    taxon=cd_nom,
+                    cd_nom=cd_nom,
                 )
             )
             assert r.get_json()["rank"] == expected_rank

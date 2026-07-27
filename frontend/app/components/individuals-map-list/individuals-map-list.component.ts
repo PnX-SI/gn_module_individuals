@@ -22,7 +22,7 @@ import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constant
 })
 export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public availableColumnsParams = INDIVIDUAL_MODEL;
-  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_DISPLAYED_COLUMNS ?? [];
+  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.LIST_COLUMNS ?? [];
   public datatable$: Observable<PaginatedItemCollection<Individual>> = new Observable<
     PaginatedItemCollection<Individual>
   >();

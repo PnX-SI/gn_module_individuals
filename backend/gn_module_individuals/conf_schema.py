@@ -15,14 +15,14 @@ class GlobalSchema(Schema):
 
 class IndividualsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer()
-    DEFAULT_DISPLAYED_COLUMNS = fields.List(fields.String(), load_default=[])
-    DEFAULT_DEPLOY_DISPLAYED_COLUMNS = fields.List(fields.String(), load_default=[])
+    LIST_COLUMNS = fields.List(fields.String(), load_default=[])
+    DEPLOYMENT_LIST_COLUMNS = fields.List(fields.String(), load_default=[])
 
 
 class DevicesSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer()
-    DEFAULT_DISPLAYED_COLUMNS = fields.List(fields.String(), load_default=[])
-    DEFAULT_DEPLOY_DISPLAYED_COLUMNS = fields.List(fields.String(), load_default=[])
+    LIST_COLUMNS = fields.List(fields.String(), load_default=[])
+    DEPLOYMENT_LIST_COLUMNS = fields.List(fields.String(), load_default=[])
 
 
 class GnModuleSchemaConf(Schema):

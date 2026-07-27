@@ -1,0 +1,38 @@
+.ngx-datatable .datatable-header-cell {
+  line-height: 40px;
+}
+
+.datatable-body-row {
+  height: auto !important;
+
+  :hover {
+    cursor: pointer;
+  }
+}
+
+
+// Is used only if in the component the decorator encapsulation is set to ViewEncapsulation.None
+// This style set the vertical align to center of the datatable cells
+.ngx-datatable.fixed-row .datatable-scroll .datatable-body-row .datatable-body-cell {
+  display: flex;
+  align-items: center;
+}
+
+.ngx-datatable.material:not(.cell-selection) .datatable-body-row:hover .datatable-row-group {
+  background-color: #ddd;
+  transition: none;
+}
+
+// Highlight expanded row header in ngx-datatable blue -> grey
+.ngx-datatable.material.single-selection .datatable-body-row.active,
+.ngx-datatable.material.single-selection .datatable-body-row.active .datatable-row-group,
+.ngx-datatable.material.single-selection .datatable-body-row.active:hover,
+.ngx-datatable.material.single-selection .datatable-body-row.active:hover .datatable-row-group,
+.ngx-datatable.material.multi-selection .datatable-body-row.active:hover,
+.ngx-datatable.material.multi-selection .datatable-body-row.active:hover .datatable-row-group,
+.ngx-datatable.material.multi-click-selection .datatable-body-row.active:hover,
+.ngx-datatable.material.multi-click-selection
+  .datatable-body-row.active:hover
+  .datatable-row-group {
+  background-color: #ccc;
+}

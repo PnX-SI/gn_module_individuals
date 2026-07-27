@@ -156,9 +156,9 @@
     </ngx-datatable-column>
     <!-- Displayed data columns -->
     <ngx-datatable-column
-      *ngFor="let col of displayedColumns"
-      [name]="col.name"
-      [prop]="col.prop"
+      *ngFor="let column of displayedColumns"
+      [name]="column.name"
+      [prop]="column.prop"
     >
       <ng-template
         ngx-datatable-cell-template
@@ -166,7 +166,7 @@
         maxWidth="columnMaxWidth"
       >
         <span>
-          {{ row[col.prop] === null || row[col.prop] === undefined ? '-' : row[col.prop] === false ? ('Individuals.Others.No' | translate) : row[col.prop] === true ? ('Individuals.Others.Yes' | translate) : row[col.prop] }}
+          {{ row[column.prop] === null || row[column.prop] === undefined ? '-' : row[column.prop] === false ? ('Individuals.Others.No' | translate) : row[column.prop] === true ? ('Individuals.Others.Yes' | translate) : row[column.prop] }}
         </span>
       </ng-template>
     </ngx-datatable-column>

@@ -1,0 +1,111 @@
+<ng-template
+  #infoTemplate
+  let-dataTable="dataTable"
+>
+  <div class="content row">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.individual_name' | translate }}</h3>
+      <p>
+        {{ dataTable['individual_name'] }}
+      </p>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.taxref_nom_vern' | translate }}</h3>
+      <p>
+        {{ dataTable['nom_vern'] }} ( {{ dataTable['lb_nom'] }})
+      </p>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.nomenclature_sex_name' | translate }}</h3>
+      <p>
+        {{ dataTable['nomenclature_sex']?.['label_' + defaultLang] }}
+      </p>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.comment' | translate }}</h3>
+      <p>
+        {{ dataTable['comment'] ?? '-' }}
+      </p>
+    </div>
+  </div>
+  <div class="content row one-per-row">
+    <div
+      *ngIf="'deployments' as field"
+      class="col-12 padding-sm"
+    >
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.' + field | translate }}</h3>
+      <p *ngIf="dataTable[field]?.length > 0">
+        <ngx-datatable
+          class="material striped margin-top-xs table-size expandable"
+          [columnMode]="'force'"
+          [columns]="deploymentsColumns"
+          [rowHeight]="rowHeight"
+          [headerHeight]="rowHeight + 10"
+          [footerHeight]="rowHeight + 10"
+          [rows]="dataTable[field]"
+          [sorts]="[]"
+        >
+          <ngx-datatable-column
+              *ngFor="let column of deploymentsColumns"
+              [name]="column.name"
+              [prop]="column.prop"
+          >
+            <ng-template
+              ngx-datatable-cell-template
+              let-row="row"
+            >
+              <ng-container *ngIf="column.prop === 'id_tracking_device'; else defaultCell">
+                <a [routerLink]="['/individuals/devices/info', row.id_tracking_device]">
+                  {{ row.id_tracking_device }}
+                </a>
+              </ng-container>
+              <ng-template #defaultCell>
+                <span>
+                  {{ row[column.prop] === null || row[column.prop] === undefined ? '-' : row[column.prop] === false ? ('Individuals.Others.No' | translate) : row[column.prop] === true ? ('Individuals.Others.Yes' | translate) : row[column.prop] }}
+                </span>
+              </ng-template>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </p>
+      <p *ngIf="deploymentsColumns.length == 0">-</p>
+    </div>
+  </div>
+  <div class="content row">
+    <div
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
+    >
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.digitiser_name' | translate }}</h3>
+      <p>
+        {{ dataTable['digitiser']?.['nom_complet'] }}
+      </p>
+    </div>
+    <div
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
+    >
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.meta_create_date' | translate }}</h3>
+      <p>
+        {{ dataTable['meta_create_date'] }}
+      </p>
+    </div>
+    <div
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
+    >
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.meta_update_date' | translate }}</h3>
+      <p>
+        {{ dataTable['meta_update_date'] ?? '-' }}
+      </p>
+    </div>
+  </div>
+</ng-template>
+
+<gn-individuals-info
+  *ngIf="dataTable$ | async as dataTable"
+  [infoTemplate]="infoTemplate"
+  [dataTable]="dataTable"
+  [infoTitle]="'Individuals.Individuals.Titles.Info' | translate: { id: dataTable.id_individual }"
+  [objectName]="'individuals'"
+  [objectId]="dataTable.id_individual"
+  [canBeDeleted]="canBeDeleted"
+  (delete)="onDelete()"
+></gn-individuals-info>

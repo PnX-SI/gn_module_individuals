@@ -8,32 +8,33 @@ import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
-import { Device } from '../../models/devices.models';
+import { Individual } from '../../models/individuals.models';
 import { Deployment } from '../../models/deployments.models';
 import { Column } from '../../models/common.models';
-import { DevicesService } from '../../services/devices.service';
+import { IndividualsService } from '../../services/individuals.service';
 
 @Component({
   selector: 'gn-individuals-devices-info',
-  templateUrl: 'devices-info.component.html',
-  styleUrls: ['devices-info.component.scss'],
+  templateUrl: 'individuals-info.component.html',
+  styleUrls: ['individuals-info.component.scss'],
   // SCSS used only in this component and not in the global CSS
   encapsulation: ViewEncapsulation.None,
   standalone: false,
 })
-export class DevicesInfoComponent implements OnInit {
-  public dataTable$: Observable<Device> = new Observable<Device>();
+export class IndividualsInfoComponent implements OnInit {
+  public dataTable$: Observable<Individual> = new Observable<Individual>();
   public deploymentsColumns: Column<Deployment>[] = [];
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public canBeDeleted: boolean = false;
-  private _deviceId!: number;
+  public defaultLang!: string; 
+  private _individualId!: number;
 
   constructor(
     private _config: ConfigService,
     private _commonService: CommonService,
     private _route: ActivatedRoute,
     private _translate: TranslateService,
-    private _service: DevicesService,
+    private _service: IndividualsService,
     private _location: Location
   ) {}
 
@@ -41,11 +42,11 @@ export class DevicesInfoComponent implements OnInit {
     // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
     this._route.data.subscribe(({ data }) => {
       this.dataTable$ = of(data);
-      this._deviceId = data.id_tracking_device;
+      this._individualId = data.id_individual;
 
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
       if (data.deployments?.length > 0) {
-        const props = this._config.INDIVIDUALS.DEVICES
+        const props = this._config.INDIVIDUALS.INDIVIDUALS
           .DEPLOYMENT_LIST_COLUMNS as (keyof Deployment)[];
 
         forkJoin(
@@ -60,24 +61,26 @@ export class DevicesInfoComponent implements OnInit {
       } else {
         data.deployments = [];
       }
+
+      this.defaultLang = this._config['DEFAULT_LANGUAGE'];
     });
   }
 
   onDelete(): void {
-    this._service.deleteDevice(this._deviceId).subscribe({
-      next: (res) => {
-        this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
-          id: this._deviceId,
-        });
-        this._location.back();
-      },
-      error: (err) => {
-        const msg = err.name + ':' + err.message || JSON.stringify(err);
-        this._commonService.translateToaster('error', 'Individuals.Devices.Errors.DeletedNOK', {
-          id: this._deviceId,
-          error: msg,
-        });
-      },
-    });
+    // this._service.deleteDevice(this._individualId).subscribe({
+    //   next: (res) => {
+    //     this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
+    //       id: this._individualId,
+    //     });
+    //     this._location.back();
+    //   },
+    //   error: (err) => {
+    //     const msg = err.name + ':' + err.message || JSON.stringify(err);
+    //     this._commonService.translateToaster('error', 'Individuals.Devices.Errors.DeletedNOK', {
+    //       id: this._deviceId,
+    //       error: msg,
+    //     });
+    //   },
+    // });
   }
 }
