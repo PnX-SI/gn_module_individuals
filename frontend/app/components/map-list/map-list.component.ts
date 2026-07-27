@@ -26,6 +26,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
   @Output() idPage: EventEmitter<number> = new EventEmitter();
+  @Output() bbox: EventEmitter<string> = new EventEmitter();
   @Input() objectName!: string;
   @Input() idFieldName!: string;
   @Input() availableColumnsParams!: Record<string, unknown>;
@@ -52,7 +53,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
   // private _lastBbox: string | null = null;
-  // private _mapMoveHandler: (() => void) | null = null;
+  private _mapMoveHandler: (() => void) | null = null;
 
   constructor(
     private _moduleService: ModuleService,
@@ -77,8 +78,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
       this.mapReady = true;
       this.contentHeight = calcContentHeight();
       this._zoomOnFeatures();
-      // this.bindMapMove();
-      // this.resizeMap();
+      this._bindMapMove();
     }, 0);
   }
 
@@ -298,28 +298,29 @@ export class MapListComponent implements OnInit, AfterViewInit {
     }, 1000);
   }
   
-    /**
+  /**
    * Reload data whenever the map extent changes (bbox). 
    *
    * @private
    * @return {*}  {void}
    * @memberof MapListComponent
    */
-  // private _bindMapMove(): void {
-  //   const map = this._mapService.getMap();
-  //   if (!map) {
-  //     return;
-  //   }
-  //   // Store the map move function in a property so we can remove it later if needed
-  //   this._mapMoveHandler = () => {
-  //     const bbox = this.getMapBbox();
-  //     if (bbox !== undefined && bbox !== this._lastBbox) {
-  //       this._lastBbox = bbox;
-  //       // this.loadMapFeatures();
-  //     }
-  //   };
-  //   map.on('moveend', this._mapMoveHandler);
-  // }
+  private _bindMapMove(): void {
+    const map = this._mapService.getMap();
+    if (!map) {
+      return;
+    }
+    // Store the map move function in a property so we can remove it later if needed
+    this._mapMoveHandler = () => {
+      const bbox = this._getMapBbox();
+      if (bbox !== undefined) {
+        this.bbox.emit(bbox);
+      }
+    };
+
+    // Install a listner on the move end event
+    map.on('moveend', this._mapMoveHandler);
+  }
 
   /**
    * Return the bbox of current map
@@ -328,16 +329,16 @@ export class MapListComponent implements OnInit, AfterViewInit {
    * @return {*}  {(string | undefined)}
    * @memberof MapListComponent
    */
-  // private _getMapBbox(): string | undefined {
-  //   const map = this._mapService.getMap();
-  //   if (!map) {
-  //     return undefined;
-  //   }
-  //   const bounds = map.getBounds();
-  //   return [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
-  //     .map((value) => value.toFixed(6))
-  //     .join(',');
-  // }
+  private _getMapBbox(): string | undefined {
+    const map = this._mapService.getMap();
+    if (!map) {
+      return undefined;
+    }
+    const bounds = map.getBounds();
+    return [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
+      .map((value) => value.toFixed(6))
+      .join(',');
+  }
 
 
   /**

@@ -93,11 +93,21 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Call API with the new bbox parametter
+   *
+   * @param {string} $event Current bbox
+   * @memberof IndividualsMapListComponent
+   */
+  onBbox($event: string): void {
+    this._APIFiltersParams = {
+      bbox: $event
+    }
+    this._loadData();
+  }
+
+  /**
    * Open the delete modal
    *
-   * @param {*} $event Current row
-   * @param {TemplateRef<any>} template Delete modal Template reference
-   * @memberof DevicesListComponent
    */
   openDeleteModal($event: any) {
   }
@@ -169,7 +179,6 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   private loadMapData(): void {
     const APIParams = {
       ...this._APIFiltersParams,
-      // bbox: this.getMapBbox(), 
     }
 
     this.mapData$ = this._individualsService
