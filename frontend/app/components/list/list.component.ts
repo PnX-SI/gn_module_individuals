@@ -50,8 +50,7 @@ export class ListComponent implements OnInit {
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public actionColumnsWidth: number = DATATABLE_CONFIG.ACTION_COLUMNS_WIDTH;
   public columnMaxWidth: number = DATATABLE_CONFIG.COLUMN_MAX_WIDTH;
-  public displayedColumns!: Column<undefined>[];
-  public availableColumns!: Column<undefined>[];
+  public displayedColumns!: Column[];
   public moduleName: string = this._moduleService.currentModule.module_url;
   public selectionType = SelectionType;
   public tableMessages = {};
@@ -82,23 +81,27 @@ export class ListComponent implements OnInit {
         };
       });
 
-    // Columns initialization with prop and empty name, to be filled with translations after
-    this.availableColumns = this.availableColumnsParams ? (Object.keys(this.availableColumnsParams) as (keyof undefined)[]).map(
+    const availableColumns = Object.keys(this.availableColumnsParams).map(
       (prop) => ({ prop, name: '' })
-    ):[];
-
-    // Keep only the configured columns to display
-    this.displayedColumns = this.availableColumns.filter((column) =>
-      this.displayedColumnsParams.includes(column.prop)
     );
 
-    // Translate the displayed column labels.
-    const translations$ = this.displayedColumns.map(column =>
-      // An observable is returned which emits the translation of this key
-      this._translate.get(`${this.fieldsTranslation}.${column.prop}`)
-    );
+    this.displayedColumns = this.displayedColumnsParams
+      .map((prop) =>
+        availableColumns.find((column) => column.prop === prop)
+      )
+      .filter((column): column is Column => column !== undefined);
 
-    combineLatest(translations$).subscribe(labels => {
+    if (this.displayedColumns.length === 0) {
+      return;
+    }
+
+    combineLatest(
+      // Translate the displayed column labels.
+      this.displayedColumns.map(column =>
+        // An observable is returned which emits the translation of this key
+        this._translate.get(`${this.fieldsTranslation}.${column.prop}`)
+      )
+    ).subscribe(labels => {
       this.displayedColumns = this.displayedColumns.map((column, index) => ({
         ...column,
         name: labels[index],
