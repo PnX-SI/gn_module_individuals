@@ -1,6 +1,9 @@
 <div
   class="form-group"
   [ngClass]="containerClass"
+  [class.ng-invalid]="parentFormControl?.invalid"
+  [class.ng-touched]="parentFormControl?.touched"
+  [class.is-required]="parentFormControl?.hasError('required')"
 >
   <label class="small">{{ label }}</label>
   <div class="form-check">
