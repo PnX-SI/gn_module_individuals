@@ -92,7 +92,6 @@ export class ListComponent implements OnInit {
       this.displayedColumnsParams.includes(column.prop)
     );
 
-    console.log("displayedColumn",this.displayedColumns)
     // Translate the displayed column labels.
     const translations$ = this.displayedColumns.map(column =>
       // An observable is returned which emits the translation of this key

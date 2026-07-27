@@ -14,7 +14,7 @@ import { Column } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
 
 @Component({
-  selector: 'gn-individuals-devices-info',
+  selector: 'gn-individuals-individuals-info',
   templateUrl: 'individuals-info.component.html',
   styleUrls: ['individuals-info.component.scss'],
   // SCSS used only in this component and not in the global CSS

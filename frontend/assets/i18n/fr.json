@@ -92,9 +92,7 @@
                 "deployments" : "Déploiement(s) associé(s)"
             },
             "PlaceHolder": {
-                "provider_name": "Indiquer le nom du fournisseur",
-                "provider_device_id": "Indiquer l'identifiant du dispositif",
-                "id_referer": "Sélectionner le référent",
+                "individual_name": "Indiquer le nom de l'individu",
                 "comment": "En dire plus ..."
             },
             "Filters":{
@@ -173,7 +171,7 @@
         "Others" : {
             "Yes" : "Oui",
             "No" : "Non",
-            "Unknown" : "Inconnu"
+            "All" : "Tout"
         }
     }
 }

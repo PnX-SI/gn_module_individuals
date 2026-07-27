@@ -54,6 +54,16 @@ export class DevicesFiltersComponent implements OnInit, OnDestroy {
           takeUntil(this._destroy$)
         )
         .subscribe((value) => {
+          // Emit a change only if filtersForm change due to user action : genericForm.component emit 
+          // changes when it call setValue() 
+          if (!this.filtersForm.get(field)?.dirty) {
+            return;
+          }
+          
+          // Emit to IndividualsMapList
+          // If the value comes from pnx-taxonomy, get the value.cd_nom
+          // If the value comes from pnx-observers, get the value.id_role
+          // Else get the value
           this.filters.emit({ key: field, value: value?.id_role ?? value?.cd_nom ?? value });
         });
     });

@@ -16,9 +16,11 @@ export const INDIVIDUAL_MODEL = {
     nomenclature_sex_name: '',
     last_observation_date: '',
     last_observation_observers_name: '',
-    nom_ver: '',
-    device_type_name_deployments: '',
-    marking_codes: ''
+    taxon_vern_nom: '',
+    taxon_lb_nom: '',
+    taxon_cd_nom: '',
+    deployed_markings: '',
+    deployed_devices: ''
 }
 
 export type Individual = typeof INDIVIDUAL_MODEL;
@@ -28,29 +30,29 @@ export interface IndividualRankAndPage extends RankAndPage {
 }
 
 export interface APIIndividualFiltersParams {
-  // This line help to use
-  // $event: {
-  //   key: keyof APIDevicesFiltersParams;
-  //   value: string | number | undefined;
-  // }
-  [key: string]: string | number | undefined;
+    // This line help to use
+    // $event: {
+    //   key: keyof APIIndividualsFiltersParams;
+    //   value: string | number | undefined;
+    // }
+    [key: string]: string | number | undefined;
 
-  individual_name?: string;
-  cd_nom?: number;
-  id_nomenclature_sex?: number;
-  active?: string;
+    individual_name?: string;
+    cd_nom?: number;
+    id_nomenclature_sex?: number;
+    active?: string;
 }
 
 // This model is only used to POST data to the API (dto = data transfer object)
-// export interface CreateDeviceDto {
-//   id_nomenclature_device_type: number;
-//   provider_name: string;
-//   provider_device_id: string;
-//   id_referer: number;
-//   comment: string;
-// }
+export interface CreateIndividualDto {
+    individual_name: string;
+    cd_nom: number;
+    id_nomenclature_sex: number;
+    active: false;
+    comment: string;
+}
 
-// // This model is only used to PUT data to the API (dto = data transfer object)
-// export interface UpdateDeviceDto extends CreateDeviceDto {
-//   id_tracking_device: number;
-// }
+// This model is only used to PUT data to the API (dto = data transfer object)
+export interface UpdateIndividualDto extends CreateIndividualDto {
+  id_individual: number;
+}

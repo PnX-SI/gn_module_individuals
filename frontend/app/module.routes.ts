@@ -11,6 +11,7 @@ import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component'; 
 import { IndividualsResolver, IndividualsMapResolver, IndividualResolver } from './resolvers/individuals.resolver';
 import { IndividualsInfoComponent } from './components/individuals-info/individuals-info.component';
+import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
 
 export const routes: Routes = [
   {
@@ -33,7 +34,16 @@ export const routes: Routes = [
       {
         path: 'individuals/info/:id_individual',
         component: IndividualsInfoComponent,
-        resolve: { data: IndividualResolver },
+        resolve: { datatable: IndividualResolver },
+      },
+      {
+        path: 'individuals/form',
+        component: IndividualsFormComponent,
+      },
+      {
+        path: 'individuals/form/:id_individual',
+        component: IndividualsFormComponent,
+        resolve: { datatable: IndividualResolver },
       },
       {
         path: 'observations',
@@ -55,12 +65,12 @@ export const routes: Routes = [
       {
         path: 'devices/form/:id_tracking_device',
         component: DevicesFormComponent,
-        resolve: { data: DeviceResolver },
+        resolve: { datatable: DeviceResolver },
       },
       {
         path: 'devices/info/:id_tracking_device',
         component: DevicesInfoComponent,
-        resolve: { data: DeviceResolver },
+        resolve: { datatable: DeviceResolver },
       },
     ],
   },

@@ -1,8 +1,7 @@
-import { ViewEncapsulation, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
 
 import { CommonService } from '@geonature_common/service/common.service';
 
@@ -18,12 +17,12 @@ import { DevicesService } from '../../services/devices.service';
   standalone: false,
 })
 export class DevicesFormComponent implements OnInit {
-  public dataTable$: Observable<Device> = new Observable<Device>();
   public availableFields!: Device;
   public deviceId!: number;
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
+  
   constructor(
     private _route: ActivatedRoute,
     private _commonService: CommonService,
@@ -63,16 +62,14 @@ export class DevicesFormComponent implements OnInit {
       ],
     });
 
-    this._route.params.subscribe((params) => {
-      if (params['id_tracking_device']) {
-        this.deviceId = params['id_tracking_device'];
+    // Patch the form with the datatable resolver
+    this._route.data.subscribe(({ datatable }) => {
+      if (datatable && datatable['id_tracking_device']) {
+        this.deviceId = datatable['id_tracking_device'];
         this.formAction = 'EDIT';
-        // Peut-être pas utile le dataTable$
-        this.dataTable$ = this._service.getDevice(params['id_tracking_device']);
-        this._service.getDevice(params['id_tracking_device']).subscribe((device: any) => {
-          this.patchForm(device);
-        });
-      } else {
+        this.patchForm(datatable);
+      }
+      else {
         this.formAction = 'ADD';
       }
     });

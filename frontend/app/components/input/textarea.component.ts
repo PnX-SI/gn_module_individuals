@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AbstractControl, ɵInternalFormsSharedModule } from '@angular/forms';
 
 @Component({
-  selector: 'gn-individuals-form-textarea',
+  selector: 'gn-individuals-textarea',
   templateUrl: './textarea.component.html',
   standalone: false,
 })

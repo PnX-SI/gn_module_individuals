@@ -1,6 +1,9 @@
 <div
   class="form-group"
   [ngClass]="containerClass"
+  [class.ng-invalid]="parentFormControl?.invalid"
+  [class.ng-touched]="parentFormControl?.touched"
+  [class.is-required]="parentFormControl?.hasError('required')"
 >
   <label class="small">{{ label }}</label>
   <div class="form-check">
@@ -8,12 +11,13 @@
       <input
         type="radio"
         class="form-check-input"
-        [id]="option.key"
-        [value]="option.key"
+        [id]="option.value"
+        [value]="option.value"
+        [name]="inputName"
         [formControl]="$any(parentFormControl)"
       />
-      <label class="small" [for]="option.key">
-        {{ option.value }}
+      <label class="small">
+        {{ option.label }}
       </label>
     </div>
   </div>

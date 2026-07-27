@@ -1,34 +1,36 @@
-import { ViewEncapsulation, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
 
 import { CommonService } from '@geonature_common/service/common.service';
+import { ConfigService } from '@geonature/services/config.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Device } from '../../models/devices.models';
+import { Individual } from '../../models/individuals.models';
 import { FormConstraint } from '../../models/common.models';
-import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
-import { DevicesService } from '../../services/devices.service';
+import { INDIVIDUALS_FORM_CONSTRAINTS } from '../../utils/constants.util';
+import { IndividualsService } from '../../services/individuals.service';
 
 @Component({
-  selector: 'gn-individuals-devices-form',
+  selector: 'gn-individuals-individuals-form',
   templateUrl: 'individuals-form.component.html',
   standalone: false,
 })
 export class IndividualsFormComponent implements OnInit {
-  public dataTable$: Observable<Device> = new Observable<Device>();
-  public availableFields!: Device;
-  public deviceId!: number;
+  public availableFields!: Individual;
+  public individualId!: number;
   public formAction!: string;
   public form!: FormGroup;
-  public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
-  constructor(
+  public formConstraints: Record<string, FormConstraint> = INDIVIDUALS_FORM_CONSTRAINTS;
+  public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
+
+  constructor (
     private _route: ActivatedRoute,
+    private _config: ConfigService,
     private _commonService: CommonService,
     private _fb: FormBuilder,
-    private _service: DevicesService,
+    private _service: IndividualsService,
     private _location: Location,
     private _errorHandler: ErrorHandlerService
   ) {}
@@ -36,24 +38,17 @@ export class IndividualsFormComponent implements OnInit {
   ngOnInit(): void {
     // Form initialization
     this.form = this._fb.group({
-      id_nomenclature_device_type: [null, Validators.required],
-      provider_name: [
+      individual_name: [
         null,
         [
           Validators.required,
-          Validators.maxLength(this.formConstraints.provider_name.maxLength),
-          Validators.pattern(this.formConstraints.provider_name.pattern),
+          Validators.maxLength(this.formConstraints.individual_name.maxLength),
+          Validators.pattern(this.formConstraints.individual_name.pattern),
         ],
       ],
-      provider_device_id: [
-        null,
-        [
-          Validators.required,
-          Validators.maxLength(this.formConstraints.provider_device_id.maxLength),
-          Validators.pattern(this.formConstraints.provider_device_id.pattern),
-        ],
-      ],
-      id_referer: [null, Validators.required],
+      cd_nom: [null, Validators.required],
+      id_nomenclature_sex: [null, Validators.required],
+      active: [null, Validators.required],
       comment: [
         null,
         [
@@ -63,49 +58,47 @@ export class IndividualsFormComponent implements OnInit {
       ],
     });
 
-    this._route.params.subscribe((params) => {
-      if (params['id_tracking_device']) {
-        this.deviceId = params['id_tracking_device'];
+    // Patch the form with the datatable resolver
+    this._route.data.subscribe(({ datatable }) => {
+      if (datatable && datatable['id_individual']) {
+        this.individualId = datatable['id_individual'];
         this.formAction = 'EDIT';
-        // Peut-être pas utile le dataTable$
-        this.dataTable$ = this._service.getDevice(params['id_tracking_device']);
-        this._service.getDevice(params['id_tracking_device']).subscribe((device: any) => {
-          this.patchForm(device);
-        });
-      } else {
+        this.patchForm(datatable);
+      }
+      else {
         this.formAction = 'ADD';
       }
     });
   }
 
-  patchForm(device: any): void {
+  patchForm(individual: any): void {
     /// Modifier par : Device au lieu de any et faire le mapping si besoin
-    this.form.patchValue(device);
-
+    this.form.patchValue(individual);
     this.form.patchValue({
-      id_nomenclature_device_type: device.nomenclature_device_type.id_nomenclature,
-      id_referer: device.referer,
+      // En attendant la correction de l'API
+      cd_nom: { cd_nom:individual.cd_nom, nom_valide:'Bouquetin'},
+      id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
     });
   }
 
   onSave(): void {
-    const device = this.form.getRawValue();
+    const individual = this.form.getRawValue();
 
-    this._service.createOrUpdateDevice(device, this.formAction, this.deviceId).subscribe({
+    this._service.createOrUpdateIndividual(individual, this.formAction, this.individualId).subscribe({
       next: (res) => {
         const successKey =
           this.formAction === 'ADD'
-            ? 'Individuals.Devices.Messages.Added'
-            : 'Individuals.Devices.Messages.Edited';
-        this._commonService.translateToaster('info', successKey, { id: this.deviceId });
+            ? 'Individuals.Individuals.Messages.Added'
+            : 'Individuals.Individuals.Messages.Edited';
+        this._commonService.translateToaster('info', successKey, { id: this.individualId });
         this.form.markAsPristine();
         this._location.back();
       },
       error: (err) => {
         this._errorHandler.handleHttpError(
           err,
-          { id: this.deviceId },
-          'Individuals.Devices.ApiErrors'
+          { id: this.individualId },
+          'Individuals.Individuals.ApiErrors'
         );
       },
     });

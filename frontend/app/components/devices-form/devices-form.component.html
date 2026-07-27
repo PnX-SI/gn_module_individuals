@@ -1,58 +1,50 @@
-<ng-template
-  #formTemplate
-  let-dataTable="dataTable"
->
+<ng-template #formTemplate>
   <div class="col-6 padding-sm">
     <!-- id_nomenclature_device_type -->
     <pnx-nomenclature
-      *ngIf="'id_nomenclature_device_type' as field"
       class="form-group w-50"
-      label="{{ 'Individuals.Devices.Fields.' + field | translate }}"
-      [parentFormControl]="$any(form.get(field))"
-      codeNomenclatureType="TYPE_DISPO_SUIVI"
+      [label]="'Individuals.Devices.Fields.id_nomenclature_device_type' | translate"
+      [parentFormControl]="$any(form.get('id_nomenclature_device_type'))"
+      [codeNomenclatureType]="'TYPE_DISPO_SUIVI'"
     ></pnx-nomenclature>
 
     <!-- provider_name -->
-    <gn-individuals-form-input-text
-      *ngIf="'provider_name' as field"
-      [label]="'Individuals.Devices.Fields.' + field | translate"
+    <gn-individuals-input-text
+      [label]="'Individuals.Devices.Fields.provider_name' | translate"
       [containerClass]="'w-50'"
-      [parentFormControl]="form.get(field)"
-      [maxLength]="formConstraints[field].maxLength"
-      [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
-      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
-    ></gn-individuals-form-input-text>
+      [parentFormControl]="form.get('provider_name')"
+      [maxLength]="formConstraints['provider_name'].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints['provider_name'].help] | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.provider_name' | translate"
+    ></gn-individuals-input-text>
 
     <!-- provider_device_id -->
-    <gn-individuals-form-input-text
-      *ngIf="'provider_device_id' as field"
-      [label]="'Individuals.Devices.Fields.' + field | translate"
+    <gn-individuals-input-text
+      [label]="'Individuals.Devices.Fields.provider_device_id' | translate"
       [containerClass]="'w-50'"
-      [parentFormControl]="form.get(field)"
-      [maxLength]="formConstraints[field].maxLength"
-      [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
-      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
-    ></gn-individuals-form-input-text>
+      [parentFormControl]="form.get('provider_device_id')"
+      [maxLength]="formConstraints['provider_device_id'].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints['provider_device_id'].help] | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.provider_device_id' | translate"
+    ></gn-individuals-input-text>
 
     <!-- id_referer -->
     <pnx-observers
-      *ngIf="'id_referer' as field"
       class="form-group"
-      [label]="'Individuals.Devices.Fields.' + field | translate"
-      [parentFormControl]="$any(form.get(field))"
+      [label]="'Individuals.Devices.Fields.id_referer' | translate"
+      [parentFormControl]="$any(form.get('id_referer'))"
       [bindAllItem]="true"
-      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.id_referer' | translate"
     ></pnx-observers>
 
     <!-- comment -->
-    <gn-individuals-form-textarea
-      *ngIf="'comment' as field"
-      [label]="'Individuals.Devices.Fields.' + field | translate"
-      [parentFormControl]="form.get(field)"
-      [maxLength]="formConstraints[field].maxLength"
-      [errorKey]="'Individuals.Errors.' + [formConstraints[field].help] | translate"
-      [placeHolder]="'Individuals.Devices.PlaceHolder.' + field | translate"
-    ></gn-individuals-form-textarea>
+    <gn-individuals-textarea
+      [label]="'Individuals.Devices.Fields.comment' | translate"
+      [parentFormControl]="form.get('comment')"
+      [maxLength]="formConstraints['comment'].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints['comment'].help] | translate"
+      [placeHolder]="'Individuals.Devices.PlaceHolder.comment' | translate"
+    ></gn-individuals-textarea>
   </div>
 </ng-template>
 
@@ -68,14 +60,10 @@
 
 <ng-template #editMode>
   <gn-individuals-form
-    *ngIf="dataTable$ | async as dataTable"
-    [formTitle]="
-      'Individuals.Devices.Titles.Edit' | translate: { id: dataTable.id_tracking_device }
-    "
+    [formTitle]="'Individuals.Devices.Titles.Edit' | translate: { id: deviceId }"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [objectName]="'devices'"
-    [dataTable]="dataTable"
     [canSave]="form.valid && form.dirty"
     (save)="onSave()"
   ></gn-individuals-form>
