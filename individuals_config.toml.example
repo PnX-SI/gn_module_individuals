@@ -17,7 +17,7 @@
 
     # Columns to display in the individuals list. 
     # Have to be those of the corresponding API response /individuals/individuals
-    LIST_COLUMNS=["individual_name","taxon_vern_nom","nomenclature_sex_name","last_observation_date","active"]
+    LIST_COLUMNS=["individual_name","taxref_nom_vern","nomenclature_sex_name","last_observation_date","active"]
 
     # Columns to display in the individual detail page, in the section "Deployments" 
     # Have to be those of the corresponding API response /individuals/individuals/:id
