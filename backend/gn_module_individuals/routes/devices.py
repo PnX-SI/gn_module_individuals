@@ -15,7 +15,6 @@ from utils_flask_sqla.response import json_resp
 
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
-from pypnnomenclature.models import TNomenclatures
 from pypnusershub.db.models import User
 from ..utils.errors import APIError, DevicesErrorCode
 
@@ -305,6 +304,13 @@ def delete_device(id_tracking_device, scope):
             DevicesErrorCode.DEVICE_NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
+        )
+
+    if not device.has_instance_permission(scope):
+        raise APIError(
+            DevicesErrorCode.INSUFFICIENT_PERMISSIONS,
+            f"You do not have permission to delete device {id_tracking_device}.",
+            403,
         )
 
     deployment_count = db.session.scalar(

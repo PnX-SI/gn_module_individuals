@@ -493,6 +493,31 @@ class TestDeleteDevice:
         )
         assert r.status_code == 403
 
+    def test_forbidden_without_scope_permission(self, users, devices):
+        # self_user a le droit D mais scope=1 (ses données uniquement).
+        # devices[0] appartient à admin_user (digitiseur ET référent) → 403
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_device",
+                id_tracking_device=devices[0].id_tracking_device,
+            )
+        )
+        assert r.status_code == 403
+
+    def test_forbidden_scope_returns_structured_error(self, users, devices):
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_device",
+                id_tracking_device=devices[0].id_tracking_device,
+            )
+        )
+        assert r.status_code == 403
+        payload = r.get_json()
+        assert payload.get("name") == DevicesErrorCode.INSUFFICIENT_PERMISSIONS
+        assert "description" in payload
+
     def test_not_found_returns_404(self, users):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.delete(url_for("individuals.delete_device", id_tracking_device=-1))
