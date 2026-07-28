@@ -18,31 +18,39 @@
     </div>
     <div class="col-12 col-md-6 px-0">
       <strong>{{ 'Individuals.Individuals.Fields.last_observation_date' | translate }} :</strong>
-      {{ row.last_observation_date }}
+      {{ row.last_observation_date || '-'}}
     </div>
     <div class="col-12 col-md-6 px-0">
       <strong>{{ 'Individuals.Individuals.Fields.last_observation_observers_name' | translate }} :</strong>
-      {{ row.last_observation_observers_name }}
+      {{ row.last_observation_observers_name || '-'}} 
     </div>
     <div class="col-12 col-md-6 px-0">
       <strong>
         {{ 'Individuals.Individuals.Fields.deployed_devices' | translate }} :
       </strong>
-      <span *ngFor="let device of row.deployed_devices | keyvalue; let last = last">
-          <span>{{ $any(device.value).name }} ({{ $any(device.value).location_name }})</span>
-          <span *ngIf="!last">, </span>
-      </span>
+      <ng-container *ngIf="(row.deployed_devices | keyvalue).length > 0; else noDeployment">
+        <span *ngFor="let device of row.deployed_devices | keyvalue; let last = last">
+            <span>{{ $any(device.value).name }} ({{ $any(device.value).location_name }})</span>
+            <span *ngIf="!last">, </span>
+        </span>
+      </ng-container>
     </div>
     <div class="col-12 col-md-6 px-0">
       <strong>
         {{ 'Individuals.Individuals.Fields.deployed_markings' | translate }} :
       </strong>
-      <span *ngFor="let marking of row.deployed_markings | keyvalue; let last = last">
-          <span>{{ $any(marking.value).type_name }} : {{ $any(marking.value).code }} ({{ $any(marking.value).location_name }})</span>
-          <span *ngIf="!last">, </span>
-      </span>
+      <ng-container *ngIf="(row.deployed_markings | keyvalue).length > 0; else noDeployment">
+        <span *ngFor="let marking of row.deployed_markings | keyvalue; let last = last">
+            <span>{{ $any(marking.value).type_name }} : {{ $any(marking.value).code }} ({{ $any(marking.value).location_name }})</span>
+            <span *ngIf="!last">, </span>
+        </span>
+      </ng-container>
     </div>
   </div>
+</ng-template>
+
+<ng-template #noDeployment>
+  -
 </ng-template>
 
 <ng-template #filtersTemplate>
