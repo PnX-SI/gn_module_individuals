@@ -40,7 +40,7 @@ export class ListComponent implements OnInit {
   @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
   @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
-  @Input() allowedToEdit: boolean[] = [];
+  @Input() allowedToEdit: Record<number, boolean> = {};
   @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;

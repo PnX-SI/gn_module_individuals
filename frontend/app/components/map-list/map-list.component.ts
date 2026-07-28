@@ -25,6 +25,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   // public apiEndPoint: string;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
+  @Output() delete: EventEmitter<any> = new EventEmitter();
   @Output() idPage: EventEmitter<number> = new EventEmitter();
   @Output() bbox: EventEmitter<string> = new EventEmitter();
   @Input() objectName!: string;
@@ -37,7 +38,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() nbRowsToDisplay!: number;
   @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
-  @Input() allowedToEdit: boolean[] = [];
+  @Input() allowedToEdit: Record<number, boolean> = {};
   @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
@@ -109,7 +110,8 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this.sort.emit($event);
   }
 
-  openDeleteModal($event: any): void {
+  onDelete($event: any): void {
+    this.delete.emit($event);
   }
 
   /**
@@ -305,17 +307,11 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (!layer) {
       this._showNoGeometryMessage();
       this._selectedLayer?.closePopup();
-      // if (zoom) {
-      //   this.focusMissingMapFeature(idIndividual);
-      // }
       return;
     }
     this._selectedId = id;
     this._highlightLayer(layer);
     this._openLayerPopup(layer);
-    // if (zoom) {
-    //   this.zoomOnLayer(layer);
-    // }
   }
 
   /**

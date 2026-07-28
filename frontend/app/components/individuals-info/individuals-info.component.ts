@@ -54,9 +54,12 @@ export class IndividualsInfoComponent implements OnInit {
             name: translations[name],
           }));
         });
-        this.canBeDeleted = true;
       } else {
         datatable.deployments = [];
+
+        if (!datatable.last_observation_date) {
+          this.canBeDeleted = true;
+        }
       }
 
       this.dataTable$ = of(datatable);
