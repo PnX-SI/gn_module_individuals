@@ -116,11 +116,11 @@
                 "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             },
             "ApiErrors": {
-                "DeviceNotFound": "Le dispositif de suivi n°{{ id }} est introuvable.",
-                "DeviceHasDeployment": "Le dispositif de suivi n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
-                "JsonBodyMissing": "Les données du dispositif de suivi sont manquantes ou mal formées.",
-                "ValidationError": "Les données du dispositif de suivi sont invalides. Veuillez vérifier le formulaire.",
-                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier ce dispositif de suivi."
+                "NotFound": "L'individu n°{{ id }} est introuvable.",
+                "HasDeployment": "L'individu n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
+                "JsonBodyMissing": "Les données de l'individu sont manquantes ou mal formées.",
+                "ValidationError": "Les données de l'individu sont invalides. Veuillez vérifier le formulaire.",
+                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier cet individu."
             }
         },
         "Messages": {
@@ -139,7 +139,6 @@
             "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
             "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
             "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
-            "IndividualNotFound": "L'individu n°{{ id }} est introuvable.",
             "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
             "UnknownError": "Une erreur inattendue s'est produite."
         },
