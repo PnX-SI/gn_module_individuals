@@ -56,8 +56,8 @@ export class DevicesInfoComponent implements OnInit {
             name: translations[name],
           }));
         });
-        this.canBeDeleted = true;
       } else {
+        this.canBeDeleted = true;
         datatable.deployments = [];
       }
     });
