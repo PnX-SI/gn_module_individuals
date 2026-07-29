@@ -116,6 +116,8 @@ def _sort_expression(sort):
     }
     column = sort_columns.get(sort["prop"], TIndividuals.id_individual)
     expression = column.desc() if sort["dir"] == "desc" else column.asc()
+    if sort["prop"] == "last_observation_date":
+        expression = expression.nullslast()  # FORCE NULL VALUES LAST
     if column is TIndividuals.id_individual:
         return (expression,)
     return expression, TIndividuals.id_individual.asc()
