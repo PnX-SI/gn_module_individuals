@@ -246,6 +246,8 @@ def individual(id_individual, scope):
             params={"id": id_individual},
         )
 
+    _assign_last_observation([result])
+
     schema = IndividualsDetailSchema(only=["+cruved", "nomenclature_sex", "digitiser"])
     return schema.dump(result)
 

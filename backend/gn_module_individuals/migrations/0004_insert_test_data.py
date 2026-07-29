@@ -255,12 +255,26 @@ JOIN ref_nomenclatures.t_nomenclatures n
             """
         )
     )
+    # Col de la Vanoise: 2 observers, Refuge de Prariond: 3 observers,
+    # the other two keep a single observer (their own id_digitiser) to
+    # cover the 1/2/3-observer display cases.
     op.execute(
         sa.text(
             """
+            WITH observer_data (place_name, id_role) AS (
+                VALUES
+                ('Col de la Vanoise', 4),
+                ('Col de la Vanoise', 6),
+                ('Refuge de Prariond', 6),
+                ('Refuge de Prariond', 3),
+                ('Refuge de Prariond', 4),
+                ('Pointe de la Réchasse', 4),
+                ('Plan du Lac', 6)
+            )
             INSERT INTO pr_occtax.cor_role_releves_occtax (id_releve_occtax, id_role)
-            SELECT r.id_releve_occtax, r.id_digitiser
+            SELECT r.id_releve_occtax, o.id_role
             FROM pr_occtax.t_releves_occtax r
+            JOIN observer_data o ON o.place_name = r.place_name
             WHERE r.place_name IN (
                 'Col de la Vanoise', 'Refuge de Prariond',
                 'Pointe de la Réchasse', 'Plan du Lac'
