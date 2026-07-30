@@ -16,7 +16,7 @@ from utils_flask_sqla.response import json_resp
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.db.models import User
-from ..utils.errors import APIError, DevicesErrorCode
+from ..utils.errors import APIError, ApiErrorCode
 
 from .. import MODULE_CODE
 from ..schemas import (
@@ -112,13 +112,13 @@ def device(id_tracking_device, scope):
 
     if device is None:
         raise APIError(
-            DevicesErrorCode.DEVICE_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
     if not device.has_instance_permission(scope):
         raise APIError(
-            DevicesErrorCode.INSUFFICIENT_PERMISSIONS,
+            ApiErrorCode.INSUFFICIENT_PERMISSIONS,
             f"You do not have permission to read this device.",
             403,
         )
@@ -233,7 +233,7 @@ def list_devices(scope):
         )
 
     # Get only the items related to the scope
-    query = TrackingDevices.filter_by_scope(query,scope)        
+    query = TrackingDevices.filter_by_scope(query, scope)
 
     if paginated:
         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
@@ -274,17 +274,17 @@ def create_device(scope):
 
     if not data:
         raise APIError(
-            DevicesErrorCode.MISSING_JSON_BODY,
+            ApiErrorCode.MISSING_JSON_BODY,
             "Missing JSON request body.",
             400,
         )
-    
+
     schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data)
     except ValidationError as e:
         raise APIError(
-            DevicesErrorCode.VALIDATION_ERROR,
+            ApiErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",
             400,
         )
@@ -320,7 +320,7 @@ def update_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
-            DevicesErrorCode.DEVICE_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
@@ -328,13 +328,13 @@ def update_device(id_tracking_device, scope):
 
     if not data:
         raise APIError(
-            DevicesErrorCode.MISSING_JSON_BODY,
+            ApiErrorCode.MISSING_JSON_BODY,
             "Missing JSON request body.",
             400,
         )
     if not device.has_instance_permission(scope):
         raise APIError(
-            DevicesErrorCode.INSUFFICIENT_PERMISSIONS,
+            ApiErrorCode.INSUFFICIENT_PERMISSIONS,
             f"You do not have permission to update device {id_tracking_device}.",
             403,
         )
@@ -344,7 +344,7 @@ def update_device(id_tracking_device, scope):
         device = schema.load(data, instance=device)
     except ValidationError as e:
         raise APIError(
-            DevicesErrorCode.VALIDATION_ERROR,
+            ApiErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",
             400,
         )
@@ -375,14 +375,14 @@ def delete_device(id_tracking_device, scope):
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
-            DevicesErrorCode.DEVICE_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
 
     if not device.has_instance_permission(scope):
         raise APIError(
-            DevicesErrorCode.INSUFFICIENT_PERMISSIONS,
+            ApiErrorCode.INSUFFICIENT_PERMISSIONS,
             f"You do not have permission to delete device {id_tracking_device}.",
             403,
         )
@@ -394,7 +394,7 @@ def delete_device(id_tracking_device, scope):
     )
     if deployment_count:
         raise APIError(
-            DevicesErrorCode.DEVICE_HAS_DEPLOYMENTS,
+            ApiErrorCode.HAS_DEPLOYMENT,
             "This device cannot be deleted because it is associated with deployments.",
             409,
             params={"id": id_tracking_device, "nb": deployment_count},

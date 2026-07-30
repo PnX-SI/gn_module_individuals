@@ -16,7 +16,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .utils import get_label
-from ..utils.errors import APIError, IndividualsErrorCode
+from ..utils.errors import APIError, ApiErrorCode
 
 
 class IndividualsMapConverter(NomenclaturesConverter, GeoModelConverter):
@@ -207,7 +207,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     def validate_individual_name(self, value, **kwargs):
         if not value or not value.strip():
             raise APIError(
-                IndividualsErrorCode.VALIDATION_ERROR,
+                ApiErrorCode.VALIDATION_ERROR,
                 "The individual name can't be empty",
                 400,
             )
@@ -218,7 +218,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
         exists = db.session.execute(db.select(Taxref).filter_by(cd_nom=value)).scalar_one_or_none()
         if exists is None:
             raise APIError(
-                IndividualsErrorCode.VALIDATION_ERROR,
+                ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} taxon (cd_nom) does not exist.",
                 400,
             )
@@ -233,7 +233,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
         ).scalar_one_or_none()
         if exists is None:
             raise APIError(
-                IndividualsErrorCode.VALIDATION_ERROR,
+                ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} nomenclature is not found in configured nomenclatures",
                 400,
             )

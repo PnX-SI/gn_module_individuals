@@ -122,7 +122,7 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
                 ors.append(cls.referer.has(id_organisme=user.id_organisme))
             query = query.where(or_(*ors))
         return query
-    
+
     def has_instance_permission(self, scope):
         user = g.current_user
         # Nothing
