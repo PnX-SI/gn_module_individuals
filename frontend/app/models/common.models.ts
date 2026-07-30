@@ -1,9 +1,12 @@
 // Used to declare avilable columns and their name in the table header
-export interface Column<T> {
-  prop: keyof T;
+// export interface Column<T> {
+//   prop: keyof T;
+//   name: string;
+// }
+export interface Column<T = Record<string, unknown>> {
+  prop: keyof T | string;
   name: string;
 }
-
 export interface Sort {
   prop: string;
   dir: string;

@@ -150,7 +150,7 @@
           class="btn btn-row fa fa-trash-o"
           matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
           (click)="onDelete(row)"
-          [disabled]="!allowedToDelete[row.id_tracking_device]"
+          [disabled]="!allowedToDelete[row[idFieldName]]"
         ></button>
       </ng-template>
     </ngx-datatable-column>

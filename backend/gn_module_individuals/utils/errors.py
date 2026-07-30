@@ -26,6 +26,7 @@ class IndividualsErrorCode(str, Enum):
     """
 
     INDIVIDUAL_NOT_FOUND = "IndividualNotFound"
+    INDIVIDUAL_HAS_DEPLOYMENTS = "IndividualHasDeployments"
     INVALID_FILTER = "InvalidFilter"
     MISSING_JSON_BODY = "JsonBodyMissing"
     VALIDATION_ERROR = "ValidationError"

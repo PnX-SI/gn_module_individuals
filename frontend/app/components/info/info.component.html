@@ -20,7 +20,7 @@
         [matTooltip]="'Individuals.Actions.Delete' | translate"
         class="mr-1 bg-danger text-white border-0"
         type="button"
-        [disabled]="canBeDeleted"
+        [disabled]="!canBeDeleted"
         (click)="delete.emit()"
       >
         <mat-icon>delete</mat-icon>

@@ -318,19 +318,53 @@ class TestListIndividuals:
         names = [item["individual_name"] for item in r.get_json()["items"]]
         assert names == sorted(names, reverse=True)
 
+    def test_sort_by_last_observation_date_desc(self, users, source, individuals):
+        geom = func.ST_SetSRID(func.ST_MakePoint(6.0, 45.0), 4326)
+        with db.session.begin_nested():
+            db.session.add_all(
+                [
+                    Synthese(
+                        id_source=source.id_source,
+                        id_individual=individuals[0].id_individual,
+                        nom_cite="Test",
+                        the_geom_4326=geom,
+                        the_geom_point=geom,
+                        date_min=datetime.datetime(2026, 1, 1),
+                        date_max=datetime.datetime(2026, 1, 1),
+                    ),
+                    Synthese(
+                        id_source=source.id_source,
+                        id_individual=individuals[1].id_individual,
+                        nom_cite="Test",
+                        the_geom_4326=geom,
+                        the_geom_point=geom,
+                        date_min=datetime.datetime(2026, 6, 1),
+                        date_max=datetime.datetime(2026, 6, 1),
+                    ),
+                ]
+            )
+
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(
+            url_for("individuals.list_individuals", prop="last_observation_date", dir="desc")
+        )
+        assert r.status_code == 200
+        ids = [item["id_individual"] for item in r.get_json()["items"]]
+        assert ids.index(individuals[1].id_individual) < ids.index(individuals[0].id_individual)
+
     def test_sort_invalid_dir_returns_400(self, users):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.list_individuals", dir="sideways"))
         assert r.status_code == 400
 
-    def test_default_sort_is_last_obs_date_desc(self, users):
+    def test_default_sort_is_last_observation_date_desc(self, users):
         """Without explicit prop/dir, the list is sorted by last observation
         date, most recent first."""
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.list_individuals"))
         assert r.status_code == 200
         payload = r.get_json()
-        assert payload["prop"] == "last_obs_date"
+        assert payload["prop"] == "last_observation_date"
         assert payload["dir"] == "desc"
 
     def test_prop_and_dir_are_echoed_without_pagination(self, users):
@@ -800,6 +834,8 @@ class TestIndividualPage:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.individual_page", id_individual=-1))
         assert r.status_code == 404
+        payload = r.get_json()
+        assert payload.get("name") == IndividualsErrorCode.INDIVIDUAL_NOT_FOUND
 
     def test_out_of_scope_individual_returns_404(self, users, individuals):
         """individuals[0] is digitised by admin_user; self_user (scope=1) can't see it."""

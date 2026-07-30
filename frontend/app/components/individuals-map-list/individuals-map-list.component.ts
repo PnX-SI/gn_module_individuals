@@ -13,7 +13,7 @@ import { Individual, INDIVIDUAL_MODEL, APIIndividualFiltersParams } from '../../
 import { Sort, PaginatedItemCollection, APIPaginationParams, FeatureCollection } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
 import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
-// import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
+import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 
 @Component({
   selector: 'gn-individuals-individuals-map-list',
@@ -29,7 +29,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public nbRowsToDisplay = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = "Individuals.Individuals.Fields";
   public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
-  public allowedToEdit: boolean[] = [];
+  public allowedToEdit: Record<number, boolean> = {};
   public allowedToDelete: Record<number, boolean> = {};
   public selectedRows: Individual[] = [];
   public mapData$: Observable<FeatureCollection<Individual>> = new Observable<FeatureCollection<Individual>>();
@@ -59,7 +59,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, mapData }) => {
       this.datatable$ = of(datatable);
       this.mapData$ = of(mapData);
-      // this._initPermissions(data);
+      this._initPermissions(datatable);
     });
 
     this.defaultFilters = this._APIFiltersParams;
@@ -70,7 +70,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 
-  onPage($event: any): void {
+  public onPage($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: Number($event.limit),
@@ -80,7 +80,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._loadData();
   }
 
-  onSort($event: any): void {
+  public onSort($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: this.nbRowsToDisplay,
@@ -93,13 +93,42 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Open the delete modal
+   * Call API with the new bbox parametter
    *
-   * @param {*} $event Current row
-   * @param {TemplateRef<any>} template Delete modal Template reference
-   * @memberof DevicesListComponent
+   * @param {string} $event Current bbox
+   * @memberof IndividualsMapListComponent
    */
-  openDeleteModal($event: any) {
+  public onBbox($event: string): void {
+    // this._APIFiltersParams = {
+    //   bbox: $event
+    // }
+    this._loadData();
+  }
+
+  /**
+   * Open the delete modal with Individual properties
+   *
+   * @param {Individual} $event The selected Individual to delete
+   * @memberof IndividualsMapListComponent
+   */
+  public openDeleteModal($event: Individual) {
+      this.selectedRows = [$event];
+      const modalRef = this._ngbModal.open(DeleteModalComponent);
+  
+      modalRef.componentInstance.title = this._translate.instant(
+        'Individuals.Individuals.Titles.Delete',
+        { id: this.selectedRows[0].id_individual }
+      );
+  
+      modalRef.componentInstance.body = `
+        ${this._translate.instant('Individuals.Individuals.Fields.individual_name')} : ${this.selectedRows[0].individual_name}<br>
+        ${this._translate.instant('Individuals.Individuals.Fields.taxref_nom_vern')} : ${this.selectedRows[0].taxref_nom_vern}<br>
+        ${this._translate.instant('Individuals.Individuals.Fields.nomenclature_sex_name')} : ${this.selectedRows[0].nomenclature_sex_name}<br>
+      `;
+  
+      modalRef.componentInstance.confirm.subscribe((id: number) => {
+        this._onDelete();
+      });
   }
 
   /**
@@ -108,19 +137,35 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @param {({key: keyof APIIndividualFiltersParams; value: any;} | null)} $event Filter value {key, value} or null to reset filters
    * @memberof IndividualsMapListComponent
    */
-  onFilters($event: {key: keyof APIIndividualFiltersParams; value: any;} | null): void {
+  public onFilters($event: {key: keyof APIIndividualFiltersParams; value: any;} | null): void {
       if (!$event) {
         this._APIFiltersParams = {};
       } else {
-        if ($event.value != null) {
           this._APIFiltersParams[$event.key] = $event.value;
           this._APIPaginationParams['page'] = 1;
-        }
       }
       this._loadData();
   }
 
-  onDelete(): void {
+  private _onDelete(): void {
+    if (this.selectedRows.length > 0) {
+      const selectedId = this.selectedRows[0].id_individual;
+      this._individualsService.deleteIndividual(selectedId).subscribe({
+        next: (res) => {
+          this._commonService.translateToaster('info', 'Individuals.Individuals.Messages.Deleted', {
+            id: selectedId,
+          });
+          this._loadData();
+        },
+        error: (err) => {
+          this._errorHandler.handleHttpError(
+            err,
+            { id: selectedId },
+            'Individuals.Individuals.ApiErrors'
+          );
+        },
+      });
+    }
   }
   
   /**
@@ -134,7 +179,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._selectedId = $event;
     const APIParams = {
       ...this._APIPaginationParams,
-      // ...this._APIFiltersParams,
+      ...this._APIFiltersParams,
     };
 
     if ($event) {
@@ -163,38 +208,34 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
           } else {
             this.selectedRows = [];
           }
-          // this._initPermissions(data)
+          this._initPermissions(data)
         })
       )
   }
 
-  private loadMapData(): void {
-    const APIParams = {
-      ...this._APIFiltersParams,
-      // bbox: this.getMapBbox(), 
+  /**
+   * Set the allowToDelete array. 
+   * For each item id, if a deployment or observation exists 
+   * set the corresponding array entry to false, else to true
+   *
+   * @private
+   * @param {PaginatedItemCollection<Individual>} data
+   * @memberof IndividualsMapListComponent
+   */
+  private _initPermissions(data: PaginatedItemCollection<Individual>): void {
+    this.allowedToDelete = [];
+
+    // Not allowed to delete if deployments exists
+    // Have to be changed with scope and cruved
+    if (data.items) {
+      data.items.forEach((item: Individual) => {
+        this.allowedToDelete[item.id_individual] = item.last_observation_date == null
+          && Object.keys(item.deployed_devices).length == 0
+          && Object.keys(item.deployed_markings).length == 0;
+      });
+
+      // Have to be changed with scope and cruved
+      this.allowedToEdit = data.items.map(() => true);
     }
-
-    this.mapData$ = this._individualsService
-      .getIndividualsForMap(APIParams)
-      // .subscribe((featureCollection) => {
-      //   this.mapLayerByIndividualId = {};
-      //   this._selectedLayer = null;
-      //   this.featureCollection = featureCollection;
-      // });
   }
-
-  // private _initPermissions(data: PaginatedItemCollection<Device>): void {
-  //   this.allowedToDelete = [];
-
-  //   // Not allowed to delete if deployments exists
-  //   // Have to be changed with scope and cruved
-  //   if (data.items) {
-  //     data.items.forEach((item: Device) => {
-  //       this.allowedToDelete[item.id_tracking_device] = item.last_individual_equipped_name == null;
-  //     });
-
-  //     // Have to be changed with scope and cruved
-  //     this.allowedToEdit = data.items.map(() => true);
-  //   }
-  // }
 }

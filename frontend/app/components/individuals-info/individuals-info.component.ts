@@ -40,12 +40,9 @@ export class IndividualsInfoComponent implements OnInit {
 
   ngOnInit(): void {
     // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
-    this._route.data.subscribe(({ data }) => {
-      this.dataTable$ = of(data);
-      this._individualId = data.id_individual;
-
+    this._route.data.subscribe(({ datatable }) => {
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
-      if (data.deployments?.length > 0) {
+      if (datatable.deployments?.length > 0) {
         const props = this._config.INDIVIDUALS.INDIVIDUALS
           .DEPLOYMENT_LIST_COLUMNS as (keyof Deployment)[];
 
@@ -57,13 +54,19 @@ export class IndividualsInfoComponent implements OnInit {
             name: translations[name],
           }));
         });
-        this.canBeDeleted = true;
       } else {
-        data.deployments = [];
+        datatable.deployments = [];
+
+        if (!datatable.last_observation_date) {
+          this.canBeDeleted = true;
+        }
       }
 
-      this.defaultLang = this._config['DEFAULT_LANGUAGE'];
+      this.dataTable$ = of(datatable);
+      this._individualId = datatable.id_individual;
     });
+    
+    this.defaultLang = this._config['DEFAULT_LANGUAGE'];
   }
 
   onDelete(): void {

@@ -164,11 +164,22 @@ class IndividualsDetailSchema(IndividualsBaseSchema):
     digitiser = ma.Nested(UserSchema, dump_only=True)
     deployments = fields.Method("get_deployments", dump_only=True)
 
+    last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
+    last_observation_observers = fields.Method("get_last_observation_observers", dump_only=True)
+
     def get_nom_vern(self, obj):
         return obj.taxon.nom_vern if obj.taxon else None
 
     def get_lb_nom(self, obj):
         return obj.taxon.lb_nom if obj.taxon else None
+
+    def get_last_observation_date(self, obj):
+        if obj.last_obs_date is None:
+            return None
+        return obj.last_obs_date.strftime("%d-%m-%Y")
+
+    def get_last_observation_observers(self, obj):
+        return obj.last_obs_observers
 
     def get_deployments(self, obj):
         deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)

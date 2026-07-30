@@ -16,9 +16,9 @@ export const INDIVIDUAL_MODEL = {
     nomenclature_sex_name: '',
     last_observation_date: '',
     last_observation_observers_name: '',
-    taxon_vern_nom: '',
-    taxon_lb_nom: '',
-    taxon_cd_nom: '',
+    taxref_nom_vern: '',
+    taxref_lb_nom: '',
+    taxref_cd_nom: '',
     deployed_markings: '',
     deployed_devices: ''
 }

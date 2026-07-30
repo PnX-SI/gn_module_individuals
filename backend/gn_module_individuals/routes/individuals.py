@@ -1,6 +1,6 @@
 import json
 
-from flask import jsonify, request, g
+from flask import make_response, request, g
 from marshmallow import EXCLUDE, ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload, raiseload, selectinload
@@ -9,6 +9,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
 from geonature.utils.env import db
+from utils_flask_sqla.response import json_resp
 from utils_flask_sqla_geo.utils import geojsonify
 
 from .. import MODULE_CODE
@@ -26,7 +27,6 @@ from ..schemas.individuals import (
     IndividualsWriteSchema,
 )
 from ..utils.errors import APIError, IndividualsErrorCode
-from ..utils.common import sql_log
 
 
 def _parse_filters(args):
@@ -98,7 +98,7 @@ def _parse_sort(args):
     if direction not in ("asc", "desc"):
         raise APIError(IndividualsErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
     return {
-        "prop": args.get("prop", "last_obs_date", type=str),
+        "prop": args.get("prop", "last_observation_date", type=str),
         "dir": direction,
     }
 
@@ -112,10 +112,14 @@ def _sort_expression(sort):
         "id_digitiser": TIndividuals.id_digitiser,
         "meta_create_date": TIndividuals.meta_create_date,
         "meta_update_date": TIndividuals.meta_update_date,
-        "last_obs_date": individual_last_observation_date_expression(),
+        "last_observation_date": individual_last_observation_date_expression(),
     }
     column = sort_columns.get(sort["prop"], TIndividuals.id_individual)
     expression = column.desc() if sort["dir"] == "desc" else column.asc()
+    if sort["prop"] == "last_observation_date":
+        expression = expression.nullslast()  # FORCE NULL VALUES LAST
+    if column is TIndividuals.id_individual:
+        return (expression,)
     return expression, TIndividuals.id_individual.asc()
 
 
@@ -194,8 +198,6 @@ def individuals_geometry(scope):
         .where(individual_last_observation_geom_expression().isnot(None))
     )
 
-    # sql_log(query)  # Log the SQL query for debugging purposes
-
     individuals = db.session.scalars(query).unique().all()
     _assign_last_observation(individuals)
 
@@ -217,7 +219,8 @@ def individuals_geometry(scope):
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
-def individual(scope, id_individual):
+@json_resp
+def individual(id_individual, scope):
     query = (
         select(TIndividuals)
         .options(
@@ -245,8 +248,10 @@ def individual(scope, id_individual):
             params={"id": id_individual},
         )
 
+    _assign_last_observation([result])
+
     schema = IndividualsDetailSchema(only=["+cruved", "nomenclature_sex", "digitiser"])
-    return jsonify(schema.dump(result))
+    return schema.dump(result)
 
 
 @blueprint.route("/individuals", methods=["POST"])
@@ -254,6 +259,7 @@ def individual(scope, id_individual):
 @permissions.check_cruved_scope(
     "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
 )
+@json_resp
 def create_individual(scope):
     data = request.get_json(silent=True)
 
@@ -279,7 +285,7 @@ def create_individual(scope):
     db.session.add(individual)
     db.session.commit()
 
-    return jsonify(schema.dump(individual)), 201
+    return schema.dump(individual), 201
 
 
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["PUT"])
@@ -287,7 +293,8 @@ def create_individual(scope):
 @permissions.check_cruved_scope(
     "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
 )
-def update_individual(scope, id_individual):
+@json_resp
+def update_individual(id_individual, scope):
     individual = db.session.get(TIndividuals, id_individual)
     if individual is None:
         raise APIError(
@@ -326,12 +333,53 @@ def update_individual(scope, id_individual):
 
     db.session.commit()
 
-    return jsonify(schema.dump(individual)), 200
+    return schema.dump(individual), 200
+
+
+@blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["DELETE"])
+@login_required
+@permissions.check_cruved_scope(
+    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+)
+def delete_individual(id_individual, scope):
+    individual = db.session.get(TIndividuals, id_individual)
+    if individual is None:
+        raise APIError(
+            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            f"Individual with id {id_individual} was not found.",
+            404,
+            params={"id": id_individual},
+        )
+
+    if not individual.has_instance_permission(scope):
+        raise APIError(
+            IndividualsErrorCode.INSUFFICIENT_PERMISSIONS,
+            f"You do not have permission to delete individual {id_individual}.",
+            403,
+        )
+
+    deployment_count = db.session.scalar(
+        select(func.count())
+        .select_from(IndividualDeployments)
+        .where(IndividualDeployments.id_individual == id_individual)
+    )
+    if deployment_count:
+        raise APIError(
+            IndividualsErrorCode.INDIVIDUAL_HAS_DEPLOYMENTS,
+            "This individual cannot be deleted because it is associated with deployments.",
+            409,
+            params={"id": id_individual, "nb": deployment_count},
+        )
+
+    db.session.delete(individual)
+    db.session.commit()
+    return make_response("", 204)
 
 
 @blueprint.route("/individuals", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+@json_resp
 def list_individuals(scope):
     filters = _parse_filters(request.args)
     sort = _parse_sort(request.args)
@@ -344,17 +392,18 @@ def list_individuals(scope):
     if page is not None and per_page is not None:
         paginated = db.paginate(query, page=page, per_page=per_page)
         _assign_last_observation(paginated.items)
-        return jsonify(_pagination_payload(paginated, schema, sort))
+        return _pagination_payload(paginated, schema, sort)
 
     individuals = db.session.scalars(query).unique().all()
     _assign_last_observation(individuals)
-    return jsonify({"items": schema.dump(individuals), "prop": sort["prop"], "dir": sort["dir"]})
+    return {"items": schema.dump(individuals), "prop": sort["prop"], "dir": sort["dir"]}
 
 
-@blueprint.route("/individuals/<int:id_individual>/page", methods=["GET"])
+@blueprint.route("/individuals/<int(signed=True):id_individual>/page", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
-def individual_page(scope, id_individual):
+@json_resp
+def individual_page(id_individual, scope):
     filters = _parse_filters(request.args)
     sort = _parse_sort(request.args)
     per_page = request.args.get("per_page", 20, type=int)
@@ -380,11 +429,9 @@ def individual_page(scope, id_individual):
             params={"id": id_individual},
         )
 
-    return jsonify(
-        {
-            "id_individual": id_individual,
-            "rank": rank,
-            "page": ((rank - 1) // per_page) + 1,
-            "per_page": per_page,
-        }
-    )
+    return {
+        "id_individual": id_individual,
+        "rank": rank,
+        "page": ((rank - 1) // per_page) + 1,
+        "per_page": per_page,
+    }

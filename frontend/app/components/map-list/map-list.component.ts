@@ -25,7 +25,9 @@ export class MapListComponent implements OnInit, AfterViewInit {
   // public apiEndPoint: string;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
+  @Output() delete: EventEmitter<any> = new EventEmitter();
   @Output() idPage: EventEmitter<number> = new EventEmitter();
+  @Output() bbox: EventEmitter<string> = new EventEmitter();
   @Input() objectName!: string;
   @Input() idFieldName!: string;
   @Input() availableColumnsParams!: Record<string, unknown>;
@@ -36,7 +38,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() nbRowsToDisplay!: number;
   @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
-  @Input() allowedToEdit: boolean[] = [];
+  @Input() allowedToEdit: Record<number, boolean> = {};
   @Input() allowedToDelete: Record<number, boolean> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
@@ -52,7 +54,8 @@ export class MapListComponent implements OnInit, AfterViewInit {
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
   // private _lastBbox: string | null = null;
-  // private _mapMoveHandler: (() => void) | null = null;
+  private _mapMoveHandler: (() => void) | null = null;
+  private _ignoreNextMapMoveEnd = false;
 
   constructor(
     private _moduleService: ModuleService,
@@ -77,8 +80,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
       this.mapReady = true;
       this.contentHeight = calcContentHeight();
       this._zoomOnFeatures();
-      // this.bindMapMove();
-      // this.resizeMap();
+      this._bindMapMove();
     }, 0);
   }
 
@@ -108,7 +110,8 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this.sort.emit($event);
   }
 
-  openDeleteModal($event: any): void {
+  onDelete($event: any): void {
+    this.delete.emit($event);
   }
 
   /**
@@ -202,10 +205,42 @@ export class MapListComponent implements OnInit, AfterViewInit {
   private _zoomOnFeatures(): void {
     this.mapData$.subscribe(mapData => {
       const layer = L.geoJSON(mapData);
+
       if (layer.getBounds().isValid()) {
-        this._mapService.getMap()?.fitBounds(layer.getBounds(), { padding: [20, 20] });
+        this._ignoreNextMapMoveEnd = true;
+        this._mapService.getMap()?.fitBounds(layer.getBounds(), { padding: [20, 20],animate: false });
       }
     });
+  }
+
+   /**
+   * Reload data whenever the map extent changes (bbox). 
+   *
+   * @private
+   * @return {*}  {void}
+   * @memberof MapListComponent
+   */
+  private _bindMapMove(): void {
+    const map = this._mapService.getMap();
+    if (!map) {
+      return;
+    }
+    // Store the map move function in a property so we can remove it later if needed
+    this._mapMoveHandler = () => {
+      // _zoomOnFeature emit a movenend : we needs to ignore it to avoid an API call
+      if (this._ignoreNextMapMoveEnd) {
+        this._ignoreNextMapMoveEnd = false;
+        return;
+      }
+
+      const bbox = this._getMapBbox();
+      if (bbox) {
+        this.bbox.emit(bbox);
+      }
+    };
+
+    // Install a listner on the moveend event
+    map.on('moveend', this._mapMoveHandler);
   }
 
   /**
@@ -272,17 +307,11 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (!layer) {
       this._showNoGeometryMessage();
       this._selectedLayer?.closePopup();
-      // if (zoom) {
-      //   this.focusMissingMapFeature(idIndividual);
-      // }
       return;
     }
     this._selectedId = id;
     this._highlightLayer(layer);
     this._openLayerPopup(layer);
-    // if (zoom) {
-    //   this.zoomOnLayer(layer);
-    // }
   }
 
   /**
@@ -297,29 +326,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
       this.noGeometry = false;
     }, 1000);
   }
-  
-    /**
-   * Reload data whenever the map extent changes (bbox). 
-   *
-   * @private
-   * @return {*}  {void}
-   * @memberof MapListComponent
-   */
-  // private _bindMapMove(): void {
-  //   const map = this._mapService.getMap();
-  //   if (!map) {
-  //     return;
-  //   }
-  //   // Store the map move function in a property so we can remove it later if needed
-  //   this._mapMoveHandler = () => {
-  //     const bbox = this.getMapBbox();
-  //     if (bbox !== undefined && bbox !== this._lastBbox) {
-  //       this._lastBbox = bbox;
-  //       // this.loadMapFeatures();
-  //     }
-  //   };
-  //   map.on('moveend', this._mapMoveHandler);
-  // }
 
   /**
    * Return the bbox of current map
@@ -328,16 +334,16 @@ export class MapListComponent implements OnInit, AfterViewInit {
    * @return {*}  {(string | undefined)}
    * @memberof MapListComponent
    */
-  // private _getMapBbox(): string | undefined {
-  //   const map = this._mapService.getMap();
-  //   if (!map) {
-  //     return undefined;
-  //   }
-  //   const bounds = map.getBounds();
-  //   return [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
-  //     .map((value) => value.toFixed(6))
-  //     .join(',');
-  // }
+  private _getMapBbox(): string | undefined {
+    const map = this._mapService.getMap();
+    if (!map) {
+      return undefined;
+    }
+    const bounds = map.getBounds();
+    return [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
+      .map((value) => value.toFixed(6))
+      .join(',');
+  }
 
 
   /**

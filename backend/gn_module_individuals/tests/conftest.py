@@ -94,7 +94,7 @@ def ensure_individuals_module(app, users):
     # Permissions sur INDIVIDUALS_INDIVIDUALS (C/U/D discriminés)
     individuals_permissions = {
         "admin_user": {"actions": "CUD", "scope": None},
-        "self_user": {"actions": "U", "scope": 1},
+        "self_user": {"actions": "UD", "scope": 1},
     }
 
     def _add_permissions(target_map, perm_object):

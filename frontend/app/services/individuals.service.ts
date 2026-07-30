@@ -126,7 +126,7 @@ export class IndividualsService {
     // return of();
   }
 
-  // deleteIndividual(id: number): Observable<Individual> {
-  //   return this._http.delete<Individual>(`${this._OBJECT_API}/${id}`);
-  // }
+  deleteIndividual(id: number): Observable<Individual> {
+    return this._http.delete<Individual>(`${this._OBJECT_API}/${id}`);
+  }
 }
