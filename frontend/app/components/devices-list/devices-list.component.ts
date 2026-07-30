@@ -29,7 +29,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   public nbRowsToDisplay = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = "Individuals.Devices.Fields";
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
-  public allowedToEdit: boolean[] = [];
+  public allowedToEdit: Record<number, boolean> = {};
   public allowedToDelete: Record<number, boolean> = {};
   public selectedRow!: Device;
   private _destroy$ = new Subject<void>();
@@ -164,10 +164,15 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     if (data.items) {
       data.items.forEach((item: Device) => {
         this.allowedToDelete[item.id_tracking_device] = item.last_individual_equipped_name == null;
+        this.allowedToEdit[item.id_tracking_device] = item.cruved?.U??false;
       });
 
       // Have to be changed with scope and cruved
-      this.allowedToEdit = data.items.map(() => true);
+      // this.allowedToEdit = data.items.map((item: Device) => {
+      //   const value = item.cruved?.U??false;
+      //   console.log("id:",item.id_tracking_device," ", item.provider_device_id," value:",value," ",item.cruved);
+      //   return value;
+      // });
     }
   }
 }

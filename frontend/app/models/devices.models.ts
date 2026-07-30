@@ -1,3 +1,5 @@
+import { Cruved } from '@geonature/modules/imports/models/cruved.model';
+
 // This model is only used to read data
 export const DEVICE_MODEL = {
   id_tracking_device: 0,
@@ -15,7 +17,7 @@ export const DEVICE_MODEL = {
   digitiser_name: '',
 };
 
-export type Device = typeof DEVICE_MODEL;
+export type Device = typeof DEVICE_MODEL & {cruved: Cruved};
 
 export interface APIDeviceFiltersParams {
   // This line help to use

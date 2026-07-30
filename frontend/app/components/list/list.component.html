@@ -130,7 +130,7 @@
           class="btn btn-row fa fa-pencil-square-o"
           matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
           [routerLink]="['form', row[idFieldName]]"
-          [disabled]="false"
+          [disabled]="!allowedToEdit[row[idFieldName]]"
         ></button>
       </ng-template>
     </ngx-datatable-column>

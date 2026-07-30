@@ -116,6 +116,12 @@ def device(id_tracking_device, scope):
             f"Tracking device with id {id_tracking_device} was not found.",
             404,
         )
+    if not device.has_instance_permission(scope):
+        raise APIError(
+            DevicesErrorCode.INSUFFICIENT_PERMISSIONS,
+            f"You do not have permission to read this device.",
+            403,
+        )
     return schema.dump(device)
 
 
@@ -226,6 +232,9 @@ def list_devices(scope):
             .exists()
         )
 
+    # Get only the items related to the scope
+    query = TrackingDevices.filter_by_scope(query,scope)        
+
     if paginated:
         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
         return {
@@ -269,7 +278,7 @@ def create_device(scope):
             "Missing JSON request body.",
             400,
         )
-
+    
     schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data)
