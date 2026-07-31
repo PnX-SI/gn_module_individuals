@@ -308,6 +308,11 @@ def update_device(id_tracking_device, scope):
     "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
 )
 def delete_device(id_tracking_device, scope):
+    """
+    Delete one device
+
+    :returns: empty response with 204 status
+    """
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
