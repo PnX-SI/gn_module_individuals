@@ -15,7 +15,7 @@ import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { CONTENT_CONFIG, DATATABLE_CONFIG } from '../../utils/constants.util';
-import { Column, PaginatedItemCollection } from '../../models/common.models';
+import { Column, PaginatedItemCollection, AccessResult } from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-list',
@@ -40,8 +40,8 @@ export class ListComponent implements OnInit {
   @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
   @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
-  @Input() allowedToEdit: Record<number, boolean> = {};
-  @Input() allowedToDelete: Record<number, boolean> = {};
+  @Input() allowedToEdit: Record<number, AccessResult> = {};
+  @Input() allowedToDelete: Record<number, AccessResult> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
   @Input() selectedRows: unknown[] = [];

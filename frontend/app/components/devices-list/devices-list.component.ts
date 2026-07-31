@@ -10,7 +10,7 @@ import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
 import { Device, APIDeviceFiltersParams, DEVICE_MODEL } from '../../models/devices.models';
-import { Sort, PaginatedItemCollection, APIPaginationParams } from '../../models/common.models';
+import { Sort, PaginatedItemCollection, APIPaginationParams, AccessResult } from '../../models/common.models';
 import { DevicesService } from '../../services/devices.service';
 import { DEVICES_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
@@ -29,8 +29,8 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   public nbRowsToDisplay = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = "Individuals.Devices.Fields";
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
-  public allowedToEdit: Record<number, boolean> = {};
-  public allowedToDelete: Record<number, boolean> = {};
+  public allowedToEdit: Record<number, AccessResult> = {};
+  public allowedToDelete: Record<number, AccessResult> = {};
   public selectedRow!: Device;
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
@@ -56,7 +56,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     // Resolver : First initialisation of the table
     this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable }) => {
       this.dataTable$ = of(datatable);
-      this._initPermissions(datatable);
+      this._setPermissions(datatable);
     });     
   }
 
@@ -153,26 +153,42 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     };
     this.dataTable$ = this._devicesService
       .getDevices(APIParams)
-      .pipe(tap((data) => this._initPermissions(data)));
+      .pipe(tap((data) => this._setPermissions(data)));
   }
 
-  private _initPermissions(data: PaginatedItemCollection<Device>): void {
-    this.allowedToDelete = [];
-
-    // Not allowed to delete if deployments exists
-    // Have to be changed with scope and cruved
+  /**
+   * Set the allowToDelete and allowToEdit variables considering the item cruved. 
+   * Else, for each item id, if a deployment exists 
+   * set the corresponding array entry to false, else to true
+   *
+   * @private
+   * @param {PaginatedItemCollection<Device>} data
+   * @memberof DevicesListComponent
+   */
+  private _setPermissions(data: PaginatedItemCollection<Device>): void {
     if (data.items) {
       data.items.forEach((item: Device) => {
-        this.allowedToDelete[item.id_tracking_device] = item.last_individual_equipped_name == null;
-        this.allowedToEdit[item.id_tracking_device] = item.cruved?.U??false;
-      });
+        // Delete access
+        let deleteAccess: AccessResult = {id: item.id_tracking_device, access:true};
 
-      // Have to be changed with scope and cruved
-      // this.allowedToEdit = data.items.map((item: Device) => {
-      //   const value = item.cruved?.U??false;
-      //   console.log("id:",item.id_tracking_device," ", item.provider_device_id," value:",value," ",item.cruved);
-      //   return value;
-      // });
+        deleteAccess.access = item.cruved?.D??false;
+        deleteAccess.message = deleteAccess.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+
+        if(deleteAccess.access) {
+          // Not allowed to delete if deployments exists
+          deleteAccess.access = item.last_individual_equipped_name == null;
+          deleteAccess.message = deleteAccess.access?null:this._translate.instant('Individuals.ApiErrors.HasDeployment');
+        }
+
+        // Edit access
+        let editAccess: AccessResult = {id: item.id_tracking_device, access:true};
+
+        editAccess.access = item.cruved?.U??false;
+        editAccess.message = editAccess.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+
+        this.allowedToDelete[item.id_tracking_device] = deleteAccess;
+        this.allowedToEdit[item.id_tracking_device] = editAccess;
+      });
     }
   }
 }

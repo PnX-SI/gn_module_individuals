@@ -101,6 +101,7 @@
   [infoTitle]="'Individuals.Devices.Titles.Info' | translate: { id: dataTable.id_tracking_device }"
   [objectName]="'devices'"
   [objectId]="dataTable.id_tracking_device"
-  [canBeDeleted]="canBeDeleted"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
   (delete)="onDelete()"
 ></gn-individuals-info>

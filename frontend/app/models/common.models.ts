@@ -60,3 +60,9 @@ export interface RankAndPage {
   per_page: number;
   rank: number;
 }
+
+export interface AccessResult {
+  id: number;
+  access: boolean;
+  message?: string | null;
+}

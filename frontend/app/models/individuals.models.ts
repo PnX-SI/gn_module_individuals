@@ -1,3 +1,5 @@
+import { Cruved } from '@geonature/modules/imports/models/cruved.model';
+
 import { RankAndPage } from './common.models';
 
 // This model is only used to read data
@@ -23,7 +25,7 @@ export const INDIVIDUAL_MODEL = {
     deployed_devices: ''
 }
 
-export type Individual = typeof INDIVIDUAL_MODEL;
+export type Individual = typeof INDIVIDUAL_MODEL & {cruved: Cruved};;
 
 export interface IndividualRankAndPage extends RankAndPage { 
     "id_individual": 36,

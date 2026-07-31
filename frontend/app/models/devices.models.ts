@@ -15,6 +15,7 @@ export const DEVICE_MODEL = {
   last_individual_equipped_name: '',
   referer_name: '',
   digitiser_name: '',
+  deployments: '',
 };
 
 export type Device = typeof DEVICE_MODEL & {cruved: Cruved};

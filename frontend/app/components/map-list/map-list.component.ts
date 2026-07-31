@@ -7,7 +7,7 @@ import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
 
-import { Feature, FeatureCollection, PaginatedItemCollection } from '../../models/common.models';
+import { Feature, FeatureCollection, PaginatedItemCollection, AccessResult } from '../../models/common.models';
 import { Individual } from '../../models/individuals.models';
 import { CONTENT_CONFIG, MAP_CONFIG } from '../../utils/constants.util';
 import { calcContentHeight } from '../../utils/functions.util';
@@ -38,8 +38,8 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() nbRowsToDisplay!: number;
   @Input() fieldsTranslation: string = ''
   @Input() sorts: Array<Object> = [];
-  @Input() allowedToEdit: Record<number, boolean> = {};
-  @Input() allowedToDelete: Record<number, boolean> = {};
+  @Input() allowedToEdit: Record<number, AccessResult> = {};
+  @Input() allowedToDelete: Record<number, AccessResult> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
   @Input() selectedRows: unknown[] = [];

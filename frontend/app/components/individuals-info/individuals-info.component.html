@@ -106,6 +106,7 @@
   [infoTitle]="'Individuals.Individuals.Titles.Info' | translate: { id: dataTable.id_individual }"
   [objectName]="'individuals'"
   [objectId]="dataTable.id_individual"
-  [canBeDeleted]="canBeDeleted"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
   (delete)="onDelete()"
 ></gn-individuals-info>

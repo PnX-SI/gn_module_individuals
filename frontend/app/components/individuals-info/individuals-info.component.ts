@@ -10,7 +10,7 @@ import { CommonService } from '@geonature_common/service/common.service';
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Individual } from '../../models/individuals.models';
 import { Deployment } from '../../models/deployments.models';
-import { Column } from '../../models/common.models';
+import { Column, AccessResult } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
 
 @Component({
@@ -25,7 +25,8 @@ export class IndividualsInfoComponent implements OnInit {
   public dataTable$: Observable<Individual> = new Observable<Individual>();
   public deploymentsColumns: Column<Deployment>[] = [];
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
-  public canBeDeleted: boolean = false;
+  public allowedToDelete!: AccessResult;
+  public allowedToEdit!: AccessResult;
   public defaultLang!: string; 
   private _individualId!: number;
 
@@ -41,6 +42,9 @@ export class IndividualsInfoComponent implements OnInit {
   ngOnInit(): void {
     // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
     this._route.data.subscribe(({ datatable }) => {
+      this.dataTable$ = of(datatable);
+      this._individualId = datatable.id_individual;
+
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
       if (datatable.deployments?.length > 0) {
         const props = this._config.INDIVIDUALS.INDIVIDUALS
@@ -56,34 +60,63 @@ export class IndividualsInfoComponent implements OnInit {
         });
       } else {
         datatable.deployments = [];
-
-        if (!datatable.last_observation_date) {
-          this.canBeDeleted = true;
-        }
       }
 
-      this.dataTable$ = of(datatable);
-      this._individualId = datatable.id_individual;
+      this._setPermissions(datatable);
     });
     
     this.defaultLang = this._config['DEFAULT_LANGUAGE'];
   }
 
   onDelete(): void {
-    // this._service.deleteDevice(this._individualId).subscribe({
-    //   next: (res) => {
-    //     this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
-    //       id: this._individualId,
-    //     });
-    //     this._location.back();
-    //   },
-    //   error: (err) => {
-    //     const msg = err.name + ':' + err.message || JSON.stringify(err);
-    //     this._commonService.translateToaster('error', 'Individuals.Devices.Errors.DeletedNOK', {
-    //       id: this._deviceId,
-    //       error: msg,
-    //     });
-    //   },
-    // });
+    this._service.deleteIndividual(this._individualId).subscribe({
+      next: (res) => {
+        this._commonService.translateToaster('info', 'Individuals.Individuals.Messages.Deleted', {
+          id: this._individualId,
+        });
+        this._location.back();
+      },
+      error: (err) => {
+        const msg = err.name + ':' + err.message || JSON.stringify(err);
+        this._commonService.translateToaster('error', 'Individuals.Individuals.Errors.DeletedNOK', {
+          id: this._individualId,
+          error: msg,
+        });
+      },
+    });
+  }
+
+  /**
+   * Set edit and delete permissions 
+   *
+   * @private
+   * @param {Individual} datatable
+   * @memberof IndividualsInfoComponent
+   */
+  private _setPermissions(datatable: Individual) {
+    console.log(datatable.cruved);
+    this.allowedToEdit = {id: datatable.id_individual, access: true};
+    this.allowedToDelete = {id: datatable.id_individual, access: true};
+
+    this.allowedToDelete.access = datatable.cruved?.D;
+    this.allowedToDelete.message = this.allowedToDelete.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+
+    // Delete access
+    if (this.allowedToDelete.access) {
+      // Check if device has observations, if yes : no access
+      if (datatable.last_observation_date) {
+        this.allowedToDelete.access = false;
+        this.allowedToDelete.message = this._translate.instant('Individuals.ApiErrors.HasObservation');
+      }
+      // Check if device has deployments, if yes : no access
+      else if (datatable.deployed_devices?.length > 0 || datatable.deployed_markings?.length > 0) {
+        this.allowedToDelete.access = false;
+        this.allowedToDelete.message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
+      }
+    }
+
+    // Edit Access
+    this.allowedToEdit.access = datatable.cruved?.U??false;
+    this.allowedToEdit.message = this.allowedToEdit.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
   }
 }
