@@ -112,6 +112,11 @@ def device(id_tracking_device, scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def list_devices(scope):
+    """
+        List all devices
+        :params: page, per_page, cd_nom, id_nomenclature_device_type, provider_name, id_referer, prop, dir
+        :returns: JSON list of devices, paginated if page and per_page are provided
+        """
     # Scope not yet used -------------
     cd_nom = request.args.get("cd_nom", type=int)
     device_type = request.args.get("id_nomenclature_device_type", type=int)
