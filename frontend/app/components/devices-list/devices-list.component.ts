@@ -10,7 +10,12 @@ import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
 import { Device, APIDeviceFiltersParams, DEVICE_MODEL } from '../../models/devices.models';
-import { Sort, PaginatedItemCollection, APIPaginationParams, AccessResult } from '../../models/common.models';
+import {
+  Sort,
+  PaginatedItemCollection,
+  APIPaginationParams,
+  AccessResult,
+} from '../../models/common.models';
 import { DevicesService } from '../../services/devices.service';
 import { DEVICES_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
@@ -26,8 +31,9 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<
     PaginatedItemCollection<Device>
   >();
-  public nbRowsToDisplay = this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
-  public fieldsTranslation = "Individuals.Devices.Fields";
+  public nbRowsToDisplay =
+    this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
+  public fieldsTranslation = 'Individuals.Devices.Fields';
   public sorts: Array<Sort> = [DEVICES_DEFAULT_SORT];
   public allowedToEdit: Record<number, AccessResult> = {};
   public allowedToDelete: Record<number, AccessResult> = {};
@@ -49,15 +55,14 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     private _ngbModal: NgbModal,
     private _errorHandler: ErrorHandlerService,
     private _translate: TranslateService
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     // Resolver : First initialisation of the table
     this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable }) => {
       this.dataTable$ = of(datatable);
       this._setPermissions(datatable);
-    });     
+    });
   }
 
   ngOnDestroy() {
@@ -113,7 +118,9 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     });
   }
 
-  onFilters($event: {key: keyof APIDeviceFiltersParams; value: string | number | undefined;} | null): void {
+  onFilters(
+    $event: { key: keyof APIDeviceFiltersParams; value: string | number | undefined } | null
+  ): void {
     if (!$event) {
       this._APIFiltersParams = {};
     } else {
@@ -157,8 +164,8 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Set the allowToDelete and allowToEdit variables considering the item cruved. 
-   * Else, for each item id, if a deployment exists 
+   * Set the allowToDelete and allowToEdit variables considering the item cruved.
+   * Else, for each item id, if a deployment exists
    * set the corresponding array entry to false, else to true
    *
    * @private
@@ -169,22 +176,28 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     if (data.items) {
       data.items.forEach((item: Device) => {
         // Delete access
-        let deleteAccess: AccessResult = {id: item.id_tracking_device, access:true};
+        let deleteAccess: AccessResult = { id: item.id_tracking_device, access: true };
 
-        deleteAccess.access = item.cruved?.D??false;
-        deleteAccess.message = deleteAccess.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+        deleteAccess.access = item.cruved?.D ?? false;
+        deleteAccess.message = deleteAccess.access
+          ? null
+          : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
-        if(deleteAccess.access) {
+        if (deleteAccess.access) {
           // Not allowed to delete if deployments exists
           deleteAccess.access = item.last_individual_equipped_name == null;
-          deleteAccess.message = deleteAccess.access?null:this._translate.instant('Individuals.ApiErrors.HasDeployment');
+          deleteAccess.message = deleteAccess.access
+            ? null
+            : this._translate.instant('Individuals.ApiErrors.HasDeployment');
         }
 
         // Edit access
-        let editAccess: AccessResult = {id: item.id_tracking_device, access:true};
+        let editAccess: AccessResult = { id: item.id_tracking_device, access: true };
 
-        editAccess.access = item.cruved?.U??false;
-        editAccess.message = editAccess.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+        editAccess.access = item.cruved?.U ?? false;
+        editAccess.message = editAccess.access
+          ? null
+          : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
         this.allowedToDelete[item.id_tracking_device] = deleteAccess;
         this.allowedToEdit[item.id_tracking_device] = editAccess;

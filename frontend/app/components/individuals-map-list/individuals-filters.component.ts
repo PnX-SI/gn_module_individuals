@@ -25,7 +25,10 @@ import { INDIVIDUALS_FORM_CONSTRAINTS } from '../../utils/constants.util';
   standalone: false,
 })
 export class IndividualsFiltersComponent implements OnInit, OnDestroy {
-  @Output() filters = new EventEmitter<{key: keyof APIIndividualFiltersParams; value: string | number | undefined;} | null>();
+  @Output() filters = new EventEmitter<{
+    key: keyof APIIndividualFiltersParams;
+    value: string | number | undefined;
+  } | null>();
   @Input() defaultValues: APIIndividualFiltersParams = {};
 
   public filtersForm!: FormGroup;
@@ -44,7 +47,7 @@ export class IndividualsFiltersComponent implements OnInit, OnDestroy {
       active: [this.defaultValues?.active, null],
       cd_nom: [null, null],
       id_nomenclature_sex: [null, null],
-      individual_name: [null,[Validators.pattern(this.formConstraints.individual_name.pattern)]],
+      individual_name: [null, [Validators.pattern(this.formConstraints.individual_name.pattern)]],
     });
 
     // Call API on change event
@@ -57,8 +60,8 @@ export class IndividualsFiltersComponent implements OnInit, OnDestroy {
           takeUntil(this._destroy$)
         )
         .subscribe((value) => {
-          // Emit a change only if filtersForm change due to user action : genericForm.component emit 
-          // changes when it call setValue() 
+          // Emit a change only if filtersForm change due to user action : genericForm.component emit
+          // changes when it call setValue()
           if (!this.filtersForm.get(field)?.dirty) {
             return;
           }

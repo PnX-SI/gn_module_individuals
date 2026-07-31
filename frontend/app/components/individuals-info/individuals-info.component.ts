@@ -27,7 +27,7 @@ export class IndividualsInfoComponent implements OnInit {
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public allowedToDelete!: AccessResult;
   public allowedToEdit!: AccessResult;
-  public defaultLang!: string; 
+  public defaultLang!: string;
   private _individualId!: number;
 
   constructor(
@@ -64,7 +64,7 @@ export class IndividualsInfoComponent implements OnInit {
 
       this._setPermissions(datatable);
     });
-    
+
     this.defaultLang = this._config['DEFAULT_LANGUAGE'];
   }
 
@@ -87,7 +87,7 @@ export class IndividualsInfoComponent implements OnInit {
   }
 
   /**
-   * Set edit and delete permissions 
+   * Set edit and delete permissions
    *
    * @private
    * @param {Individual} datatable
@@ -95,28 +95,36 @@ export class IndividualsInfoComponent implements OnInit {
    */
   private _setPermissions(datatable: Individual) {
     console.log(datatable.cruved);
-    this.allowedToEdit = {id: datatable.id_individual, access: true};
-    this.allowedToDelete = {id: datatable.id_individual, access: true};
+    this.allowedToEdit = { id: datatable.id_individual, access: true };
+    this.allowedToDelete = { id: datatable.id_individual, access: true };
 
     this.allowedToDelete.access = datatable.cruved?.D;
-    this.allowedToDelete.message = this.allowedToDelete.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+    this.allowedToDelete.message = this.allowedToDelete.access
+      ? null
+      : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
     // Delete access
     if (this.allowedToDelete.access) {
       // Check if device has observations, if yes : no access
       if (datatable.last_observation_date) {
         this.allowedToDelete.access = false;
-        this.allowedToDelete.message = this._translate.instant('Individuals.ApiErrors.HasObservation');
+        this.allowedToDelete.message = this._translate.instant(
+          'Individuals.ApiErrors.HasObservation'
+        );
       }
       // Check if device has deployments, if yes : no access
       else if (datatable.deployed_devices?.length > 0 || datatable.deployed_markings?.length > 0) {
         this.allowedToDelete.access = false;
-        this.allowedToDelete.message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
+        this.allowedToDelete.message = this._translate.instant(
+          'Individuals.ApiErrors.HasDeployment'
+        );
       }
     }
 
     // Edit Access
-    this.allowedToEdit.access = datatable.cruved?.U??false;
-    this.allowedToEdit.message = this.allowedToEdit.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+    this.allowedToEdit.access = datatable.cruved?.U ?? false;
+    this.allowedToEdit.message = this.allowedToEdit.access
+      ? null
+      : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
   }
 }

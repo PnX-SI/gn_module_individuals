@@ -5,8 +5,18 @@ import { Observable, of } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Individual, APIIndividualFiltersParams, IndividualRankAndPage, CreateIndividualDto, UpdateIndividualDto } from '../models/individuals.models';
-import { PaginatedItemCollection, APIPaginationParams, FeatureCollection } from '../models/common.models';
+import {
+  Individual,
+  APIIndividualFiltersParams,
+  IndividualRankAndPage,
+  CreateIndividualDto,
+  UpdateIndividualDto,
+} from '../models/individuals.models';
+import {
+  PaginatedItemCollection,
+  APIPaginationParams,
+  FeatureCollection,
+} from '../models/common.models';
 import { DATATABLE_CONFIG, INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
@@ -60,7 +70,7 @@ export class IndividualsService {
       params: httpParams,
     });
   }
-  
+
   /**
    * Return un observable with the rank and page in the individuals list of the individual given id
    * with current filters and sort applied.
@@ -70,7 +80,10 @@ export class IndividualsService {
    * @return {*}  {Observable<IndividualRankAndPage>}
    * @memberof IndividualsService
    */
-  getIndividualRankAndPage(id: number, params: APIPaginationParams & APIIndividualFiltersParams): Observable<IndividualRankAndPage> {
+  getIndividualRankAndPage(
+    id: number,
+    params: APIPaginationParams & APIIndividualFiltersParams
+  ): Observable<IndividualRankAndPage> {
     let httpParams = new HttpParams();
 
     Object.keys(params).forEach((key) => {
@@ -78,7 +91,12 @@ export class IndividualsService {
         httpParams = httpParams.set(key, String(params[key]));
       }
     });
-    console.log('Parameters sent to API (Individual Rank and Page)', params, 'for individual id', id);
+    console.log(
+      'Parameters sent to API (Individual Rank and Page)',
+      params,
+      'for individual id',
+      id
+    );
     return this._http.get<IndividualRankAndPage>(`${this._OBJECT_API}/${id}/page`, {
       params: httpParams,
     });
@@ -110,7 +128,7 @@ export class IndividualsService {
         id_individual: individual.id,
       };
     }
-    console.log("Parameters sent to API params:", params,"payload",payload);
+    console.log('Parameters sent to API params:', params, 'payload', payload);
 
     if (formAction === 'ADD') {
       return this._http.post<Individual>(`${this._OBJECT_API}`, payload, {

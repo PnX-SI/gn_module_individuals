@@ -11,7 +11,7 @@ import {
 
 import { ModuleService } from '@geonature/services/module.service';
 
-import { AccessResult } from '../../models/common.models'
+import { AccessResult } from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-info',

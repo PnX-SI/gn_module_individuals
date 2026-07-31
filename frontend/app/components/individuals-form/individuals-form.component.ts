@@ -25,7 +25,7 @@ export class IndividualsFormComponent implements OnInit {
   public formConstraints: Record<string, FormConstraint> = INDIVIDUALS_FORM_CONSTRAINTS;
   public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
 
-  constructor (
+  constructor(
     private _route: ActivatedRoute,
     private _config: ConfigService,
     private _commonService: CommonService,
@@ -64,8 +64,7 @@ export class IndividualsFormComponent implements OnInit {
         this.individualId = datatable['id_individual'];
         this.formAction = 'EDIT';
         this.patchForm(datatable);
-      }
-      else {
+      } else {
         this.formAction = 'ADD';
       }
     });
@@ -76,7 +75,7 @@ export class IndividualsFormComponent implements OnInit {
     this.form.patchValue(individual);
     this.form.patchValue({
       // En attendant la correction de l'API
-      cd_nom: { cd_nom:individual.cd_nom, nom_valide:'Bouquetin'},
+      cd_nom: { cd_nom: individual.cd_nom, nom_valide: 'Bouquetin' },
       id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
     });
   }
@@ -84,23 +83,25 @@ export class IndividualsFormComponent implements OnInit {
   onSave(): void {
     const individual = this.form.getRawValue();
 
-    this._service.createOrUpdateIndividual(individual, this.formAction, this.individualId).subscribe({
-      next: (res) => {
-        const successKey =
-          this.formAction === 'ADD'
-            ? 'Individuals.Individuals.Messages.Added'
-            : 'Individuals.Individuals.Messages.Edited';
-        this._commonService.translateToaster('info', successKey, { id: this.individualId });
-        this.form.markAsPristine();
-        this._location.back();
-      },
-      error: (err) => {
-        this._errorHandler.handleHttpError(
-          err,
-          { id: this.individualId },
-          'Individuals.Individuals.ApiErrors'
-        );
-      },
-    });
+    this._service
+      .createOrUpdateIndividual(individual, this.formAction, this.individualId)
+      .subscribe({
+        next: (res) => {
+          const successKey =
+            this.formAction === 'ADD'
+              ? 'Individuals.Individuals.Messages.Added'
+              : 'Individuals.Individuals.Messages.Edited';
+          this._commonService.translateToaster('info', successKey, { id: this.individualId });
+          this.form.markAsPristine();
+          this._location.back();
+        },
+        error: (err) => {
+          this._errorHandler.handleHttpError(
+            err,
+            { id: this.individualId },
+            'Individuals.Individuals.ApiErrors'
+          );
+        },
+      });
   }
 }

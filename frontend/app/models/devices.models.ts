@@ -18,7 +18,7 @@ export const DEVICE_MODEL = {
   deployments: '',
 };
 
-export type Device = typeof DEVICE_MODEL & {cruved: Cruved};
+export type Device = typeof DEVICE_MODEL & { cruved: Cruved };
 
 export interface APIDeviceFiltersParams {
   // This line help to use

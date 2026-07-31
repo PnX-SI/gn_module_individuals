@@ -92,12 +92,14 @@ export class DevicesInfoComponent implements OnInit {
    */
   private _setPermissions(datatable: Device) {
     console.log(datatable.cruved);
-    this.allowedToEdit = {id: datatable.id_tracking_device, access: true};
-    this.allowedToDelete = {id: datatable.id_tracking_device, access: true};
+    this.allowedToEdit = { id: datatable.id_tracking_device, access: true };
+    this.allowedToDelete = { id: datatable.id_tracking_device, access: true };
 
     // Delete access
     this.allowedToDelete.access = datatable.cruved?.D;
-    this.allowedToDelete.message = this.allowedToDelete.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+    this.allowedToDelete.message = this.allowedToDelete.access
+      ? null
+      : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
     // Check if device has deployments, if yes : no access
     if (this.allowedToDelete.access && datatable.deployments?.length > 0) {
@@ -106,7 +108,9 @@ export class DevicesInfoComponent implements OnInit {
     }
 
     // Edit Access
-    this.allowedToEdit.access = datatable.cruved?.U??false;
-    this.allowedToEdit.message = this.allowedToEdit.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+    this.allowedToEdit.access = datatable.cruved?.U ?? false;
+    this.allowedToEdit.message = this.allowedToEdit.access
+      ? null
+      : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
   }
 }

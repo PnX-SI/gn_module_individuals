@@ -38,7 +38,7 @@ export class ListComponent implements OnInit {
   @Input() displayedColumnsParams: string[] = [];
   @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = of();
   @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
-  @Input() fieldsTranslation: string = ''
+  @Input() fieldsTranslation: string = '';
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: Record<number, AccessResult> = {};
   @Input() allowedToDelete: Record<number, AccessResult> = {};
@@ -69,11 +69,8 @@ export class ListComponent implements OnInit {
 
     // ngx-datatable messages translation
     this._translate
-      .get([
-        'Individuals.Messages.EmptyList',
-        'Individuals.Messages.TotalList',
-      ])
-      .subscribe(translations => {
+      .get(['Individuals.Messages.EmptyList', 'Individuals.Messages.TotalList'])
+      .subscribe((translations) => {
         this.tableMessages = {
           emptyMessage: translations['Individuals.Messages.EmptyList'],
           totalMessage: translations['Individuals.Messages.TotalList'],
@@ -81,14 +78,13 @@ export class ListComponent implements OnInit {
         };
       });
 
-    const availableColumns = Object.keys(this.availableColumnsParams).map(
-      (prop) => ({ prop, name: '' })
-    );
+    const availableColumns = Object.keys(this.availableColumnsParams).map((prop) => ({
+      prop,
+      name: '',
+    }));
 
     this.displayedColumns = this.displayedColumnsParams
-      .map((prop) =>
-        availableColumns.find((column) => column.prop === prop)
-      )
+      .map((prop) => availableColumns.find((column) => column.prop === prop))
       .filter((column): column is Column => column !== undefined);
 
     if (this.displayedColumns.length === 0) {
@@ -97,11 +93,11 @@ export class ListComponent implements OnInit {
 
     combineLatest(
       // Translate the displayed column labels.
-      this.displayedColumns.map(column =>
+      this.displayedColumns.map((column) =>
         // An observable is returned which emits the translation of this key
         this._translate.get(`${this.fieldsTranslation}.${column.prop}`)
       )
-    ).subscribe(labels => {
+    ).subscribe((labels) => {
       this.displayedColumns = this.displayedColumns.map((column, index) => ({
         ...column,
         name: labels[index],
@@ -128,7 +124,6 @@ export class ListComponent implements OnInit {
     this.pagination.emit($event);
   }
 
-
   /**
    * Emit a sort event
    *
@@ -150,7 +145,7 @@ export class ListComponent implements OnInit {
   }
 
   /**
-   * Expand or not the row detail 
+   * Expand or not the row detail
    *
    * @param {*} row
    * @memberof ListComponent

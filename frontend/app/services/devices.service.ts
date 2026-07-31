@@ -5,7 +5,12 @@ import { Observable } from 'rxjs';
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
-import { Device, CreateDeviceDto, UpdateDeviceDto, APIDeviceFiltersParams } from '../models/devices.models';
+import {
+  Device,
+  CreateDeviceDto,
+  UpdateDeviceDto,
+  APIDeviceFiltersParams,
+} from '../models/devices.models';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
 import { DEVICES_DEFAULT_SORT } from '../utils/constants.util';
 @Injectable()

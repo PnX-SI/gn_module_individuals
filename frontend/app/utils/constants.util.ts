@@ -14,7 +14,7 @@ export const MAP_CONFIG = {
   UNSELECTED_LAYER_COLOR: '#2c7bb6',
   SELECTED_LAYER_OPACITY: 0.9,
   UNSELECTED_LAYER_OPACITY: 0.55,
-}
+};
 
 export const DEVICE_FORM_CONSTRAINTS = {
   provider_name: {
@@ -35,7 +35,6 @@ export const DEVICE_FORM_CONSTRAINTS = {
 };
 
 export const DEVICES_DEFAULT_SORT = { prop: 'meta_create_date', dir: 'desc' };
-
 
 export const INDIVIDUALS_DEFAULT_SORT = { prop: 'last_observation_date', dir: 'desc' };
 

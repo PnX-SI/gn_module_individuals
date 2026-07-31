@@ -1,13 +1,27 @@
-import { Component, OnInit, AfterViewInit, HostListener, Input, Output, EventEmitter, TemplateRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  HostListener,
+  Input,
+  Output,
+  EventEmitter,
+  TemplateRef,
+} from '@angular/core';
 import { Observable } from 'rxjs';
 import * as L from 'leaflet';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
 
-import { Feature, FeatureCollection, PaginatedItemCollection, AccessResult } from '../../models/common.models';
+import {
+  Feature,
+  FeatureCollection,
+  PaginatedItemCollection,
+  AccessResult,
+} from '../../models/common.models';
 import { Individual } from '../../models/individuals.models';
 import { CONTENT_CONFIG, MAP_CONFIG } from '../../utils/constants.util';
 import { calcContentHeight } from '../../utils/functions.util';
@@ -36,14 +50,16 @@ export class MapListComponent implements OnInit, AfterViewInit {
     PaginatedItemCollection<unknown>
   >();
   @Input() nbRowsToDisplay!: number;
-  @Input() fieldsTranslation: string = ''
+  @Input() fieldsTranslation: string = '';
   @Input() sorts: Array<Object> = [];
   @Input() allowedToEdit: Record<number, AccessResult> = {};
   @Input() allowedToDelete: Record<number, AccessResult> = {};
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
   @Input() selectedRows: unknown[] = [];
-  @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<FeatureCollection<unknown>>(); 
+  @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<
+    FeatureCollection<unknown>
+  >();
   @Input() featurePopupTemplate!: TemplateRef<{ feature: Feature<unknown> }>;
   @Input() noGeometryMessage: string | null = null;
 
@@ -67,9 +83,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
   ngOnInit() {
     // No geometry default message translation
     if (!this.noGeometryMessage) {
-      this._translate
-      .get('Individuals.Messages.NoGeometry')
-      .subscribe(translations => {
+      this._translate.get('Individuals.Messages.NoGeometry').subscribe((translations) => {
         this.noGeometryMessage = translations;
       });
     }
@@ -154,12 +168,21 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (!(layer as any).setStyle) {
       return;
     }
-    
+
     (layer as any).setStyle({
-      color: selected ? 
-      this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR : this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
-      fillColor: selected ? this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR : this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
-      fillOpacity: selected ? this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_OPACITY ?? MAP_CONFIG.SELECTED_LAYER_OPACITY : this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_OPACITY ?? MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
+      color: selected
+        ? (this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR)
+        : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ??
+          MAP_CONFIG.UNSELECTED_LAYER_COLOR),
+      fillColor: selected
+        ? (this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR)
+        : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ??
+          MAP_CONFIG.UNSELECTED_LAYER_COLOR),
+      fillOpacity: selected
+        ? (this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_OPACITY ??
+          MAP_CONFIG.SELECTED_LAYER_OPACITY)
+        : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_OPACITY ??
+          MAP_CONFIG.UNSELECTED_LAYER_OPACITY),
       radius: selected ? 8 : 6,
       weight: selected ? 3 : 2,
     });
@@ -170,7 +193,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this._selectedId = id;
     this._highlightLayer(layer);
 
-    // Emit the selected id to the parent component, 
+    // Emit the selected id to the parent component,
     // which call the API to get the page, reload the datatable with it,
     // set the selectRows attribute to the corresponding row in the datatable
     this.idPage.emit(id);
@@ -203,18 +226,20 @@ export class MapListComponent implements OnInit, AfterViewInit {
    * @memberof MapListComponent
    */
   private _zoomOnFeatures(): void {
-    this.mapData$.subscribe(mapData => {
+    this.mapData$.subscribe((mapData) => {
       const layer = L.geoJSON(mapData);
 
       if (layer.getBounds().isValid()) {
         this._ignoreNextMapMoveEnd = true;
-        this._mapService.getMap()?.fitBounds(layer.getBounds(), { padding: [20, 20],animate: false });
+        this._mapService
+          .getMap()
+          ?.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
       }
     });
   }
 
-   /**
-   * Reload data whenever the map extent changes (bbox). 
+  /**
+   * Reload data whenever the map extent changes (bbox).
    *
    * @private
    * @return {*}  {void}
@@ -268,7 +293,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     const HTMLDom = document.createElement('div');
 
     // Append each rendered DOM node from the template into the container.
-    view.rootNodes.forEach(node => {
+    view.rootNodes.forEach((node) => {
       if (node instanceof Node) {
         HTMLDom.appendChild(node);
       }
@@ -290,9 +315,8 @@ export class MapListComponent implements OnInit, AfterViewInit {
     }
   }
 
-  
   /**
-   * According to the given id, highlight the layer 
+   * According to the given id, highlight the layer
    * and open it's popup.
    *
    * @private
@@ -344,7 +368,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
       .map((value) => value.toFixed(6))
       .join(',');
   }
-
 
   /**
    * Ask leaflet to recalculate the size of the map

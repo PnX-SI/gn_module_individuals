@@ -1,6 +1,4 @@
-<div
-  [ngStyle]="{ 'min-height.px': contentHeight }"
->
+<div [ngStyle]="{ 'min-height.px': contentHeight }">
   <div class="action-buttons">
     <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
     <button
@@ -127,7 +125,9 @@
         let-row="row"
       >
         <span
-          [matTooltip]="allowedToEdit[row[idFieldName]]?.message??('Individuals.Actions.Edit' | translate)"
+          [matTooltip]="
+            allowedToEdit[row[idFieldName]]?.message ?? ('Individuals.Actions.Edit' | translate)
+          "
         >
           <button
             class="btn btn-row fa fa-pencil-square-o"
@@ -150,7 +150,9 @@
         let-row="row"
       >
         <span
-          [matTooltip]="allowedToDelete[row[idFieldName]]?.message??('Individuals.Actions.Delete' | translate)"
+          [matTooltip]="
+            allowedToDelete[row[idFieldName]]?.message ?? ('Individuals.Actions.Delete' | translate)
+          "
         >
           <button
             class="btn btn-row fa fa-trash-o"
@@ -172,7 +174,15 @@
         maxWidth="columnMaxWidth"
       >
         <span>
-          {{ row[column.prop] === null || row[column.prop] === undefined ? '-' : row[column.prop] === false ? ('Individuals.Others.No' | translate) : row[column.prop] === true ? ('Individuals.Others.Yes' | translate) : row[column.prop] }}
+          {{
+            row[column.prop] === null || row[column.prop] === undefined
+              ? '-'
+              : row[column.prop] === false
+                ? ('Individuals.Others.No' | translate)
+                : row[column.prop] === true
+                  ? ('Individuals.Others.Yes' | translate)
+                  : row[column.prop]
+          }}
         </span>
       </ng-template>
     </ngx-datatable-column>

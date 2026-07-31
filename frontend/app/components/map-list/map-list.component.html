@@ -1,9 +1,12 @@
 <div id="map-list-container">
-  
-  <div id="map-container"
+  <div
+    id="map-container"
     [ngStyle]="{ 'min-height.px': contentHeight }"
   >
-    <div *ngIf="noGeometry" class="map-overlay-message">
+    <div
+      *ngIf="noGeometry"
+      class="map-overlay-message"
+    >
       {{ noGeometryMessage }}
     </div>
     <pnx-map

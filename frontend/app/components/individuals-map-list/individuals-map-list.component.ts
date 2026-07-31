@@ -9,8 +9,18 @@ import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
-import { Individual, INDIVIDUAL_MODEL, APIIndividualFiltersParams } from '../../models/individuals.models';
-import { Sort, PaginatedItemCollection, APIPaginationParams, FeatureCollection, AccessResult } from '../../models/common.models';
+import {
+  Individual,
+  INDIVIDUAL_MODEL,
+  APIIndividualFiltersParams,
+} from '../../models/individuals.models';
+import {
+  Sort,
+  PaginatedItemCollection,
+  APIPaginationParams,
+  FeatureCollection,
+  AccessResult,
+} from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
 import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
@@ -22,17 +32,21 @@ import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 })
 export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public availableColumnsParams = INDIVIDUAL_MODEL;
-  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.LIST_COLUMNS ?? [];
+  public displayedColumnsParams: string[] =
+    this._config.INDIVIDUALS?.INDIVIDUALS?.LIST_COLUMNS ?? [];
   public datatable$: Observable<PaginatedItemCollection<Individual>> = new Observable<
     PaginatedItemCollection<Individual>
   >();
-  public nbRowsToDisplay = this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
-  public fieldsTranslation = "Individuals.Individuals.Fields";
+  public nbRowsToDisplay =
+    this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
+  public fieldsTranslation = 'Individuals.Individuals.Fields';
   public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
   public allowedToEdit: Record<number, AccessResult> = {};
   public allowedToDelete: Record<number, AccessResult> = {};
   public selectedRows: Individual[] = [];
-  public mapData$: Observable<FeatureCollection<Individual>> = new Observable<FeatureCollection<Individual>>();
+  public mapData$: Observable<FeatureCollection<Individual>> = new Observable<
+    FeatureCollection<Individual>
+  >();
   public defaultFilters: APIIndividualFiltersParams = {};
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
@@ -41,7 +55,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     prop: INDIVIDUALS_DEFAULT_SORT.prop,
     dir: INDIVIDUALS_DEFAULT_SORT.dir,
   };
-  private _APIFiltersParams: APIIndividualFiltersParams = {'active': 'true'};
+  private _APIFiltersParams: APIIndividualFiltersParams = { active: 'true' };
   private _selectedId: number | null = null;
 
   constructor(
@@ -56,11 +70,13 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     // Resolver : First initialisation of the table
-    this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, mapData }) => {
-      this.datatable$ = of(datatable);
-      this.mapData$ = of(mapData);
-      this._setPermissions(datatable);
-    });
+    this._activatedRoute.data
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(({ datatable, mapData }) => {
+        this.datatable$ = of(datatable);
+        this.mapData$ = of(mapData);
+        this._setPermissions(datatable);
+      });
 
     this.defaultFilters = this._APIFiltersParams;
   }
@@ -112,23 +128,23 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @memberof IndividualsMapListComponent
    */
   public openDeleteModal($event: Individual) {
-      this.selectedRows = [$event];
-      const modalRef = this._ngbModal.open(DeleteModalComponent);
-  
-      modalRef.componentInstance.title = this._translate.instant(
-        'Individuals.Individuals.Titles.Delete',
-        { id: this.selectedRows[0].id_individual }
-      );
-  
-      modalRef.componentInstance.body = `
+    this.selectedRows = [$event];
+    const modalRef = this._ngbModal.open(DeleteModalComponent);
+
+    modalRef.componentInstance.title = this._translate.instant(
+      'Individuals.Individuals.Titles.Delete',
+      { id: this.selectedRows[0].id_individual }
+    );
+
+    modalRef.componentInstance.body = `
         ${this._translate.instant('Individuals.Individuals.Fields.individual_name')} : ${this.selectedRows[0].individual_name}<br>
         ${this._translate.instant('Individuals.Individuals.Fields.taxref_nom_vern')} : ${this.selectedRows[0].taxref_nom_vern}<br>
         ${this._translate.instant('Individuals.Individuals.Fields.nomenclature_sex_name')} : ${this.selectedRows[0].nomenclature_sex_name}<br>
       `;
-  
-      modalRef.componentInstance.confirm.subscribe((id: number) => {
-        this._onDelete();
-      });
+
+    modalRef.componentInstance.confirm.subscribe((id: number) => {
+      this._onDelete();
+    });
   }
 
   /**
@@ -137,14 +153,14 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @param {({key: keyof APIIndividualFiltersParams; value: any;} | null)} $event Filter value {key, value} or null to reset filters
    * @memberof IndividualsMapListComponent
    */
-  public onFilters($event: {key: keyof APIIndividualFiltersParams; value: any;} | null): void {
-      if (!$event) {
-        this._APIFiltersParams = {};
-      } else {
-          this._APIFiltersParams[$event.key] = $event.value;
-          this._APIPaginationParams['page'] = 1;
-      }
-      this._loadData();
+  public onFilters($event: { key: keyof APIIndividualFiltersParams; value: any } | null): void {
+    if (!$event) {
+      this._APIFiltersParams = {};
+    } else {
+      this._APIFiltersParams[$event.key] = $event.value;
+      this._APIPaginationParams['page'] = 1;
+    }
+    this._loadData();
   }
 
   private _onDelete(): void {
@@ -167,10 +183,10 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       });
     }
   }
-  
+
   /**
    * API call to get the page corresponding to the given id and reload data with this page.
-   * Used when a map feature is clicked and want to display the corresponding row in the paginated table. 
+   * Used when a map feature is clicked and want to display the corresponding row in the paginated table.
    *
    * @param {*} $event
    * @memberof IndividualsMapListComponent
@@ -197,25 +213,22 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       ...this._APIPaginationParams,
       ...this._APIFiltersParams,
     };
-    this.datatable$ = this._individualsService
-      .getIndividuals(APIParams).pipe(
-        tap((data) => {
-          if (this._selectedId !== null) {
-            const selected = data.items.find(
-              (item) => item.id_individual === this._selectedId
-            );
-            this.selectedRows = selected ? [selected] : [];
-          } else {
-            this.selectedRows = [];
-          }
-          this._setPermissions(data)
-        })
-      )
+    this.datatable$ = this._individualsService.getIndividuals(APIParams).pipe(
+      tap((data) => {
+        if (this._selectedId !== null) {
+          const selected = data.items.find((item) => item.id_individual === this._selectedId);
+          this.selectedRows = selected ? [selected] : [];
+        } else {
+          this.selectedRows = [];
+        }
+        this._setPermissions(data);
+      })
+    );
   }
 
   /**
-   * Set the allowToDelete and allowToEdit variables considering the item cruved. 
-   * Else, for each item id, if a deployment or observation exists 
+   * Set the allowToDelete and allowToEdit variables considering the item cruved.
+   * Else, for each item id, if a deployment or observation exists
    * set the corresponding array entry to false, else to true
    *
    * @private
@@ -226,33 +239,39 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     if (data.items) {
       data.items.forEach((item: Individual) => {
         // Delete access
-        let deleteAccess: AccessResult = {id: item.id_individual, access:true};
-        console.log(item.id_individual," ",item.cruved)
-        deleteAccess.access = item.cruved?.D??false;
-        deleteAccess.message = deleteAccess.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+        let deleteAccess: AccessResult = { id: item.id_individual, access: true };
+        console.log(item.id_individual, ' ', item.cruved);
+        deleteAccess.access = item.cruved?.D ?? false;
+        deleteAccess.message = deleteAccess.access
+          ? null
+          : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
         if (deleteAccess.access) {
           // Not allowed to delete if deployments exists
           if (item.last_observation_date) {
             deleteAccess.access = false;
-            deleteAccess.message = this._translate.instant('Individuals.ApiErrors.HasObservation')
-          } 
+            deleteAccess.message = this._translate.instant('Individuals.ApiErrors.HasObservation');
+          }
           // Not Allowed to delete if observations exists
-          else if (Object.keys(item.deployed_devices).length > 0 || Object.keys(item.deployed_markings).length > 0) {
+          else if (
+            Object.keys(item.deployed_devices).length > 0 ||
+            Object.keys(item.deployed_markings).length > 0
+          ) {
             deleteAccess.access = false;
-            deleteAccess.message = this._translate.instant('Individuals.ApiErrors.HasDeployment')
+            deleteAccess.message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
           }
         }
-        
-        // Edit access
-        let editAccess: AccessResult = {id: item.id_individual, access:true};
 
-        editAccess.access = item.cruved?.D??false;
-        editAccess.message = editAccess.access?null:this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+        // Edit access
+        let editAccess: AccessResult = { id: item.id_individual, access: true };
+
+        editAccess.access = item.cruved?.D ?? false;
+        editAccess.message = editAccess.access
+          ? null
+          : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
         this.allowedToDelete[item.id_individual] = deleteAccess;
         this.allowedToEdit[item.id_individual] = editAccess;
-
       });
     }
   }

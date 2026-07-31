@@ -23,18 +23,21 @@
     <!-- id_nomenclature_sex -->
     <pnx-nomenclature
       class="form-group w-50"
-      [label]="'Individuals.Individuals.Fields.nomenclature_sex_name' | translate "
+      [label]="'Individuals.Individuals.Fields.nomenclature_sex_name' | translate"
       [parentFormControl]="$any(form.get('id_nomenclature_sex'))"
       [codeNomenclatureType]="'SEXE'"
-      [cdNomenclatures]="[2,3]"
+      [cdNomenclatures]="[2, 3]"
     ></pnx-nomenclature>
 
     <!-- active -->
     <gn-individuals-input-radio
-      [label]="'Individuals.Individuals.Fields.active'| translate"
+      [label]="'Individuals.Individuals.Fields.active' | translate"
       [parentFormControl]="$any(form.get('active'))"
       [inputName]="'active'"
-      [options]="[{ value: true, label: 'Individuals.Others.Yes' | translate }, { value: false, label: 'Individuals.Others.No' | translate }]"
+      [options]="[
+        { value: true, label: 'Individuals.Others.Yes' | translate },
+        { value: false, label: 'Individuals.Others.No' | translate }
+      ]"
     ></gn-individuals-input-radio>
 
     <!-- comment -->
@@ -48,7 +51,7 @@
 
     <!-- Additional data -->
     <label>Additional data</label>
-    <span> A FAIRE ! </span>
+    <span>A FAIRE !</span>
   </div>
 </ng-template>
 
@@ -76,9 +79,7 @@
     (save)="onSave()"
   ></gn-individuals-form> -->
   <gn-individuals-form
-    [formTitle]="
-      'Individuals.Individuals.Titles.Edit' | translate: { id: individualId }
-    "
+    [formTitle]="'Individuals.Individuals.Titles.Edit' | translate: { id: individualId }"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [objectName]="'individuals'"

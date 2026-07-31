@@ -22,7 +22,8 @@ export class DevicesResolver implements Resolve<PaginatedItemCollection<Device>>
   ): Observable<PaginatedItemCollection<Device>> {
     const params = {
       page: 1,
-      per_page: this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION,
+      per_page:
+        this._config.INDIVIDUALS.DEVICES.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION,
     };
 
     return this._service.getDevices(params);

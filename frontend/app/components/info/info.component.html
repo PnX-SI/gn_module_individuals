@@ -5,9 +5,7 @@
       {{ infoTitle }}
     </div>
     <div>
-      <span
-          [matTooltip]="allowedToEdit?.message??('Individuals.Actions.Edit' | translate)"
-       >
+      <span [matTooltip]="allowedToEdit?.message ?? ('Individuals.Actions.Edit' | translate)">
         <button
           mat-mini-fab
           class="custom-mini-fab mr-1 bg-success text-white border-0"
@@ -18,9 +16,7 @@
           <mat-icon>edit</mat-icon>
         </button>
       </span>
-      <span
-        [matTooltip]="allowedToDelete?.message??('Individuals.Actions.Delete' | translate)"
-      >
+      <span [matTooltip]="allowedToDelete?.message ?? ('Individuals.Actions.Delete' | translate)">
         <button
           mat-mini-fab
           class="mr-1 bg-danger text-white border-0"
