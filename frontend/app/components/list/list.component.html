@@ -1,6 +1,4 @@
-<div
-  [ngStyle]="{ 'min-height.px': contentHeight }"
->
+<div [ngStyle]="{ 'min-height.px': contentHeight }">
   <div class="action-buttons">
     <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
     <button
@@ -126,12 +124,17 @@
         ngx-datatable-cell-template
         let-row="row"
       >
-        <button
-          class="btn btn-row fa fa-pencil-square-o"
-          matTooltip="{{ 'Individuals.Actions.Edit' | translate }}"
-          [routerLink]="['form', row[idFieldName]]"
-          [disabled]="false"
-        ></button>
+        <span
+          [matTooltip]="
+            allowedToEdit[row[idFieldName]]?.message ?? ('Individuals.Actions.Edit' | translate)
+          "
+        >
+          <button
+            class="btn btn-row fa fa-pencil-square-o"
+            [routerLink]="['form', row[idFieldName]]"
+            [disabled]="!allowedToEdit[row[idFieldName]]?.access"
+          ></button>
+        </span>
       </ng-template>
     </ngx-datatable-column>
     <ngx-datatable-column
@@ -146,12 +149,17 @@
         ngx-datatable-cell-template
         let-row="row"
       >
-        <button
-          class="btn btn-row fa fa-trash-o"
-          matTooltip="{{ 'Individuals.Actions.Delete' | translate }}"
-          (click)="onDelete(row)"
-          [disabled]="!allowedToDelete[row[idFieldName]]"
-        ></button>
+        <span
+          [matTooltip]="
+            allowedToDelete[row[idFieldName]]?.message ?? ('Individuals.Actions.Delete' | translate)
+          "
+        >
+          <button
+            class="btn btn-row fa fa-trash-o"
+            (click)="onDelete(row)"
+            [disabled]="!allowedToDelete[row[idFieldName]]?.access"
+          ></button>
+        </span>
       </ng-template>
     </ngx-datatable-column>
     <!-- Displayed data columns -->
@@ -166,7 +174,15 @@
         maxWidth="columnMaxWidth"
       >
         <span>
-          {{ row[column.prop] === null || row[column.prop] === undefined ? '-' : row[column.prop] === false ? ('Individuals.Others.No' | translate) : row[column.prop] === true ? ('Individuals.Others.Yes' | translate) : row[column.prop] }}
+          {{
+            row[column.prop] === null || row[column.prop] === undefined
+              ? '-'
+              : row[column.prop] === false
+                ? ('Individuals.Others.No' | translate)
+                : row[column.prop] === true
+                  ? ('Individuals.Others.Yes' | translate)
+                  : row[column.prop]
+          }}
         </span>
       </ng-template>
     </ngx-datatable-column>

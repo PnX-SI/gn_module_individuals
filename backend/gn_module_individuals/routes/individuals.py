@@ -8,6 +8,7 @@ from sqlalchemy.orm import joinedload, raiseload, selectinload
 from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
+from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 from utils_flask_sqla_geo.utils import geojsonify
@@ -26,7 +27,7 @@ from ..schemas.individuals import (
     IndividualsMapSchema,
     IndividualsWriteSchema,
 )
-from ..utils.errors import APIError, IndividualsErrorCode
+from ..utils.errors import APIError, ApiErrorCode
 
 
 def _parse_filters(args):
@@ -47,7 +48,7 @@ def _parse_bool(value):
         return True
     if normalized in ("false", "0", "no", "n"):
         return False
-    raise APIError(IndividualsErrorCode.INVALID_FILTER, "Unsupported active value", 400)
+    raise APIError(ApiErrorCode.INVALID_FILTER, "Unsupported active value", 400)
 
 
 def _parse_bbox(value):
@@ -57,14 +58,12 @@ def _parse_bbox(value):
         west, south, east, north = [float(part) for part in value.split(",")]
     except ValueError as exc:
         raise APIError(
-            IndividualsErrorCode.INVALID_FILTER,
+            ApiErrorCode.INVALID_FILTER,
             "bbox must be formatted as west,south,east,north",
             400,
         ) from exc
     if west >= east or south >= north:
-        raise APIError(
-            IndividualsErrorCode.INVALID_FILTER, "bbox coordinates are inconsistent", 400
-        )
+        raise APIError(ApiErrorCode.INVALID_FILTER, "bbox coordinates are inconsistent", 400)
     return west, south, east, north
 
 
@@ -96,7 +95,7 @@ def _apply_filters(query, filters):
 def _parse_sort(args):
     direction = args.get("dir", "desc", type=str).lower()
     if direction not in ("asc", "desc"):
-        raise APIError(IndividualsErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
+        raise APIError(ApiErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
     return {
         "prop": args.get("prop", "last_observation_date", type=str),
         "dir": direction,
@@ -268,7 +267,7 @@ def individual(id_individual, scope):
 
     if result is None:
         raise APIError(
-            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             f"Individual with id {id_individual} was not found.",
             404,
             params={"id": id_individual},
@@ -301,7 +300,7 @@ def create_individual(scope):
 
     if not data:
         raise APIError(
-            IndividualsErrorCode.MISSING_JSON_BODY,
+            ApiErrorCode.MISSING_JSON_BODY,
             "Missing JSON request body.",
             400,
         )
@@ -311,7 +310,7 @@ def create_individual(scope):
         individual = schema.load(data)
     except ValidationError as e:
         raise APIError(
-            IndividualsErrorCode.VALIDATION_ERROR,
+            ApiErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",
             400,
         )
@@ -347,7 +346,7 @@ def update_individual(id_individual, scope):
     individual = db.session.get(TIndividuals, id_individual)
     if individual is None:
         raise APIError(
-            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             f"Individual with id {id_individual} was not found.",
             404,
             params={"id": id_individual},
@@ -356,14 +355,14 @@ def update_individual(id_individual, scope):
     data = request.get_json(silent=True)
     if not data:
         raise APIError(
-            IndividualsErrorCode.MISSING_JSON_BODY,
+            ApiErrorCode.MISSING_JSON_BODY,
             "Missing JSON request body.",
             400,
         )
 
     if not individual.has_instance_permission(scope):
         raise APIError(
-            IndividualsErrorCode.INSUFFICIENT_PERMISSIONS,
+            ApiErrorCode.INSUFFICIENT_PERMISSIONS,
             f"You do not have permission to update individual {id_individual}.",
             403,
         )
@@ -373,7 +372,7 @@ def update_individual(id_individual, scope):
         individual = schema.load(data, instance=individual)
     except ValidationError as e:
         raise APIError(
-            IndividualsErrorCode.VALIDATION_ERROR,
+            ApiErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",
             400,
         )
@@ -404,7 +403,7 @@ def delete_individual(id_individual, scope):
     individual = db.session.get(TIndividuals, id_individual)
     if individual is None:
         raise APIError(
-            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             f"Individual with id {id_individual} was not found.",
             404,
             params={"id": id_individual},
@@ -412,7 +411,7 @@ def delete_individual(id_individual, scope):
 
     if not individual.has_instance_permission(scope):
         raise APIError(
-            IndividualsErrorCode.INSUFFICIENT_PERMISSIONS,
+            ApiErrorCode.INSUFFICIENT_PERMISSIONS,
             f"You do not have permission to delete individual {id_individual}.",
             403,
         )
@@ -424,10 +423,21 @@ def delete_individual(id_individual, scope):
     )
     if deployment_count:
         raise APIError(
-            IndividualsErrorCode.INDIVIDUAL_HAS_DEPLOYMENTS,
+            ApiErrorCode.HAS_DEPLOYMENT,
             "This individual cannot be deleted because it is associated with deployments.",
             409,
             params={"id": id_individual, "nb": deployment_count},
+        )
+
+    observation_count = db.session.scalar(
+        select(func.count()).select_from(Synthese).where(Synthese.id_individual == id_individual)
+    )
+    if observation_count:
+        raise APIError(
+            ApiErrorCode.HAS_OBSERVATION,
+            "This individual cannot be deleted because it is associated with observations.",
+            409,
+            params={"id": id_individual, "nb": observation_count},
         )
 
     db.session.delete(individual)
@@ -509,7 +519,7 @@ def individual_page(id_individual, scope):
     sort = _parse_sort(request.args)
     per_page = request.args.get("per_page", 20, type=int)
     if per_page < 1:
-        raise APIError(IndividualsErrorCode.INVALID_FILTER, "per_page must be greater than 0", 400)
+        raise APIError(ApiErrorCode.INVALID_FILTER, "per_page must be greater than 0", 400)
 
     query = _build_individuals_query(scope, filters, sort, eager_load=False)
     ranked = (
@@ -524,7 +534,7 @@ def individual_page(id_individual, scope):
     rank = db.session.scalar(select(ranked.c.rank).where(ranked.c.id_individual == id_individual))
     if rank is None:
         raise APIError(
-            IndividualsErrorCode.INDIVIDUAL_NOT_FOUND,
+            ApiErrorCode.NOT_FOUND,
             "Individual not found in current filtered result",
             404,
             params={"id": id_individual},

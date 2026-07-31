@@ -10,7 +10,7 @@ import { CommonService } from '@geonature_common/service/common.service';
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Device } from '../../models/devices.models';
 import { Deployment } from '../../models/deployments.models';
-import { Column } from '../../models/common.models';
+import { Column, AccessResult } from '../../models/common.models';
 import { DevicesService } from '../../services/devices.service';
 
 @Component({
@@ -25,7 +25,8 @@ export class DevicesInfoComponent implements OnInit {
   public dataTable$: Observable<Device> = new Observable<Device>();
   public deploymentsColumns: Column<Deployment>[] = [];
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
-  public canBeDeleted: boolean = false;
+  public allowedToDelete!: AccessResult;
+  public allowedToEdit!: AccessResult;
   private _deviceId!: number;
 
   constructor(
@@ -57,9 +58,10 @@ export class DevicesInfoComponent implements OnInit {
           }));
         });
       } else {
-        this.canBeDeleted = true;
         datatable.deployments = [];
       }
+
+      this._setPermissions(datatable);
     });
   }
 
@@ -79,5 +81,36 @@ export class DevicesInfoComponent implements OnInit {
         });
       },
     });
+  }
+
+  /**
+   * Set edit and delete permissions
+   *
+   * @private
+   * @param {Device} datatable Device object to set button access
+   * @memberof DevicesInfoComponent
+   */
+  private _setPermissions(datatable: Device) {
+    console.log(datatable.cruved);
+    this.allowedToEdit = { id: datatable.id_tracking_device, access: true };
+    this.allowedToDelete = { id: datatable.id_tracking_device, access: true };
+
+    // Delete access
+    this.allowedToDelete.access = datatable.cruved?.D;
+    this.allowedToDelete.message = this.allowedToDelete.access
+      ? null
+      : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+
+    // Check if device has deployments, if yes : no access
+    if (this.allowedToDelete.access && datatable.deployments?.length > 0) {
+      this.allowedToDelete.access = false;
+      this.allowedToDelete.message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
+    }
+
+    // Edit Access
+    this.allowedToEdit.access = datatable.cruved?.U ?? false;
+    this.allowedToEdit.message = this.allowedToEdit.access
+      ? null
+      : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
   }
 }

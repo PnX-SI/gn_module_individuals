@@ -1,13 +1,13 @@
 <div class="d-flex flex-wrap filters-form">
   <!-- active -->
   <gn-individuals-input-radio
-    [label]="'Individuals.Individuals.Fields.active'| translate"
+    [label]="'Individuals.Individuals.Fields.active' | translate"
     [parentFormControl]="filtersForm.get('active')"
     [inputName]="'active'"
     [options]="[
-      { value: 'true', label: 'Individuals.Others.Yes' | translate }, 
+      { value: 'true', label: 'Individuals.Others.Yes' | translate },
       { value: 'false', label: 'Individuals.Others.No' | translate },
-      { value: '', label: 'Individuals.Others.All' | translate },
+      { value: '', label: 'Individuals.Others.All' | translate }
     ]"
   ></gn-individuals-input-radio>
 
@@ -23,15 +23,15 @@
   <!-- id_nomenclature_sex -->
   <pnx-nomenclature
     [ngClass]="'form-group'"
-    [label]="'Individuals.Individuals.Fields.nomenclature_sex_name'| translate"
+    [label]="'Individuals.Individuals.Fields.nomenclature_sex_name' | translate"
     [parentFormControl]="$any(filtersForm.get('id_nomenclature_sex'))"
     [codeNomenclatureType]="'SEXE'"
-    [cdNomenclatures]="[2,3]"
+    [cdNomenclatures]="[2, 3]"
   ></pnx-nomenclature>
 
   <!-- individual_name -->
   <gn-individuals-input-text
-    [label]="'Individuals.Individuals.Fields.individual_name'| translate"
+    [label]="'Individuals.Individuals.Fields.individual_name' | translate"
     [parentFormControl]="filtersForm.get('individual_name')"
     [maxLength]="formConstraints['individual_name'].maxLength"
     [errorKey]="'Individuals.Errors.' + [formConstraints['individual_name'].help] | translate"

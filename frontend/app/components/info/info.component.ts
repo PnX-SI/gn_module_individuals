@@ -11,6 +11,8 @@ import {
 
 import { ModuleService } from '@geonature/services/module.service';
 
+import { AccessResult } from '../../models/common.models';
+
 @Component({
   selector: 'gn-individuals-info',
   templateUrl: 'info.component.html',
@@ -25,7 +27,8 @@ export class InfoComponent implements OnInit, AfterViewInit {
   @Input() dataTable: any;
   @Input() objectName: string = '';
   @Input() objectId: number | null = null;
-  @Input() canBeDeleted: boolean = false;
+  @Input() allowedToEdit!: AccessResult;
+  @Input() allowedToDelete!: AccessResult;
   public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(private _moduleService: ModuleService) {}

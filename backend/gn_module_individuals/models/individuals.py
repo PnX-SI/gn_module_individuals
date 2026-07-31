@@ -17,8 +17,7 @@ def _register_nomenclatures_attribute():
     TIndividuals is a core model, so it can't inherit the mixin (which must be
     in the class bases at declaration time). Instead we set __nomenclatures__
     here to the list of TIndividuals relationships pointing to TNomenclatures,
-    used by routes/individuals.py (eager loading + schema `only`), the same
-    way gn_module_occhab does with Station.__nomenclatures__.
+    used by routes/individuals.py (eager loading + schema `only`)
     """
     if hasattr(TIndividuals, "__nomenclatures__"):
         return
@@ -44,8 +43,7 @@ def register_individual_extensions():
 
 # ---------------------------------------------------------------------------
 # An individual's last observation (position, date, observers) is read from
-# gn_synthese.synthese (fed by Occtax's real-time trigger and by manual sync
-# of Monitoring sub-modules), not computed here.
+# gn_synthese.synthese
 # ---------------------------------------------------------------------------
 
 

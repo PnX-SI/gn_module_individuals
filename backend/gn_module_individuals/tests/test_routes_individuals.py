@@ -10,7 +10,7 @@ from geonature.utils.env import db
 from pypnusershub.tests.utils import set_logged_user
 
 from gn_module_individuals.models import IndividualDeployments
-from gn_module_individuals.utils.errors import IndividualsErrorCode
+from gn_module_individuals.utils.errors import ApiErrorCode
 
 # ===========================================================================
 # GET /individuals/individuals/geometry  (individuals_geometry)
@@ -430,7 +430,7 @@ class TestGetIndividual:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.individual", id_individual=-1))
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.INDIVIDUAL_NOT_FOUND
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
         assert "description" in payload
 
     def test_out_of_scope_individual_returns_404(self, users, individuals):
@@ -664,7 +664,7 @@ class TestCreateIndividual:
         )
         assert r.status_code == 400
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.MISSING_JSON_BODY
+        assert payload.get("name") == ApiErrorCode.MISSING_JSON_BODY
         assert "description" in payload
 
     def test_validation_error_returns_structured_error(self, users, valid_payload):
@@ -675,7 +675,7 @@ class TestCreateIndividual:
         )
         assert r.status_code == 400
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.VALIDATION_ERROR
+        assert payload.get("name") == ApiErrorCode.VALIDATION_ERROR
         assert "description" in payload
 
 
@@ -726,7 +726,7 @@ class TestUpdateIndividual:
             json={"individual_name": "X", "cd_nom": 1},
         )
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.INDIVIDUAL_NOT_FOUND
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
         assert "description" in payload
 
     def test_forbidden_scope_returns_structured_error(self, users, individuals):
@@ -737,7 +737,7 @@ class TestUpdateIndividual:
         )
         assert r.status_code == 403
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.INSUFFICIENT_PERMISSIONS
+        assert payload.get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
         assert "description" in payload
 
     def test_returns_200_with_valid_payload(self, users, individual):
@@ -805,7 +805,7 @@ class TestUpdateIndividual:
         )
         assert r.status_code == 400
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.MISSING_JSON_BODY
+        assert payload.get("name") == ApiErrorCode.MISSING_JSON_BODY
         assert "description" in payload
 
 
@@ -835,7 +835,7 @@ class TestIndividualPage:
         r = self.client.get(url_for("individuals.individual_page", id_individual=-1))
         assert r.status_code == 404
         payload = r.get_json()
-        assert payload.get("name") == IndividualsErrorCode.INDIVIDUAL_NOT_FOUND
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
 
     def test_out_of_scope_individual_returns_404(self, users, individuals):
         """individuals[0] is digitised by admin_user; self_user (scope=1) can't see it."""

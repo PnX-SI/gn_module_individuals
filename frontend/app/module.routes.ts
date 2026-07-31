@@ -8,8 +8,12 @@ import { DevicesInfoComponent } from './components/devices-info/devices-info.com
 import { DevicesFormComponent } from './components/devices-form/devices-form.component';
 import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
 
-import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component'; 
-import { IndividualsResolver, IndividualsMapResolver, IndividualResolver } from './resolvers/individuals.resolver';
+import { IndividualsMapListComponent } from './components/individuals-map-list/individuals-map-list.component';
+import {
+  IndividualsResolver,
+  IndividualsMapResolver,
+  IndividualResolver,
+} from './resolvers/individuals.resolver';
 import { IndividualsInfoComponent } from './components/individuals-info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
 

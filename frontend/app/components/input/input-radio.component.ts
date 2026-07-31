@@ -28,11 +28,11 @@ export class InputRadioComponent {
   @Input() inputClass = '';
 
   /**
-   * Input name. The different options will set with the same name, 
+   * Input name. The different options will set with the same name,
    * all be part of the same group
    */
   @Input() inputName = '';
-  
+
   /**
    * Input options defined as a value/label array
    * ex: [{value:1, label: 'Label 1'}]

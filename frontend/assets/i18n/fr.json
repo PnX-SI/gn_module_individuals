@@ -46,13 +46,6 @@
                 "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
                 "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
                 "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            },
-            "ApiErrors": {
-                "DeviceNotFound": "Le dispositif de suivi n°{{ id }} est introuvable.",
-                "DeviceHasDeployment": "Le dispositif de suivi n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
-                "JsonBodyMissing": "Les données du dispositif de suivi sont manquantes ou mal formées.",
-                "ValidationError": "Les données du dispositif de suivi sont invalides. Veuillez vérifier le formulaire.",
-                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier ce dispositif de suivi."
             }
         },
         "Deployments": {
@@ -114,14 +107,7 @@
                 "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
                 "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
                 "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            },
-            "ApiErrors": {
-                "NotFound": "L'individu n°{{ id }} est introuvable.",
-                "HasDeployment": "L'individu n°{{ id }} ne peut pas être supprimé car il est associé à {{ nb }} déploiements.",
-                "JsonBodyMissing": "Les données de l'individu sont manquantes ou mal formées.",
-                "ValidationError": "Les données de l'individu sont invalides. Veuillez vérifier le formulaire.",
-                "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour modifier cet individu."
-            }
+            }      
         },
         "Messages": {
             "EmptyList" : "Aucune donnée à afficher",
@@ -140,7 +126,10 @@
             "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
             "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
             "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
-            "UnknownError": "Une erreur inattendue s'est produite."
+            "UnknownError": "Une erreur inattendue s'est produite.",
+            "HasDeployment": "Cet objet ne peut pas être supprimé car un ou des déploiements lui sont associés.",
+            "HasObservation": "Cet objet e peut pas être supprimé car une ou des observations lui sont associées.",
+            "NotFound": "L'objet n°{{ id }} est introuvable."
         },
         "DeletingPopup" : {
             "Warning" : "Attention",
@@ -151,7 +140,6 @@
             "PickGeom" : " Veuillez saisir une géométrie sur la carte ",
             "firstLetters": "Saisir les premières lettres",
             "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet"
-
         },
         "Actions" : {
             "Add" : "Ajouter",

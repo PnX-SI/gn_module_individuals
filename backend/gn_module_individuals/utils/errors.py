@@ -4,29 +4,17 @@ from typing import Dict, Optional
 from flask import jsonify
 
 
-class DevicesErrorCode(str, Enum):
-    """Error codes for tracking devices.
+class ApiErrorCode(str, Enum):
+    """Error codes shared by all entities (devices, individuals, ...).
 
-    Backend/frontend contract: the frontend uses the value as a translation
-    key suffix (e.g. Individuals.ApiErrors.DeviceNotFound).
+    Backend/frontend contract: the frontend uses the value as a generic
+    translation key (e.g. Individuals.ApiErrors.NotFound), shared across
+    entities rather than namespaced per entity.
     """
 
-    DEVICE_NOT_FOUND = "DeviceNotFound"
-    DEVICE_HAS_DEPLOYMENTS = "DeviceHasDeployment"
-    MISSING_JSON_BODY = "JsonBodyMissing"
-    VALIDATION_ERROR = "ValidationError"
-    INSUFFICIENT_PERMISSIONS = "InsufficientPermissions"
-
-
-class IndividualsErrorCode(str, Enum):
-    """Error codes for individuals.
-
-    Backend/frontend contract: the frontend uses the value as a translation
-    key suffix (e.g. Individuals.ApiErrors.IndividualNotFound).
-    """
-
-    INDIVIDUAL_NOT_FOUND = "IndividualNotFound"
-    INDIVIDUAL_HAS_DEPLOYMENTS = "IndividualHasDeployments"
+    NOT_FOUND = "NotFound"
+    HAS_DEPLOYMENT = "HasDeployment"
+    HAS_OBSERVATION = "HasObservation"
     INVALID_FILTER = "InvalidFilter"
     MISSING_JSON_BODY = "JsonBodyMissing"
     VALIDATION_ERROR = "ValidationError"
@@ -36,14 +24,14 @@ class IndividualsErrorCode(str, Enum):
 class APIError(Exception):
     """Structured exception producing {name, description}, as expected by MyCustomInterceptor.
 
-    ``name`` is the machine code (e.g. DevicesErrorCode), used by the frontend as a
+    ``name`` is the machine code (e.g. ApiErrorCode), used by the frontend as a
     translation key. ``description`` is the default English message, shown as-is if
     no translation is available.
     """
 
     def __init__(
         self,
-        code: DevicesErrorCode,
+        code: ApiErrorCode,
         description: str,
         status: int = 400,
         params: Optional[Dict[str, object]] = None,

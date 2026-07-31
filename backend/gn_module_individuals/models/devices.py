@@ -1,4 +1,6 @@
 from flask import g
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import false, or_
 
 from geonature.utils.env import DB
 from geonature.core.gn_monitoring.models import TIndividuals
@@ -90,10 +92,48 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         back_populates="tracking_device",
     )
 
+    @hybrid_property
+    def organism_actors(self):
+        """Organisms that own this device, through its digitiser and its referer.
+
+        Mirrors TIndividuals.organism_actors so scope 2 behaves identically on
+        both resources.
+        """
+        return [
+            actor.id_organisme
+            for actor in (self.digitiser, self.referer)
+            if isinstance(actor, User)
+        ]
+
+    @classmethod
+    def filter_by_scope(cls, query, scope, user=None):
+        if user is None:
+            user = g.current_user
+        if scope == 0:
+            query = query.where(false())
+        elif scope in (1, 2):
+            ors = [
+                cls.id_digitiser == user.id_role,
+                cls.id_referer == user.id_role,
+            ]
+            # if organism is None => do not filter on id_organism even if level = 2
+            if scope == 2 and user.id_organisme is not None:
+                ors.append(cls.digitiser.has(id_organisme=user.id_organisme))
+                ors.append(cls.referer.has(id_organisme=user.id_organisme))
+            query = query.where(or_(*ors))
+        return query
+
     def has_instance_permission(self, scope):
+        user = g.current_user
+        # Nothing
         if scope == 0:
             return False
-        elif scope in (1, 2):
-            return g.current_user == self.digitiser or g.current_user == self.referer
+        # My data
+        elif scope == 1:
+            return user == self.digitiser or user == self.referer
+        # My company's data
+        elif scope == 2 and user.id_organisme is not None:
+            return user.id_organisme in self.organism_actors
+        # All
         elif scope == 3:
             return True

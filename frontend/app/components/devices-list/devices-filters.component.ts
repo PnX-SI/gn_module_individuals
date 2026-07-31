@@ -24,7 +24,10 @@ import { DEVICE_FORM_CONSTRAINTS } from '../../utils/constants.util';
   standalone: false,
 })
 export class DevicesFiltersComponent implements OnInit, OnDestroy {
-  @Output() filters = new EventEmitter<{key: keyof APIDeviceFiltersParams; value: string | number | undefined;} | null>();
+  @Output() filters = new EventEmitter<{
+    key: keyof APIDeviceFiltersParams;
+    value: string | number | undefined;
+  } | null>();
   public filtersForm!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
   public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
@@ -54,12 +57,12 @@ export class DevicesFiltersComponent implements OnInit, OnDestroy {
           takeUntil(this._destroy$)
         )
         .subscribe((value) => {
-          // Emit a change only if filtersForm change due to user action : genericForm.component emit 
-          // changes when it call setValue() 
+          // Emit a change only if filtersForm change due to user action : genericForm.component emit
+          // changes when it call setValue()
           if (!this.filtersForm.get(field)?.dirty) {
             return;
           }
-          
+
           // Emit to IndividualsMapList
           // If the value comes from pnx-taxonomy, get the value.cd_nom
           // If the value comes from pnx-observers, get the value.id_role

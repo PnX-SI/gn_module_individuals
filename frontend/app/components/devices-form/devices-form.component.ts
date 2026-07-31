@@ -22,7 +22,7 @@ export class DevicesFormComponent implements OnInit {
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEVICE_FORM_CONSTRAINTS;
-  
+
   constructor(
     private _route: ActivatedRoute,
     private _commonService: CommonService,
@@ -68,8 +68,7 @@ export class DevicesFormComponent implements OnInit {
         this.deviceId = datatable['id_tracking_device'];
         this.formAction = 'EDIT';
         this.patchForm(datatable);
-      }
-      else {
+      } else {
         this.formAction = 'ADD';
       }
     });

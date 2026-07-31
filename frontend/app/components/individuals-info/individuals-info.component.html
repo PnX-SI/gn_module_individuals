@@ -11,12 +11,12 @@
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.taxref_nom_vern' | translate }}</h3>
-      <p>
-        {{ dataTable['nom_vern'] }} ( {{ dataTable['lb_nom'] }})
-      </p>
+      <p>{{ dataTable['nom_vern'] }} ( {{ dataTable['lb_nom'] }})</p>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
-      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.nomenclature_sex_name' | translate }}</h3>
+      <h3 class="text-muted">
+        {{ 'Individuals.Individuals.Fields.nomenclature_sex_name' | translate }}
+      </h3>
       <p>
         {{ dataTable['nomenclature_sex']?.['label_' + defaultLang] }}
       </p>
@@ -46,9 +46,9 @@
           [sorts]="[]"
         >
           <ngx-datatable-column
-              *ngFor="let column of deploymentsColumns"
-              [name]="column.name"
-              [prop]="column.prop"
+            *ngFor="let column of deploymentsColumns"
+            [name]="column.name"
+            [prop]="column.prop"
           >
             <ng-template
               ngx-datatable-cell-template
@@ -61,7 +61,15 @@
               </ng-container>
               <ng-template #defaultCell>
                 <span>
-                  {{ row[column.prop] === null || row[column.prop] === undefined ? '-' : row[column.prop] === false ? ('Individuals.Others.No' | translate) : row[column.prop] === true ? ('Individuals.Others.Yes' | translate) : row[column.prop] }}
+                  {{
+                    row[column.prop] === null || row[column.prop] === undefined
+                      ? '-'
+                      : row[column.prop] === false
+                        ? ('Individuals.Others.No' | translate)
+                        : row[column.prop] === true
+                          ? ('Individuals.Others.Yes' | translate)
+                          : row[column.prop]
+                  }}
                 </span>
               </ng-template>
             </ng-template>
@@ -72,26 +80,24 @@
     </div>
   </div>
   <div class="content row">
-    <div
-      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
-    >
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.digitiser_name' | translate }}</h3>
       <p>
         {{ dataTable['digitiser']?.['nom_complet'] }}
       </p>
     </div>
-    <div
-      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
-    >
-      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.meta_create_date' | translate }}</h3>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">
+        {{ 'Individuals.Individuals.Fields.meta_create_date' | translate }}
+      </h3>
       <p>
         {{ dataTable['meta_create_date'] }}
       </p>
     </div>
-    <div
-      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
-    >
-      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.meta_update_date' | translate }}</h3>
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">
+        {{ 'Individuals.Individuals.Fields.meta_update_date' | translate }}
+      </h3>
       <p>
         {{ dataTable['meta_update_date'] ?? '-' }}
       </p>
@@ -106,6 +112,7 @@
   [infoTitle]="'Individuals.Individuals.Titles.Info' | translate: { id: dataTable.id_individual }"
   [objectName]="'individuals'"
   [objectId]="dataTable.id_individual"
-  [canBeDeleted]="canBeDeleted"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
   (delete)="onDelete()"
 ></gn-individuals-info>

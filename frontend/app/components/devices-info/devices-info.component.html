@@ -63,7 +63,15 @@
               let-row="row"
             >
               <span>
-                {{ row[column.prop] === null || row[column.prop] === undefined ? '-' : row[column.prop] === false ? ('Individuals.Others.No' | translate) : row[column.prop] === true ? ('Individuals.Others.Yes' | translate) : row[column.prop] }}
+                {{
+                  row[column.prop] === null || row[column.prop] === undefined
+                    ? '-'
+                    : row[column.prop] === false
+                      ? ('Individuals.Others.No' | translate)
+                      : row[column.prop] === true
+                        ? ('Individuals.Others.Yes' | translate)
+                        : row[column.prop]
+                }}
               </span>
             </ng-template>
           </ngx-datatable-column>
@@ -101,6 +109,7 @@
   [infoTitle]="'Individuals.Devices.Titles.Info' | translate: { id: dataTable.id_tracking_device }"
   [objectName]="'devices'"
   [objectId]="dataTable.id_tracking_device"
-  [canBeDeleted]="canBeDeleted"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
   (delete)="onDelete()"
 ></gn-individuals-info>

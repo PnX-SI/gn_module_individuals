@@ -10,13 +10,12 @@ from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.schemas import UserSchema
-from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
 
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .utils import get_label
-from ..utils.errors import APIError, IndividualsErrorCode
+from ..utils.errors import APIError, ApiErrorCode
 
 
 class IndividualsMapConverter(NomenclaturesConverter, GeoModelConverter):
@@ -161,7 +160,9 @@ class IndividualsDetailSchema(IndividualsBaseSchema):
     nom_vern = fields.Method("get_nom_vern", dump_only=True)
     lb_nom = fields.Method("get_lb_nom", dump_only=True)
     nomenclature_sex = ma.Nested(NomenclatureSchema, dump_only=True)
-    digitiser = ma.Nested(UserSchema, dump_only=True)
+    # The exclusion of max_level_profil avoid to load the relationship User.groups
+    # thanks to that no error "Internal Server Error 'User.groups' is not available due to lazy='raise'"
+    digitiser = ma.Nested(UserSchema(exclude=("max_level_profil",)), dump_only=True)
     deployments = fields.Method("get_deployments", dump_only=True)
 
     last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
@@ -207,7 +208,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     def validate_individual_name(self, value, **kwargs):
         if not value or not value.strip():
             raise APIError(
-                IndividualsErrorCode.VALIDATION_ERROR,
+                ApiErrorCode.VALIDATION_ERROR,
                 "The individual name can't be empty",
                 400,
             )
@@ -218,7 +219,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
         exists = db.session.execute(db.select(Taxref).filter_by(cd_nom=value)).scalar_one_or_none()
         if exists is None:
             raise APIError(
-                IndividualsErrorCode.VALIDATION_ERROR,
+                ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} taxon (cd_nom) does not exist.",
                 400,
             )
@@ -233,7 +234,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
         ).scalar_one_or_none()
         if exists is None:
             raise APIError(
-                IndividualsErrorCode.VALIDATION_ERROR,
+                ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} nomenclature is not found in configured nomenclatures",
                 400,
             )

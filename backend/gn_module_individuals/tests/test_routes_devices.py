@@ -4,7 +4,7 @@ from flask import url_for, g
 from pypnusershub.tests.utils import set_logged_user
 
 from gn_module_individuals.schemas import TrackingDevicesDetailSchema, TrackingDevicesWriteSchema
-from gn_module_individuals.utils.errors import DevicesErrorCode
+from gn_module_individuals.utils.errors import ApiErrorCode
 
 # ===========================================================================
 # GET /devices  (list_devices)
@@ -171,7 +171,7 @@ class TestGetDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.device", id_tracking_device=-1))
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.DEVICE_NOT_FOUND
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
         assert "description" in payload
 
     def test_returns_200_for_existing_device(self, users, device):
@@ -314,7 +314,7 @@ class TestCreateDevice:
         )
         assert r.status_code == 400
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.MISSING_JSON_BODY
+        assert payload.get("name") == ApiErrorCode.MISSING_JSON_BODY
         assert "description" in payload
 
     def test_validation_error_returns_structured_error(self, users):
@@ -325,7 +325,7 @@ class TestCreateDevice:
         )
         assert r.status_code == 400
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.VALIDATION_ERROR
+        assert payload.get("name") == ApiErrorCode.VALIDATION_ERROR
         assert "description" in payload
 
 
@@ -380,7 +380,7 @@ class TestUpdateDevice:
             json={"provider_name": "X", "provider_device_id": "Y"},
         )
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.DEVICE_NOT_FOUND
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
         assert "description" in payload
 
     def test_forbidden_scope_returns_structured_error(self, users, devices):
@@ -394,7 +394,7 @@ class TestUpdateDevice:
         )
         assert r.status_code == 403
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.INSUFFICIENT_PERMISSIONS
+        assert payload.get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
         assert "description" in payload
 
     def test_returns_200_with_valid_payload(self, users, device):
@@ -515,7 +515,7 @@ class TestDeleteDevice:
         )
         assert r.status_code == 403
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.INSUFFICIENT_PERMISSIONS
+        assert payload.get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
         assert "description" in payload
 
     def test_not_found_returns_404(self, users):
@@ -558,7 +558,7 @@ class TestDeleteDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.delete(url_for("individuals.delete_device", id_tracking_device=-1))
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.DEVICE_NOT_FOUND
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
         assert "description" in payload
 
     def test_conflict_returns_structured_error(self, users, device_with_deployment):
@@ -570,7 +570,7 @@ class TestDeleteDevice:
             )
         )
         payload = r.get_json()
-        assert payload.get("name") == DevicesErrorCode.DEVICE_HAS_DEPLOYMENTS
+        assert payload.get("name") == ApiErrorCode.HAS_DEPLOYMENT
         assert "description" in payload
         assert payload.get("params", {}).get("id") == device_with_deployment.id_tracking_device
         assert payload.get("params", {}).get("nb") == 1
