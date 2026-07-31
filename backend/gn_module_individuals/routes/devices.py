@@ -81,6 +81,18 @@ def _device_sort_columns():
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def device(id_tracking_device, scope):
+    """
+    Return one tracking device
+
+    .. :quickref: Devices;
+
+    :param id_tracking_device: the id_tracking_device
+    :type id_tracking_device: int
+
+    :returns: a dict representing one tracking device with its nomenclatures,
+        referer, digitiser and deployments
+    :rtype: dict<TrackingDevices>
+    """
     # Detail schema always exposes every relationship of the model.
     relationship_fields = list(TrackingDevices.__nomenclatures__) + ["referer", "digitiser"]
     schema = TrackingDevicesDetailSchema(only=["+cruved"] + relationship_fields)
@@ -113,9 +125,24 @@ def device(id_tracking_device, scope):
 @json_resp
 def list_devices(scope):
     """
-    List all devices
-    :params: page, per_page, cd_nom, id_nomenclature_device_type, provider_name, id_referer, prop, dir
-    :returns: JSON list of devices, paginated if page and per_page are provided
+    List tracking devices
+
+    .. :quickref: Devices;
+
+    :query int cd_nom: filter on the cd_nom of the last individual equipped
+        with the device
+    :query int id_nomenclature_device_type: filter on the device type
+    :query string provider_name: filter on the provider name (partial match)
+    :query int id_referer: filter on the referer role
+    :query int page: page number, requires per_page to enable pagination
+    :query int per_page: page size, requires page to enable pagination
+    :query string prop: column to sort on (default: meta_create_date)
+    :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
+
+    :returns: `list<TrackingDevices>`, wrapped in a pagination envelope
+        (``items``, ``total``, ``pages``, ``has_next``...) when page and
+        per_page are provided
+    :rtype: dict|list
     """
     # Scope not yet used -------------
     cd_nom = request.args.get("cd_nom", type=int)
@@ -225,9 +252,14 @@ def list_devices(scope):
 @json_resp
 def create_device(scope):
     """
-    Post one new device
+    Post one new tracking device
 
-    :returns: new device as JSON
+    .. :quickref: Devices;
+
+    Expects a JSON body matching ``TrackingDevicesWriteSchema``.
+
+    :returns: the created device
+    :rtype: dict<TrackingDevices>
     """
     data = request.get_json(silent=True)
 
@@ -264,9 +296,17 @@ def create_device(scope):
 @json_resp
 def update_device(id_tracking_device, scope):
     """
-    Update one device
+    Update one tracking device
 
-    :returns: updated device as JSON
+    .. :quickref: Devices;
+
+    Expects a JSON body matching ``TrackingDevicesWriteSchema``.
+
+    :param id_tracking_device: the id_tracking_device
+    :type id_tracking_device: int
+
+    :returns: the updated device
+    :rtype: dict<TrackingDevices>
     """
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
@@ -314,9 +354,14 @@ def update_device(id_tracking_device, scope):
 )
 def delete_device(id_tracking_device, scope):
     """
-    Delete one device
+    Delete one tracking device
 
-    :returns: empty response with 204 status
+    .. :quickref: Devices;
+
+    :param id_tracking_device: the id_tracking_device
+    :type id_tracking_device: int
+
+    :returns: empty response
     """
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:

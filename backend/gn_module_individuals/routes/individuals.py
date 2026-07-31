@@ -189,6 +189,20 @@ def _pagination_payload(paginated, schema, sort):
 @login_required
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 def individuals_geometry(scope):
+    """
+    List individuals having a last known observation, as GeoJSON points
+
+    .. :quickref: Individuals;
+
+    :query int cd_nom: filter on the taxon
+    :query boolean active: filter on the active field
+    :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
+    :query string individual_name: filter on the individual name (partial match)
+    :query int id_nomenclature_sex: filter on the sex nomenclature
+
+    :returns: a GeoJSON FeatureCollection of individuals
+    :rtype: dict<FeatureCollection>
+    """
     filters = _parse_filters(request.args)
     sort = {"prop": "id_individual", "dir": "asc"}
 
@@ -221,6 +235,18 @@ def individuals_geometry(scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def individual(id_individual, scope):
+    """
+    Return one individual
+
+    .. :quickref: Individuals;
+
+    :param id_individual: the id_individual
+    :type id_individual: int
+
+    :returns: a dict representing one individual with its taxon, nomenclatures,
+        digitiser and deployments
+    :rtype: dict<TIndividuals>
+    """
     query = (
         select(TIndividuals)
         .options(
@@ -261,6 +287,16 @@ def individual(id_individual, scope):
 )
 @json_resp
 def create_individual(scope):
+    """
+    Post one new individual
+
+    .. :quickref: Individuals;
+
+    Expects a JSON body matching ``IndividualsWriteSchema``.
+
+    :returns: the created individual
+    :rtype: dict<TIndividuals>
+    """
     data = request.get_json(silent=True)
 
     if not data:
@@ -295,6 +331,19 @@ def create_individual(scope):
 )
 @json_resp
 def update_individual(id_individual, scope):
+    """
+    Update one individual
+
+    .. :quickref: Individuals;
+
+    Expects a JSON body matching ``IndividualsWriteSchema``.
+
+    :param id_individual: the id_individual
+    :type id_individual: int
+
+    :returns: the updated individual
+    :rtype: dict<TIndividuals>
+    """
     individual = db.session.get(TIndividuals, id_individual)
     if individual is None:
         raise APIError(
@@ -342,6 +391,16 @@ def update_individual(id_individual, scope):
     "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
 )
 def delete_individual(id_individual, scope):
+    """
+    Delete one individual
+
+    .. :quickref: Individuals;
+
+    :param id_individual: the id_individual
+    :type id_individual: int
+
+    :returns: empty response
+    """
     individual = db.session.get(TIndividuals, id_individual)
     if individual is None:
         raise APIError(
@@ -381,6 +440,27 @@ def delete_individual(id_individual, scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def list_individuals(scope):
+    """
+    List individuals
+
+    .. :quickref: Individuals;
+
+    :query int cd_nom: filter on the taxon
+    :query boolean active: filter on the active field
+    :query string bbox: filter on ``west,south,east,north`` (EPSG:4326),
+        based on the last known observation
+    :query string individual_name: filter on the individual name (partial match)
+    :query int id_nomenclature_sex: filter on the sex nomenclature
+    :query string prop: column to sort on (default: last_observation_date)
+    :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
+    :query int page: page number, requires per_page to enable pagination
+    :query int per_page: page size, requires page to enable pagination
+
+    :returns: `list<TIndividuals>`, wrapped in a pagination envelope
+        (``items``, ``total``, ``pages``, ``has_next``...) when page and
+        per_page are provided
+    :rtype: dict
+    """
     filters = _parse_filters(request.args)
     sort = _parse_sort(request.args)
     page = request.args.get("page", type=int)
@@ -404,6 +484,27 @@ def list_individuals(scope):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
 @json_resp
 def individual_page(id_individual, scope):
+    """
+    Return the pagination page on which an individual would appear, given
+    the same filters and sort as :func:`list_individuals`
+
+    .. :quickref: Individuals;
+
+    :param id_individual: the id_individual
+    :type id_individual: int
+
+    :query int cd_nom: filter on the taxon
+    :query boolean active: filter on the active field
+    :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
+    :query string individual_name: filter on the individual name (partial match)
+    :query int id_nomenclature_sex: filter on the sex nomenclature
+    :query string prop: column to sort on (default: last_observation_date)
+    :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
+    :query int per_page: page size (default: 20)
+
+    :returns: dict with ``id_individual``, ``rank``, ``page`` and ``per_page``
+    :rtype: dict
+    """
     filters = _parse_filters(request.args)
     sort = _parse_sort(request.args)
     per_page = request.args.get("per_page", 20, type=int)
