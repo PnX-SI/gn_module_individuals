@@ -1,7 +1,11 @@
 """Insert test data
 
-Revision ID: 0004_insert_test_data
-Revises: 0003_insert_nomenclatures
+Standalone "individuals-samples" branch: not applied by `geonature db
+autoupgrade`, run manually (or in CI) with:
+    geonature db upgrade individuals-samples@head
+
+Revision ID: individuals_samples_data
+Revises:
 Create Date: 2026-03-19 16:53:24.982945
 
 """
@@ -10,10 +14,10 @@ from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = "0004_insert_test_data"
-down_revision = "0003_insert_nomenclatures"
-branch_labels = None
-depends_on = None
+revision = "individuals_samples_data"
+down_revision = None
+branch_labels = ("individuals-samples",)
+depends_on = ("individuals",)
 
 
 def upgrade():
@@ -227,6 +231,57 @@ JOIN ref_nomenclatures.t_nomenclatures n
     )
 
     # --- Occtax integration: a few Vanoise records referencing our individuals ---
+    # Dedicated acquisition framework and dataset for this test data, so no
+    # hardcoded id_dataset / id_module is needed in the inserts below.
+    op.execute(
+        sa.text(
+            """
+            INSERT INTO gn_meta.t_acquisition_frameworks (
+                acquisition_framework_name, acquisition_framework_desc,
+                acquisition_framework_start_date
+            )
+            SELECT
+                'Cadre d''acquisition de test Individus',
+                'Cadre d''acquisition des données de test du module Individus',
+                CURRENT_DATE
+            WHERE NOT EXISTS (
+                SELECT 1 FROM gn_meta.t_acquisition_frameworks
+                WHERE acquisition_framework_name = 'Cadre d''acquisition de test Individus'
+            )
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            INSERT INTO gn_meta.t_datasets (
+                id_acquisition_framework, dataset_name, dataset_shortname, dataset_desc,
+                marine_domain, terrestrial_domain, id_digitizer
+            )
+            SELECT
+                af.id_acquisition_framework,
+                'Jeu de données de test Individus', 'INDIVIDUALS_TEST',
+                'Relevés Occtax de test du module Individus',
+                FALSE, TRUE, 4
+            FROM gn_meta.t_acquisition_frameworks af
+            WHERE af.acquisition_framework_name = 'Cadre d''acquisition de test Individus'
+              AND NOT EXISTS (
+                  SELECT 1 FROM gn_meta.t_datasets
+                  WHERE dataset_shortname = 'INDIVIDUALS_TEST'
+              )
+            """
+        )
+    )
+    op.execute(
+        sa.text(
+            """
+            INSERT INTO gn_commons.cor_module_dataset (id_module, id_dataset)
+            SELECT m.id_module, d.id_dataset
+            FROM gn_commons.t_modules m, gn_meta.t_datasets d
+            WHERE m.module_code = 'OCCTAX' AND d.dataset_shortname = 'INDIVIDUALS_TEST'
+            """
+        )
+    )
 
     op.execute(
         sa.text(
@@ -237,21 +292,30 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 ('Refuge de Prariond',   6.9800, 45.4500, '2026-07-05 07:15'::timestamp, 6),
                 ('Pointe de la Réchasse',6.9100, 45.4050, '2026-07-09 11:00'::timestamp, 4),
                 ('Plan du Lac',          6.9050, 45.3160, '2026-07-14 08:45'::timestamp, 6)
+            ),
+            occtax_module AS (
+                SELECT id_module FROM gn_commons.t_modules WHERE module_code = 'OCCTAX'
+            ),
+            test_dataset AS (
+                SELECT id_dataset FROM gn_meta.t_datasets
+                WHERE dataset_shortname = 'INDIVIDUALS_TEST'
             )
             INSERT INTO pr_occtax.t_releves_occtax (
                 id_dataset, id_digitiser, id_module, date_min, date_max,
                 place_name, geom_4326, geom_local
             )
             SELECT
-                1,
+                ds.id_dataset,
                 d.id_digitiser,
-                6,
+                m.id_module,
                 d.obs_date,
                 d.obs_date,
                 d.place_name,
                 ST_SetSRID(ST_MakePoint(d.lon, d.lat), 4326),
                 ST_Transform(ST_SetSRID(ST_MakePoint(d.lon, d.lat), 4326), 2154)
             FROM releve_data d
+            CROSS JOIN occtax_module m
+            CROSS JOIN test_dataset ds
             """
         )
     )
@@ -347,15 +411,24 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 ('Evasion',     6.80, 45.38, '2026-07-03 11:30'::timestamp, 6),
                 ('Evasion',     6.93, 45.45, '2026-07-10 13:10'::timestamp, 6),
                 ('Evasion',     6.75, 45.22, '2026-07-18 07:55'::timestamp, 6)
+            ),
+            occtax_module AS (
+                SELECT id_module FROM gn_commons.t_modules WHERE module_code = 'OCCTAX'
+            ),
+            test_dataset AS (
+                SELECT id_dataset FROM gn_meta.t_datasets
+                WHERE dataset_shortname = 'INDIVIDUALS_TEST'
             )
             INSERT INTO pr_occtax.t_releves_occtax (
                 id_dataset, id_digitiser, id_module, date_min, date_max, geom_4326, geom_local
             )
             SELECT
-                1, d.id_digitiser, 6, d.obs_date, d.obs_date,
+                ds.id_dataset, d.id_digitiser, m.id_module, d.obs_date, d.obs_date,
                 ST_SetSRID(ST_MakePoint(d.lon, d.lat), 4326),
                 ST_Transform(ST_SetSRID(ST_MakePoint(d.lon, d.lat), 4326), 2154)
             FROM sighting_data d
+            CROSS JOIN occtax_module m
+            CROSS JOIN test_dataset ds
             """
         )
     )
@@ -434,13 +507,22 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 (7, '2026-07-21 18:00'::timestamp), (8, '2026-07-21 22:00'::timestamp),
                 (9, '2026-07-22 06:00'::timestamp), (10, '2026-07-22 12:00'::timestamp),
                 (11, '2026-07-22 18:00'::timestamp), (12, '2026-07-22 22:00'::timestamp)
+            ),
+            occtax_module AS (
+                SELECT id_module FROM gn_commons.t_modules WHERE module_code = 'OCCTAX'
+            ),
+            test_dataset AS (
+                SELECT id_dataset FROM gn_meta.t_datasets
+                WHERE dataset_shortname = 'INDIVIDUALS_TEST'
             )
             INSERT INTO pr_occtax.t_releves_occtax (
                 id_dataset, id_digitiser, id_module, date_min, date_max, geom_4326, geom_local
             )
-            SELECT 1, 4, 6, t.fix_time, t.fix_time, p.geom, ST_Transform(p.geom, 2154)
+            SELECT ds.id_dataset, 4, m.id_module, t.fix_time, t.fix_time, p.geom, ST_Transform(p.geom, 2154)
             FROM gps_points p
             JOIN gps_times t ON t.seq = p.seq
+            CROSS JOIN occtax_module m
+            CROSS JOIN test_dataset ds
             """
         )
     )
@@ -498,11 +580,12 @@ JOIN ref_nomenclatures.t_nomenclatures n
                     id_acquisition_framework, dataset_name, dataset_shortname, dataset_desc,
                     marine_domain, terrestrial_domain, id_digitizer
                 )
-                VALUES (
-                    1, 'Suivi CMR bouquetins TEST', 'CMR_BOUQUETIN',
+                SELECT
+                    af.id_acquisition_framework, 'Suivi CMR bouquetins TEST', 'CMR_BOUQUETIN',
                     'Jeu de données du suivi capture-marquage-recapture des bouquetins du Parc national de la Vanoise',
                     FALSE, TRUE, 4
-                )
+                FROM gn_meta.t_acquisition_frameworks af
+                WHERE af.acquisition_framework_name = 'Cadre d''acquisition de test Individus'
                 """
             )
         )
@@ -625,6 +708,19 @@ def downgrade():
             """
             DELETE FROM pr_occtax.t_releves_occtax
             WHERE date_min BETWEEN '2026-07-01' AND '2026-07-31 23:59:59'
+            """
+        )
+    )
+
+    # cor_module_dataset is deleted in cascade with the dataset.
+    op.execute(
+        sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'INDIVIDUALS_TEST'")
+    )
+    op.execute(
+        sa.text(
+            """
+            DELETE FROM gn_meta.t_acquisition_frameworks
+            WHERE acquisition_framework_name = 'Cadre d''acquisition de test Individus'
             """
         )
     )
