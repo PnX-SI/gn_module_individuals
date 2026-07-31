@@ -222,7 +222,7 @@ def create_device(scope):
     """
     Post one new device
 
-    :returns: new Device as JSON
+    :returns: new device as JSON
     """
     data = request.get_json(silent=True)
 
@@ -258,6 +258,11 @@ def create_device(scope):
 )
 @json_resp
 def update_device(id_tracking_device, scope):
+    """
+        Update one device
+    
+        :returns: updated device as JSON
+        """
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
