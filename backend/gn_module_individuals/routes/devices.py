@@ -219,6 +219,11 @@ def list_devices(scope):
 )
 @json_resp
 def create_device(scope):
+    """
+    Post one new device
+
+    :returns: Device as JSON
+    """
     data = request.get_json(silent=True)
 
     if not data:

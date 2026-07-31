@@ -5,15 +5,13 @@ on:
     paths:
       - "backend/**"
     branches:
-      - main
-      - hotfixes
+      - master
       - develop 
   pull_request:
     paths:
       - "backend/**"
     branches:
-      - main
-      - hotfixes
+      - master
       - develop
 
 jobs:
