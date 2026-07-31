@@ -113,10 +113,10 @@ def device(id_tracking_device, scope):
 @json_resp
 def list_devices(scope):
     """
-        List all devices
-        :params: page, per_page, cd_nom, id_nomenclature_device_type, provider_name, id_referer, prop, dir
-        :returns: JSON list of devices, paginated if page and per_page are provided
-        """
+    List all devices
+    :params: page, per_page, cd_nom, id_nomenclature_device_type, provider_name, id_referer, prop, dir
+    :returns: JSON list of devices, paginated if page and per_page are provided
+    """
     # Scope not yet used -------------
     cd_nom = request.args.get("cd_nom", type=int)
     device_type = request.args.get("id_nomenclature_device_type", type=int)
@@ -264,10 +264,10 @@ def create_device(scope):
 @json_resp
 def update_device(id_tracking_device, scope):
     """
-        Update one device
-    
-        :returns: updated device as JSON
-        """
+    Update one device
+
+    :returns: updated device as JSON
+    """
     device = db.session.get(TrackingDevices, id_tracking_device)
     if device is None:
         raise APIError(
@@ -314,7 +314,7 @@ def update_device(id_tracking_device, scope):
 )
 def delete_device(id_tracking_device, scope):
     """
-    Delete one device 
+    Delete one device
 
     :returns: empty response with 204 status
     """
