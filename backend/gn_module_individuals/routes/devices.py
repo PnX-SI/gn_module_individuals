@@ -309,7 +309,7 @@ def update_device(id_tracking_device, scope):
 )
 def delete_device(id_tracking_device, scope):
     """
-    Delete one device
+    Delete one device 
 
     :returns: empty response with 204 status
     """
