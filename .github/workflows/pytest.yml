@@ -20,8 +20,9 @@ jobs:
       fail-fast: false
       matrix:
         geonature_ref: ["feat/manageIndividuals"] # Mettre version compatible
-    uses: pnx-si/geonature/.github/workflows/gn-module-pytest.yml@develop
+    uses: pnvanoise/geonature/feat/manageIndividuals/.github/workflows/gn-module-pytest.yml@develop
     with:
+      geonature_repo: pnvanoise/geonature
       geonature_ref: ${{ matrix.geonature_ref }}
       upload_coverage: true
     secrets:

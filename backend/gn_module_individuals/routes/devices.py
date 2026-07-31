@@ -222,7 +222,7 @@ def create_device(scope):
     """
     Post one new device
 
-    :returns: Device as JSON
+    :returns: new Device as JSON
     """
     data = request.get_json(silent=True)
 
