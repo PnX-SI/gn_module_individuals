@@ -10,7 +10,6 @@ from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.schemas import UserSchema
-from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
 
 from .. import MODULE_CODE
@@ -161,7 +160,9 @@ class IndividualsDetailSchema(IndividualsBaseSchema):
     nom_vern = fields.Method("get_nom_vern", dump_only=True)
     lb_nom = fields.Method("get_lb_nom", dump_only=True)
     nomenclature_sex = ma.Nested(NomenclatureSchema, dump_only=True)
-    digitiser = ma.Nested(UserSchema, dump_only=True)
+    # The exclusion of max_level_profil avoid to load the relationship User.groups
+    # thanks to that no error "Internal Server Error 'User.groups' is not available due to lazy='raise'"
+    digitiser = ma.Nested(UserSchema(exclude=("max_level_profil",)), dump_only=True)
     deployments = fields.Method("get_deployments", dump_only=True)
 
     last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
