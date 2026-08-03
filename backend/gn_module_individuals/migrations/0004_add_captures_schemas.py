@@ -5,16 +5,16 @@ Revises: 0003_insert_nomenclatures
 Create Date: 2026-08-03 15:09:10.810607
 
 """
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import select, table, column, functions as func
 from geoalchemy2 import Geometry
 
-
 # revision identifiers, used by Alembic.
-revision = '0004_add_captures'
-down_revision = '0003_insert_nomenclatures'
+revision = "0004_add_captures"
+down_revision = "0003_insert_nomenclatures"
 branch_labels = None
 depends_on = None
 
@@ -119,22 +119,18 @@ def upgrade():
         schema=SCHEMA_NAME,
     )
 
-    op.execute(
-        f"""
+    op.execute(f"""
         CREATE TRIGGER tr_meta_dates_captures
         BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.t_captures
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT t_individual_deployments_id_capture_fkey
         FOREIGN KEY (id_capture) REFERENCES {SCHEMA_NAME}.t_captures (id_capture) NOT VALID;
-    """
-    )
+    """)
 
     conn = op.get_bind()
     bib_nomencl = table(
@@ -252,48 +248,36 @@ def upgrade():
         )
     )
 
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_captures
         ADD CONSTRAINT check_t_captures_capture_protocol
         CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_capture_protocol, 'PROTOCOLE_CAPTURE'::character varying)) NOT VALID;
-    """
-    )
+    """)
 
 
 def downgrade():
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_captures
         DROP CONSTRAINT IF EXISTS check_t_captures_capture_protocol;
-    """
-    )
+    """)
 
-    op.execute(
-        """
+    op.execute("""
         DELETE FROM ref_nomenclatures.t_nomenclatures t
         USING ref_nomenclatures.bib_nomenclatures_types b
         WHERE t.id_type = b.id_type
         AND b.mnemonique = 'PROTOCOLE_CAPTURE';
-    """
-    )
-    op.execute(
-        """
+    """)
+    op.execute("""
         DELETE FROM ref_nomenclatures.bib_nomenclatures_types
         WHERE mnemonique = 'PROTOCOLE_CAPTURE';
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         DROP CONSTRAINT IF EXISTS t_individual_deployments_id_capture_fkey;
-    """
-    )
+    """)
 
-    op.execute(
-        f"DROP TRIGGER IF EXISTS tr_meta_dates_captures ON {SCHEMA_NAME}.t_captures;"
-    )
+    op.execute(f"DROP TRIGGER IF EXISTS tr_meta_dates_captures ON {SCHEMA_NAME}.t_captures;")
 
     op.drop_table("cor_role_capture", schema=SCHEMA_NAME, if_exists=True)
     op.drop_table("t_individual_capture_observations", schema=SCHEMA_NAME, if_exists=True)
