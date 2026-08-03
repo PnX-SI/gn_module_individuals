@@ -8,6 +8,7 @@ export interface IndividualCaptured {
 }
 
 export interface Capture {
+  id_capture: number;
   id_nomenclature_protocole: number;
   comment: string;
   date: Date;
