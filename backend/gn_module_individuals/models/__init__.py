@@ -1,4 +1,5 @@
 from .devices import TrackingDevices
+from .captures import IndividualCaptures, IndividualsCaptureObservations, CorRoleCapture
 from .deployments import IndividualDeployments
 from .individuals import register_individual_extensions
 

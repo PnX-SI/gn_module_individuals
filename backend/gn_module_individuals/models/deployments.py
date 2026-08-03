@@ -23,6 +23,7 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
     id_capture = DB.Column(
         "id_capture",
         DB.Integer,
+        DB.ForeignKey("gn_individual.t_captures.id_capture"),
         nullable=False,
     )
 
@@ -111,6 +112,14 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
         TrackingDevices,
         primaryjoin=TrackingDevices.id_tracking_device == id_tracking_device,
         foreign_keys=[id_tracking_device],
+        lazy="select",
+        back_populates="deployments",
+    )
+
+    capture = DB.relationship(
+        "IndividualCaptures",
+        primaryjoin="IndividualDeployments.id_capture == IndividualCaptures.id_capture",
+        foreign_keys=[id_capture],
         lazy="select",
         back_populates="deployments",
     )
