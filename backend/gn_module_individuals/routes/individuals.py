@@ -282,7 +282,7 @@ def individual(id_individual, scope):
 @blueprint.route("/individuals", methods=["POST"])
 @login_required
 @permissions.check_cruved_scope(
-    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 @json_resp
 def create_individual(scope):
@@ -326,7 +326,7 @@ def create_individual(scope):
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["PUT"])
 @login_required
 @permissions.check_cruved_scope(
-    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 @json_resp
 def update_individual(id_individual, scope):
@@ -387,7 +387,7 @@ def update_individual(id_individual, scope):
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["DELETE"])
 @login_required
 @permissions.check_cruved_scope(
-    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 def delete_individual(id_individual, scope):
     """

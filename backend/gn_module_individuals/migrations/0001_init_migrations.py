@@ -28,8 +28,8 @@ def upgrade():
             """
         INSERT INTO gn_permissions.t_objects (code_object, description_object)
         VALUES
-            ('INDIVIDUALS_INDIVIDUALS', 'Gestion des individus'),
-            ('INDIVIDUALS_SAMPLES',     'Gestion des échantillons dans Individus')
+            ('INDIVIDUALS', 'Gestion des individus'),
+            ('SAMPLES',     'Gestion des échantillons dans Individus')
         ON CONFLICT (code_object) DO NOTHING
     """
         )
@@ -53,12 +53,12 @@ def upgrade():
         FROM (
             VALUES
                 ('{MODULE_CODE}', 'ALL',                    'R', True,  'Voir dans le module Individuals')
-               ,('{MODULE_CODE}', 'INDIVIDUALS_INDIVIDUALS','C', True,  'Créer des individus')
-               ,('{MODULE_CODE}', 'INDIVIDUALS_INDIVIDUALS','U', True,  'Éditer des individus')
-               ,('{MODULE_CODE}', 'INDIVIDUALS_INDIVIDUALS','D', True,  'Supprimer des individus')
-               ,('{MODULE_CODE}', 'INDIVIDUALS_SAMPLES',    'C', True,  'Créer des échantillons')
-               ,('{MODULE_CODE}', 'INDIVIDUALS_SAMPLES',    'U', True,  'Éditer des échantillons')
-               ,('{MODULE_CODE}', 'INDIVIDUALS_SAMPLES',    'D', True,  'Supprimer des échantillons')
+               ,('{MODULE_CODE}', 'INDIVIDUALS','C', True,  'Créer des individus')
+               ,('{MODULE_CODE}', 'INDIVIDUALS','U', True,  'Éditer des individus')
+               ,('{MODULE_CODE}', 'INDIVIDUALS','D', True,  'Supprimer des individus')
+               ,('{MODULE_CODE}', 'SAMPLES',    'C', True,  'Créer des échantillons')
+               ,('{MODULE_CODE}', 'SAMPLES',    'U', True,  'Éditer des échantillons')
+               ,('{MODULE_CODE}', 'SAMPLES',    'D', True,  'Supprimer des échantillons')
         ) AS v (module_code, object_code, action_code, scope_filter, label)
         JOIN gn_commons.t_modules m     ON m.module_code  = v.module_code
         JOIN gn_permissions.t_objects o ON o.code_object  = v.object_code
@@ -78,7 +78,7 @@ def upgrade():
         FROM (VALUES ('C'), ('U'), ('D')) AS v (action_code)
         JOIN utilisateurs.t_roles r      ON r.nom_role    = 'Grp_admin'
         JOIN gn_commons.t_modules m      ON m.module_code = '{MODULE_CODE}'
-        JOIN gn_permissions.t_objects o  ON o.code_object = 'INDIVIDUALS_INDIVIDUALS'
+        JOIN gn_permissions.t_objects o  ON o.code_object = 'INDIVIDUALS'
         JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
         ON CONFLICT DO NOTHING
     """
@@ -111,7 +111,7 @@ def downgrade():
         WHERE p.id_role   = r.id_role
           AND p.id_object = o.id_object
           AND r.nom_role    = 'Grp_admin'
-          AND o.code_object = 'INDIVIDUALS_INDIVIDUALS'
+          AND o.code_object = 'INDIVIDUALS'
     """
         )
     )
@@ -120,7 +120,7 @@ def downgrade():
         sa.text(
             """
         DELETE FROM gn_permissions.t_objects
-        WHERE code_object IN ('INDIVIDUALS_INDIVIDUALS', 'INDIVIDUALS_SAMPLES')
+        WHERE code_object IN ('INDIVIDUALS', 'SAMPLES')
     """
         )
     )

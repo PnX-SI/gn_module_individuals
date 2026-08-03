@@ -195,7 +195,7 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     route from the current user, regardless of what is submitted here."""
 
     __module_code__ = MODULE_CODE
-    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
+    __object_code__ = "INDIVIDUALS"
 
     uuid_individual = fields.UUID(dump_only=True)
     # id_digitiser is NOT NULL on the model but always set by the route from the

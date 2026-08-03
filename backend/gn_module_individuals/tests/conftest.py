@@ -76,14 +76,14 @@ def ensure_individuals_module(app, users):
     # Créer les objets métier du module s'ils n'existent pas encore
     with db.session.begin_nested():
         for code, description in [
-            ("INDIVIDUALS_INDIVIDUALS", "Gestion des individus"),
-            ("INDIVIDUALS_SAMPLES", "Gestion des échantillons dans Individus"),
+            ("DEVICES", "Gestion des individus"),
+            ("SAMPLES", "Gestion des échantillons dans Individus"),
         ]:
             if db.session.scalar(select(PermObject).filter_by(code_object=code)) is None:
                 db.session.add(PermObject(code_object=code, description_object=description))
 
     object_individuals = db.session.scalar(
-        select(PermObject).filter_by(code_object="INDIVIDUALS_INDIVIDUALS")
+        select(PermObject).filter_by(code_object="INDIVIDUALS")
     )
 
     # Permissions sur ALL (lecture globale du module)
@@ -91,7 +91,7 @@ def ensure_individuals_module(app, users):
         "admin_user": {"actions": "RV", "scope": None},
         "self_user": {"actions": "R", "scope": 1},
     }
-    # Permissions sur INDIVIDUALS_INDIVIDUALS (C/U/D discriminés)
+    # Permissions sur INDIVIDUALS (C/U/D discriminés)
     individuals_permissions = {
         "admin_user": {"actions": "CUD", "scope": None},
         "self_user": {"actions": "UD", "scope": 1},

@@ -256,7 +256,7 @@ def list_devices(scope):
 @blueprint.route("/devices", methods=["POST"])
 @login_required
 @permissions.check_cruved_scope(
-    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 @json_resp
 def create_device(scope):
@@ -300,7 +300,7 @@ def create_device(scope):
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["PUT"])
 @login_required
 @permissions.check_cruved_scope(
-    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 @json_resp
 def update_device(id_tracking_device, scope):
@@ -359,7 +359,7 @@ def update_device(id_tracking_device, scope):
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["DELETE"])
 @login_required
 @permissions.check_cruved_scope(
-    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 def delete_device(id_tracking_device, scope):
     """
