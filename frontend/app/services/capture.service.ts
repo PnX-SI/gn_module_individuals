@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
-import { Capture } from '../models/capture.model';
+import { Capture, APICaptureFiltersParams, CaptureRankAndPage } from '../models/capture.model';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
 
 // REMOVE any
@@ -31,6 +31,17 @@ export class CaptureService {
     params: APIPaginationParams | any
   ): Observable<PaginatedItemCollection<Capture> | any> {
     return of({});
+  }
+
+  /**
+   * Return an observable with the rank and page in the captures list of the given capture id
+   * with current filters and sort applied.
+   */
+  getCaptureRankAndPage(
+    id: number,
+    params: APIPaginationParams & APICaptureFiltersParams
+  ): Observable<CaptureRankAndPage> {
+    return of({} as CaptureRankAndPage);
   }
 
   createOrUpdateDevice(

@@ -1,0 +1,34 @@
+<div class="d-flex flex-wrap filters-form">
+  <!-- id_nomenclature_protocole -->
+  <pnx-nomenclature
+    [ngClass]="'form-group'"
+    [label]="'Individuals.Captures.Fields.id_nomenclature_protocole' | translate"
+    [parentFormControl]="$any(filtersForm.get('id_nomenclature_protocole'))"
+    [codeNomenclatureType]="'PROTOCOLE_CAPTURE'"
+  ></pnx-nomenclature>
+
+  <!-- date -->
+  <pnx-date
+    class="form-group"
+    [label]="'Individuals.Captures.Fields.date' | translate"
+    [parentFormControl]="$any(filtersForm.get('date'))"
+  ></pnx-date>
+
+  <!-- id_role : observers -->
+  <pnx-observers
+    [ngClass]="'form-group w-25'"
+    [label]="'Individuals.Captures.Fields.observers' | translate"
+    [parentFormControl]="$any(filtersForm.get('id_role'))"
+    [bindAllItem]="true"
+    [placeHolder]="'Individuals.Captures.PlaceHolder.observers' | translate"
+  ></pnx-observers>
+
+  <button
+    mat-mini-fab
+    [matTooltip]="'Actions.Reset' | translate"
+    class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+    (click)="onResetFilters()"
+  >
+    <mat-icon>restart_alt</mat-icon>
+  </button>
+</div>

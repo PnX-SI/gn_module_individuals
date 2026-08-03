@@ -38,6 +38,8 @@ export const DEVICES_DEFAULT_SORT = { prop: 'meta_create_date', dir: 'desc' };
 
 export const INDIVIDUALS_DEFAULT_SORT = { prop: 'last_observation_date', dir: 'desc' };
 
+export const CAPTURES_DEFAULT_SORT = { prop: 'date', dir: 'desc' };
+
 export const INDIVIDUALS_FORM_CONSTRAINTS = {
   individual_name: {
     maxLength: 50,

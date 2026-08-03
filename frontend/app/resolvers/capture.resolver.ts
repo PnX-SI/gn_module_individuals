@@ -23,7 +23,7 @@ export class CapturesResolver implements Resolve<PaginatedItemCollection<Capture
     const params = {
       page: 1,
       per_page:
-        this._config.CaptureS.CaptureS.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION,
+        this._config.INDIVIDUALS?.CAPTURES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION,
     };
 
     return this._service.getCaptures(params);
@@ -49,6 +49,6 @@ export class CaptureResolver implements Resolve<Capture> {
   constructor(private _service: CaptureService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Capture> {
-    return this._service.getCapture(route.params.id_Capture);
+    return this._service.getCapture(route.params.id_capture);
   }
 }

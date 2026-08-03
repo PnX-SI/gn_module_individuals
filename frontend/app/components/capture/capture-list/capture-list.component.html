@@ -1,1 +1,86 @@
-capture-list
+<!-- SUMMARY TEMPLATE -->
+<ng-template
+  #summaryTemplate
+  let-row="row"
+>
+  <div class="row mx-0">
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Captures.Fields.date' | translate }} :</strong>
+      {{ row.date | date: 'dd/MM/yyyy HH:mm' }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Captures.Fields.id_nomenclature_protocole' | translate }} :</strong>
+      {{ row.id_nomenclature_protocole }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Captures.Fields.observers' | translate }} :</strong>
+      <ng-container *ngIf="row.observers?.length > 0; else noValue">
+        <span *ngFor="let observer of row.observers; let last = last">
+          {{ observer?.nom_complet }}<span *ngIf="!last">, </span>
+        </span>
+      </ng-container>
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Captures.Fields.individuals' | translate }} :</strong>
+      <ng-container *ngIf="row.individuals?.length > 0; else noValue">
+        <span *ngFor="let individualCaptured of row.individuals; let last = last">
+          {{ individualCaptured.individual?.individual_name }}<span *ngIf="!last">, </span>
+        </span>
+      </ng-container>
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Captures.Fields.comment' | translate }} :</strong>
+      {{ row.comment || '-' }}
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #noValue>-</ng-template>
+
+<ng-template #filtersTemplate>
+  <gn-individuals-capture-filters
+    [defaultValues]="defaultFilters"
+    (filters)="onFilters($event)"
+  ></gn-individuals-capture-filters>
+</ng-template>
+
+<ng-template
+  #featurePopupTemplate
+  let-feature="feature"
+>
+  <div>
+    <span>
+      <strong>{{ 'Individuals.Captures.Fields.date' | translate }} :</strong>
+      {{ feature.properties.date | date: 'dd/MM/yyyy HH:mm' }}
+      <br />
+    </span>
+    <span>
+      <strong>{{ 'Individuals.Captures.Fields.id_nomenclature_protocole' | translate }} :</strong>
+      {{ feature.properties.id_nomenclature_protocole }}
+    </span>
+  </div>
+</ng-template>
+
+<gn-individuals-map-list
+  [objectName]="'captures'"
+  [idFieldName]="'id_capture'"
+  [displayedColumnsParams]="displayedColumnsParams"
+  [availableColumnsParams]="availableColumnsParams"
+  [datatable$]="datatable$"
+  [nbRowsToDisplay]="nbRowsToDisplay"
+  [fieldsTranslation]="fieldsTranslation"
+  [sorts]="sorts"
+  [allowedToEdit]="allowedToEdit"
+  [allowedToDelete]="allowedToDelete"
+  [summaryTemplate]="summaryTemplate"
+  [filtersTemplate]="filtersTemplate"
+  [featurePopupTemplate]="featurePopupTemplate"
+  [mapData$]="mapData$"
+  [selectedRows]="selectedRows"
+  [noGeometryMessage]="'Individuals.Captures.Messages.NoGeometry' | translate"
+  (pagination)="onPage($event)"
+  (sort)="onSort($event)"
+  (delete)="openDeleteModal($event)"
+  (idPage)="onIdPage($event)"
+  (bbox)="onBbox($event)"
+></gn-individuals-map-list>

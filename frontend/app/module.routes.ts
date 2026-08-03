@@ -20,6 +20,7 @@ import { IndividualsFormComponent } from './components/individuals-form/individu
 import { CaptureListComponent } from './components/capture/capture-list/capture-list.component';
 import { CaptureInfoComponent } from './components/capture/capture-info/capture-info.component';
 import { CaptureFormComponent } from './components/capture/capture-form/capture-form.component';
+import { CapturesResolver, CapturesMapResolver } from './resolvers/capture.resolver';
 
 export const routes: Routes = [
   {
@@ -60,6 +61,10 @@ export const routes: Routes = [
       {
         path: 'captures',
         component: CaptureListComponent,
+        resolve: {
+          datatable: CapturesResolver,
+          mapData: CapturesMapResolver,
+        },
       },
       {
         path: 'captures/form',
