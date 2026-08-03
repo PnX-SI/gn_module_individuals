@@ -34,9 +34,9 @@ export class DevicesResolver implements Resolve<PaginatedItemCollection<Device>>
   providedIn: 'root',
 })
 export class DeviceResolver implements Resolve<Device> {
-  constructor(private _service: DevicesService) {}
+  constructor(private _device_service: DevicesService) {}
 
   resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Device> {
-    return this._service.getDevice(route.params.id_tracking_device);
+    return this._device_service.getDevice(route.params.id_tracking_device);
   }
 }
