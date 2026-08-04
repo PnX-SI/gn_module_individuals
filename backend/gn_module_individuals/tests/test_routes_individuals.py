@@ -553,7 +553,6 @@ class TestGetIndividual:
         earlier = IndividualDeployments(
             id_tracking_device=existing.id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
             id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
             install_date=datetime.datetime(2020, 1, 1),
@@ -561,7 +560,6 @@ class TestGetIndividual:
         later = IndividualDeployments(
             id_tracking_device=existing.id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
             id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
             install_date=datetime.datetime(2025, 1, 1),

@@ -20,12 +20,6 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
         autoincrement=True,
     )
 
-    id_capture = DB.Column(
-        "id_capture",
-        DB.Integer,
-        nullable=False,
-    )
-
     id_individual = DB.Column(
         "id_individual",
         DB.Integer,
