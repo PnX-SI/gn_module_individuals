@@ -1,4 +1,5 @@
 from geoalchemy2 import Geometry
+from flask import g
 
 from geonature.utils.env import DB
 from geonature.core.gn_monitoring.models import TIndividuals
@@ -7,6 +8,7 @@ from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.utils import NomenclaturesMixin
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy import func
+
 
 from gn_module_individuals.models.deployments import IndividualDeployments
 
@@ -67,10 +69,7 @@ class Capture(NomenclaturesMixin, DB.Model):
     )
 
     meta_create_date = DB.Column(
-        "meta_create_date",
-        DB.DateTime,
-        nullable=True,
-        server_default=func.now()
+        "meta_create_date", DB.DateTime, nullable=True, server_default=func.now()
     )
 
     meta_update_date = DB.Column(
@@ -97,6 +96,18 @@ class Capture(NomenclaturesMixin, DB.Model):
         secondary="gn_individual.cor_role_capture",
         lazy="select",
     )
+
+    def has_instance_permission(self, scope, user=None):
+        user = g.current_user
+        # Nothing
+        if scope == 0:
+            return False
+        # My data
+        elif scope in (1,2):
+            return user == self.digitiser
+        # My company's data
+        elif scope == 3:
+            return True
 
 
 class IndividualsCaptureObservations(DB.Model):
