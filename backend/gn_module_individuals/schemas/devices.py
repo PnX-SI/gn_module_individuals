@@ -43,6 +43,7 @@ class TrackingDevicesBaseSchema(
     nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
     digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
     referer_name = fields.Method("get_referer_name", dump_only=True)
+    device_label = fields.Method("get_device_label", dump_only=True)
 
     # Validators
 
@@ -111,6 +112,9 @@ class TrackingDevicesBaseSchema(
             return f"{obj.referer.prenom_role} {obj.referer.nom_role}"
         return None
 
+    def get_device_label(self, obj):
+        return f"{obj.provider_name}-{obj.provider_device_id}"
+
 
 class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
     """Adds only computed fields on top of the base: no relationships."""
@@ -158,4 +162,5 @@ class TrackingDevicesWriteSchema(TrackingDevicesBaseSchema):
             "nomenclature_device_type_name",
             "referer_name",
             "digitiser_name",
+            "device_label",
         )
