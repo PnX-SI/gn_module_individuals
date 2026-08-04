@@ -72,17 +72,16 @@ export class IndividualsFormComponent implements OnInit {
         module_code: [this.moduleService.currentModule.module_code],
       }),
       this._route.data,
-    ]).subscribe(([additionalFields, { individualData }]) => {
+    ]).subscribe(([additionalFields, individualData]) => {
       this.additionalFields = additionalFields;
-
-      if (individualData?.id_individual) {
-        this.individualId = individualData.id_individual;
+      const individual = individualData?.datatable;
+      if (individual?.id_individual) {
+        this.individualId = individual.id_individual;
         this.formAction = 'EDIT';
-
-        this.patchForm(individualData);
+        this.patchForm(individual);
         // Patch additional fields with individual data
         this.additionalFields.forEach((field) => {
-          field.value = individualData.additional_data?.[field.attribut_name] ?? field.value;
+          field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
         });
       } else {
         this.formAction = 'ADD';
