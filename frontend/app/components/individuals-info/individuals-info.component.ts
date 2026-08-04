@@ -1,11 +1,13 @@
 import { ViewEncapsulation, Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of, forkJoin } from 'rxjs';
+import { Observable, of, forkJoin, combineLatest } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
+import { ModuleService } from '@geonature/services/module.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Individual } from '../../models/individuals.models';
@@ -29,6 +31,7 @@ export class IndividualsInfoComponent implements OnInit {
   public allowedToEdit!: AccessResult;
   public defaultLang!: string;
   private _individualId!: number;
+  public additionalFields: Array<any> = [];
 
   constructor(
     private _config: ConfigService,
@@ -36,12 +39,23 @@ export class IndividualsInfoComponent implements OnInit {
     private _route: ActivatedRoute,
     private _translate: TranslateService,
     private _service: IndividualsService,
-    private _location: Location
+    private _location: Location,
+    private _dfs: DataFormService,
+    public moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {
-    // First initialisation of the table with the resolver data, to display something while waiting for translations to load and avoid having an empty table at the beginning
-    this._route.data.subscribe(({ datatable }) => {
+    // First initialisation of the table with the resolver data, to display something while waiting
+    // for translations to load and avoid having an empty table at the beginning
+    combineLatest([
+      this._dfs.getadditionalFields({
+        module_code: [this.moduleService.currentModule.module_code],
+      }),
+      this._route.data,
+    ]).subscribe(([additionalFields, individualData]) => {
+      this.additionalFields = additionalFields;
+      const datatable = individualData?.datatable;
+
       this.dataTable$ = of(datatable);
       this._individualId = datatable.id_individual;
 

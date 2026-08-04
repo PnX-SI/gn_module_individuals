@@ -103,6 +103,14 @@
       </p>
     </div>
   </div>
+  <h3 class="text-muted">infos complémentaires</h3>
+  <div
+    class="content row"
+    *ngFor="let additionalField of additionalFields"
+  >
+    <b>{{ additionalField.attribut_label }} :</b>
+    {{ dataTable['additional_data'][additionalField.attribut_name] }}
+  </div>
 </ng-template>
 
 <gn-individuals-info
