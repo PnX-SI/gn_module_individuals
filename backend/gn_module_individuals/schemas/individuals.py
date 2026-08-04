@@ -64,6 +64,7 @@ class IndividualsBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAl
         model_converter = NomenclaturesConverter
 
     __module_code__ = MODULE_CODE
+    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
 
     meta_create_date = fields.DateTime(format="%d-%m-%Y", dump_only=True)
     meta_update_date = fields.DateTime(format="%d-%m-%Y", dump_only=True, allow_none=True)
@@ -201,6 +202,16 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     # id_digitiser is NOT NULL on the model but always set by the route from the
     # current user, so it must not be required at load time.
     id_digitiser = fields.Integer(dump_only=True)
+    deployments = fields.Method("get_deployments", dump_only=True)
+
+    # Serialization
+
+    def get_deployments(self, obj):
+        deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
+        # individual_name is redundant here: we are already on that individual's page.
+        return IndividualsDeploymentsSchema(many=True, exclude=("individual_name",)).dump(
+            deployments
+        )
 
     # Validators
 
@@ -336,3 +347,15 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     def get_deployment_location_name(self, obj):
         return get_label(obj.nomenclature_deployment_location)
+
+
+class IndividualsDeploymentsWriteSchema(IndividualsDeploymentsSchema):
+    """Used to create/update a deployment under an individual's PUT"""
+
+    __module_code__ = MODULE_CODE
+
+    id_individual = fields.Integer(dump_only=True)
+    id_digitiser = fields.Integer(dump_only=True)
+    # Loadable here: the base schema marks them dump_only for read use.
+    install_date = fields.DateTime(format="%Y-%m-%d")
+    removal_date = fields.DateTime(format="%Y-%m-%d", allow_none=True, required=False)
