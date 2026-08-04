@@ -3,8 +3,12 @@ import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
+import { combineLatest } from 'rxjs';
+
+import { ModuleService } from '@geonature/services/module.service';
 import { CommonService } from '@geonature_common/service/common.service';
 import { ConfigService } from '@geonature/services/config.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
 import { Individual } from '../../models/individuals.models';
@@ -25,6 +29,8 @@ export class IndividualsFormComponent implements OnInit {
   public formConstraints: Record<string, FormConstraint> = INDIVIDUALS_FORM_CONSTRAINTS;
   public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
 
+  public additionalFields: Array<any> = [];
+
   constructor(
     private _route: ActivatedRoute,
     private _config: ConfigService,
@@ -32,7 +38,9 @@ export class IndividualsFormComponent implements OnInit {
     private _fb: FormBuilder,
     private _service: IndividualsService,
     private _location: Location,
-    private _errorHandler: ErrorHandlerService
+    private _errorHandler: ErrorHandlerService,
+    private _dfs: DataFormService,
+    public moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {
@@ -56,14 +64,26 @@ export class IndividualsFormComponent implements OnInit {
           Validators.pattern(this.formConstraints.comment.pattern),
         ],
       ],
+      additional_data: this._fb.group({}),
     });
 
-    // Patch the form with the datatable resolver
-    this._route.data.subscribe(({ datatable }) => {
-      if (datatable && datatable['id_individual']) {
-        this.individualId = datatable['id_individual'];
+    combineLatest([
+      this._dfs.getadditionalFields({
+        module_code: [this.moduleService.currentModule.module_code],
+      }),
+      this._route.data,
+    ]).subscribe(([additionalFields, { individualData }]) => {
+      this.additionalFields = additionalFields;
+
+      if (individualData?.id_individual) {
+        this.individualId = individualData.id_individual;
         this.formAction = 'EDIT';
-        this.patchForm(datatable);
+
+        this.patchForm(individualData);
+        // Patch additional fields with individual data
+        this.additionalFields.forEach((field) => {
+          field.value = individualData.additional_data?.[field.attribut_name] ?? field.value;
+        });
       } else {
         this.formAction = 'ADD';
       }
@@ -82,7 +102,6 @@ export class IndividualsFormComponent implements OnInit {
 
   onSave(): void {
     const individual = this.form.getRawValue();
-
     this._service
       .createOrUpdateIndividual(individual, this.formAction, this.individualId)
       .subscribe({
