@@ -120,6 +120,7 @@ export class IndividualsService {
       id_nomenclature_sex: individual.id_nomenclature_sex,
       active: individual.active,
       comment: individual.comment,
+      additional_data: individual.additional_data,
     };
 
     if (formAction === 'EDIT') {
