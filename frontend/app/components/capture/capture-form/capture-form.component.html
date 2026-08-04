@@ -1,0 +1,33 @@
+<div>
+  <pnx-nomenclature
+    ngClass="form-group"
+    label="Protocole"
+    [parentFormControl]="form_group.controls['id_nomenclature_protocol']"
+    codeNomenclatureType="PROTOCOLE_CAPTURE"
+  ></pnx-nomenclature>
+
+  <pnx-date
+    class="form-group"
+    label="Date"
+    [parentFormControl]="form_group.controls['date']"
+  ></pnx-date>
+
+  <pnx-observers
+    class="form-group"
+    label="Opérateur"
+    [parentFormControl]="form_group.controls['observers']"
+    [bindAllItem]="true"
+    placeHolder="Opérateur"
+  ></pnx-observers>
+
+  <gn-individuals-textarea
+    class="form-group"
+    label="Commentaire"
+    [parentFormControl]="form_group.controls['comment']"
+  ></gn-individuals-textarea>
+
+  <pnx-individuals
+    label="Individus"
+    [parentFormControl]="form_group.controls['individuals']"
+  ></pnx-individuals>
+</div>

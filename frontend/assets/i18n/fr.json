@@ -109,6 +109,39 @@
                 "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             }      
         },
+        "Captures": {
+            "Fields": {
+                "id_capture" : "Identifiant",
+                "id_nomenclature_protocole" : "Protocole de capture",
+                "date" : "Date",
+                "comment" : "Commentaire",
+                "observers" : "Opérateur(s)",
+                "individuals" : "Individu(s) capturé(s)",
+                "id_digitiser" : "Rédacteur",
+                "meta_create_date" : "Date de création",
+                "meta_update_date" : "Date de mise à jour"
+            },
+            "PlaceHolder": {
+                "observers": "Sélectionner un opérateur"
+            },
+            "Titles": {
+                "Info": "Capture n°{{ id }}",
+                "Add" : "Ajout d'une capture",
+                "Edit" : "Modification de la capture n°{{ id }}",
+                "Delete" : "Suppression de la capture n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "La capture a été créée.",
+                "Edited" : "La capture n°{{ id }} a été modifiée.",
+                "Deleted" : "La capture n°{{ id }} a été supprimée.",
+                "NoGeometry" : "Cette capture ne dispose pas de géométrie."
+            },
+            "Errors": {
+                "AddedNOK" : "Cette capture n'a pas pu être créée. Erreur : {{ error }}",
+                "EditedNOK" : "La capture n°{{ id }} n'a pas pu être modifiée. Erreur : {{ error }}",
+                "DeletedNOK" : "La capture n°{{ id }} n'a pas pu être supprimée. Erreur : {{ error }}"
+            }
+        },
         "Messages": {
             "EmptyList" : "Aucune donnée à afficher",
             "TotalList" : "ligne(s) au total",
