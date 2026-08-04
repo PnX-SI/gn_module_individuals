@@ -1,6 +1,5 @@
 export interface Deployment {
   id_deployment: number;
-  id_capture: number;
   id_tracking_device: string;
   id_individual: number;
   id_nomenclature_deployment_type: number;

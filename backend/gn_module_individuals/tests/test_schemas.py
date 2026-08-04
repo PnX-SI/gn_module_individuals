@@ -289,7 +289,6 @@ class TestIndividualsListSchema:
     def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",
@@ -311,7 +310,6 @@ class TestIndividualsListSchema:
         dep = IndividualDeployments(
             id_tracking_device=devices[0].id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "4"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "3"),
             install_date=datetime(2024, 1, 1),
@@ -335,7 +333,6 @@ class TestIndividualsListSchema:
     def test_get_deployed_markings_returns_active_physical_markings(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",
@@ -353,7 +350,6 @@ class TestIndividualsListSchema:
     def test_get_deployed_markings_excludes_removed_marking(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",

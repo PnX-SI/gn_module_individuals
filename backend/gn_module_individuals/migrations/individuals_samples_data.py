@@ -83,7 +83,6 @@ JOIN ref_nomenclatures.t_nomenclatures n
             """))
     op.execute(sa.text("""
             INSERT INTO gn_individual.t_individual_deployments (
-                id_capture,
                 id_individual,
                 id_nomenclature_deployment_type,
                 id_nomenclature_deployment_location,
@@ -118,25 +117,24 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 SELECT *
                 FROM (
                     VALUES
-                    ('Cynthia', 1, '182243', NULL, '2024-01-01', '2024-06-01', 'Premier équipement', 4),
-                    ('Cynthia', 2, '121256-AZ', NULL, '2024-06-02', NULL, 'Remplacement GPS', 4),
-                    ('Claire', 3, '182A256POX', NULL, '2025-03-15', NULL, 'Pose unique', 6),
-                    ('Christophe', 5, '210709', NULL, '2025-02-01', '2026-01-06', 'VHF actif', 4),
-                    ('Christophe', 6, '182A256ARG', NULL, '2026-01-06', NULL, 'Remplacement CHF par GPS', 4),
-                    ('Tempête', 7, '18256-9G', NULL, '2022-01-01', '2023-01-01', 'Ancien dispositif', 6),
-                    ('Tempête', 8, '210719', NULL, '2023-02-01', NULL, 'Dispositif actuel', 6),
-                    ('Patastrophe', 9, '121256-AZ', NULL, '2023-06-01', '2024-01-01', 'Retiré après suivi', 3),
-                    ('Obiwan', 10, '182A256ARG', NULL, '2024-01-10', NULL, 'Suivi GPS', 4),
-                    ('Evasion', 11, '18256-9G', NULL, '2023-03-01', '2023-09-01', 'Premier', 6),
-                    ('Evasion', 12, '182A9P6ARP-6', NULL, '2023-09-02', NULL, 'Remplacement', 6),
-                    ('Queen', 13, '1887Y56ZA8', NULL, '2022-05-01', '2023-05-01', 'Avant désactivation', 3),
-                    ('Quechua', 14, '182A256POM', NULL, '2024-02-20', NULL, 'Suivi classique', 3),
-                    ('Kalinka', 15, '210710', NULL, '2023-01-01', '2023-07-01', 'Retrait été', 4),
-                    ('Pavot', 16, '210721', NULL, '2024-03-01', NULL, 'Nouveau suivi', 4)
-                ) AS t(individual_name, id_capture, provider_device_id, marking_code, install_date, removal_date, comment, id_digitiser)
+                    ('Cynthia', '182243', NULL, '2024-01-01', '2024-06-01', 'Premier équipement', 4),
+                    ('Cynthia', '121256-AZ', NULL, '2024-06-02', NULL, 'Remplacement GPS', 4),
+                    ('Claire', '182A256POX', NULL, '2025-03-15', NULL, 'Pose unique', 6),
+                    ('Christophe', '210709', NULL, '2025-02-01', '2026-01-06', 'VHF actif', 4),
+                    ('Christophe', '182A256ARG', NULL, '2026-01-06', NULL, 'Remplacement CHF par GPS', 4),
+                    ('Tempête', '18256-9G', NULL, '2022-01-01', '2023-01-01', 'Ancien dispositif', 6),
+                    ('Tempête', '210719', NULL, '2023-02-01', NULL, 'Dispositif actuel', 6),
+                    ('Patastrophe', '121256-AZ', NULL, '2023-06-01', '2024-01-01', 'Retiré après suivi', 3),
+                    ('Obiwan', '182A256ARG', NULL, '2024-01-10', NULL, 'Suivi GPS', 4),
+                    ('Evasion', '18256-9G', NULL, '2023-03-01', '2023-09-01', 'Premier', 6),
+                    ('Evasion', '182A9P6ARP-6', NULL, '2023-09-02', NULL, 'Remplacement', 6),
+                    ('Queen', '1887Y56ZA8', NULL, '2022-05-01', '2023-05-01', 'Avant désactivation', 3),
+                    ('Quechua', '182A256POM', NULL, '2024-02-20', NULL, 'Suivi classique', 3),
+                    ('Kalinka', '210710', NULL, '2023-01-01', '2023-07-01', 'Retrait été', 4),
+                    ('Pavot', '210721', NULL, '2024-03-01', NULL, 'Nouveau suivi', 4)
+                ) AS t(individual_name, provider_device_id, marking_code, install_date, removal_date, comment, id_digitiser)
             )
             SELECT
-                d.id_capture,
                 i.id_individual,
                 n_type.id_nomenclature,
                 n_loc.id_nomenclature,
@@ -157,7 +155,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
     # Each animal: 2 colors per ear (OD, OG) + a colored collar at the neck.
     op.execute(sa.text("""
         INSERT INTO gn_individual.t_individual_deployments (
-            id_capture, id_individual,
+            id_individual,
             id_nomenclature_deployment_type, id_nomenclature_deployment_location,
             id_tracking_device, marking_code, install_date, id_digitiser
         )
@@ -179,28 +177,27 @@ JOIN ref_nomenclatures.t_nomenclatures n
         ),
         data AS (
             SELECT * FROM (VALUES
-                -- Patastrophe: orange/yellow, green collar (capture 17)
-                ('Patastrophe', 17, 'PLAQUE', 'OD',       'Orange', '2023-01-15', 3),
-                ('Patastrophe', 17, 'PLAQUE', 'OD',       'Jaune',  '2023-01-15', 3),
-                ('Patastrophe', 17, 'PLAQUE', 'OG',       'Orange', '2023-01-15', 3),
-                ('Patastrophe', 17, 'PLAQUE', 'OG',       'Jaune',  '2023-01-15', 3),
-                ('Patastrophe', 17, 'PLAQUE', 'ENCOLURE', 'Vert',   '2023-01-15', 3),
-                -- Evasion: purple/red, yellow collar (capture 18)
-                ('Evasion', 18, 'PLAQUE', 'OD',       'Violet', '2022-11-20', 6),
-                ('Evasion', 18, 'PLAQUE', 'OD',       'Rouge',  '2022-11-20', 6),
-                ('Evasion', 18, 'PLAQUE', 'OG',       'Violet', '2022-11-20', 6),
-                ('Evasion', 18, 'PLAQUE', 'OG',       'Rouge',  '2022-11-20', 6),
-                ('Evasion', 18, 'PLAQUE', 'ENCOLURE', 'Jaune',  '2022-11-20', 6),
-                -- Obiwan: blue/white, red collar (capture 19, same date as GPS deployment)
-                ('Obiwan', 19, 'PLAQUE', 'OD',       'Bleu',  '2024-01-10', 4),
-                ('Obiwan', 19, 'PLAQUE', 'OD',       'Blanc', '2024-01-10', 4),
-                ('Obiwan', 19, 'PLAQUE', 'OG',       'Bleu',  '2024-01-10', 4),
-                ('Obiwan', 19, 'PLAQUE', 'OG',       'Blanc', '2024-01-10', 4),
-                ('Obiwan', 19, 'PLAQUE', 'ENCOLURE', 'Rouge', '2024-01-10', 4)
-            ) AS t(individual_name, id_capture, type_mnemo, loc_mnemo, marking_code, install_date, id_digitiser)
+                -- Patastrophe: orange/yellow, green collar (same capture)
+                ('Patastrophe', 'PLAQUE', 'OD',       'Orange', '2023-01-15', 3),
+                ('Patastrophe', 'PLAQUE', 'OD',       'Jaune',  '2023-01-15', 3),
+                ('Patastrophe', 'PLAQUE', 'OG',       'Orange', '2023-01-15', 3),
+                ('Patastrophe', 'PLAQUE', 'OG',       'Jaune',  '2023-01-15', 3),
+                ('Patastrophe', 'PLAQUE', 'ENCOLURE', 'Vert',   '2023-01-15', 3),
+                -- Evasion: purple/red, yellow collar (same capture)
+                ('Evasion', 'PLAQUE', 'OD',       'Violet', '2022-11-20', 6),
+                ('Evasion', 'PLAQUE', 'OD',       'Rouge',  '2022-11-20', 6),
+                ('Evasion', 'PLAQUE', 'OG',       'Violet', '2022-11-20', 6),
+                ('Evasion', 'PLAQUE', 'OG',       'Rouge',  '2022-11-20', 6),
+                ('Evasion', 'PLAQUE', 'ENCOLURE', 'Jaune',  '2022-11-20', 6),
+                -- Obiwan: blue/white, red collar (same capture, same date as GPS deployment)
+                ('Obiwan', 'PLAQUE', 'OD',       'Bleu',  '2024-01-10', 4),
+                ('Obiwan', 'PLAQUE', 'OD',       'Blanc', '2024-01-10', 4),
+                ('Obiwan', 'PLAQUE', 'OG',       'Bleu',  '2024-01-10', 4),
+                ('Obiwan', 'PLAQUE', 'OG',       'Blanc', '2024-01-10', 4),
+                ('Obiwan', 'PLAQUE', 'ENCOLURE', 'Rouge', '2024-01-10', 4)
+            ) AS t(individual_name, type_mnemo, loc_mnemo, marking_code, install_date, id_digitiser)
         )
         SELECT
-            d.id_capture,
             i.id_individual,
             nt.id_nomenclature,
             nl.id_nomenclature,

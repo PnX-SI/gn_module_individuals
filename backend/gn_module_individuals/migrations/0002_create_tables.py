@@ -83,12 +83,6 @@ def upgrade():
             autoincrement=True,
         ),
         sa.Column(
-            "id_capture",
-            sa.Integer(),
-            # sa.ForeignKey("t_captures.id_capture"),
-            nullable=False,
-        ),
-        sa.Column(
             "id_individual",
             sa.Integer(),
             sa.ForeignKey("gn_monitoring.t_individuals.id_individual"),
