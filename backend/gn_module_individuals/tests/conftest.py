@@ -82,9 +82,7 @@ def ensure_individuals_module(app, users):
             if db.session.scalar(select(PermObject).filter_by(code_object=code)) is None:
                 db.session.add(PermObject(code_object=code, description_object=description))
 
-    object_individuals = db.session.scalar(
-        select(PermObject).filter_by(code_object="INDIVIDUALS")
-    )
+    object_individuals = db.session.scalar(select(PermObject).filter_by(code_object="INDIVIDUALS"))
 
     # Permissions sur ALL (lecture globale du module)
     all_permissions = {

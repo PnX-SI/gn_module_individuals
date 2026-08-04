@@ -25,7 +25,7 @@ def upgrade():
 
     op.execute(
         sa.text(
-        """
+            """
         INSERT INTO gn_permissions.t_objects 
             (code_object, description_object)
         VALUES
@@ -94,6 +94,7 @@ def upgrade():
         JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
     """
     )
+
 
 def downgrade():
     conn = op.get_bind()
