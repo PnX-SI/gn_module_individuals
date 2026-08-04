@@ -22,9 +22,7 @@ depends_on = ("individuals",)
 
 def upgrade():
     conn = op.get_bind()
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             INSERT INTO gn_individual.bib_tracking_devices (
     id_nomenclature_device_type,
     provider_name,
@@ -66,12 +64,8 @@ FROM (
 ) AS v(mnemonique, provider_name, provider_device_id, id_referer, comment, id_digitiser)
 JOIN ref_nomenclatures.t_nomenclatures n
     ON n.mnemonique = v.mnemonique;
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO gn_monitoring.t_individuals
             (individual_name, cd_nom, id_nomenclature_sex, active, "comment", id_digitiser, additional_data)
             VALUES
@@ -86,12 +80,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
             ('Quechua',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               3, '{"birth_year": 2012}'),
             ('Kalinka',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       4, '{"birth_year": 2011}'),
             ('Pavot',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               4, '{"birth_year": 2019}')
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO gn_individual.t_individual_deployments (
                 id_capture,
                 id_individual,
@@ -161,15 +151,11 @@ JOIN ref_nomenclatures.t_nomenclatures n
             JOIN devices dev ON dev.provider_device_id = d.provider_device_id
             CROSS JOIN n_type
             CROSS JOIN n_loc
-            """
-        )
-    )
+            """))
 
     # Physical markings: Patastrophe and Evasion (no GPS), Obiwan (with GPS).
     # Each animal: 2 colors per ear (OD, OG) + a colored collar at the neck.
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
         INSERT INTO gn_individual.t_individual_deployments (
             id_capture, id_individual,
             id_nomenclature_deployment_type, id_nomenclature_deployment_location,
@@ -226,16 +212,12 @@ JOIN ref_nomenclatures.t_nomenclatures n
         JOIN individuals i  ON i.individual_name = d.individual_name
         JOIN n_type nt       ON nt.mnemonique     = d.type_mnemo
         JOIN n_loc nl        ON nl.mnemonique      = d.loc_mnemo;
-    """
-        )
-    )
+    """))
 
     # --- Occtax integration: a few Vanoise records referencing our individuals ---
     # Dedicated acquisition framework and dataset for this test data, so no
     # hardcoded id_dataset / id_module is needed in the inserts below.
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             INSERT INTO gn_meta.t_acquisition_frameworks (
                 acquisition_framework_name, acquisition_framework_desc,
                 acquisition_framework_start_date
@@ -248,12 +230,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 SELECT 1 FROM gn_meta.t_acquisition_frameworks
                 WHERE acquisition_framework_name = 'Cadre d''acquisition de test Individus'
             )
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO gn_meta.t_datasets (
                 id_acquisition_framework, dataset_name, dataset_shortname, dataset_desc,
                 marine_domain, terrestrial_domain, id_digitizer
@@ -269,23 +247,15 @@ JOIN ref_nomenclatures.t_nomenclatures n
                   SELECT 1 FROM gn_meta.t_datasets
                   WHERE dataset_shortname = 'INDIVIDUALS_TEST'
               )
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO gn_commons.cor_module_dataset (id_module, id_dataset)
             SELECT m.id_module, d.id_dataset
             FROM gn_commons.t_modules m, gn_meta.t_datasets d
             WHERE m.module_code = 'OCCTAX' AND d.dataset_shortname = 'INDIVIDUALS_TEST'
-            """
-        )
-    )
+            """))
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             WITH releve_data (place_name, lon, lat, obs_date, id_digitiser) AS (
                 VALUES
                 ('Col de la Vanoise',    6.9313, 45.3944, '2026-07-02 09:30'::timestamp, 4),
@@ -316,15 +286,11 @@ JOIN ref_nomenclatures.t_nomenclatures n
             FROM releve_data d
             CROSS JOIN occtax_module m
             CROSS JOIN test_dataset ds
-            """
-        )
-    )
+            """))
     # Col de la Vanoise: 2 observers, Refuge de Prariond: 3 observers,
     # the other two keep a single observer (their own id_digitiser) to
     # cover the 1/2/3-observer display cases.
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             WITH observer_data (place_name, id_role) AS (
                 VALUES
                 ('Col de la Vanoise', 4),
@@ -343,12 +309,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 'Col de la Vanoise', 'Refuge de Prariond',
                 'Pointe de la Réchasse', 'Plan du Lac'
             )
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             WITH releve_species (place_name, cd_nom, nom_cite) AS (
                 VALUES
                 ('Col de la Vanoise',     459629, 'Lagopède alpin'),
@@ -366,12 +328,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 'Col de la Vanoise', 'Refuge de Prariond',
                 'Pointe de la Réchasse', 'Plan du Lac'
             )
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             WITH occ_individual (place_name, individual_name) AS (
                 VALUES
                 ('Col de la Vanoise', 'Cynthia'),
@@ -391,16 +349,12 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 'Col de la Vanoise', 'Refuge de Prariond',
                 'Pointe de la Réchasse', 'Plan du Lac'
             )
-            """
-        )
-    )
+            """))
 
     # Field sightings identified by physical marking (no place name, random
     # positions in Vanoise): Patastrophe (5), Evasion (3), Obiwan (0), covering
     # the requested 0-5 range so movement can be tested.
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             WITH sighting_data (individual_name, lon, lat, obs_date, id_digitiser) AS (
                 VALUES
                 ('Patastrophe', 6.72, 45.25, '2026-07-01 10:15'::timestamp, 3),
@@ -429,12 +383,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
             FROM sighting_data d
             CROSS JOIN occtax_module m
             CROSS JOIN test_dataset ds
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO pr_occtax.cor_role_releves_occtax (id_releve_occtax, id_role)
             SELECT DISTINCT r.id_releve_occtax, CASE WHEN r.date_min < '2026-07-06' THEN 3 ELSE 6 END
             FROM pr_occtax.t_releves_occtax r
@@ -443,12 +393,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 '2026-07-12 16:20', '2026-07-15 08:50',
                 '2026-07-03 11:30', '2026-07-10 13:10', '2026-07-18 07:55'
             )
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO pr_occtax.t_occurrences_occtax (id_releve_occtax, cd_nom, nom_cite, meta_v_taxref)
             SELECT r.id_releve_occtax, 61098, 'Bouquetin des Alpes', 'Taxref v18'
             FROM pr_occtax.t_releves_occtax r
@@ -457,12 +403,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 '2026-07-12 16:20', '2026-07-15 08:50',
                 '2026-07-03 11:30', '2026-07-10 13:10', '2026-07-18 07:55'
             )
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             WITH sighting_individual (obs_date, individual_name) AS (
                 VALUES
                 ('2026-07-01 10:15'::timestamp, 'Patastrophe'),
@@ -482,15 +424,11 @@ JOIN ref_nomenclatures.t_nomenclatures n
             JOIN pr_occtax.t_releves_occtax r ON r.id_releve_occtax = o.id_releve_occtax
             JOIN sighting_individual si ON si.obs_date = r.date_min
             JOIN gn_monitoring.t_individuals i ON i.individual_name = si.individual_name
-            """
-        )
-    )
+            """))
 
     # Simulated GPS tag data: 4 points/day over 3 days, 100m apart,
     # for a single animal (Cynthia).
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             WITH RECURSIVE gps_points(seq, geom) AS (
                 SELECT 1, ST_SetSRID(ST_MakePoint(6.9200, 45.4100), 4326)
                 UNION ALL
@@ -523,32 +461,20 @@ JOIN ref_nomenclatures.t_nomenclatures n
             JOIN gps_times t ON t.seq = p.seq
             CROSS JOIN occtax_module m
             CROSS JOIN test_dataset ds
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO pr_occtax.cor_role_releves_occtax (id_releve_occtax, id_role)
             SELECT r.id_releve_occtax, 4
             FROM pr_occtax.t_releves_occtax r
             WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO pr_occtax.t_occurrences_occtax (id_releve_occtax, cd_nom, nom_cite, meta_v_taxref)
             SELECT r.id_releve_occtax, 459629, 'Lagopède alpin', 'Taxref v18'
             FROM pr_occtax.t_releves_occtax r
             WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
-            """
-        )
-    )
-    op.execute(
-        sa.text(
-            """
+            """))
+    op.execute(sa.text("""
             INSERT INTO pr_occtax.cor_counting_occtax (
                 id_occurrence_occtax, count_min, count_max, id_individual
             )
@@ -557,9 +483,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
             JOIN pr_occtax.t_releves_occtax r ON r.id_releve_occtax = o.id_releve_occtax
             JOIN gn_monitoring.t_individuals i ON i.individual_name = 'Cynthia'
             WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
-            """
-        )
-    )
+            """))
 
     # --- Monitoring integration: CMR_BOUQUETIN sub-module on our marked ibex ---
     # The sub-module must have been installed beforehand via
@@ -573,9 +497,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
     if cmr_installed:
         # Dedicated dataset: the dataset "1" reused for Occtax is associated
         # (gn_commons.cor_module_dataset) with the OCCTAX module only, not CMR_BOUQUETIN.
-        op.execute(
-            sa.text(
-                """
+        op.execute(sa.text("""
                 INSERT INTO gn_meta.t_datasets (
                     id_acquisition_framework, dataset_name, dataset_shortname, dataset_desc,
                     marine_domain, terrestrial_domain, id_digitizer
@@ -586,22 +508,14 @@ JOIN ref_nomenclatures.t_nomenclatures n
                     FALSE, TRUE, 4
                 FROM gn_meta.t_acquisition_frameworks af
                 WHERE af.acquisition_framework_name = 'Cadre d''acquisition de test Individus'
-                """
-            )
-        )
-        op.execute(
-            sa.text(
-                """
+                """))
+        op.execute(sa.text("""
                 INSERT INTO gn_commons.cor_module_dataset (id_module, id_dataset)
                 SELECT m.id_module, d.id_dataset
                 FROM gn_commons.t_modules m, gn_meta.t_datasets d
                 WHERE m.module_code = 'CMR_BOUQUETIN' AND d.dataset_shortname = 'CMR_BOUQUETIN'
-                """
-            )
-        )
-        op.execute(
-            sa.text(
-                """
+                """))
+        op.execute(sa.text("""
                 WITH site_data (base_site_name, lon, lat, id_digitiser) AS (
                     VALUES
                     ('Pointe de la Réchasse', 6.9100, 45.4050, 4),
@@ -613,12 +527,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 SELECT d.base_site_name, d.id_digitiser, d.id_digitiser,
                     ST_SetSRID(ST_MakePoint(d.lon, d.lat), 4326)
                 FROM site_data d
-                """
-            )
-        )
-        op.execute(
-            sa.text(
-                """
+                """))
+        op.execute(sa.text("""
                 WITH visit_data (base_site_name, visit_date, id_digitiser) AS (
                     VALUES
                     ('Pointe de la Réchasse', '2026-07-03'::date, 4),
@@ -640,12 +550,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 JOIN gn_monitoring.t_base_sites s ON s.base_site_name = v.base_site_name
                 CROSS JOIN cmr_module m
                 CROSS JOIN cmr_dataset ds
-                """
-            )
-        )
-        op.execute(
-            sa.text(
-                """
+                """))
+        op.execute(sa.text("""
                 INSERT INTO gn_monitoring.cor_visit_observer (id_base_visit, id_role)
                 SELECT bv.id_base_visit, bv.id_digitiser
                 FROM gn_monitoring.t_base_visits bv
@@ -653,12 +559,8 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 WHERE s.base_site_name IN (
                     'Pointe de la Réchasse', 'Plan du Lac', 'Refuge de l''Arpont', 'Col d''Aussois'
                 )
-                """
-            )
-        )
-        op.execute(
-            sa.text(
-                """
+                """))
+        op.execute(sa.text("""
                 WITH obs_data (base_site_name, individual_name, id_digitiser) AS (
                     VALUES
                     ('Pointe de la Réchasse', 'Obiwan',     4),
@@ -672,9 +574,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
                 JOIN gn_monitoring.t_base_sites s ON s.base_site_name = o.base_site_name
                 JOIN gn_monitoring.t_base_visits bv ON bv.id_base_site = s.id_base_site
                 JOIN gn_monitoring.t_individuals i ON i.individual_name = o.individual_name
-                """
-            )
-        )
+                """))
 
 
 def downgrade():
@@ -688,46 +588,32 @@ def downgrade():
             "SELECT EXISTS (SELECT 1 FROM gn_commons.t_modules WHERE module_code = 'CMR_BOUQUETIN')"
         )
     ).scalar():
-        op.execute(
-            sa.text(
-                """
+        op.execute(sa.text("""
                 DELETE FROM gn_monitoring.t_base_sites
                 WHERE base_site_name IN (
                     'Pointe de la Réchasse', 'Plan du Lac', 'Refuge de l''Arpont', 'Col d''Aussois'
                 )
-                """
-            )
-        )
+                """))
         # cor_module_dataset is deleted in cascade with the dataset.
         op.execute(
             sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'CMR_BOUQUETIN'")
         )
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             DELETE FROM pr_occtax.t_releves_occtax
             WHERE date_min BETWEEN '2026-07-01' AND '2026-07-31 23:59:59'
-            """
-        )
-    )
+            """))
 
     # cor_module_dataset is deleted in cascade with the dataset.
     op.execute(
         sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'INDIVIDUALS_TEST'")
     )
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             DELETE FROM gn_meta.t_acquisition_frameworks
             WHERE acquisition_framework_name = 'Cadre d''acquisition de test Individus'
-            """
-        )
-    )
+            """))
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.tables
@@ -745,6 +631,4 @@ BEGIN
         DELETE FROM gn_monitoring.t_individuals;
     END IF;
 END $$;
-    """
-        )
-    )
+    """))
