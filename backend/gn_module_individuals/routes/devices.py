@@ -40,6 +40,12 @@ def _parse_bool(value):
     raise APIError(ApiErrorCode.INVALID_FILTER, "Unsupported available value", 400)
 
 
+def _device_label_expression():
+    """SQL equivalent of TrackingDevicesBaseSchema.get_device_label, so it can
+    be filtered on (search) or sorted on at the database level."""
+    return func.concat(TrackingDevices.provider_name, "-", TrackingDevices.provider_device_id)
+
+
 def _device_available_expression():
     """A device is available when it has 0 deployment, or when its last
     deployment has a  removal_date."""
@@ -104,6 +110,7 @@ def _device_sort_columns():
             .correlate(TrackingDevices)
             .scalar_subquery()
         ),
+        "device_label": _device_label_expression(),
     }
 
 
@@ -174,6 +181,8 @@ def list_devices(scope):
         with the device
     :query int id_nomenclature_device_type: filter on the device type
     :query string provider_name: filter on the provider name (partial match)
+    :query string search: filter on the device label (``provider_name-
+       provider_device_id``), partial match, for autocomplete
     :query int id_referer: filter on the referer role
     :query boolean available: filter on device availability
     :query int page: page number, requires per_page to enable pagination
@@ -189,6 +198,7 @@ def list_devices(scope):
     cd_nom = request.args.get("cd_nom", type=int)
     device_type = request.args.get("id_nomenclature_device_type", type=int)
     provider_name = request.args.get("provider_name", type=str)
+    search = request.args.get("search", type=str)
     id_referer = request.args.get("id_referer", type=int)
     available = _parse_bool(request.args.get("available"))
 
@@ -255,6 +265,8 @@ def list_devices(scope):
         query = query.where(TrackingDevices.id_nomenclature_device_type == device_type)
     if provider_name:
         query = query.where(TrackingDevices.provider_name.ilike(f"%{provider_name}%"))
+    if search:
+        query = query.where(_device_label_expression().ilike(f"%{search}%"))
     if id_referer is not None:
         query = query.where(TrackingDevices.id_referer == id_referer)
     if available is not None:
