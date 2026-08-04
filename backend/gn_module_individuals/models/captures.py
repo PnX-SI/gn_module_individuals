@@ -45,14 +45,14 @@ class Capture(NomenclaturesMixin, DB.Model):
 
     geom_local = DB.Column(
         "geom_local",
-        Geometry("POINT"),
+        Geometry("GEOMETRY"),
         nullable=False,
     )
 
     geom_4326 = DB.Column(
         "geom_4326",
-        Geometry("POINT", 4326),
-        nullable=False,
+        Geometry("GEOMETRY", 4326),
+        nullable=True,
     )
 
     additional_data = DB.Column(
@@ -97,14 +97,32 @@ class Capture(NomenclaturesMixin, DB.Model):
         lazy="select",
     )
 
+    @classmethod
+    def filter_by_scope(cls, query, scope, user=None):
+        from sqlalchemy import or_, false, true
+
+        if user is None:
+            user = g.current_user
+        if scope == 0:
+            query = query.where(false())
+        elif scope in (1, 2):
+            ors = [
+                cls.id_digitiser == user.id_role,
+            ]
+            # if organism is None => do not filter on id_organism even if level = 2
+            if scope == 2 and user.id_organisme is not None:
+                ors.append(cls.digitiser.has(id_organisme=user.id_organisme))
+            query = query.where(or_(*ors))
+        return query
+
     def has_instance_permission(self, scope, user=None):
         user = g.current_user
         # Nothing
         if scope == 0:
             return False
         # My data
-        elif scope in (1,2):
-            return user == self.digitiser
+        elif scope in (1, 2):
+            return user.id_role == self.id_digitiser
         # My company's data
         elif scope == 3:
             return True
