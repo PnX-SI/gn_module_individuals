@@ -20,7 +20,11 @@ import { IndividualsFormComponent } from './components/individuals-form/individu
 import { CaptureListComponent } from './components/capture/capture-list/capture-list.component';
 import { CaptureInfoComponent } from './components/capture/capture-info/capture-info.component';
 import { CaptureFormComponent } from './components/capture/capture-form/capture-form.component';
-import { CapturesResolver, CapturesMapResolver } from './resolvers/capture.resolver';
+import {
+  CapturesResolver,
+  CapturesMapResolver,
+  CaptureResolver,
+} from './resolvers/capture.resolver';
 
 export const routes: Routes = [
   {
@@ -77,6 +81,9 @@ export const routes: Routes = [
       {
         path: 'captures/info/:id_capture',
         component: CaptureInfoComponent,
+        resolve: {
+          capture: CaptureResolver,
+        },
       },
       {
         path: 'devices',

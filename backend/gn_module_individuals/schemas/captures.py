@@ -8,9 +8,12 @@ from geojson import Feature
 from utils_flask_sqla_geo.utilsgeometry import remove_third_dimension
 
 from geonature.utils.schema import CruvedSchemaMixin
+from geonature.utils.env import MA
 from shapely.geometry import shape
 from .. import MODULE_CODE
 from ..models import Capture
+from utils_flask_sqla_geo.schema import GeometryField,GeoModelConverter,GeoAlchemyAutoSchema
+
 
 
 # PATCH : To move in utils_flask_sqla_geo
@@ -38,18 +41,39 @@ class GeojsonSerializationField(fields.Field):
         except Exception as error:
             raise ValidationError("Geometry error") from error
 
-class CapturesSchema(CruvedSchemaMixin, SmartRelationshipsMixin):
-  class Meta:
-    model = Capture
-    include_fk = True
-    load_instance = True
-    sqla_session = db.session
-    include_relationships = False
-    model_converter = NomenclaturesConverter
+
+class CapturesSchema(MA.SQLAlchemyAutoSchema, CruvedSchemaMixin, SmartRelationshipsMixin):
+    class Meta:
+        model = Capture
+        include_fk = True
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = False
+        model_converter = NomenclaturesConverter
+        exclude = ("geom_4326",)
 
     __module_code__ = MODULE_CODE
 
     meta_create_date = fields.DateTime(format="%d-%m-%Y", dump_only=True)
     meta_update_date = fields.DateTime(format="%d-%m-%Y", dump_only=True, allow_none=True)
-    geom = GeojsonSerializationField(required=True)
+    geom_local = GeojsonSerializationField(required=False, allow_none=True)
+
+
+
+class CaptureMapConverter(NomenclaturesConverter, GeoModelConverter):
+    pass
+
+
+class CaptureMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
+    class Meta:
+        model = Capture
+        include_fk = False
+        load_instance = True
+        sqla_session = db.session
+        feature_id = "id_capture"
+        feature_geometry = "geom_local"
+        model_converter = CaptureMapConverter
+
+    geom_local = GeometryField(metadata={"exclude": True}, dump_only=True)
+
 

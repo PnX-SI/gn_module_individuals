@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { Capture } from '../../../models/capture.model';
 import { Individual } from '../../../models/individuals.models';
+import { CaptureService } from '../../../services/capture.service';
+import { ActivatedRoute } from '@angular/router';
 
 const DUMMY_INDIVIDUAL: Individual = {
   id_individual: 1,
@@ -50,5 +52,14 @@ const DUMMY_CAPTURE: Capture = {
   standalone: false,
 })
 export class CaptureInfoComponent {
-  @Input() capture: Capture = DUMMY_CAPTURE;
+  @Input() capture: Capture;
+
+  constructor(
+    private _captureService: CaptureService,
+    private _route: ActivatedRoute
+  ) {
+    this._route.data.subscribe(({ capture }) => {
+      this.capture = capture;
+    });
+  }
 }

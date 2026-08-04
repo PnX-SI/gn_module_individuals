@@ -20,17 +20,17 @@ export class CaptureService {
   }
 
   getCapture(id_capture: number): Observable<Capture | any> {
-    return of({});
+    return this._http.get<Capture>(`${this.API_ENDPOINT}/${id_capture}`);
   }
 
   getCaptures(params: APIPaginationParams): Observable<PaginatedItemCollection<Capture> | any> {
-    return of({});
+    return this._http.get<Capture>(`${this.API_ENDPOINT}`);
   }
 
   getCapturesforMap(
     params: APIPaginationParams | any
   ): Observable<PaginatedItemCollection<Capture> | any> {
-    return of({});
+    return this._http.get<Capture>(`${this.API_ENDPOINT}/geometry`);
   }
 
   /**
