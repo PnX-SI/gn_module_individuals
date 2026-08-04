@@ -19,10 +19,24 @@ source ~/geonature/backend/venv/bin/activate
 geonature install-gn-module ~/gn_module_individuals
 ```
 
-Donner tous les droits sur le module au groupe admin (Grp_admin) : 
+Donner tous les droits sur le module au groupe admin (Grp_admin) :
 
 ```
 geonature permissions supergrant --nom Grp_admin --yes
 ```
 
 Il faudra ensuite donner les droits souhaités aux utilisateurs via l'interface d'administration.
+
+
+
+## Configuration
+
+Pour pouvoir activer les champs additionels rajouter les paramètres suivant au fichier `geonature_config.toml`
+
+
+```
+# Champs additionnels
+[ADDITIONAL_FIELDS]
+    IMPLEMENTED_MODULES = ["OCCTAX", "METADATA", "INDIVIDUALS"]
+    IMPLEMENTED_OBJECTS = ["OCCTAX_RELEVE", "OCCTAX_OCCURENCE", "OCCTAX_DENOMBREMENT", "METADATA_CADRE_ACQUISITION", "METADATA_JEU_DE_DONNEES", "INDIVIDUALS"]
+```
