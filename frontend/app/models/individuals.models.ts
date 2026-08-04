@@ -53,6 +53,7 @@ export interface CreateIndividualDto {
   id_nomenclature_sex: number;
   active: false;
   comment: string;
+  deployments: [];
   additional_data: {};
 }
 
