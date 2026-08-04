@@ -33,7 +33,7 @@ class TrackingDevicesBaseSchema(
         feature_id = "id_tracking_device"
 
     __module_code__ = MODULE_CODE
-    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
+    __object_code__ = "INDIVIDUALS"
 
     id_tracking_device = ma.auto_field(dump_only=True)
     meta_create_date = fields.Date(format="%Y-%m-%d", dump_only=True)
@@ -116,7 +116,7 @@ class TrackingDevicesListSchema(TrackingDevicesBaseSchema):
     """Adds only computed fields on top of the base: no relationships."""
 
     __module_code__ = MODULE_CODE
-    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
+    __object_code__ = "INDIVIDUALS"
 
     last_individual_equipped_name = fields.Method(
         "get_last_individual_equipped_name", dump_only=True
@@ -139,7 +139,7 @@ class TrackingDevicesDetailSchema(TrackingDevicesBaseSchema):
     """All of the model's relationships, in addition to the base fields."""
 
     __module_code__ = MODULE_CODE
-    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
+    __object_code__ = "INDIVIDUALS"
 
     nomenclature_device_type = fields.Nested(NomenclatureSchema, dump_only=True)
     referer = fields.Nested(UserSchema, dump_only=True)
