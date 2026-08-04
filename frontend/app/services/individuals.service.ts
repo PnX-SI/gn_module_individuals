@@ -121,6 +121,7 @@ export class IndividualsService {
       active: individual.active,
       comment: individual.comment,
       additional_data: individual.additional_data,
+      deployments: individual.deployments,
     };
 
     if (formAction === 'EDIT') {
