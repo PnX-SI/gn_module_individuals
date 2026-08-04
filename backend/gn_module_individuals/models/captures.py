@@ -6,9 +6,12 @@ from pypnusershub.db.models import User
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.utils import NomenclaturesMixin
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import func
+
+from gn_module_individuals.models.deployments import IndividualDeployments
 
 
-class IndividualCaptures(NomenclaturesMixin, DB.Model):
+class Capture(NomenclaturesMixin, DB.Model):
     __tablename__ = "t_captures"
     __table_args__ = {"schema": "gn_individual"}
 
@@ -67,6 +70,7 @@ class IndividualCaptures(NomenclaturesMixin, DB.Model):
         "meta_create_date",
         DB.DateTime,
         nullable=True,
+        server_default=func.now()
     )
 
     meta_update_date = DB.Column(
@@ -86,22 +90,6 @@ class IndividualCaptures(NomenclaturesMixin, DB.Model):
         primaryjoin=(User.id_role == id_digitiser),
         foreign_keys=[id_digitiser],
         lazy="select",
-    )
-
-    deployments = DB.relationship(
-        "IndividualDeployments",
-        primaryjoin="IndividualCaptures.id_capture == IndividualDeployments.id_capture",
-        foreign_keys="IndividualDeployments.id_capture",
-        lazy="select",
-        back_populates="capture",
-    )
-
-    observations = DB.relationship(
-        "IndividualsCaptureObservations",
-        primaryjoin="IndividualCaptures.id_capture == IndividualsCaptureObservations.id_capture",
-        foreign_keys="IndividualsCaptureObservations.id_capture",
-        lazy="select",
-        back_populates="capture",
     )
 
     observers = DB.relationship(
@@ -137,8 +125,8 @@ class IndividualsCaptureObservations(DB.Model):
 
     # Relationships
     capture = DB.relationship(
-        IndividualCaptures,
-        primaryjoin=(IndividualCaptures.id_capture == id_capture),
+        Capture,
+        primaryjoin=(Capture.id_capture == id_capture),
         foreign_keys=[id_capture],
         lazy="select",
         back_populates="observations",
@@ -151,6 +139,26 @@ class IndividualsCaptureObservations(DB.Model):
         lazy="select",
         viewonly=True,
     )
+
+
+# Declared here, once both classes exist, since these relationships reference
+# each other's mapped class directly (SQLAlchemy relationships must use the
+# class itself, not a string, going forward).
+Capture.deployments = DB.relationship(
+    IndividualDeployments,
+    primaryjoin=Capture.id_capture == IndividualDeployments.id_capture,
+    foreign_keys=[IndividualDeployments.id_capture],
+    lazy="select",
+    back_populates="capture",
+)
+
+Capture.observations = DB.relationship(
+    IndividualsCaptureObservations,
+    primaryjoin=Capture.id_capture == IndividualsCaptureObservations.id_capture,
+    foreign_keys=[IndividualsCaptureObservations.id_capture],
+    lazy="select",
+    back_populates="capture",
+)
 
 
 cor_role_capture = DB.Table(

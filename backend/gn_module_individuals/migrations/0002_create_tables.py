@@ -142,6 +142,7 @@ def upgrade():
             "meta_create_date",
             sa.DateTime(),
             nullable=True,
+            server_default=sa.func.now()
         ),
         sa.Column(
             "meta_update_date",
@@ -155,9 +156,7 @@ def upgrade():
         CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.set_meta_dates()
         RETURNS TRIGGER AS $$
         BEGIN
-            IF TG_OP = 'INSERT' THEN
-                NEW.meta_create_date := NOW();
-            ELSIF TG_OP = 'UPDATE' THEN
+            IF TG_OP = 'UPDATE' THEN
                 NEW.meta_update_date := NOW();
             END IF;
             RETURN NEW;
