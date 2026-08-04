@@ -29,6 +29,37 @@ from ..models import TrackingDevices, IndividualDeployments
 from ..blueprint import blueprint
 
 
+def _parse_bool(value):
+    if value is None or value == "":
+        return None
+    normalized = value.lower()
+    if normalized in ("true", "1", "yes", "y"):
+        return True
+    if normalized in ("false", "0", "no", "n"):
+        return False
+    raise APIError(ApiErrorCode.INVALID_FILTER, "Unsupported available value", 400)
+
+
+def _device_available_expression():
+    """A device is available when it has 0 deployment, or when its last
+    deployment has a  removal_date."""
+    has_deployment = (
+        db.select(IndividualDeployments.id_deployment)
+        .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
+        .correlate(TrackingDevices)
+        .exists()
+    )
+    last_removal_date = (
+        db.select(IndividualDeployments.removal_date)
+        .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
+        .order_by(IndividualDeployments.install_date.desc())
+        .limit(1)
+        .correlate(TrackingDevices)
+        .scalar_subquery()
+    )
+    return db.or_(~has_deployment, last_removal_date.isnot(None))
+
+
 def _device_sort_columns():
     """Some `prop` values correspond to computed schema fields
     (nomenclature_device_type_name, digitiser_name, referer_name,
@@ -144,6 +175,7 @@ def list_devices(scope):
     :query int id_nomenclature_device_type: filter on the device type
     :query string provider_name: filter on the provider name (partial match)
     :query int id_referer: filter on the referer role
+    :query boolean available: filter on device availability
     :query int page: page number, requires per_page to enable pagination
     :query int per_page: page size, requires page to enable pagination
     :query string prop: column to sort on (default: meta_create_date)
@@ -154,11 +186,11 @@ def list_devices(scope):
         per_page are provided
     :rtype: dict|list
     """
-    # Scope not yet used -------------
     cd_nom = request.args.get("cd_nom", type=int)
     device_type = request.args.get("id_nomenclature_device_type", type=int)
     provider_name = request.args.get("provider_name", type=str)
     id_referer = request.args.get("id_referer", type=int)
+    available = _parse_bool(request.args.get("available"))
 
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
@@ -225,6 +257,9 @@ def list_devices(scope):
         query = query.where(TrackingDevices.provider_name.ilike(f"%{provider_name}%"))
     if id_referer is not None:
         query = query.where(TrackingDevices.id_referer == id_referer)
+    if available is not None:
+        available_expr = _device_available_expression()
+        query = query.where(available_expr if available else ~available_expr)
     if cd_nom is not None:
         query = query.where(
             db.select(IndividualDeployments.id_deployment)
