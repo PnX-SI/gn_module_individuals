@@ -94,7 +94,7 @@ export class IndividualsFormComponent implements OnInit {
     this.form.patchValue(individual);
     this.form.patchValue({
       // En attendant la correction de l'API
-      cd_nom: { cd_nom: individual.cd_nom, nom_valide: 'Bouquetin' },
+      cd_nom: { cd_nom: individual.cd_nom, nom_valide: individual.nom_vern },
       id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
     });
   }
