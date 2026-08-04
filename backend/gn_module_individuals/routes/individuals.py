@@ -292,11 +292,13 @@ def individual(id_individual, scope):
 @json_resp
 def create_individual(scope):
     """
-    Post one new individual
+    Post one new individual, optionally with its deployments
 
     .. :quickref: Individuals;
 
-    Expects a JSON body matching ``IndividualsWriteSchema``.
+    Expects a JSON body matching ``IndividualsWriteSchema``. May include a
+    ``deployments`` list to create deployments attached to the new individual
+    in the same request. See :func:`_sync_deployments`.
 
     :returns: the created individual
     :rtype: dict<TIndividuals>
@@ -323,6 +325,12 @@ def create_individual(scope):
     individual.id_digitiser = g.current_user.id_role
 
     db.session.add(individual)
+    db.session.flush()
+
+    deployments_data = data.get("deployments")
+    if deployments_data is not None:
+        _sync_deployments(individual, deployments_data, scope)
+
     db.session.commit()
 
     return schema.dump(individual), 201
