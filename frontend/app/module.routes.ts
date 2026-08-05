@@ -17,6 +17,17 @@ import {
 import { IndividualsInfoComponent } from './components/individuals-info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
 
+import { CaptureListComponent } from './components/capture/capture-list/capture-list.component';
+import { CaptureInfoComponent } from './components/capture/capture-info/capture-info.component';
+import { CaptureFormComponent } from './components/capture/capture-form/capture-form.component';
+import {
+  CapturesResolver,
+  CapturesMapResolver,
+  CaptureResolver,
+} from './resolvers/capture.resolver';
+import { CaptureFormLayoutComponent } from './components/capture/capture-form-layout/capture-form-layout.component';
+import { CaptureFormIndividualsComponent } from './components/capture/capture-form-individuals/capture-form-individuals.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -55,7 +66,49 @@ export const routes: Routes = [
       },
       {
         path: 'captures',
-        component: MapListComponent,
+        component: CaptureListComponent,
+        resolve: {
+          datatable: CapturesResolver,
+          mapData: CapturesMapResolver,
+        },
+      },
+      {
+        path: 'captures/form',
+        component: CaptureFormLayoutComponent,
+        children: [
+          {
+            path: '',
+            component: CaptureFormComponent,
+          },
+          {
+            path: 'individus',
+            component: CaptureFormIndividualsComponent,
+          },
+        ],
+      },
+      {
+        path: 'captures/form/:id_capture',
+        component: CaptureFormLayoutComponent,
+        resolve: {
+          data: CaptureResolver,
+        },
+        children: [
+          {
+            path: '',
+            component: CaptureFormComponent,
+          },
+          {
+            path: 'individus',
+            component: CaptureFormIndividualsComponent,
+          },
+        ],
+      },
+      {
+        path: 'captures/info/:id_capture',
+        component: CaptureInfoComponent,
+        resolve: {
+          capture: CaptureResolver,
+        },
       },
       {
         path: 'devices',

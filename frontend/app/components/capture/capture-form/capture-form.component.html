@@ -1,0 +1,43 @@
+<div>
+  <pnx-nomenclature
+    ngClass="form-group"
+    label="Protocole"
+    [parentFormControl]="form_group.controls['id_nomenclature_protocole']"
+    codeNomenclatureType="PROTOCOLE_CAPTURE"
+  ></pnx-nomenclature>
+
+  <pnx-date
+    class="form-group"
+    label="Date"
+    [parentFormControl]="form_group.controls['date']"
+  ></pnx-date>
+
+  <pnx-observers
+    class="form-group"
+    label="Opérateur"
+    [parentFormControl]="form_group.controls['observers']"
+    [bindAllItem]="true"
+    placeHolder="Opérateur"
+  ></pnx-observers>
+
+  <gn-individuals-textarea
+    class="form-group"
+    label="Commentaire"
+    [parentFormControl]="form_group.controls['comment']"
+  ></gn-individuals-textarea>
+  <div>
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="form_group.invalid"
+      (click)="onSave()">
+      {{ formAction === 'ADD' ? 'Ajouter' : 'Modifier' }}
+    </button>
+    <button
+      mat-raised-button
+      color="secondary"
+      (click)="onCancel()">
+      Annuler
+    </button>
+  </div>
+</div>

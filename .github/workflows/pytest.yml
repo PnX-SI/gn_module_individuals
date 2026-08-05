@@ -6,13 +6,14 @@ on:
       - "backend/**"
     branches:
       - master
-      - develop 
+      - develop
   pull_request:
     paths:
       - "backend/**"
     branches:
       - master
       - develop
+      - feat/capture
 
 jobs:
   build:

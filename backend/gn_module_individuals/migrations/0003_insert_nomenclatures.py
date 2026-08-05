@@ -327,17 +327,13 @@ def upgrade():
 
 
 def downgrade():
-    op.execute(
-        """
+    op.execute("""
         DELETE FROM ref_nomenclatures.t_nomenclatures t
         USING ref_nomenclatures.bib_nomenclatures_types b
         WHERE t.id_type = b.id_type
         AND b.mnemonique IN ('TYPE_DISPO_SUIVI', 'TYPE_MARQUAGE', 'LOC_MARQUAGE');
-    """
-    )
-    op.execute(
-        """
+    """)
+    op.execute("""
         DELETE FROM ref_nomenclatures.bib_nomenclatures_types
         WHERE mnemonique IN ('TYPE_DISPO_SUIVI', 'TYPE_MARQUAGE', 'LOC_MARQUAGE');
-    """
-    )
+    """)

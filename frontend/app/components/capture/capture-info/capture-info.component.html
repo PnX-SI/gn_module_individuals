@@ -1,0 +1,46 @@
+<ng-container *ngIf="capture">
+  <h2>Détails de la capture n°{{ capture.id_capture }}</h2>
+  <div>
+    <div class="capture-info">
+      <strong class="badge-pill">Protocole de capture</strong>
+      <span>{{ capture.id_nomenclature_protocole }}</span>
+    </div>
+    <div class="capture-info">
+      <strong class="badge-pill">Date</strong>
+      <span>{{ capture.date | date: 'dd/MM/yyyy HH:mm' }}</span>
+    </div>
+    <div class="capture-info">
+      <strong class="badge-pill">Commentaire</strong>
+      <span>{{ capture.comment || '-' }}</span>
+    </div>
+    <div class="capture-info">
+      <strong class="badge-pill">Numérisateur</strong>
+      <span>{{ capture.id_digitiser }}</span>
+    </div>
+  </div>
+
+  <div class="capture-info">
+    <strong class="badge-pill">Opérateur(s)</strong>
+    <ul *ngIf="capture.observers?.length; else noObserver">
+      <li *ngFor="let observer of capture.observers">{{ observer?.nom_complet }}</li>
+    </ul>
+    <ng-template #noObserver><span>-</span></ng-template>
+  </div>
+
+  <div>
+    <h3>Individus capturés</h3>
+    <ul *ngIf="capture.individuals?.length; else noIndividual">
+      <li *ngFor="let individualCaptured of capture.individuals">
+        <a [routerLink]="['/individuals', individualCaptured.individual.id_individual]">
+          {{ individualCaptured.individual.individual_name }}
+        </a>
+        <span *ngIf="individualCaptured.individual.taxref_nom_vern">
+          ({{ individualCaptured.individual.taxref_nom_vern }})
+        </span>
+      </li>
+    </ul>
+    <ng-template #noIndividual>
+      <p>Aucun individu associé à cette capture</p>
+    </ng-template>
+  </div>
+</ng-container>

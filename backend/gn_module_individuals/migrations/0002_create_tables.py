@@ -138,11 +138,7 @@ def upgrade():
             sa.ForeignKey("utilisateurs.t_roles.id_role"),
             nullable=True,
         ),
-        sa.Column(
-            "meta_create_date",
-            sa.DateTime(),
-            nullable=True,
-        ),
+        sa.Column("meta_create_date", sa.DateTime(), nullable=True, server_default=sa.func.now()),
         sa.Column(
             "meta_update_date",
             sa.DateTime(),
@@ -151,63 +147,49 @@ def upgrade():
         schema=SCHEMA_NAME,
     )
 
-    op.execute(
-        f"""
+    op.execute(f"""
         CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.set_meta_dates()
         RETURNS TRIGGER AS $$
         BEGIN
-            IF TG_OP = 'INSERT' THEN
-                NEW.meta_create_date := NOW();
-            ELSIF TG_OP = 'UPDATE' THEN
+            IF TG_OP = 'UPDATE' THEN
                 NEW.meta_update_date := NOW();
             END IF;
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         CREATE TRIGGER tr_meta_dates_bib_tracking_devices
         BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.bib_tracking_devices
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         CREATE TRIGGER tr_meta_dates_individual_deployments
         BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.t_individual_deployments
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.bib_tracking_devices
         ADD CONSTRAINT check_bib_tracking_devices_device_type
         CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_device_type, 'TYPE_DISPO_SUIVI'::character varying)) NOT VALID;
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT check_t_individual_deployments_deployment_type
         CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_type, 'TYPE_MARQUAGE'::character varying)) NOT VALID;
-    """
-    )
+    """)
 
-    op.execute(
-        f"""
+    op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT check_t_individual_deployments_deployment_location
         CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_location, 'LOC_MARQUAGE'::character varying)) NOT VALID;
-    """
-    )
+    """)
 
 
 def downgrade():

@@ -23,6 +23,7 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
     id_capture = DB.Column(
         "id_capture",
         DB.Integer,
+        DB.ForeignKey("gn_individual.t_captures.id_capture"),
         nullable=False,
     )
 
@@ -146,6 +147,18 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
                 foreign_keys=[cls.id_individual],
                 lazy="select",
                 viewonly=True,
+            )
+
+    @classmethod
+    def register_capture_backref(cls, capture_cls):
+        """Attaches cls.capture, once the Capture class exists (avoids a circular import)."""
+        if not hasattr(cls, "capture"):
+            cls.capture = DB.relationship(
+                capture_cls,
+                primaryjoin=cls.id_capture == capture_cls.id_capture,
+                foreign_keys=[cls.id_capture],
+                lazy="select",
+                back_populates="deployments",
             )
 
     def has_instance_permission(self, scope):

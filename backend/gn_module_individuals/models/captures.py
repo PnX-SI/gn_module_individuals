@@ -1,0 +1,212 @@
+from geoalchemy2 import Geometry
+from flask import g
+
+from geonature.utils.env import DB
+from geonature.core.gn_monitoring.models import TIndividuals
+from pypnusershub.db.models import User
+from pypnnomenclature.models import TNomenclatures
+from pypnnomenclature.utils import NomenclaturesMixin
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import func
+
+
+from gn_module_individuals.models.deployments import IndividualDeployments
+
+
+class Capture(NomenclaturesMixin, DB.Model):
+    __tablename__ = "t_captures"
+    __table_args__ = {"schema": "gn_individual"}
+
+    id_capture = DB.Column(
+        "id_capture",
+        DB.Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    id_nomenclature_capture_protocol = DB.Column(
+        "id_nomenclature_capture_protocol",
+        DB.Integer,
+        DB.ForeignKey(TNomenclatures.id_nomenclature),
+        nullable=True,
+    )
+
+    comment = DB.Column(
+        "comment",
+        DB.Text,
+        nullable=True,
+    )
+
+    date = DB.Column(
+        "date",
+        DB.DateTime,
+        nullable=False,
+    )
+
+    geom_local = DB.Column(
+        "geom_local",
+        Geometry("GEOMETRY"),
+        nullable=False,
+    )
+
+    geom_4326 = DB.Column(
+        "geom_4326",
+        Geometry("GEOMETRY", 4326),
+        nullable=True,
+    )
+
+    additional_data = DB.Column(
+        "additional_data",
+        JSONB,
+        nullable=True,
+    )
+
+    id_digitiser = DB.Column(
+        "id_digitiser",
+        DB.Integer,
+        DB.ForeignKey("utilisateurs.t_roles.id_role"),
+        nullable=True,
+    )
+
+    meta_create_date = DB.Column(
+        "meta_create_date", DB.DateTime, nullable=True, server_default=func.now()
+    )
+
+    meta_update_date = DB.Column(
+        "meta_update_date",
+        DB.DateTime,
+        nullable=True,
+    )
+
+    # Relationships
+    nomenclature_capture_protocol = DB.relationship(
+        TNomenclatures,
+        foreign_keys=[id_nomenclature_capture_protocol],
+    )
+
+    digitiser = DB.relationship(
+        User,
+        primaryjoin=(User.id_role == id_digitiser),
+        foreign_keys=[id_digitiser],
+        lazy="select",
+    )
+
+    observers = DB.relationship(
+        User,
+        secondary="gn_individual.cor_role_capture",
+        lazy="select",
+    )
+
+    @classmethod
+    def filter_by_scope(cls, query, scope, user=None):
+        from sqlalchemy import or_, false, true
+
+        if user is None:
+            user = g.current_user
+        if scope == 0:
+            query = query.where(false())
+        elif scope in (1, 2):
+            ors = [
+                cls.id_digitiser == user.id_role,
+            ]
+            # if organism is None => do not filter on id_organism even if level = 2
+            if scope == 2 and user.id_organisme is not None:
+                ors.append(cls.digitiser.has(id_organisme=user.id_organisme))
+            query = query.where(or_(*ors))
+        return query
+
+    def has_instance_permission(self, scope, user=None):
+        user = g.current_user
+        # Nothing
+        if scope == 0:
+            return False
+        # My data
+        elif scope in (1, 2):
+            return user.id_role == self.id_digitiser
+        # My company's data
+        elif scope == 3:
+            return True
+
+
+class IndividualsCaptureObservations(DB.Model):
+    __tablename__ = "t_individual_capture_observations"
+    __table_args__ = {"schema": "gn_individual"}
+
+    id_capture = DB.Column(
+        "id_capture",
+        DB.Integer,
+        DB.ForeignKey("gn_individual.t_captures.id_capture"),
+        primary_key=True,
+    )
+
+    id_individual = DB.Column(
+        "id_individual",
+        DB.Integer,
+        DB.ForeignKey("gn_monitoring.t_individuals.id_individual"),
+        primary_key=True,
+    )
+
+    additional_data = DB.Column(
+        "additional_data",
+        JSONB,
+        nullable=True,
+    )
+
+    # Relationships
+    capture = DB.relationship(
+        Capture,
+        primaryjoin=(Capture.id_capture == id_capture),
+        foreign_keys=[id_capture],
+        lazy="select",
+        back_populates="observations",
+    )
+
+    individual = DB.relationship(
+        TIndividuals,
+        primaryjoin=(TIndividuals.id_individual == id_individual),
+        foreign_keys=[id_individual],
+        lazy="select",
+        viewonly=True,
+    )
+
+
+# Declared here, once both classes exist, since these relationships reference
+# each other's mapped class directly (SQLAlchemy relationships must use the
+# class itself, not a string, going forward).
+Capture.deployments = DB.relationship(
+    IndividualDeployments,
+    primaryjoin=Capture.id_capture == IndividualDeployments.id_capture,
+    foreign_keys=[IndividualDeployments.id_capture],
+    lazy="select",
+    back_populates="capture",
+)
+
+Capture.observations = DB.relationship(
+    IndividualsCaptureObservations,
+    primaryjoin=Capture.id_capture == IndividualsCaptureObservations.id_capture,
+    foreign_keys=[IndividualsCaptureObservations.id_capture],
+    lazy="select",
+    back_populates="capture",
+)
+
+
+cor_role_capture = DB.Table(
+    "cor_role_capture",
+    DB.Column(
+        "id_capture",
+        DB.Integer,
+        DB.ForeignKey("gn_individual.t_captures.id_capture"),
+        primary_key=True,
+    ),
+    DB.Column(
+        "id_role",
+        DB.Integer,
+        DB.ForeignKey("utilisateurs.t_roles.id_role"),
+        primary_key=True,
+    ),
+    schema="gn_individual",
+)
+
+
+class CorRoleCapture(DB.Model):
+    __table__ = cor_role_capture
