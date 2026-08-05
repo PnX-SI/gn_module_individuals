@@ -9,18 +9,10 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - name: Backend code formatting check (Black)
+        uses: psf/black@stable
         with:
-          python-version: "3.11"
-      - name: Debug
-        run: |
-          pwd
-          ls -la
-          find . -name "requirements-dev.in"
-      - name: Install dev dependencies
-        run: pip install -r requirements-dev.in
-      - name: Check formatting
-        run: black --check ./backend/gn_module_individuals
+          src: "./backend/gn_module_individuals"
   frontend:
     runs-on: ubuntu-latest
     steps:
