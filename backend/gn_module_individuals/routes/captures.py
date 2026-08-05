@@ -23,7 +23,7 @@ default_object_code = "INDIVIDUALS"
 
 
 @blueprint.route("/captures", methods=["GET"])
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="ALL")
+@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS")
 @login_required
 def list_captures(scope):
     args = request.args
@@ -82,7 +82,7 @@ def delete_capture(scope, id_capture):
 
 @blueprint.route("/captures/<int(signed=True):id_capture>", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="ALL")
+@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS")
 def get_capture_by_id(scope, id_capture):
     cap = db.session.get(Capture, id_capture)
     if cap is None:

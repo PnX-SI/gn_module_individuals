@@ -58,7 +58,7 @@ export class CaptureService {
     return this._http.get<Capture>(`${this.API_ENDPOINT}/geometry`);
   }
 
-  createOrUpdateDevice(
+  createOrUpdateCapture(
     captureData: any,
     formAction: 'CREATE' | 'UPDATE',
     id: number | null = null

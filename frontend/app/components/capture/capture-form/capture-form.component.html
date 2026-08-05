@@ -2,7 +2,7 @@
   <pnx-nomenclature
     ngClass="form-group"
     label="Protocole"
-    [parentFormControl]="form_group.controls['id_nomenclature_protocol']"
+    [parentFormControl]="form_group.controls['id_nomenclature_protocole']"
     codeNomenclatureType="PROTOCOLE_CAPTURE"
   ></pnx-nomenclature>
 
@@ -25,9 +25,19 @@
     label="Commentaire"
     [parentFormControl]="form_group.controls['comment']"
   ></gn-individuals-textarea>
-
-  <pnx-individuals
-    label="Individus"
-    [parentFormControl]="form_group.controls['individuals']"
-  ></pnx-individuals>
+  <div>
+    <button
+      mat-raised-button
+      color="primary"
+      [disabled]="form_group.invalid"
+      (click)="onSave()">
+      {{ formAction === 'ADD' ? 'Ajouter' : 'Modifier' }}
+    </button>
+    <button
+      mat-raised-button
+      color="secondary"
+      (click)="onCancel()">
+      Annuler
+    </button>
+  </div>
 </div>

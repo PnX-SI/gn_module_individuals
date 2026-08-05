@@ -25,6 +25,8 @@ import {
   CapturesMapResolver,
   CaptureResolver,
 } from './resolvers/capture.resolver';
+import { CaptureFormLayoutComponent } from './components/capture/capture-form-layout/capture-form-layout.component';
+import { CaptureFormIndividualsComponent } from './components/capture/capture-form-individuals/capture-form-individuals.component';
 
 export const routes: Routes = [
   {
@@ -72,11 +74,34 @@ export const routes: Routes = [
       },
       {
         path: 'captures/form',
-        component: CaptureFormComponent,
+        component: CaptureFormLayoutComponent,
+        children: [
+          {
+            path: '',
+            component: CaptureFormComponent,
+          },
+          {
+            path: 'individus',
+            component: CaptureFormIndividualsComponent,
+          },
+        ],
       },
       {
         path: 'captures/form/:id_capture',
-        component: CaptureFormComponent,
+        component: CaptureFormLayoutComponent,
+        resolve: {
+          data: CaptureResolver,
+        },
+        children: [
+          {
+            path: '',
+            component: CaptureFormComponent,
+          },
+          {
+            path: 'individus',
+            component: CaptureFormIndividualsComponent,
+          },
+        ],
       },
       {
         path: 'captures/info/:id_capture',

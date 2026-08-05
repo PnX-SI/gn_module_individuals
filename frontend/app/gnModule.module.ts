@@ -43,6 +43,8 @@ import { IndividualsInfoComponent } from './components/individuals-info/individu
 import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
 
 import { CaptureFormComponent } from './components/capture/capture-form/capture-form.component';
+import { CaptureFormLayoutComponent } from './components/capture/capture-form-layout/capture-form-layout.component';
+import { CaptureFormIndividualsComponent } from './components/capture/capture-form-individuals/capture-form-individuals.component';
 import { CaptureInfoComponent } from './components/capture/capture-info/capture-info.component';
 import { CaptureListComponent } from './components/capture/capture-list/capture-list.component';
 import { CaptureFiltersComponent } from './components/capture/capture-list/capture-filters.component';
@@ -76,6 +78,8 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsInfoComponent,
     IndividualsFormComponent,
     CaptureFormComponent,
+    CaptureFormLayoutComponent,
+    CaptureFormIndividualsComponent,
     CaptureInfoComponent,
     CaptureListComponent,
     CaptureFiltersComponent,

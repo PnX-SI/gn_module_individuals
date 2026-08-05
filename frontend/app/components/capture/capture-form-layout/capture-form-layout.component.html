@@ -1,0 +1,34 @@
+<div>
+  <div class="tab-map-list-container">
+    <nav
+      mat-tab-nav-bar
+      [tabPanel]="tabPanel"
+      id="individuals-tab"
+      mat-stretch-tabs="false"
+      mat-align-tabs="start"
+    >
+      <a
+        mat-tab-link
+        [routerLink]="'.'"
+        routerLinkActive
+        #rla1="routerLinkActive"
+        [routerLinkActiveOptions]="{ exact: true }"
+        [active]="rla1.isActive"
+      >
+        {{ 'Individuals.NavigationTabs.Capture' | translate }}
+      </a>
+      <a
+        mat-tab-link
+        [routerLink]="'individus'"
+        routerLinkActive
+        #rla2="routerLinkActive"
+        [active]="rla2.isActive"
+      >
+        {{ 'Individuals.NavigationTabs.Individuals' | translate }}
+      </a>
+    </nav>
+    <mat-tab-nav-panel #tabPanel>
+      <router-outlet></router-outlet>
+    </mat-tab-nav-panel>
+  </div>
+</div>

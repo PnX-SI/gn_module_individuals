@@ -17,7 +17,7 @@ def individuals_user_factory(users, ensure_individuals_module):
     def create_user(username, *, actions="R", scope=1):
         app = db.session.scalar(select(Application).where(Application.code_application == "GN"))
         profil = db.session.scalar(select(Profil).where(Profil.nom_profil == "Lecteur"))
-        object_all = db.session.scalar(select(PermObject).filter_by(code_object="ALL"))
+        object_all = db.session.scalar(select(PermObject).filter_by(code_object="INDIVIDUALS"))
         with db.session.begin_nested():
             user = User(
                 groupe=False,
