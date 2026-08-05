@@ -104,12 +104,21 @@ class TestCaptureGeometry:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.capture_geometry"))
         feature = next(
-            f for f in r.get_json()["features"] if f["properties"]["id_capture"] == capture.id_capture
+            f
+            for f in r.get_json()["features"]
+            if f["properties"]["id_capture"] == capture.id_capture
         )
         assert feature["type"] == "Feature"
         assert feature["geometry"] is not None
         props = feature["properties"]
-        for key in ("id_capture", "comment", "date", "additional_data", "meta_create_date", "meta_update_date"):
+        for key in (
+            "id_capture",
+            "comment",
+            "date",
+            "additional_data",
+            "meta_create_date",
+            "meta_update_date",
+        ):
             assert key in props
 
     def test_scope_restricts_to_own_data(self, users, captures):
@@ -130,12 +139,16 @@ class TestCaptureGeometry:
 @pytest.mark.usefixtures("client_class", "temporary_transaction")
 class TestGetCapture:
     def test_unauthenticated_returns_401(self, capture):
-        r = self.client.get(url_for("individuals.get_capture_by_id", id_capture=capture.id_capture))
+        r = self.client.get(
+            url_for("individuals.get_capture_by_id", id_capture=capture.id_capture)
+        )
         assert r.status_code == 401
 
     def test_forbidden_without_rights(self, users, capture):
         set_logged_user(self.client, users["noright_user"])
-        r = self.client.get(url_for("individuals.get_capture_by_id", id_capture=capture.id_capture))
+        r = self.client.get(
+            url_for("individuals.get_capture_by_id", id_capture=capture.id_capture)
+        )
         assert r.status_code == 403
 
     def test_not_found_returns_404(self, users):
@@ -153,12 +166,16 @@ class TestGetCapture:
     def test_out_of_scope_capture_returns_403(self, users, captures):
         """captures[0] is digitised by admin_user; self_user (scope=1) can't read it."""
         set_logged_user(self.client, users["self_user"])
-        r = self.client.get(url_for("individuals.get_capture_by_id", id_capture=captures[0].id_capture))
+        r = self.client.get(
+            url_for("individuals.get_capture_by_id", id_capture=captures[0].id_capture)
+        )
         assert r.status_code == 403
 
     def test_returns_200_for_existing_capture(self, users, capture):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.get(url_for("individuals.get_capture_by_id", id_capture=capture.id_capture))
+        r = self.client.get(
+            url_for("individuals.get_capture_by_id", id_capture=capture.id_capture)
+        )
         assert r.status_code == 200
 
     EXPECTED_FIELDS = {
@@ -177,14 +194,18 @@ class TestGetCapture:
 
     def test_payload_contains_expected_fields(self, users, capture):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.get(url_for("individuals.get_capture_by_id", id_capture=capture.id_capture))
+        r = self.client.get(
+            url_for("individuals.get_capture_by_id", id_capture=capture.id_capture)
+        )
         payload = r.get_json()
         missing = self.EXPECTED_FIELDS - payload.keys()
         assert not missing, f"Missing fields in payload: {missing}"
 
     def test_payload_id_matches(self, users, capture):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.get(url_for("individuals.get_capture_by_id", id_capture=capture.id_capture))
+        r = self.client.get(
+            url_for("individuals.get_capture_by_id", id_capture=capture.id_capture)
+        )
         assert r.get_json()["id_capture"] == capture.id_capture
 
 
@@ -344,12 +365,16 @@ class TestUpdateCapture:
 @pytest.mark.usefixtures("client_class", "temporary_transaction")
 class TestDeleteCapture:
     def test_unauthenticated_returns_401(self, capture):
-        r = self.client.delete(url_for("individuals.delete_capture", id_capture=capture.id_capture))
+        r = self.client.delete(
+            url_for("individuals.delete_capture", id_capture=capture.id_capture)
+        )
         assert r.status_code == 401
 
     def test_forbidden_without_delete_permission(self, users, capture):
         set_logged_user(self.client, users["noright_user"])
-        r = self.client.delete(url_for("individuals.delete_capture", id_capture=capture.id_capture))
+        r = self.client.delete(
+            url_for("individuals.delete_capture", id_capture=capture.id_capture)
+        )
         assert r.status_code == 403
 
     def test_forbidden_without_scope_permission(self, users, captures):
@@ -374,12 +399,16 @@ class TestDeleteCapture:
 
     def test_returns_204_for_existing_capture(self, users, capture):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.delete(url_for("individuals.delete_capture", id_capture=capture.id_capture))
+        r = self.client.delete(
+            url_for("individuals.delete_capture", id_capture=capture.id_capture)
+        )
         assert r.status_code == 204
 
     def test_response_body_is_empty(self, users, capture):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.delete(url_for("individuals.delete_capture", id_capture=capture.id_capture))
+        r = self.client.delete(
+            url_for("individuals.delete_capture", id_capture=capture.id_capture)
+        )
         assert r.data == b""
 
     def test_capture_no_longer_exists_after_delete(self, users, capture):

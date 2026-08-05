@@ -31,11 +31,11 @@ def client(app):
 
 
 @pytest.fixture
-def device_with_deployment(device, individual):
+def device_with_deployment(device, individual,capture):
     dep = IndividualDeployments(
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
-        id_capture=1,
+        id_capture=capture.id_capture,
         id_nomenclature_deployment_type=get_id_nomenclature(
             nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
         ),

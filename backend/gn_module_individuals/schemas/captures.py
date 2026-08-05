@@ -12,8 +12,7 @@ from geonature.utils.env import MA
 from shapely.geometry import shape
 from .. import MODULE_CODE
 from ..models import Capture
-from utils_flask_sqla_geo.schema import GeometryField,GeoModelConverter,GeoAlchemyAutoSchema
-
+from utils_flask_sqla_geo.schema import GeometryField, GeoModelConverter, GeoAlchemyAutoSchema
 
 
 # PATCH : To move in utils_flask_sqla_geo
@@ -59,7 +58,6 @@ class CapturesSchema(MA.SQLAlchemyAutoSchema, CruvedSchemaMixin, SmartRelationsh
     geom_local = GeojsonSerializationField(required=False, allow_none=True)
 
 
-
 class CaptureMapConverter(NomenclaturesConverter, GeoModelConverter):
     pass
 
@@ -75,5 +73,3 @@ class CaptureMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
         model_converter = CaptureMapConverter
 
     geom_local = GeometryField(metadata={"exclude": True}, dump_only=True)
-
-

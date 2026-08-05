@@ -286,10 +286,10 @@ class TestIndividualsListSchema:
     def test_get_deployed_devices_returns_empty_dict_without_deployments(self, app, individual):
         assert IndividualsListSchema().get_deployed_devices(individual) == {}
 
-    def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual):
+    def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual,capture):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
+            id_capture=capture.id_capture,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",
@@ -307,11 +307,11 @@ class TestIndividualsListSchema:
         individual.deployments[0].removal_date = datetime(2024, 6, 1)
         assert IndividualsListSchema().get_deployed_devices(individual) == {}
 
-    def test_get_deployed_devices_returns_label_for_active_device(self, app, devices, individual):
+    def test_get_deployed_devices_returns_label_for_active_device(self, app, devices, individual,capture):
         dep = IndividualDeployments(
             id_tracking_device=devices[0].id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
+            id_capture=capture.id_capture,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "4"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "3"),
             install_date=datetime(2024, 1, 1),
@@ -332,10 +332,10 @@ class TestIndividualsListSchema:
         # device_with_deployment has a tracking device → not a physical marking
         assert IndividualsListSchema().get_deployed_markings(individual) == {}
 
-    def test_get_deployed_markings_returns_active_physical_markings(self, app, individual):
+    def test_get_deployed_markings_returns_active_physical_markings(self, app, individual,capture):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
+            id_capture=capture.id_capture,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",
@@ -350,10 +350,10 @@ class TestIndividualsListSchema:
             "marking_1": {"type_name": "Plaque", "location_name": "Oreille droite", "code": "Vert"}
         }
 
-    def test_get_deployed_markings_excludes_removed_marking(self, app, individual):
+    def test_get_deployed_markings_excludes_removed_marking(self, app, individual,capture):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
+            id_capture=capture.id_capture,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",

@@ -23,9 +23,7 @@ def upgrade():
     conn = op.get_bind()
     op.execute(sa.text(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME}"))
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
         INSERT INTO gn_permissions.t_objects
             (code_object, description_object)
         VALUES
@@ -33,13 +31,9 @@ def upgrade():
             ('DEVICES', 'Gestion des devices'),
             ('SAMPLES', 'Gestion des échantillons')
         ON CONFLICT (code_object) DO NOTHING
-        """
-        )
-    )
+        """))
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             INSERT INTO gn_permissions.cor_object_module (
                 id_object,
                 id_module
@@ -57,9 +51,7 @@ def upgrade():
                 ON m.module_code = v.module_code
             JOIN gn_permissions.t_objects o
                 ON o.code_object = v.object_code;
-            """
-        )
-    )
+            """))
 
     op.execute(f"""
         INSERT INTO gn_permissions.t_permissions_available (
@@ -110,22 +102,16 @@ def downgrade():
     )
 
     conn.execute(
-        sa.text(
-            """
+        sa.text("""
             DELETE FROM gn_permissions.t_permissions p
             WHERE p.id_module = :module_id
-            """
-        ),
+            """),
         {"module_id": module_id},
     )
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
             DELETE FROM gn_permissions.t_objects
             WHERE code_object IN ('DEVICES', 'SAMPLES')
-            """
-        )
-    )
+            """))
 
     op.execute(sa.text(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE"))

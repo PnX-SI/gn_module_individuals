@@ -545,7 +545,7 @@ class TestGetIndividual:
         assert "individual_name" not in dep
 
     def test_deployments_ordered_by_install_date_desc(
-        self, users, device_with_deployment, individual
+        self, users, device_with_deployment, individual, capture
     ):
         """device_with_deployment already creates one deployment (install_date 2024-01-01);
         add an earlier and a later one and check the API sorts all three DESC."""
@@ -553,7 +553,7 @@ class TestGetIndividual:
         earlier = IndividualDeployments(
             id_tracking_device=existing.id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
+            id_capture=capture.id_capture,
             id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
             id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
             install_date=datetime.datetime(2020, 1, 1),
@@ -561,7 +561,7 @@ class TestGetIndividual:
         later = IndividualDeployments(
             id_tracking_device=existing.id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
+            id_capture=capture.id_capture,
             id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
             id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
             install_date=datetime.datetime(2025, 1, 1),
