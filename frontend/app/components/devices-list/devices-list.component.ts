@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject, Observable, of } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
+import { takeUntil, tap, filter } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConfigService } from '@geonature/services/config.service';
@@ -28,9 +28,10 @@ import { DeleteModalComponent } from '../delete-modal/delete-modal.component';
 export class DevicesListComponent implements OnInit, OnDestroy {
   public availableColumnsParams = DEVICE_MODEL;
   public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.DEVICES?.LIST_COLUMNS ?? [];
-  public dataTable$: Observable<PaginatedItemCollection<Device>> = new Observable<
-    PaginatedItemCollection<Device>
-  >();
+  private _dataTable$ = new BehaviorSubject<PaginatedItemCollection<Device> | null>(null);
+  public dataTable$: Observable<PaginatedItemCollection<Device>> = this._dataTable$.pipe(
+    filter((data): data is PaginatedItemCollection<Device> => data !== null)
+  );
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.DEVICES?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = 'Individuals.Devices.Fields';
@@ -60,7 +61,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Resolver : First initialisation of the table
     this._activatedRoute.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable }) => {
-      this.dataTable$ = of(datatable);
+      this._dataTable$.next(datatable);
       this._setPermissions(datatable);
     });
   }
@@ -158,9 +159,13 @@ export class DevicesListComponent implements OnInit, OnDestroy {
       ...this._APIPaginationParams,
       ...this._APIFiltersParams,
     };
-    this.dataTable$ = this._devicesService
+    this._devicesService
       .getDevices(APIParams)
-      .pipe(tap((data) => this._setPermissions(data)));
+      .pipe(
+        tap((data) => this._setPermissions(data)),
+        takeUntil(this._destroy$)
+      )
+      .subscribe((data) => this._dataTable$.next(data));
   }
 
   /**

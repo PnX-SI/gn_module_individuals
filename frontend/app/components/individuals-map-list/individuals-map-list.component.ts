@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { Subject, Observable, of } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
+import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
+import { takeUntil, tap, filter } from 'rxjs/operators';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConfigService } from '@geonature/services/config.service';
@@ -34,9 +34,10 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   public availableColumnsParams = INDIVIDUAL_MODEL;
   public displayedColumnsParams: string[] =
     this._config.INDIVIDUALS?.INDIVIDUALS?.LIST_COLUMNS ?? [];
-  public datatable$: Observable<PaginatedItemCollection<Individual>> = new Observable<
-    PaginatedItemCollection<Individual>
-  >();
+  private _datatable$ = new BehaviorSubject<PaginatedItemCollection<Individual> | null>(null);
+  public datatable$: Observable<PaginatedItemCollection<Individual>> = this._datatable$.pipe(
+    filter((data): data is PaginatedItemCollection<Individual> => data !== null)
+  );
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public fieldsTranslation = 'Individuals.Individuals.Fields';
@@ -73,7 +74,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._activatedRoute.data
       .pipe(takeUntil(this._destroy$))
       .subscribe(({ datatable, mapData }) => {
-        this.datatable$ = of(datatable);
+        this._datatable$.next(datatable);
         this.mapData$ = of(mapData);
         this._setPermissions(datatable);
       });
@@ -213,17 +214,21 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       ...this._APIPaginationParams,
       ...this._APIFiltersParams,
     };
-    this.datatable$ = this._individualsService.getIndividuals(APIParams).pipe(
-      tap((data) => {
-        if (this._selectedId !== null) {
-          const selected = data.items.find((item) => item.id_individual === this._selectedId);
-          this.selectedRows = selected ? [selected] : [];
-        } else {
-          this.selectedRows = [];
-        }
-        this._setPermissions(data);
-      })
-    );
+    this._individualsService
+      .getIndividuals(APIParams)
+      .pipe(
+        tap((data) => {
+          if (this._selectedId !== null) {
+            const selected = data.items.find((item) => item.id_individual === this._selectedId);
+            this.selectedRows = selected ? [selected] : [];
+          } else {
+            this.selectedRows = [];
+          }
+          this._setPermissions(data);
+        }),
+        takeUntil(this._destroy$)
+      )
+      .subscribe((data) => this._datatable$.next(data));
   }
 
   /**
