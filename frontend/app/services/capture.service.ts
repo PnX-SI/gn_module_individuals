@@ -6,6 +6,7 @@ import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 import { Capture, APICaptureFiltersParams, CaptureRankAndPage } from '../models/capture.model';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
+import { CAPTURES_DEFAULT_SORT } from '../utils/constants.util';
 
 // REMOVE any
 @Injectable()
@@ -24,6 +25,22 @@ export class CaptureService {
   }
 
   getCaptures(params: APIPaginationParams): Observable<PaginatedItemCollection<Capture> | any> {
+    let httpParams = new HttpParams();
+    params.prop ??= CAPTURES_DEFAULT_SORT.prop;
+    params.dir ??= CAPTURES_DEFAULT_SORT.dir;
+    console.log('Parameters sent to API (Captures)', params);
+
+    Object.keys(params).forEach(
+      (key) => {
+        if (params[key] != null) {
+          httpParams = httpParams.set(key, String(params[key]));
+        }
+      },
+      {
+        params: httpParams,
+      }
+    );
+
     return this._http.get<Capture>(`${this.API_ENDPOINT}`);
   }
 
@@ -31,17 +48,6 @@ export class CaptureService {
     params: APIPaginationParams | any
   ): Observable<PaginatedItemCollection<Capture> | any> {
     return this._http.get<Capture>(`${this.API_ENDPOINT}/geometry`);
-  }
-
-  /**
-   * Return an observable with the rank and page in the captures list of the given capture id
-   * with current filters and sort applied.
-   */
-  getCaptureRankAndPage(
-    id: number,
-    params: APIPaginationParams & APICaptureFiltersParams
-  ): Observable<CaptureRankAndPage> {
-    return of({} as CaptureRankAndPage);
   }
 
   createOrUpdateDevice(

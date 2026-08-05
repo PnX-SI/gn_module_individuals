@@ -16,7 +16,8 @@
       <strong>{{ 'Individuals.Captures.Fields.observers' | translate }} :</strong>
       <ng-container *ngIf="row.observers?.length > 0; else noValue">
         <span *ngFor="let observer of row.observers; let last = last">
-          {{ observer?.nom_complet }}<span *ngIf="!last">, </span>
+          {{ observer?.nom_complet }}
+          <span *ngIf="!last">,</span>
         </span>
       </ng-container>
     </div>
@@ -24,7 +25,8 @@
       <strong>{{ 'Individuals.Captures.Fields.individuals' | translate }} :</strong>
       <ng-container *ngIf="row.individuals?.length > 0; else noValue">
         <span *ngFor="let individualCaptured of row.individuals; let last = last">
-          {{ individualCaptured.individual?.individual_name }}<span *ngIf="!last">, </span>
+          {{ individualCaptured.individual?.individual_name }}
+          <span *ngIf="!last">,</span>
         </span>
       </ng-container>
     </div>
@@ -81,6 +83,5 @@
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
   (delete)="openDeleteModal($event)"
-  (idPage)="onIdPage($event)"
   (bbox)="onBbox($event)"
 ></gn-individuals-map-list>

@@ -169,32 +169,12 @@ export class CaptureListComponent implements OnInit, OnDestroy {
           this._loadData();
         },
         error: (err) => {
-          this._errorHandler.handleHttpError(err, { id: selectedId }, 'Individuals.Captures.ApiErrors');
+          this._errorHandler.handleHttpError(
+            err,
+            { id: selectedId },
+            'Individuals.Captures.ApiErrors'
+          );
         },
-      });
-    }
-  }
-
-  /**
-   * API call to get the page corresponding to the given id and reload data with this page.
-   * Used when a map feature is clicked and want to display the corresponding row in the paginated table.
-   *
-   * @param {*} $event
-   * @memberof CaptureListComponent
-   */
-  public onIdPage($event: any): void {
-    this._selectedId = $event;
-    const APIParams = {
-      ...this._APIPaginationParams,
-      ...this._APIFiltersParams,
-    };
-
-    if ($event) {
-      const IdRankAndPage$ = this._captureService.getCaptureRankAndPage($event, APIParams);
-
-      IdRankAndPage$.subscribe((rankAndPage) => {
-        this._APIPaginationParams.page = rankAndPage.page;
-        this._loadData();
       });
     }
   }

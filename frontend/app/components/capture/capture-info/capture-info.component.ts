@@ -25,6 +25,7 @@ const DUMMY_INDIVIDUAL: Individual = {
   deployed_markings: 'Boucle auriculaire n°42',
   deployed_devices: 'Collier GPS n°7',
   cruved: { C: true, R: true, U: true, V: true, E: true, D: false },
+  additional_data: {},
 };
 
 const DUMMY_CAPTURE: Capture = {
