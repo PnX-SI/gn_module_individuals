@@ -286,7 +286,9 @@ class TestIndividualsListSchema:
     def test_get_deployed_devices_returns_empty_dict_without_deployments(self, app, individual):
         assert IndividualsListSchema().get_deployed_devices(individual) == {}
 
-    def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual, capture):
+    def test_get_deployed_devices_excludes_marking_only_deployments(
+        self, app, individual, capture
+    ):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
             id_capture=capture.id_capture,
@@ -334,7 +336,9 @@ class TestIndividualsListSchema:
         # device_with_deployment has a tracking device → not a physical marking
         assert IndividualsListSchema().get_deployed_markings(individual) == {}
 
-    def test_get_deployed_markings_returns_active_physical_markings(self, app, individual, capture):
+    def test_get_deployed_markings_returns_active_physical_markings(
+        self, app, individual, capture
+    ):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
             id_capture=capture.id_capture,

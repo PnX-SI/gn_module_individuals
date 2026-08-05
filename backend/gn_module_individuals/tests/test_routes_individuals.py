@@ -292,7 +292,9 @@ class TestListIndividuals:
         item = next(i for i in items if i["id_individual"] == individual.id_individual)
         assert item["deployed_markings"] == {}
         # device_with_deployment uses a device without id_nomenclature_device_type set
-        assert item["deployed_devices"] == {"device_1": {"location_name": "Encolure", "name": None}}
+        assert item["deployed_devices"] == {
+            "device_1": {"location_name": "Encolure", "name": None}
+        }
 
     def test_filter_bbox_restricts_results(self, users, individuals):
         """Individuals without any synthese observation have no geometry, so any
