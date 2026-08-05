@@ -42,7 +42,12 @@ const DUMMY_CAPTURE: Capture = {
     { id_role: 2, nom_complet: 'Marie Martin' },
   ],
   individuals: [
-    { individual: DUMMY_INDIVIDUAL, additional_data: { poids: '4.2kg', taille: '65cm' } },
+    {
+      id_capture: 1,
+      id_individual: DUMMY_INDIVIDUAL.id_individual,
+      individual: DUMMY_INDIVIDUAL,
+      additional_data: { poids: '4.2kg', taille: '65cm' },
+    },
   ],
 };
 

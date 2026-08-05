@@ -2,9 +2,24 @@ import { Individual } from './individuals.models';
 
 export interface GeoJSON {}
 
+// Mirrors IndividualsCaptureObservationsSchema (backend/gn_module_individuals/schemas/captures.py)
 export interface IndividualCaptured {
+  id_capture: number;
+  id_individual: number;
   individual: Individual;
   additional_data: any;
+}
+
+// DTO for POST /observations
+export interface CreateCaptureObservationDto {
+  id_capture: number;
+  id_individual: number;
+  additional_data?: any;
+}
+
+// DTO for PATCH /observations/<id_capture>/<id_individual>
+export interface UpdateCaptureObservationDto {
+  additional_data?: any;
 }
 
 export interface Capture {
@@ -41,4 +56,3 @@ export interface APICaptureFiltersParams {
   id_role?: number;
 }
 
-export interface CaptureObservations {}
