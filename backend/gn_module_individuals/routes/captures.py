@@ -2,7 +2,7 @@ from geonature.utils.json import pagination_schema, MyJSONProvider
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import joinedload
 
-from flask import request, jsonify, g
+from flask import request, jsonify, g, make_response
 from werkzeug.exceptions import Forbidden, NotFound, BadRequest
 
 from geonature.core.gn_permissions import decorators as permissions
@@ -17,8 +17,11 @@ from gn_module_individuals import MODULE_CODE
 from gn_module_individuals.models.captures import Capture
 
 from ..blueprint import blueprint
+from ..utils.errors import APIError, ApiErrorCode
 
-default_object_code = "INDIVIDUALS_INDIVIDUALS"
+default_object_code = "INDIVIDUALS"
+
+
 
 
 @blueprint.route("/captures", methods=["GET"])
@@ -53,10 +56,17 @@ def capture_geometry(scope):
 )
 def delete_capture(scope, id_capture):
     cap = db.session.get(Capture, id_capture)
-    if cap.has_instance_permission(scope):
-        db.session.delete(cap)
-        db.session.commit()
-    return True, 204
+    if cap is None:
+        raise APIError(
+            ApiErrorCode.NOT_FOUND,
+            f"Capture with id {id_capture} was not found.",
+            404,
+        )
+    if not cap.has_instance_permission(scope):
+        raise Forbidden()
+    db.session.delete(cap)
+    db.session.commit()
+    return make_response("", 204)
 
 
 @blueprint.route("/captures/<int(signed=True):id_capture>", methods=["GET"])
@@ -64,6 +74,12 @@ def delete_capture(scope, id_capture):
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="ALL")
 def get_capture_by_id(scope, id_capture):
     cap = db.session.get(Capture, id_capture)
+    if cap is None:
+        raise APIError(
+            ApiErrorCode.NOT_FOUND,
+            f"Capture with id {id_capture} was not found.",
+            404,
+        )
     if not cap.has_instance_permission(scope):
         raise Forbidden()
 
@@ -85,7 +101,7 @@ def post_capture():
 
     db.session.add(capture)
     db.session.commit()
-    return schema.dump(capture), 204
+    return schema.dump(capture), 201
 
 
 @blueprint.route("/captures/<int(signed=True):id_capture>", methods=["PATCH"])
@@ -98,6 +114,12 @@ def patch_capture(id_capture, scope):
     if not "id_capture" in post_data:
         post_data["id_capture"] = id_capture
     capture = db.session.get(Capture, id_capture)
+    if capture is None:
+        raise APIError(
+            ApiErrorCode.NOT_FOUND,
+            f"Capture with id {id_capture} was not found.",
+            404,
+        )
     if not capture.has_instance_permission(scope):
         raise Forbidden(f"The user cannot modify this capture ! ")
     capture_ma = CapturesSchema().load(post_data)
