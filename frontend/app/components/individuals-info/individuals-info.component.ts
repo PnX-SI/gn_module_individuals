@@ -9,12 +9,14 @@ import { CommonService } from '@geonature_common/service/common.service';
 import { ModuleService } from '@geonature/services/module.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
 
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Individual } from '../../models/individuals.models';
 import { Deployment } from '../../models/deployments.models';
 import { Column, AccessResult } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
-
+import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.component';
 @Component({
   selector: 'gn-individuals-individuals-info',
   templateUrl: 'individuals-info.component.html',
@@ -33,6 +35,7 @@ export class IndividualsInfoComponent implements OnInit {
   private _individualId!: number;
   public additionalFields: Array<any> = [];
 
+  public modal: NgbModalRef;
   constructor(
     private _config: ConfigService,
     private _commonService: CommonService,
@@ -41,10 +44,24 @@ export class IndividualsInfoComponent implements OnInit {
     private _service: IndividualsService,
     private _location: Location,
     private _dfs: DataFormService,
-    public moduleService: ModuleService
+    public moduleService: ModuleService,
+    private modalService: NgbModal,
+    private _individualsService: IndividualsService
   ) {}
 
   ngOnInit(): void {
+    const props = this._config.INDIVIDUALS.INDIVIDUALS
+      .DEPLOYMENT_LIST_COLUMNS as (keyof Deployment)[];
+
+    forkJoin(
+      props.map((prop) => this._translate.get(`Individuals.Deployments.Fields.${prop}`))
+    ).subscribe((translations) => {
+      this.deploymentsColumns = props.map((prop, name) => ({
+        prop: prop,
+        name: translations[name],
+      }));
+    });
+
     // First initialisation of the table with the resolver data, to display something while waiting
     // for translations to load and avoid having an empty table at the beginning
     combineLatest([
@@ -54,34 +71,32 @@ export class IndividualsInfoComponent implements OnInit {
       this._route.data,
     ]).subscribe(([additionalFields, individualData]) => {
       this.additionalFields = additionalFields;
-      const datatable = individualData?.datatable;
 
+      const datatable = individualData?.datatable;
       this.dataTable$ = of(datatable);
       this._individualId = datatable.id_individual;
 
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
-      if (datatable.deployments?.length > 0) {
-        const props = this._config.INDIVIDUALS.INDIVIDUALS
-          .DEPLOYMENT_LIST_COLUMNS as (keyof Deployment)[];
-
-        forkJoin(
-          props.map((prop) => this._translate.get(`Individuals.Deployments.Fields.${prop}`))
-        ).subscribe((translations) => {
-          this.deploymentsColumns = props.map((prop, name) => ({
-            prop: prop,
-            name: translations[name],
-          }));
-        });
-      } else {
+      if (datatable.deployments?.length == 0) {
         datatable.deployments = [];
       }
 
       this._setPermissions(datatable);
     });
-
     this.defaultLang = this._config['DEFAULT_LANGUAGE'];
   }
 
+  initData(): void {
+    this._individualsService.getIndividual(this._individualId).subscribe((individualData) => {
+      const datatable = individualData;
+      this.dataTable$ = of(datatable);
+
+      // If they're deployments to display, create the columns table for ngx-datatable with translated fields
+      if (datatable?.deployments?.length == 0) {
+        datatable.deployments = [];
+      }
+    });
+  }
   onDelete(): void {
     this._service.deleteIndividual(this._individualId).subscribe({
       next: (res) => {
@@ -108,7 +123,6 @@ export class IndividualsInfoComponent implements OnInit {
    * @memberof IndividualsInfoComponent
    */
   private _setPermissions(datatable: Individual) {
-    console.log(datatable.cruved);
     this.allowedToEdit = { id: datatable.id_individual, access: true };
     this.allowedToDelete = { id: datatable.id_individual, access: true };
 
@@ -140,5 +154,20 @@ export class IndividualsInfoComponent implements OnInit {
     this.allowedToEdit.message = this.allowedToEdit.access
       ? null
       : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+  }
+
+  openModal(deployment) {
+    this.modal = this.modalService.open(DeploymentModalComponent, {
+      centered: true,
+      size: 'lg',
+    });
+    this.modal.componentInstance.deployment = deployment;
+    this.modal.componentInstance.onSave.subscribe((deployment) =>
+      this.afterSaveDeployment(deployment)
+    );
+  }
+
+  afterSaveDeployment(deployment) {
+    this.initData();
   }
 }

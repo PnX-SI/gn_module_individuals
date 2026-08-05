@@ -34,6 +34,19 @@
       class="col-12 padding-sm"
     >
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.' + field | translate }}</h3>
+
+      <div>
+        <button
+          width="10%"
+          mat-mini-fab
+          color="primary"
+          (click)="openModal({ id_individual: dataTable['id_individual'] })"
+          matTooltip="Ajouter un deployment"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
       <p *ngIf="dataTable[field]?.length > 0">
         <ngx-datatable
           class="material striped margin-top-xs table-size expandable"
@@ -72,6 +85,30 @@
                   }}
                 </span>
               </ng-template>
+            </ng-template>
+          </ngx-datatable-column>
+          <!-- Colonne Actions -->
+          <ngx-datatable-column
+            name="Actions"
+            [sortable]="false"
+            [width]="150"
+          >
+            <ng-template
+              ngx-datatable-cell-template
+              let-row="row"
+            >
+              <button
+                class="btn btn-sm btn-primary me-1"
+                (click)="openModal(row)"
+              >
+                <i class="fa fa-edit"></i>
+              </button>
+
+              <!-- <button
+class="btn btn-sm btn-danger"
+(click)="openModal(row)">
+<i class="fa fa-trash"></i>
+</button> -->
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>
