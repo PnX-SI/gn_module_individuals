@@ -331,10 +331,7 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     def get_tracking_device(self, obj):
         if obj.tracking_device:
-            return (
-                f"{obj.tracking_device.provider_name}"
-                f" - {obj.tracking_device.provider_device_id}"
-            )
+            return obj.tracking_device.device_label
         return None
 
     def get_digitiser(self, obj):

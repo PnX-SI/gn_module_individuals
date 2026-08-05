@@ -534,7 +534,7 @@ class TestGetIndividual:
         assert dep["id_nomenclature_deployment_type"] is not None
         assert dep["id_nomenclature_deployment_location"] is not None
         assert dep["tracking_device_info"] == (
-            f"{device_with_deployment.provider_name} - {device_with_deployment.provider_device_id}"
+            f"{device_with_deployment.provider_name}-{device_with_deployment.provider_device_id}"
         )
         assert dep["install_date"] == "2024-01-01"
         assert dep["marking_code"] is None

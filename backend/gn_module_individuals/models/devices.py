@@ -1,6 +1,6 @@
 from flask import g
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy import false, or_
+from sqlalchemy import false, func, or_
 
 from geonature.utils.env import DB
 from geonature.core.gn_monitoring.models import TIndividuals
@@ -91,6 +91,20 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         order_by="IndividualDeployments.install_date.desc()",
         back_populates="tracking_device",
     )
+
+    @hybrid_property
+    def device_label(self):
+        """Human-readable device identifier, e.g. ``Ornitela-XY123``.
+
+        Single source of truth for both the devices list/detail display and
+        the individual's deployment display, and usable as a SQL expression
+        (``TrackingDevices.device_label``) to filter/sort at the DB level.
+        """
+        return f"{self.provider_name}-{self.provider_device_id}"
+
+    @device_label.expression
+    def device_label(cls):
+        return func.concat(cls.provider_name, "-", cls.provider_device_id)
 
     @hybrid_property
     def organism_actors(self):
