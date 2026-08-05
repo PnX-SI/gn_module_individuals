@@ -14,7 +14,7 @@ from sqlalchemy import select
 
 from gn_module_individuals.schemas.captures import CaptureMapSchema, CapturesSchema
 from gn_module_individuals import MODULE_CODE
-from gn_module_individuals.models.captures import Capture
+from gn_module_individuals.models.captures import Capture, IndividualsCaptureObservations
 
 from ..blueprint import blueprint
 from ..utils.errors import APIError, ApiErrorCode
@@ -22,12 +22,23 @@ from ..utils.errors import APIError, ApiErrorCode
 default_object_code = "INDIVIDUALS"
 
 
-
-
 @blueprint.route("/captures", methods=["GET"])
 @permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="ALL")
 @login_required
 def list_captures(scope):
+    args = request.args
+
+    individual_ids = args.getlist("individual_id", type=int)
+
+    query = select(Capture)
+
+    if len(individual_ids) > 0:
+        query = query.join(
+            IndividualsCaptureObservations,
+            Capture.id_capture == IndividualsCaptureObservations.id_capture,
+        )
+        query = query.where(IndividualsCaptureObservations.id_individual.in_(individual_ids))
+
     results = db.session.scalars(select(Capture)).all()
     return CapturesSchema(many=True).dump(results)
 

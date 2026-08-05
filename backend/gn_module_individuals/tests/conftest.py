@@ -31,7 +31,7 @@ def client(app):
 
 
 @pytest.fixture
-def device_with_deployment(device, individual,capture):
+def device_with_deployment(device, individual, capture):
     dep = IndividualDeployments(
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
