@@ -11,10 +11,11 @@ from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.schemas import UserSchema
 from geonature.core.gn_monitoring.models import TIndividuals
+from geonature.core.gn_commons.models import TAdditionalFields
 
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
-from .utils import get_label
+from .utils import get_label, is_nomenclature_of_type
 from ..utils.errors import APIError, ApiErrorCode
 
 
@@ -240,13 +241,40 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     def validate_id_nomenclature_sex(self, value, **kwargs):
         if value is None:
             return value
-        exists = db.session.execute(
+        nomenclature = db.session.execute(
             db.select(TNomenclatures).filter_by(id_nomenclature=value)
         ).scalar_one_or_none()
-        if exists is None:
+        if nomenclature is None:
             raise APIError(
                 ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} nomenclature is not found in configured nomenclatures",
+                400,
+            )
+        if not is_nomenclature_of_type(nomenclature, "SEXE"):
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"The #{value} nomenclature is not of the expected type (SEXE)",
+                400,
+            )
+        return value
+
+    @validates("additional_data")
+    def validate_additional_data(self, value, **kwargs):
+        if not value:
+            return value
+        authorized_fields = set(
+            db.session.execute(
+                db.select(TAdditionalFields.field_name).where(
+                    TAdditionalFields.modules.any(module_code=MODULE_CODE)
+                )
+            ).scalars()
+        )
+        unknown_fields = set(value) - authorized_fields
+        if unknown_fields:
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"The additional_data field(s) {', '.join(sorted(unknown_fields))} "
+                "are not authorized for this module.",
                 400,
             )
         return value
@@ -297,15 +325,25 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     @validates("id_nomenclature_deployment_type")
     def validate_nomenclature_deployment_type(self, value, **kwargs):
-        if db.session.get(TNomenclatures, value) is None:
+        nomenclature = db.session.get(TNomenclatures, value)
+        if nomenclature is None:
             raise ValidationError(f"La nomenclature {value} (type de déploiement) n'existe pas.")
+        if not is_nomenclature_of_type(nomenclature, "TYPE_MARQUAGE"):
+            raise ValidationError(
+                f"La nomenclature {value} n'est pas du type attendu (TYPE_MARQUAGE)."
+            )
         return value
 
     @validates("id_nomenclature_deployment_location")
     def validate_nomenclature_deployment_location(self, value, **kwargs):
-        if db.session.get(TNomenclatures, value) is None:
+        nomenclature = db.session.get(TNomenclatures, value)
+        if nomenclature is None:
             raise ValidationError(
                 f"La nomenclature {value} (localisation du déploiement) n'existe pas."
+            )
+        if not is_nomenclature_of_type(nomenclature, "LOC_MARQUAGE"):
+            raise ValidationError(
+                f"La nomenclature {value} n'est pas du type attendu (LOC_MARQUAGE)."
             )
         return value
 

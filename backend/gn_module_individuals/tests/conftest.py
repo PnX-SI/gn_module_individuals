@@ -49,6 +49,11 @@ def device_with_deployment(device, individual):
     return device
 
 
+@pytest.fixture
+def individual_with_deployment(individual, deployment):
+    return individual
+
+
 @pytest.fixture(scope="session", autouse=True)
 def ensure_individuals_module(app, users):
     """Ensure the module record and baseline permissions exist for tests."""
@@ -75,6 +80,7 @@ def ensure_individuals_module(app, users):
     # Créer les objets métier du module s'ils n'existent pas encore
     with db.session.begin_nested():
         for code, description in [
+            ("INDIVIDUALS", "Gestion des individus, déploiements et captures"),
             ("DEVICES", "Gestion des individus"),
             ("SAMPLES", "Gestion des échantillons dans Individus"),
         ]:

@@ -13,7 +13,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
 from .deployments import DeploymentSummarySchema
-from .utils import get_label
+from .utils import get_label, is_nomenclature_of_type
 from ..utils.errors import APIError, ApiErrorCode
 
 
@@ -39,6 +39,9 @@ class TrackingDevicesBaseSchema(
     meta_create_date = fields.Date(format="%Y-%m-%d", dump_only=True)
     meta_update_date = fields.Date(format="%Y-%m-%d", dump_only=True)
     comment = ma.auto_field()
+    # id_digitiser is always set by the route from the current user, regardless of
+    # what is submitted here (see routes/devices.py), so it must not be loadable.
+    id_digitiser = fields.Integer(dump_only=True)
 
     nomenclature_device_type_name = fields.Method("get_nomenclature_name", dump_only=True)
     digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
@@ -71,13 +74,19 @@ class TrackingDevicesBaseSchema(
     def validate_nomenclature_device_type(self, value, **kwargs):
         if value is None:
             return value
-        exists = db.session.execute(
+        nomenclature = db.session.execute(
             db.select(TNomenclatures).filter_by(id_nomenclature=value)
         ).scalar_one_or_none()
-        if exists is None:
+        if nomenclature is None:
             raise APIError(
                 ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} nomenclature is not found in configured nomenclatures",
+                400,
+            )
+        if not is_nomenclature_of_type(nomenclature, "TYPE_DISPO_SUIVI"):
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"The #{value} nomenclature is not of the expected type (TYPE_DISPO_SUIVI)",
                 400,
             )
         return value

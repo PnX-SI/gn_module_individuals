@@ -6,10 +6,11 @@ from sqlalchemy import func, select
 
 from apptax.taxonomie.models import Taxref
 from geonature.core.gn_synthese.models import Synthese
+from geonature.tests.utils import get_id_nomenclature
 from geonature.utils.env import db
 from pypnusershub.tests.utils import set_logged_user
 
-from gn_module_individuals.models import IndividualDeployments
+from gn_module_individuals.models import IndividualDeployments, TrackingDevices
 from gn_module_individuals.utils.errors import ApiErrorCode
 
 # ===========================================================================
@@ -295,6 +296,37 @@ class TestListIndividuals:
         assert item["deployed_devices"] == {
             "device_1": {"location_name": "Encolure", "name": None}
         }
+
+    def test_filter_search_matches_device_label_case_insensitive(self, users, individual):
+        device = TrackingDevices(provider_name="Ornitela", provider_device_id="Balise 56")
+        with db.session.begin_nested():
+            db.session.add(device)
+            db.session.flush()
+            db.session.add(
+                IndividualDeployments(
+                    id_individual=individual.id_individual,
+                    id_tracking_device=device.id_tracking_device,
+                    id_nomenclature_deployment_type=get_id_nomenclature(
+                        nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
+                    ),
+                    id_nomenclature_deployment_location=get_id_nomenclature(
+                        nomenclature_type_mnemonique="LOC_MARQUAGE", cd_nomenclature="3"
+                    ),
+                    install_date=datetime.datetime(2024, 1, 1),
+                )
+            )
+
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_individuals", search="ornitela"))
+        assert r.status_code == 200
+        ids = [item["id_individual"] for item in r.get_json()["items"]]
+        assert individual.id_individual in ids
+
+    def test_filter_search_no_match_returns_empty(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_individuals", search="NoSuchDeviceLabel"))
+        assert r.status_code == 200
+        assert r.get_json()["items"] == []
 
     def test_filter_bbox_restricts_results(self, users, individuals):
         """Individuals without any synthese observation have no geometry, so any
@@ -808,6 +840,255 @@ class TestUpdateIndividual:
 
 
 # ===========================================================================
+# _sync_deployments (invoked from create_individual / update_individual)
+# ===========================================================================
+
+
+def _deployment_item(**overrides):
+    payload = {
+        "id_nomenclature_deployment_type": get_id_nomenclature(
+            nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
+        ),
+        "id_nomenclature_deployment_location": get_id_nomenclature(
+            nomenclature_type_mnemonique="LOC_MARQUAGE", cd_nomenclature="3"
+        ),
+        "install_date": "2024-01-01",
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestSyncDeployments:
+
+    # --- via create_individual (no pre-existing deployment) --------------
+
+    def test_create_with_deployments_creates_attached_deployment(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        cd_nom = db.session.scalar(select(Taxref.cd_nom).limit(1))
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={
+                "individual_name": "With deployment",
+                "cd_nom": cd_nom,
+                "deployments": [_deployment_item(marking_code="MC-NEW")],
+            },
+        )
+        assert r.status_code == 201
+        data = r.get_json()
+        assert len(data["deployments"]) == 1
+        assert data["deployments"][0]["marking_code"] == "MC-NEW"
+        assert data["deployments"][0]["id_individual"] == data["id_individual"]
+
+    # --- payload validation ------------------------------------------------
+
+    def test_deployments_not_a_list_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": "not-a-list",
+            },
+        )
+        assert r.status_code == 400
+        assert r.get_json().get("name") == ApiErrorCode.VALIDATION_ERROR
+
+    def test_deployment_item_not_a_dict_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": ["not-a-dict"],
+            },
+        )
+        assert r.status_code == 400
+        assert r.get_json().get("name") == ApiErrorCode.VALIDATION_ERROR
+
+    def test_deployment_item_validation_error_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [_deployment_item(id_nomenclature_deployment_type=-999)],
+            },
+        )
+        assert r.status_code == 400
+        body = r.get_json()
+        assert body.get("name") == ApiErrorCode.VALIDATION_ERROR
+        assert "deployments[0]" in body["description"]
+
+    # --- id_deployment resolution -------------------------------------------
+
+    def test_unknown_id_deployment_returns_404(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [_deployment_item(id_deployment=-1)],
+            },
+        )
+        assert r.status_code == 404
+        assert r.get_json().get("name") == ApiErrorCode.NOT_FOUND
+
+    def test_id_deployment_belonging_to_other_individual_returns_404(
+        self, users, deployment, individuals
+    ):
+        """`deployment` belongs to the `individual` fixture; referencing it while
+        updating a different individual must be rejected."""
+        other = individuals[0]
+        assert other.id_individual != deployment.id_individual
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=other.id_individual),
+            json={
+                "individual_name": other.individual_name,
+                "cd_nom": other.cd_nom,
+                "deployments": [_deployment_item(id_deployment=deployment.id_deployment)],
+            },
+        )
+        assert r.status_code == 404
+        assert r.get_json().get("name") == ApiErrorCode.NOT_FOUND
+
+    # --- permissions on existing deployments --------------------------------
+
+    def test_forbidden_scope_on_deployment_update_returns_403(self, users, individual, deployment):
+        """`deployment` is digitised by admin_user; self_user only has scope=1
+        (own data) on deployments, so updating it through the sync is forbidden."""
+        individual.id_digitiser = users["self_user"].id_role
+        db.session.flush()
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [_deployment_item(id_deployment=deployment.id_deployment)],
+            },
+        )
+        assert r.status_code == 403
+        assert r.get_json().get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
+
+    def test_forbidden_scope_on_deployment_deletion_returns_403(
+        self, users, individual, deployment
+    ):
+        """Omitting `deployment` (digitised by admin_user) from the payload deletes
+        it; self_user lacks permission to do so."""
+        individual.id_digitiser = users["self_user"].id_role
+        db.session.flush()
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [],
+            },
+        )
+        assert r.status_code == 403
+        assert r.get_json().get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
+
+    # --- functional sync: create / update / delete --------------------------
+
+    def test_update_existing_deployment_reflects_changes(self, users, individual, deployment):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [
+                    _deployment_item(id_deployment=deployment.id_deployment, marking_code="MC-UPD")
+                ],
+            },
+        )
+        assert r.status_code == 200
+        data = r.get_json()
+        assert len(data["deployments"]) == 1
+        assert data["deployments"][0]["id_deployment"] == deployment.id_deployment
+        assert data["deployments"][0]["marking_code"] == "MC-UPD"
+
+    def test_item_without_id_creates_new_deployment(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [_deployment_item(marking_code="MC-CREATED")],
+            },
+        )
+        assert r.status_code == 200
+        data = r.get_json()
+        assert len(data["deployments"]) == 1
+        assert data["deployments"][0]["marking_code"] == "MC-CREATED"
+        assert data["deployments"][0]["id_individual"] == individual.id_individual
+
+    def test_existing_deployment_omitted_from_payload_is_deleted(
+        self, users, individual, deployment
+    ):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [],
+            },
+        )
+        assert r.status_code == 200
+        assert r.get_json()["deployments"] == []
+        assert db.session.get(IndividualDeployments, deployment.id_deployment) is None
+
+    def test_sync_combines_update_create_and_delete_in_one_request(
+        self, users, individual, deployment
+    ):
+        """`deployment` is kept (and updated), a second pre-existing deployment is
+        omitted (deleted), and a third item without an id is created."""
+        to_delete = IndividualDeployments(
+            id_individual=individual.id_individual,
+            id_nomenclature_deployment_type=get_id_nomenclature(
+                nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
+            ),
+            id_nomenclature_deployment_location=get_id_nomenclature(
+                nomenclature_type_mnemonique="LOC_MARQUAGE", cd_nomenclature="3"
+            ),
+            install_date=datetime.datetime(2024, 2, 1),
+            id_digitiser=users["admin_user"].id_role,
+        )
+        with db.session.begin_nested():
+            db.session.add(to_delete)
+            db.session.flush()
+        to_delete_id = to_delete.id_deployment
+
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "deployments": [
+                    _deployment_item(
+                        id_deployment=deployment.id_deployment, marking_code="MC-KEPT"
+                    ),
+                    _deployment_item(marking_code="MC-CREATED"),
+                ],
+            },
+        )
+        assert r.status_code == 200
+        marking_codes = {dep["marking_code"] for dep in r.get_json()["deployments"]}
+        assert marking_codes == {"MC-KEPT", "MC-CREATED"}
+        assert db.session.get(IndividualDeployments, to_delete_id) is None
+
+
+# ===========================================================================
 # GET /individuals/individuals/<id>/page  (individual_page)
 # ===========================================================================
 
@@ -935,3 +1216,107 @@ class TestIndividualPage:
                 )
             )
             assert r.get_json()["rank"] == expected_rank
+
+
+# ===========================================================================
+# DELETE /individuals/<id>  (delete_individual)
+# ===========================================================================
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestDeleteIndividual:
+
+    def test_unauthenticated_returns_401(self, individual):
+        r = self.client.delete(
+            url_for("individuals.delete_individual", id_individual=individual.id_individual)
+        )
+        assert r.status_code == 401
+
+    def test_forbidden_without_delete_permission(self, users, individual):
+        set_logged_user(self.client, users["noright_user"])
+        r = self.client.delete(
+            url_for("individuals.delete_individual", id_individual=individual.id_individual)
+        )
+        assert r.status_code == 403
+
+    def test_forbidden_without_scope_permission(self, users, individuals):
+        # self_user a le droit D mais scope=1 (ses données uniquement).
+        # individuals[0] appartient à admin_user (digitiseur ET référent) → 403
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_individual",
+                id_individual=individuals[0].id_individual,
+            )
+        )
+        assert r.status_code == 403
+
+    def test_forbidden_scope_returns_structured_error(self, users, individuals):
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_individual",
+                id_individual=individuals[0].id_individual,
+            )
+        )
+        assert r.status_code == 403
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
+        assert "description" in payload
+
+    def test_not_found_returns_404(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(url_for("individuals.delete_individual", id_individual=-1))
+        assert r.status_code == 404
+
+    def test_returns_204_for_existing_device(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(
+            url_for("individuals.delete_individual", id_individual=individual.id_individual)
+        )
+        assert r.status_code == 204
+
+    def test_response_body_is_empty(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(
+            url_for("individuals.delete_individual", id_individual=individual.id_individual)
+        )
+        assert r.data == b""
+
+    def test_device_no_longer_exists_after_delete(self, users, individual):
+        individual_id = individual.id_individual
+        set_logged_user(self.client, users["admin_user"])
+        self.client.delete(url_for("individuals.delete_individual", id_individual=individual_id))
+        r = self.client.get(url_for("individuals.individual", id_individual=individual_id))
+        assert r.status_code == 404
+
+    def test_conflict_if_individual_has_deployments(self, users, individual_with_deployment):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_individual",
+                id_individual=individual_with_deployment.id_individual,
+            )
+        )
+        assert r.status_code == 409
+
+    def test_not_found_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(url_for("individuals.delete_individual", id_individual=-1))
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.NOT_FOUND
+        assert "description" in payload
+
+    def test_conflict_returns_structured_error(self, users, individual_with_deployment):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.delete(
+            url_for(
+                "individuals.delete_individual",
+                id_individual=individual_with_deployment.id_individual,
+            )
+        )
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.HAS_DEPLOYMENT
+        assert "description" in payload
+        assert payload.get("params", {}).get("id") == individual_with_deployment.id_individual
+        assert payload.get("params", {}).get("nb") == 1
