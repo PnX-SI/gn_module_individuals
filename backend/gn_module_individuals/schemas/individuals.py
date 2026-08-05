@@ -64,7 +64,7 @@ class IndividualsBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAl
         model_converter = NomenclaturesConverter
 
     __module_code__ = MODULE_CODE
-    __object_code__ = "INDIVIDUALS_INDIVIDUALS"
+    __object_code__ = "INDIVIDUALS"
 
     meta_create_date = fields.DateTime(format="%d-%m-%Y", dump_only=True)
     meta_update_date = fields.DateTime(format="%d-%m-%Y", dump_only=True, allow_none=True)
