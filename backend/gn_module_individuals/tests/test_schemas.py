@@ -210,6 +210,26 @@ class TestIndividualsDeploymentsSchema:
         g.current_user = users["self_user"]
         assert devices[0].has_instance_permission(scope=1) is False
 
+    def test_deployment_has_instance_permission_scope_0_always_false(self, app, deployment):
+        assert deployment.has_instance_permission(scope=0) is False
+
+    def test_deployment_has_instance_permission_scope_3_always_true(self, app, deployment):
+        assert deployment.has_instance_permission(scope=3) is True
+
+    def test_deployment_has_instance_permission_scope_1_own_deployment(
+        self, app, users, deployment_by_self
+    ):
+        # deployment_by_self is digitised by self_user → access granted
+        g.current_user = users["self_user"]
+        assert deployment_by_self.has_instance_permission(scope=1) is True
+
+    def test_deployment_has_instance_permission_scope_1_other_deployment(
+        self, app, users, deployment
+    ):
+        # deployment is digitised by admin_user → self_user denied access
+        g.current_user = users["self_user"]
+        assert deployment.has_instance_permission(scope=1) is False
+
 
 # ===========================================================================
 # IndividualsMapSchema
