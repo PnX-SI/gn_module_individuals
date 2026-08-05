@@ -18,7 +18,7 @@ from ..utils.errors import APIError, ApiErrorCode
 @blueprint.route("/deployments", methods=["POST"])
 @login_required
 @permissions.check_cruved_scope(
-    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "C", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 @json_resp
 def create_deployment(scope):
@@ -63,7 +63,7 @@ def create_deployment(scope):
 @blueprint.route("/deployments/<int(signed=True):id_deployment>", methods=["PUT"])
 @login_required
 @permissions.check_cruved_scope(
-    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "U", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 @json_resp
 def update_deployment(id_deployment, scope):
@@ -124,7 +124,7 @@ def update_deployment(id_deployment, scope):
 @blueprint.route("/deployments/<int(signed=True):id_deployment>", methods=["DELETE"])
 @login_required
 @permissions.check_cruved_scope(
-    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS_INDIVIDUALS"
+    "D", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
 )
 def delete_deployment(id_deployment, scope):
     """
