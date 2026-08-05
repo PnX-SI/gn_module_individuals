@@ -104,7 +104,7 @@ class TestIndividualsDeploymentsSchema:
             IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(None)
 
     def test_validate_nomenclature_deployment_type_accepts_valid_id(self, app):
-        valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
+        valid_id = get_id_nomenclature("TYPE_MARQUAGE", "1")
         result = IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(valid_id)
         assert result == valid_id
 
@@ -119,7 +119,7 @@ class TestIndividualsDeploymentsSchema:
             IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(None)
 
     def test_validate_nomenclature_deployment_location_accepts_valid_id(self, app):
-        valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
+        valid_id = get_id_nomenclature("LOC_MARQUAGE", "1")
         result = IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(valid_id)
         assert result == valid_id
 
