@@ -8,4 +8,4 @@ from .utils.errors import APIError, handle_error  # noqa: F401
 
 blueprint.register_error_handler(APIError, handle_error)
 
-from .routes import individuals, observations, captures, devices  # noqa: F401
+from .routes import individuals, observations, captures, devices, deployments  # noqa: F401

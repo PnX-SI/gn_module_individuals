@@ -11,7 +11,18 @@ from geonature.core.gn_monitoring.models import TIndividuals
 
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
+from .individuals import IndividualsDeploymentsSchema
 from .utils import get_label
+
+
+class DeploymentWriteSchema(IndividualsDeploymentsSchema):
+    """Used to create/update a deployment, standalone, not related to an individual."""
+
+    __module_code__ = MODULE_CODE
+
+    id_digitiser = fields.Integer(dump_only=True)
+    install_date = fields.DateTime(format="%Y-%m-%d")
+    removal_date = fields.DateTime(format="%Y-%m-%d", allow_none=True, required=False)
 
 
 class DeploymentSummarySchema(ma.Schema):

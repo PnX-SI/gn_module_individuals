@@ -113,7 +113,7 @@ class TrackingDevicesBaseSchema(
         return None
 
     def get_device_label(self, obj):
-        return f"{obj.provider_name}-{obj.provider_device_id}"
+        return obj.device_label
 
 
 class TrackingDevicesListSchema(TrackingDevicesBaseSchema):

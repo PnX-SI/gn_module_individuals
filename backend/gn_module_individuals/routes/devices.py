@@ -40,12 +40,6 @@ def _parse_bool(value):
     raise APIError(ApiErrorCode.INVALID_FILTER, "Unsupported available value", 400)
 
 
-def _device_label_expression():
-    """SQL equivalent of TrackingDevicesBaseSchema.get_device_label, so it can
-    be filtered on (search) or sorted on at the database level."""
-    return func.concat(TrackingDevices.provider_name, "-", TrackingDevices.provider_device_id)
-
-
 def _device_available_expression():
     """A device is available when it has 0 deployment, or when its last
     deployment has a  removal_date."""
@@ -110,7 +104,7 @@ def _device_sort_columns():
             .correlate(TrackingDevices)
             .scalar_subquery()
         ),
-        "device_label": _device_label_expression(),
+        "device_label": TrackingDevices.device_label,
     }
 
 
@@ -266,7 +260,7 @@ def list_devices(scope):
     if provider_name:
         query = query.where(TrackingDevices.provider_name.ilike(f"%{provider_name}%"))
     if search:
-        query = query.where(_device_label_expression().ilike(f"%{search}%"))
+        query = query.where(TrackingDevices.device_label.ilike(f"%{search}%"))
     if id_referer is not None:
         query = query.where(TrackingDevices.id_referer == id_referer)
     if available is not None:
