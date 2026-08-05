@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from geonature.utils.env import db
 from geonature.tests.utils import get_id_nomenclature
 
-from gn_module_individuals.models.captures import Capture
+from gn_module_individuals.models.captures import Capture, IndividualsCaptureObservations
 
 
 def _capture_protocol(cd_nomenclature="1"):
@@ -52,3 +52,39 @@ def capture(users):
         db.session.add(instance)
         db.session.flush()
     return instance
+
+
+@pytest.fixture
+def observation(capture, individual):
+    with db.session.begin_nested():
+        instance = IndividualsCaptureObservations(
+            id_capture=capture.id_capture,
+            id_individual=individual.id_individual,
+            additional_data={"weight": 12},
+        )
+        db.session.add(instance)
+        db.session.flush()
+    return instance
+
+
+@pytest.fixture
+def observations(captures, individuals):
+    """One observation on captures[0] (digitised by admin_user), one on
+    captures[1] (digitised by self_user) -- mirrors the `captures` fixture
+    split used for scope tests."""
+    db_obs = [
+        IndividualsCaptureObservations(
+            id_capture=captures[0].id_capture,
+            id_individual=individuals[0].id_individual,
+            additional_data={"note": "a"},
+        ),
+        IndividualsCaptureObservations(
+            id_capture=captures[1].id_capture,
+            id_individual=individuals[1].id_individual,
+            additional_data={"note": "b"},
+        ),
+    ]
+    with db.session.begin_nested():
+        db.session.add_all(db_obs)
+        db.session.flush()
+    return db_obs

@@ -4,7 +4,7 @@ import { Observable, of } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
-import { Capture, APICaptureFiltersParams, CaptureRankAndPage } from '../models/capture.model';
+import { Capture, APICaptureFiltersParams, CaptureObservations } from '../models/capture.model';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
 import { CAPTURES_DEFAULT_SORT } from '../utils/constants.util';
 
@@ -67,5 +67,11 @@ export class CaptureService {
 
   deleteCapture(id: number): Observable<Capture> {
     return this._http.delete<Capture>(`${this.API_ENDPOINT}/${id}`);
+  }
+
+  getCaptureObservations(idCapture: number): Observable<CaptureObservations> {
+    return this._http.get<CaptureObservations>(
+      `${this._config.API_ENDPOINT}/individuals/observations`
+    );
   }
 }

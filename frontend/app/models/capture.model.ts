@@ -1,5 +1,4 @@
 import { Individual } from './individuals.models';
-import { RankAndPage } from './common.models';
 
 export interface GeoJSON {}
 
@@ -42,6 +41,4 @@ export interface APICaptureFiltersParams {
   id_role?: number;
 }
 
-export interface CaptureRankAndPage extends RankAndPage {
-  id_capture: number;
-}
+export interface CaptureObservations {}
