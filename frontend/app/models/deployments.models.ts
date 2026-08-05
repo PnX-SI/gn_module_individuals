@@ -11,7 +11,6 @@ export interface Deployment {
   id_digitiser: number;
   meta_create_date: string;
   meta_update_date: string;
-  tracking_device_info: string;
   deployment_type_name: string;
   deployment_location_name: string;
   name_digitiser: string;

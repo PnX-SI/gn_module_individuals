@@ -37,11 +37,11 @@
 
       <div>
         <button
-          width="10%"
+          id="add"
           mat-mini-fab
-          color="primary"
+          [matTooltip]="'Individuals.Actions.Add' | translate"
+          class="custom-mini-fab mr-1 bg-primary text-white border-0"
           (click)="openModal({ id_individual: dataTable['id_individual'] })"
-          matTooltip="Ajouter un deployment"
         >
           <mat-icon>add</mat-icon>
         </button>
@@ -98,18 +98,10 @@
               let-row="row"
             >
               <button
-                class="btn btn-sm btn-primary me-1"
+                class="btn btn-row fa fa-pencil-square-o"
+                [disabled]="!allowedToEdit?.access"
                 (click)="openModal(row)"
-              >
-                <i class="fa fa-edit"></i>
-              </button>
-
-              <button
-                class="btn btn-sm btn-danger"
-                (click)="deleteDeployment(row.id_deployment)"
-              >
-                <i class="fa fa-trash"></i>
-              </button>
+              ></button>
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>

@@ -1,5 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormGroup, Validators } from '@angular/forms';
 
 import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
@@ -15,6 +15,7 @@ export class DeploymentFormComponent implements OnInit {
   @Input() public deploymentsForm: FormGroup;
   public trackingDevicesApiEndPoint: string = '';
   public trackingDevicesQueryString: string = '';
+  public trackingDevicesHidden: boolean = false;
 
   constructor(
     private _config: ConfigService,
@@ -37,5 +38,16 @@ export class DeploymentFormComponent implements OnInit {
 
   trackingDevicesformatter(item) {
     return item.device_label;
+  }
+  setCdNomenclatureTypeMarquage(value) {
+    const ctrTrackingDevice = this.deploymentsForm.get('id_tracking_device');
+    if (value === '4') {
+      ctrTrackingDevice?.setValidators([Validators.required]);
+      this.trackingDevicesHidden = false;
+    } else {
+      ctrTrackingDevice?.clearValidators();
+      ctrTrackingDevice?.setValue(null);
+      this.trackingDevicesHidden = true;
+    }
   }
 }

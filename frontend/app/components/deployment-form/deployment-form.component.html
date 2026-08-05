@@ -1,16 +1,25 @@
 <div>
+  <mat-error *ngIf="deploymentsForm.hasError('invalidDateRange')">
+    La date de pose doit être antérieure à la date de retrait.
+  </mat-error>
+
   <div class="content row">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <pnx-nomenclature
-        class="form-group w-50"
+        class="form-group"
         [label]="'Individuals.Deployments.Fields.deployment_type_name' | translate"
         [parentFormControl]="deploymentsForm.get('id_nomenclature_deployment_type')"
         [codeNomenclatureType]="'TYPE_MARQUAGE'"
+        ($currentCdNomenclature)="setCdNomenclatureTypeMarquage($event)"
       ></pnx-nomenclature>
     </div>
 
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+    <div
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
+      *ngIf="!trackingDevicesHidden"
+    >
       <pnx-autocomplete
+        *ngIf="!trackingDevicesHidden"
         [apiEndPoint]="trackingDevicesApiEndPoint"
         [queryParamSearch]="'search'"
         [parentFormControl]="deploymentsForm.get('id_tracking_device')"
@@ -20,25 +29,30 @@
         [label]="'Individuals.Deployments.Fields.id_tracking_device' | translate"
       ></pnx-autocomplete>
     </div>
+  </div>
 
+  <div class="content row">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <pnx-nomenclature
-        class="form-group w-50"
+        class="form-group"
         [label]="'Individuals.Deployments.Fields.deployment_location_name' | translate"
         [parentFormControl]="deploymentsForm.get('id_nomenclature_deployment_location')"
         [codeNomenclatureType]="'LOC_MARQUAGE'"
       ></pnx-nomenclature>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
-      <gn-individuals-input-text
-        [label]="'Individuals.Deployments.Fields.marking_code' | translate"
-        [containerClass]="'w-50'"
-        [parentFormControl]="deploymentsForm.get('marking_code')"
-      ></gn-individuals-input-text>
+      <small>{{ 'Individuals.Deployments.Fields.marking_code' | translate }}</small>
+      <form [formGroup]="deploymentsForm">
+        <input
+          class="form-control form-control-sm"
+          type="text"
+          formControlName="marking_code"
+        />
+      </form>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <form [formGroup]="deploymentsForm">
-        <label>{{ 'Individuals.Deployments.Fields.install_date' | translate }}</label>
+        <small>{{ 'Individuals.Deployments.Fields.install_date' | translate }}</small>
         <input
           class="form-control form-control-sm"
           type="date"
@@ -47,15 +61,8 @@
       </form>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
-      <gn-individuals-input-text
-        [label]="'Individuals.Deployments.Fields.tracking_device_info' | translate"
-        [containerClass]="'w-50'"
-        [parentFormControl]="deploymentsForm.get('tracking_device_info')"
-      ></gn-individuals-input-text>
-    </div>
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <form [formGroup]="deploymentsForm">
-        <label>{{ 'Individuals.Deployments.Fields.removal_date' | translate }}</label>
+        <small>{{ 'Individuals.Deployments.Fields.removal_date' | translate }}</small>
         <input
           class="form-control form-control-sm"
           type="date"
@@ -64,11 +71,14 @@
       </form>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
-      <gn-individuals-input-text
-        [label]="'Individuals.Deployments.Fields.comment' | translate"
-        [containerClass]="'w-50'"
-        [parentFormControl]="deploymentsForm.get('comment')"
-      ></gn-individuals-input-text>
+      <small>{{ 'Individuals.Deployments.Fields.comment' | translate }}</small>
+      <form [formGroup]="deploymentsForm">
+        <input
+          class="form-control form-control-sm"
+          type="textarea"
+          formControlName="comment"
+        />
+      </form>
     </div>
   </div>
 </div>
