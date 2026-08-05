@@ -138,12 +138,7 @@ def upgrade():
             sa.ForeignKey("utilisateurs.t_roles.id_role"),
             nullable=True,
         ),
-        sa.Column(
-            "meta_create_date",
-            sa.DateTime(),
-            nullable=True,
-            server_default=sa.func.now()
-        ),
+        sa.Column("meta_create_date", sa.DateTime(), nullable=True, server_default=sa.func.now()),
         sa.Column(
             "meta_update_date",
             sa.DateTime(),

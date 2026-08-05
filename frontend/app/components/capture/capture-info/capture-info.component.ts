@@ -1,6 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { Capture } from '../../../models/capture.model';
 import { Individual } from '../../../models/individuals.models';
+import { CaptureService } from '../../../services/capture.service';
+import { ActivatedRoute } from '@angular/router';
 
 const DUMMY_INDIVIDUAL: Individual = {
   id_individual: 1,
@@ -23,6 +25,7 @@ const DUMMY_INDIVIDUAL: Individual = {
   deployed_markings: 'Boucle auriculaire n°42',
   deployed_devices: 'Collier GPS n°7',
   cruved: { C: true, R: true, U: true, V: true, E: true, D: false },
+  additional_data: {},
 };
 
 const DUMMY_CAPTURE: Capture = {
@@ -39,7 +42,12 @@ const DUMMY_CAPTURE: Capture = {
     { id_role: 2, nom_complet: 'Marie Martin' },
   ],
   individuals: [
-    { individual: DUMMY_INDIVIDUAL, additional_data: { poids: '4.2kg', taille: '65cm' } },
+    {
+      id_capture: 1,
+      id_individual: DUMMY_INDIVIDUAL.id_individual,
+      individual: DUMMY_INDIVIDUAL,
+      additional_data: { poids: '4.2kg', taille: '65cm' },
+    },
   ],
 };
 
@@ -50,5 +58,14 @@ const DUMMY_CAPTURE: Capture = {
   standalone: false,
 })
 export class CaptureInfoComponent {
-  @Input() capture: Capture = DUMMY_CAPTURE;
+  @Input() capture: Capture;
+
+  constructor(
+    private _captureService: CaptureService,
+    private _route: ActivatedRoute
+  ) {
+    this._route.data.subscribe(({ capture }) => {
+      this.capture = capture;
+    });
+  }
 }

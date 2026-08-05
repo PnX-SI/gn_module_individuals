@@ -31,11 +31,11 @@ def client(app):
 
 
 @pytest.fixture
-def device_with_deployment(device, individual):
+def device_with_deployment(device, individual, capture):
     dep = IndividualDeployments(
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
-        id_capture=1,
+        id_capture=capture.id_capture,
         id_nomenclature_deployment_type=get_id_nomenclature(
             nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
         ),
@@ -71,7 +71,7 @@ def ensure_individuals_module(app, users):
     actions = {
         code: db.session.scalar(select(PermAction).filter_by(code_action=code)) for code in "CRUDV"
     }
-    object_all = db.session.scalar(select(PermObject).filter_by(code_object="ALL"))
+    object_all = db.session.scalar(select(PermObject).filter_by(code_object="INDIVIDUALS"))
 
     # Créer les objets métier du module s'ils n'existent pas encore
     with db.session.begin_nested():
@@ -84,15 +84,10 @@ def ensure_individuals_module(app, users):
 
     object_individuals = db.session.scalar(select(PermObject).filter_by(code_object="INDIVIDUALS"))
 
-    # Permissions sur ALL (lecture globale du module)
-    all_permissions = {
-        "admin_user": {"actions": "RV", "scope": None},
-        "self_user": {"actions": "R", "scope": 1},
-    }
-    # Permissions sur INDIVIDUALS (C/U/D discriminés)
+    # Permissions sur INDIVIDUALS (R/C/U/D discriminés)
     individuals_permissions = {
-        "admin_user": {"actions": "CUD", "scope": None},
-        "self_user": {"actions": "UD", "scope": 1},
+        "admin_user": {"actions": "RCUD", "scope": None},
+        "self_user": {"actions": "RUD", "scope": 1},
     }
 
     def _add_permissions(target_map, perm_object):

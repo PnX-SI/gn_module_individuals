@@ -48,13 +48,13 @@ def upgrade():
         ),
         sa.Column(
             "geom_local",
-            Geometry("POINT"),
+            Geometry("GEOMETRY"),
             nullable=False,
         ),
         sa.Column(
             "geom_4326",
-            Geometry("POINT", 4326),
-            nullable=False,
+            Geometry("GEOMETRY", 4326),
+            nullable=True,
         ),
         sa.Column(
             "additional_data",
@@ -124,6 +124,23 @@ def upgrade():
         BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.t_captures
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
+    """)
+
+    op.execute(f"""
+        CREATE OR REPLACE FUNCTION {SCHEMA_NAME}.set_geom_4326()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.geom_4326 := ST_Transform(NEW.geom_local, 4326);
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    """)
+
+    op.execute(f"""
+        CREATE TRIGGER tr_geom_4326_captures
+        BEFORE INSERT OR UPDATE OF geom_local ON {SCHEMA_NAME}.t_captures
+        FOR EACH ROW
+        EXECUTE FUNCTION {SCHEMA_NAME}.set_geom_4326();
     """)
 
     op.execute(f"""
@@ -276,6 +293,9 @@ def downgrade():
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         DROP CONSTRAINT IF EXISTS t_individual_deployments_id_capture_fkey;
     """)
+
+    op.execute(f"DROP TRIGGER IF EXISTS tr_geom_4326_captures ON {SCHEMA_NAME}.t_captures;")
+    op.execute(f"DROP FUNCTION IF EXISTS {SCHEMA_NAME}.set_geom_4326();")
 
     op.execute(f"DROP TRIGGER IF EXISTS tr_meta_dates_captures ON {SCHEMA_NAME}.t_captures;")
 
