@@ -24,6 +24,7 @@ export const INDIVIDUAL_MODEL = {
   deployed_markings: '',
   deployed_devices: '',
   additional_data: {},
+  deployments: [],
 };
 
 export type Individual = typeof INDIVIDUAL_MODEL & { cruved: Cruved };

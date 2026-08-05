@@ -43,6 +43,7 @@ import { IndividualsFiltersComponent } from './components/individuals-map-list/i
 import { IndividualsInfoComponent } from './components/individuals-info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
 import { DeploymentFormComponent } from './components/deployment-form/deployment-form.component';
+import { DeploymentModalComponent } from './components/deployment-modal/deployment-modal.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -67,6 +68,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsInfoComponent,
     IndividualsFormComponent,
     DeploymentFormComponent,
+    DeploymentModalComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
