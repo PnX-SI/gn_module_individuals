@@ -1,7 +1,11 @@
 import { Component, Output, EventEmitter, Input, OnInit } from '@angular/core';
-import { FormControl, FormGroup, FormBuilder } from '@angular/forms';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { DeployementsService } from '../../services/deployments.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
+import { CommonService } from '@geonature_common/service/common.service';
+import { ErrorHandlerService } from '../../services/errors-handler.service';
+
 @Component({
   selector: 'pnx-individuals-deployment-modal',
   templateUrl: './deployment-modal.component.html',
@@ -14,6 +18,8 @@ export class DeploymentModalComponent implements OnInit {
   constructor(
     public _activeModal: NgbActiveModal,
     private _deploymentsService: DeployementsService,
+    private _commonService: CommonService,
+    private _errorHandler: ErrorHandlerService,
     private _fb: FormBuilder
   ) {}
 
@@ -25,17 +31,27 @@ export class DeploymentModalComponent implements OnInit {
     this._activeModal.close();
   }
   createDeployment() {
-    console.log('deployment', this.form.value);
+    const formAction = this.deployment.id_deployment ? 'EDIT' : 'ADD';
     this._deploymentsService
-      .createOrUpdateDeployment(
-        this.form.value,
-        this.deployment.id_deployment ? 'EDIT' : 'ADD',
-        this.deployment.id_deployment
-      )
-      .subscribe(() => {
-        this.onSave.emit(this.form.value);
-        this._activeModal.close();
+      .createOrUpdateDeployment(this.form.value, formAction, this.deployment.id_deployment)
+      .subscribe({
+        next: (res) => {
+          const successKey =
+            formAction === 'ADD'
+              ? 'Individuals.Deployments.Messages.Added'
+              : 'Individuals.Deployments.Messages.Edited';
+          this._commonService.translateToaster('info', successKey, { id: res.id_deployment });
+          this.form.markAsPristine();
+          this.onSave.emit(this.form.value);
+          this._activeModal.close();
+        },
+        error: (err) => {
+          this._errorHandler.handleHttpError(
+            err,
+            { id: this.form.value.id_deployment },
+            'Individuals.Deployments.ApiErrors'
+          );
+        },
       });
-    // TODO CATCH exception
   }
 }
