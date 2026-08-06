@@ -84,8 +84,8 @@ export class DeployementsService {
       });
     }
   }
-
-  // deleteDeployment(id: number): Observable<Deployment> {
-  //   return this._http.delete<Deployment>(`${this._OBJECT_API}/${id}`);
-  // }
+  
+  deleteDeployment(id: number): Observable<Deployment> {
+    return this._http.delete<Deployment>(`${this._OBJECT_API}/${id}`);
+  }
 }

@@ -16,6 +16,7 @@ import { Individual } from '../../models/individuals.models';
 import { Deployment } from '../../models/deployments.models';
 import { Column, AccessResult } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
+import { DeployementsService } from '../../services/deployments.service';
 import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.component';
 @Component({
   selector: 'gn-individuals-individuals-info',
@@ -46,7 +47,8 @@ export class IndividualsInfoComponent implements OnInit {
     private _dfs: DataFormService,
     public moduleService: ModuleService,
     private modalService: NgbModal,
-    private _individualsService: IndividualsService
+    private _individualsService: IndividualsService,
+    private _deploymentsService: DeployementsService
   ) {}
 
   ngOnInit(): void {
@@ -133,14 +135,14 @@ export class IndividualsInfoComponent implements OnInit {
 
     // Delete access
     if (this.allowedToDelete.access) {
-      // Check if device has observations, if yes : no access
+      // Check if individual has observations, if yes : no access
       if (datatable.last_observation_date) {
         this.allowedToDelete.access = false;
         this.allowedToDelete.message = this._translate.instant(
           'Individuals.ApiErrors.HasObservation'
         );
       }
-      // Check if device has deployments, if yes : no access
+      // Check if individual has deployments, if yes : no access
       else if (datatable.deployed_devices?.length > 0 || datatable.deployed_markings?.length > 0) {
         this.allowedToDelete.access = false;
         this.allowedToDelete.message = this._translate.instant(
@@ -169,5 +171,23 @@ export class IndividualsInfoComponent implements OnInit {
 
   afterSaveDeployment(deployment) {
     this.initData();
+  }
+
+  deleteDeployment(id_deployment: number) {
+    this._deploymentsService.deleteDeployment(id_deployment).subscribe({
+      next: () => {
+        this._commonService.translateToaster('info', 'Individuals.Deployments.Messages.Deleted', {
+          id: id_deployment,
+        });
+        this.initData();
+      },
+      error: (err) => {
+        const msg = err.name + ':' + err.message || JSON.stringify(err);
+        this._commonService.translateToaster('error', 'Individuals.Deployments.Errors.DeletedNOK', {
+          id: id_deployment,
+          error: msg,
+        });
+      },
+    });
   }
 }
