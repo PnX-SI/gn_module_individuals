@@ -104,11 +104,12 @@
                 <i class="fa fa-edit"></i>
               </button>
 
-              <!-- <button
-class="btn btn-sm btn-danger"
-(click)="openModal(row)">
-<i class="fa fa-trash"></i>
-</button> -->
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="deleteDeployment(row.id_deployment)"
+              >
+                <i class="fa fa-trash"></i>
+              </button>
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>

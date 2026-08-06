@@ -65,6 +65,15 @@
                 "individual_name" : "Nom de l'individu",
                 "digitiser_name" : "Rédacteur",
                 "name_digitiser" : "Rédacteur"
+            },
+            "Titles": {
+                "Delete": "Suppression du déploiement n°{{ id }}"
+            },
+            "Messages": {
+                "Deleted": "Le déploiement n°{{ id }} a été supprimé."
+            },
+            "Errors": {
+                "DeletedNOK": "Le déploiement n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             }
         },
         "Individuals": {
