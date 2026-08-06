@@ -6,7 +6,7 @@ from marshmallow import Schema, fields
 
 
 class GlobalSchema(Schema):
-    ID_TAXON_LIST = fields.Integer(load_default=100)
+    ID_TAXON_LIST = fields.Integer(load_default=None)
     SELECTED_LAYER_COLOR = fields.String()
     UNSELECTED_LAYER_COLOR = fields.String()
     SELECTED_LAYER_OPACITY = fields.Integer()
