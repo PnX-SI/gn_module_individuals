@@ -6,7 +6,7 @@ import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { Deployment, CreateDeploymentDto, UpdateDeploymentDto } from '../models/deployments.models';
-
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 @Injectable()
 export class DeployementsService {
   private _OBJECT_API: string;
@@ -23,19 +23,34 @@ export class DeployementsService {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/deployments`;
   }
 
+  private dateRangeValidator: ValidatorFn = (group: AbstractControl): ValidationErrors | null => {
+    const dateMin = group.get('install_date')?.value;
+    const dateMax = group.get('removal_date')?.value;
+    if (!dateMin || !dateMax) {
+      return null;
+    }
+    return new Date(dateMin) <= new Date(dateMax) ? null : { invalidDateRange: true };
+  };
+
   generateDeploymentForm(): FormGroup {
-    return this._fb.group({
-      comment: [null],
-      id_deployment: [null],
-      id_individual: [null],
-      id_nomenclature_deployment_location: [null, Validators.required],
-      id_nomenclature_deployment_type: [null, Validators.required],
-      id_tracking_device: [null],
-      install_date: [null, Validators.required],
-      marking_code: [null],
-      removal_date: [null],
-      tracking_device_info: [null],
-    });
+    const form = this._fb.group(
+      {
+        comment: [null],
+        id_deployment: [null],
+        id_individual: [null],
+        id_nomenclature_deployment_location: [null, Validators.required],
+        id_nomenclature_deployment_type: [null, Validators.required],
+        id_tracking_device: [null],
+        install_date: [null, Validators.required],
+        marking_code: [null],
+        removal_date: [null],
+      },
+      {
+        validators: [this.dateRangeValidator],
+      }
+    );
+
+    return form;
   }
   formToJson(deployment: any): any {
     if (deployment.id_tracking_device) {
@@ -84,7 +99,7 @@ export class DeployementsService {
       });
     }
   }
-  
+
   deleteDeployment(id: number): Observable<Deployment> {
     return this._http.delete<Deployment>(`${this._OBJECT_API}/${id}`);
   }

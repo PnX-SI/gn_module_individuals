@@ -70,10 +70,14 @@
                 "Delete": "Suppression du déploiement n°{{ id }}"
             },
             "Messages": {
-                "Deleted": "Le déploiement n°{{ id }} a été supprimé."
+                "Added" : "Le deploiment a été créé.",
+                "Edited" : "Le deploiment n°{{ id }} a été modifié.",
+                "Deleted" : "Le deploiment n°{{ id }} a été supprimé."
             },
             "Errors": {
-                "DeletedNOK": "Le déploiement n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+                "AddedNOK" : "Ce deploiment n'a pas pu être créé. Erreur : {{ error }}",
+                "EditedNOK" : "Le deploiment n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+                "DeletedNOK" : "Le deploiment n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             }
         },
         "Individuals": {
