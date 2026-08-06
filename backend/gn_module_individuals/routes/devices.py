@@ -78,7 +78,9 @@ def _device_sort_columns():
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
 @json_resp
 def device(id_tracking_device, scope):
     """
@@ -127,7 +129,9 @@ def device(id_tracking_device, scope):
 
 @blueprint.route("/devices", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS")
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
 @json_resp
 def list_devices(scope):
     """
