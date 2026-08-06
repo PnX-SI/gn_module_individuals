@@ -78,7 +78,7 @@
                 "AddedNOK" : "Ce deploiment n'a pas pu être créé. Erreur : {{ error }}",
                 "EditedNOK" : "Le deploiment n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
                 "DeletedNOK" : "Le deploiment n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            },
+            }
         },
         "Individuals": {
             "Fields": {

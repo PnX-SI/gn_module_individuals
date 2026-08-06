@@ -97,11 +97,19 @@
               ngx-datatable-cell-template
               let-row="row"
             >
-              <button
-                class="btn btn-row fa fa-pencil-square-o"
-                [disabled]="!allowedToEdit?.access"
-                (click)="openModal(row)"
-              ></button>
+              <span [matTooltip]="'Individuals.Actions.Edit' | translate">
+                <button
+                  class="btn btn-row fa fa-pencil-square-o"
+                  [disabled]="!allowedToEdit?.access"
+                  (click)="openModal(row)"
+                ></button>
+              </span>
+              <span [matTooltip]="'Individuals.Actions.Delete' | translate">
+                <button
+                  class="btn btn-row fa fa-trash-o"
+                  (click)="deleteDeployment(row.id_deployment)"
+                ></button>
+              </span>
             </ng-template>
           </ngx-datatable-column>
         </ngx-datatable>
