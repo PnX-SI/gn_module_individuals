@@ -1,4 +1,4 @@
 MODULE_CODE = "INDIVIDUALS"
-MODULE_PICTO = "fa-th-list"
+MODULE_PICTO = "fa-tag"
 MODULE_LABEL = "Individuals"
 ALEMBIC_BRANCH = "individuals"
