@@ -54,10 +54,6 @@ export const routes: Routes = [
         component: MapListComponent,
       },
       {
-        path: 'captures',
-        component: MapListComponent,
-      },
-      {
         path: 'devices',
         component: DevicesListComponent,
         resolve: { datatable: DevicesResolver },

@@ -71,7 +71,7 @@ def ensure_individuals_module(app, users):
     actions = {
         code: db.session.scalar(select(PermAction).filter_by(code_action=code)) for code in "CRUDV"
     }
-    object_all = db.session.scalar(select(PermObject).filter_by(code_object="ALL"))
+    object_all = db.session.scalar(select(PermObject).filter_by(code_object="INDIVIDUALS"))
 
     # Créer les objets métier du module s'ils n'existent pas encore
     with db.session.begin_nested():
