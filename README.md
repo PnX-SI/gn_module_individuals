@@ -1,8 +1,8 @@
-# Module Individuals
+# Module GeoNature de gestion des individus
 
 Ce module de GeoNature permet la gestion des individus (faune).
 
-Dans ce module nous pourrons donc :
+Ce module de GeoNature permet :
 
 1) Gérer une liste d'individus
 
