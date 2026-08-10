@@ -32,9 +32,7 @@ def upgrade():
         ON CONFLICT (code_object) DO NOTHING
         """))
 
-    op.execute(
-        sa.text(
-            f"""
+    op.execute(sa.text(f"""
             INSERT INTO gn_permissions.cor_object_module (
                 id_object,
                 id_module
@@ -113,27 +111,21 @@ def downgrade():
     op.execute(sa.text("""
             DELETE FROM gn_permissions.t_objects
             WHERE code_object IN ('DEVICES', 'SAMPLES')
-            """
-        )
-    )
+            """))
 
     conn.execute(
-        sa.text(
-            """
+        sa.text("""
                 DELETE FROM gn_permissions.cor_object_module com
                 WHERE com.id_module = :module_id
-            """
-        ),
+            """),
         {"module_id": module_id},
     )
 
     conn.execute(
-        sa.text(
-            """
+        sa.text("""
                 DELETE FROM gn_permissions.cor_object_module com
                 WHERE com.id_module = :module_id
-            """
-        ),
+            """),
         {"module_id": module_id},
     )
 

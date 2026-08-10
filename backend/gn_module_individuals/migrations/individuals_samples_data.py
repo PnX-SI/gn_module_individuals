@@ -577,6 +577,12 @@ JOIN ref_nomenclatures.t_nomenclatures n
 def downgrade():
     conn = op.get_bind()
 
+    dataset = conn.execute(
+        sa.text(
+            "SELECT id_dataset FROM gn_meta.t_datasets WHERE dataset_shortname = 'INDIVIDUALS_TEST'"
+        )
+    ).scalar()
+
     # DELETEs on t_base_sites / t_releves_occtax cascade (ON DELETE CASCADE) to
     # visits/observations and occurrences/counts, including synthese
     # (synthese deletion triggers on occtax and monitoring).
@@ -597,9 +603,14 @@ def downgrade():
         )
 
     op.execute(sa.text("""
+            DELETE FROM gn_monitoring.t_base_visits
+            WHERE id_dataset = :dataset
+            """).bindparams(dataset=dataset))
+
+    op.execute(sa.text("""
             DELETE FROM pr_occtax.t_releves_occtax
-            WHERE date_min BETWEEN '2026-07-01' AND '2026-07-31 23:59:59'
-            """))
+            WHERE id_dataset = :dataset
+            """).bindparams(dataset=dataset))
 
     # cor_module_dataset is deleted in cascade with the dataset.
     op.execute(
