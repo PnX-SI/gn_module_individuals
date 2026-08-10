@@ -27,13 +27,15 @@ def upgrade():
         INSERT INTO gn_permissions.t_objects 
             (code_object, description_object)
         VALUES
-            ('ALL', 'Accès au module Individuals'),
+            ('INDIVIDUALS', 'Accès au module Individuals'),
             ('DEVICES', 'Gestion des devices'),
             ('SAMPLES', 'Gestion des échantillons')
         ON CONFLICT (code_object) DO NOTHING
         """))
 
-    op.execute(sa.text("""
+    op.execute(
+        sa.text(
+            f"""
             INSERT INTO gn_permissions.cor_object_module (
                 id_object,
                 id_module
@@ -43,7 +45,7 @@ def upgrade():
                 m.id_module
             FROM (
                 VALUES
-                    ('{MODULE_CODE}', 'ALL'),
+                    ('{MODULE_CODE}', 'INDIVIDUALS'),
                     ('{MODULE_CODE}', 'DEVICES'),
                     ('{MODULE_CODE}', 'SAMPLES')
             ) AS v (module_code, object_code)
@@ -69,7 +71,7 @@ def upgrade():
             v.scope_filter
         FROM (
             VALUES
-                ('{MODULE_CODE}', 'ALL', 'R', True,  'Voir dans le module Individuals')
+                ('{MODULE_CODE}', 'INDIVIDUALS', 'R', True,  'Voir dans le module Individuals')
                 ,('{MODULE_CODE}', 'INDIVIDUALS','C', True,  'Créer des individus, des déploiements et des captures')
                 ,('{MODULE_CODE}', 'INDIVIDUALS','U', True,  'Éditer des individus, des déploiements et des captures')
                 ,('{MODULE_CODE}', 'INDIVIDUALS','D', True,  'Supprimer des individus, des déploiements et des captures')
@@ -113,5 +115,15 @@ def downgrade():
             DELETE FROM gn_permissions.t_objects
             WHERE code_object IN ('DEVICES', 'SAMPLES')
             """))
+
+    conn.execute(
+        sa.text(
+            """
+                DELETE FROM gn_permissions.cor_object_module com
+                WHERE com.id_module = :module_id
+            """
+        ),
+        {"module_id": module_id},
+    )
 
     op.execute(sa.text(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE"))

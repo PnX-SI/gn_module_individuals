@@ -186,7 +186,9 @@ def _pagination_payload(paginated, schema, sort):
 
 @blueprint.route("/individuals/geometry", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
 def individuals_geometry(scope):
     """
     List individuals having a last known observation, as GeoJSON points
@@ -231,7 +233,9 @@ def individuals_geometry(scope):
 
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
 @json_resp
 def individual(id_individual, scope):
     """
@@ -447,7 +451,9 @@ def delete_individual(id_individual, scope):
 
 @blueprint.route("/individuals", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
 @json_resp
 def list_individuals(scope):
     """
@@ -475,7 +481,6 @@ def list_individuals(scope):
     sort = _parse_sort(request.args)
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
-
     query = _build_individuals_query(scope, filters, sort)
     schema = IndividualsListSchema(many=True, only=["+cruved"])
 
@@ -491,7 +496,9 @@ def list_individuals(scope):
 
 @blueprint.route("/individuals/<int(signed=True):id_individual>/page", methods=["GET"])
 @login_required
-@permissions.check_cruved_scope("R", get_scope=True, module_code=MODULE_CODE)
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
 @json_resp
 def individual_page(id_individual, scope):
     """
