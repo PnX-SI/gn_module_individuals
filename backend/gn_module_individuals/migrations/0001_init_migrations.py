@@ -23,18 +23,14 @@ def upgrade():
     conn = op.get_bind()
     op.execute(sa.text(f"CREATE SCHEMA IF NOT EXISTS {SCHEMA_NAME}"))
 
-    op.execute(
-        sa.text(
-            """
+    op.execute(sa.text("""
         INSERT INTO gn_permissions.t_objects 
             (code_object, description_object)
         VALUES
             ('DEVICES', 'Gestion des devices'),
             ('SAMPLES', 'Gestion des échantillons')
         ON CONFLICT (code_object) DO NOTHING
-        """
-        )
-    )
+        """))
 
     op.execute(
         sa.text(
@@ -88,8 +84,7 @@ def upgrade():
         JOIN gn_commons.t_modules m     ON m.module_code  = v.module_code
         JOIN gn_permissions.t_objects o ON o.code_object  = v.object_code
         JOIN gn_permissions.bib_actions a ON a.code_action = v.action_code
-    """
-    )
+    """)
 
 
 def downgrade():
@@ -108,12 +103,10 @@ def downgrade():
     )
 
     conn.execute(
-        sa.text(
-            """
+        sa.text("""
             DELETE FROM gn_permissions.t_permissions p
             WHERE p.id_module = :module_id
-            """
-        ),
+            """),
         {"module_id": module_id},
     )
 
