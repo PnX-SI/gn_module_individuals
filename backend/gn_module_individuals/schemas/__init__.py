@@ -5,7 +5,7 @@ from .devices import (
     TrackingDevicesDetailSchema,
 )
 from .deployments import DeploymentSummarySchema
-from .individuals import IndividualsDeploymentsSchema
+from .individuals import IndividualsDeploymentsSchema, IndividualsDeploymentsWriteSchema
 
 # __all__ = [
 #     "DeploymentSummarySchema",

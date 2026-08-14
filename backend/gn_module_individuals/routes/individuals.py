@@ -22,6 +22,7 @@ from ..models.individuals import (
     individual_last_observation_observers_expression,
 )
 from ..schemas.individuals import (
+    IndividualsDeploymentsWriteSchema,
     IndividualsDetailSchema,
     IndividualsListSchema,
     IndividualsMapSchema,
@@ -327,6 +328,83 @@ def create_individual(scope):
     return schema.dump(individual), 201
 
 
+def _sync_deployments(individual, deployments_data, scope):
+    """Creates, updates and deletes the individual's deployments to match a list
+    of deployments in the payload.
+
+    An item with an ``id_deployment`` updates the deployment
+    An item without an id creates a new deployment attached to the individual
+    Any existing deployment of the individual not in the payload is deleted.
+    """
+    if not isinstance(deployments_data, list):
+        raise APIError(ApiErrorCode.VALIDATION_ERROR, "deployments must be a list", 400)
+
+    deployment_schema = IndividualsDeploymentsWriteSchema(unknown=EXCLUDE)
+    kept_deployments = []
+
+    for index, deployment_data in enumerate(deployments_data):
+        if not isinstance(deployment_data, dict):
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"deployments[{index}] must be an object",
+                400,
+            )
+
+        id_deployment = deployment_data.get("id_deployment")
+        deployment = None
+        if id_deployment is not None:
+            deployment = db.session.get(IndividualDeployments, id_deployment)
+            if deployment is None or deployment.id_individual != individual.id_individual:
+                raise APIError(
+                    ApiErrorCode.NOT_FOUND,
+                    f"Deployment {id_deployment} was not found for this individual.",
+                    404,
+                    params={"id": id_deployment},
+                )
+            if not deployment.has_instance_permission(scope):
+                raise APIError(
+                    ApiErrorCode.INSUFFICIENT_PERMISSIONS,
+                    f"You do not have permission to update deployment {id_deployment}.",
+                    403,
+                )
+
+        try:
+            if deployment is not None:
+                deployment = deployment_schema.load(deployment_data, instance=deployment)
+            else:
+                deployment = deployment_schema.load(deployment_data)
+        except ValidationError as e:
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"Validation failed for deployments[{index}]: {json.dumps(e.messages)}",
+                400,
+            )
+
+        deployment.id_individual = individual.id_individual
+        deployment.id_digitiser = g.current_user.id_role
+
+        if id_deployment is None:
+            db.session.add(deployment)
+
+        kept_deployments.append(deployment)
+
+    existing_deployments = db.session.scalars(
+        select(IndividualDeployments).where(
+            IndividualDeployments.id_individual == individual.id_individual
+        )
+    ).all()
+    for deployment in existing_deployments:
+        if deployment in kept_deployments:
+            continue
+        if not deployment.has_instance_permission(scope):
+            raise APIError(
+                ApiErrorCode.INSUFFICIENT_PERMISSIONS,
+                f"You do not have permission to delete deployment {deployment.id_deployment}.",
+                403,
+            )
+        db.session.delete(deployment)
+
+
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["PUT"])
 @login_required
 @permissions.check_cruved_scope(
@@ -335,11 +413,15 @@ def create_individual(scope):
 @json_resp
 def update_individual(id_individual, scope):
     """
-    Update one individual
+    Update one individual, optionally updating or inserting its deployments
 
     .. :quickref: Individuals;
 
-    Expects a JSON body matching ``IndividualsWriteSchema``.
+    Expects a JSON body matching ``IndividualsWriteSchema``. May include a
+    ``deployments`` list to create/update deployments in the same request:
+    an item with an ``id_deployment`` updates the matching existing
+    deployment, an item without one creates a new deployment attached to
+    this individual. See :func:`_upsert_deployments`.
 
     :param id_individual: the id_individual
     :type id_individual: int
@@ -382,6 +464,10 @@ def update_individual(id_individual, scope):
         )
 
     individual.id_digitiser = g.current_user.id_role
+
+    deployments_data = data.get("deployments")
+    if deployments_data is not None:
+        _sync_deployments(individual, deployments_data, scope)
 
     db.session.commit()
 
