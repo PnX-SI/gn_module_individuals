@@ -35,7 +35,6 @@ def device_with_deployment(device, individual):
     dep = IndividualDeployments(
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
-        id_capture=1,
         id_nomenclature_deployment_type=get_id_nomenclature(
             nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
         ),
@@ -48,6 +47,11 @@ def device_with_deployment(device, individual):
         db.session.add(dep)
         db.session.flush()
     return device
+
+
+@pytest.fixture
+def individual_with_deployment(individual, deployment):
+    return individual
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -76,6 +80,7 @@ def ensure_individuals_module(app, users):
     # Créer les objets métier du module s'ils n'existent pas encore
     with db.session.begin_nested():
         for code, description in [
+            ("INDIVIDUALS", "Gestion des individus, déploiements et captures"),
             ("DEVICES", "Gestion des individus"),
             ("SAMPLES", "Gestion des échantillons dans Individus"),
         ]:

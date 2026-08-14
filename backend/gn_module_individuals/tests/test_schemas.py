@@ -104,7 +104,7 @@ class TestIndividualsDeploymentsSchema:
             IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(None)
 
     def test_validate_nomenclature_deployment_type_accepts_valid_id(self, app):
-        valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
+        valid_id = get_id_nomenclature("TYPE_MARQUAGE", "1")
         result = IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(valid_id)
         assert result == valid_id
 
@@ -119,7 +119,7 @@ class TestIndividualsDeploymentsSchema:
             IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(None)
 
     def test_validate_nomenclature_deployment_location_accepts_valid_id(self, app):
-        valid_id = db.session.scalar(db.select(TNomenclatures.id_nomenclature).limit(1))
+        valid_id = get_id_nomenclature("LOC_MARQUAGE", "1")
         result = IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(valid_id)
         assert result == valid_id
 
@@ -210,6 +210,26 @@ class TestIndividualsDeploymentsSchema:
         g.current_user = users["self_user"]
         assert devices[0].has_instance_permission(scope=1) is False
 
+    def test_deployment_has_instance_permission_scope_0_always_false(self, app, deployment):
+        assert deployment.has_instance_permission(scope=0) is False
+
+    def test_deployment_has_instance_permission_scope_3_always_true(self, app, deployment):
+        assert deployment.has_instance_permission(scope=3) is True
+
+    def test_deployment_has_instance_permission_scope_1_own_deployment(
+        self, app, users, deployment_by_self
+    ):
+        # deployment_by_self is digitised by self_user → access granted
+        g.current_user = users["self_user"]
+        assert deployment_by_self.has_instance_permission(scope=1) is True
+
+    def test_deployment_has_instance_permission_scope_1_other_deployment(
+        self, app, users, deployment
+    ):
+        # deployment is digitised by admin_user → self_user denied access
+        g.current_user = users["self_user"]
+        assert deployment.has_instance_permission(scope=1) is False
+
 
 # ===========================================================================
 # IndividualsMapSchema
@@ -289,7 +309,6 @@ class TestIndividualsListSchema:
     def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",
@@ -311,7 +330,6 @@ class TestIndividualsListSchema:
         dep = IndividualDeployments(
             id_tracking_device=devices[0].id_tracking_device,
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "4"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "3"),
             install_date=datetime(2024, 1, 1),
@@ -335,7 +353,6 @@ class TestIndividualsListSchema:
     def test_get_deployed_markings_returns_active_physical_markings(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",
@@ -353,7 +370,6 @@ class TestIndividualsListSchema:
     def test_get_deployed_markings_excludes_removed_marking(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_capture=1,
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
             marking_code="Vert",

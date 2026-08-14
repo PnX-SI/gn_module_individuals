@@ -49,6 +49,7 @@
             }
         },
         "Deployments": {
+            "Label": "Deploiement",
             "Fields": {
                 "id_deployment" : "ID du déploiement",
                 "id_tracking_device" : "ID du dispositif de suivi",
@@ -64,6 +65,19 @@
                 "individual_name" : "Nom de l'individu",
                 "digitiser_name" : "Rédacteur",
                 "name_digitiser" : "Rédacteur"
+            },
+            "Titles": {
+                "Delete": "Suppression du déploiement n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "Le deploiment a été créé.",
+                "Edited" : "Le deploiment n°{{ id }} a été modifié.",
+                "Deleted" : "Le deploiment n°{{ id }} a été supprimé."
+            },
+            "Errors": {
+                "AddedNOK" : "Ce deploiment n'a pas pu être créé. Erreur : {{ error }}",
+                "EditedNOK" : "Le deploiment n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+                "DeletedNOK" : "Le deploiment n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             }
         },
         "Individuals": {
@@ -107,7 +121,7 @@
                 "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
                 "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
                 "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            }      
+            }
         },
         "Messages": {
             "EmptyList" : "Aucune donnée à afficher",

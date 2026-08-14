@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
 import { combineLatest } from 'rxjs';
 
@@ -15,6 +16,7 @@ import { Individual } from '../../models/individuals.models';
 import { FormConstraint } from '../../models/common.models';
 import { INDIVIDUALS_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { IndividualsService } from '../../services/individuals.service';
+import { DeployementsService } from '../../services/deployments.service';
 
 @Component({
   selector: 'gn-individuals-individuals-form',
@@ -35,12 +37,14 @@ export class IndividualsFormComponent implements OnInit {
     private _route: ActivatedRoute,
     private _config: ConfigService,
     private _commonService: CommonService,
+    private dateParser: NgbDateParserFormatter,
     private _fb: FormBuilder,
     private _service: IndividualsService,
     private _location: Location,
     private _errorHandler: ErrorHandlerService,
     private _dfs: DataFormService,
-    public moduleService: ModuleService
+    public moduleService: ModuleService,
+    public _deployementsService: DeployementsService
   ) {}
 
   ngOnInit(): void {
@@ -64,6 +68,7 @@ export class IndividualsFormComponent implements OnInit {
           Validators.pattern(this.formConstraints.comment.pattern),
         ],
       ],
+      deployments: this._fb.array<FormGroup>([]),
       additional_data: this._fb.group({}),
     });
 
@@ -83,6 +88,11 @@ export class IndividualsFormComponent implements OnInit {
         this.additionalFields.forEach((field) => {
           field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
         });
+        individual.deployments.forEach((deployment) => {
+          const deploymentForm = this._deployementsService.generateDeploymentForm();
+          deploymentForm.patchValue(deployment);
+          (this.form.get('deployments') as FormArray).push(deploymentForm);
+        });
       } else {
         this.formAction = 'ADD';
       }
@@ -100,7 +110,9 @@ export class IndividualsFormComponent implements OnInit {
   }
 
   onSave(): void {
-    const individual = this.form.getRawValue();
+    let individual = this.form.getRawValue();
+    individual = this.formToJson(individual);
+
     this._service
       .createOrUpdateIndividual(individual, this.formAction, this.individualId)
       .subscribe({
@@ -121,5 +133,36 @@ export class IndividualsFormComponent implements OnInit {
           );
         },
       });
+  }
+
+  formToJson(individual: any): any {
+    // Traitement des deployments
+    individual.deployments.forEach((deployment: any) => {
+      this._deployementsService.formToJson(deployment);
+    });
+
+    /* Champs additionnels - formatter les dates et les nomenclatures */
+    this.additionalFields.forEach((fieldForm: any) => {
+      if (fieldForm.type_widget == 'date') {
+        individual.additional_data[fieldForm.attribut_name] = this.dateParser.format(
+          individual.additional_data[fieldForm.attribut_name]
+        );
+      }
+    });
+    return individual;
+  }
+
+  dataToForm(individual: any): any {
+    return individual;
+  }
+
+  supprimerDeployment(index: number) {
+    (this.form.get('deployments') as FormArray).removeAt(index);
+  }
+
+  addDeployment() {
+    (this.form.get('deployments') as FormArray).push(
+      this._deployementsService.generateDeploymentForm()
+    );
   }
 }

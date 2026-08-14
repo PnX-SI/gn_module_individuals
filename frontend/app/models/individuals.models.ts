@@ -24,6 +24,7 @@ export const INDIVIDUAL_MODEL = {
   deployed_markings: '',
   deployed_devices: '',
   additional_data: {},
+  deployments: [],
 };
 
 export type Individual = typeof INDIVIDUAL_MODEL & { cruved: Cruved };
@@ -53,6 +54,7 @@ export interface CreateIndividualDto {
   id_nomenclature_sex: number;
   active: false;
   comment: string;
+  deployments: [];
   additional_data: {};
 }
 

@@ -11,10 +11,11 @@ from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.schemas import UserSchema
 from geonature.core.gn_monitoring.models import TIndividuals
+from geonature.core.gn_commons.models import TAdditionalFields
 
 from .. import MODULE_CODE
 from ..models import TrackingDevices, IndividualDeployments
-from .utils import get_label
+from .utils import get_label, is_nomenclature_of_type
 from ..utils.errors import APIError, ApiErrorCode
 
 
@@ -202,6 +203,16 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     # id_digitiser is NOT NULL on the model but always set by the route from the
     # current user, so it must not be required at load time.
     id_digitiser = fields.Integer(dump_only=True)
+    deployments = fields.Method("get_deployments", dump_only=True)
+
+    # Serialization
+
+    def get_deployments(self, obj):
+        deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
+        # individual_name is redundant here: we are already on that individual's page.
+        return IndividualsDeploymentsSchema(many=True, exclude=("individual_name",)).dump(
+            deployments
+        )
 
     # Validators
 
@@ -230,13 +241,40 @@ class IndividualsWriteSchema(IndividualsBaseSchema):
     def validate_id_nomenclature_sex(self, value, **kwargs):
         if value is None:
             return value
-        exists = db.session.execute(
+        nomenclature = db.session.execute(
             db.select(TNomenclatures).filter_by(id_nomenclature=value)
         ).scalar_one_or_none()
-        if exists is None:
+        if nomenclature is None:
             raise APIError(
                 ApiErrorCode.VALIDATION_ERROR,
                 f"The #{value} nomenclature is not found in configured nomenclatures",
+                400,
+            )
+        if not is_nomenclature_of_type(nomenclature, "SEXE"):
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"The #{value} nomenclature is not of the expected type (SEXE)",
+                400,
+            )
+        return value
+
+    @validates("additional_data")
+    def validate_additional_data(self, value, **kwargs):
+        if not value:
+            return value
+        authorized_fields = set(
+            db.session.execute(
+                db.select(TAdditionalFields.field_name).where(
+                    TAdditionalFields.modules.any(module_code=MODULE_CODE)
+                )
+            ).scalars()
+        )
+        unknown_fields = set(value) - authorized_fields
+        if unknown_fields:
+            raise APIError(
+                ApiErrorCode.VALIDATION_ERROR,
+                f"The additional_data field(s) {', '.join(sorted(unknown_fields))} "
+                "are not authorized for this module.",
                 400,
             )
         return value
@@ -287,15 +325,25 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     @validates("id_nomenclature_deployment_type")
     def validate_nomenclature_deployment_type(self, value, **kwargs):
-        if db.session.get(TNomenclatures, value) is None:
+        nomenclature = db.session.get(TNomenclatures, value)
+        if nomenclature is None:
             raise ValidationError(f"La nomenclature {value} (type de déploiement) n'existe pas.")
+        if not is_nomenclature_of_type(nomenclature, "TYPE_MARQUAGE"):
+            raise ValidationError(
+                f"La nomenclature {value} n'est pas du type attendu (TYPE_MARQUAGE)."
+            )
         return value
 
     @validates("id_nomenclature_deployment_location")
     def validate_nomenclature_deployment_location(self, value, **kwargs):
-        if db.session.get(TNomenclatures, value) is None:
+        nomenclature = db.session.get(TNomenclatures, value)
+        if nomenclature is None:
             raise ValidationError(
                 f"La nomenclature {value} (localisation du déploiement) n'existe pas."
+            )
+        if not is_nomenclature_of_type(nomenclature, "LOC_MARQUAGE"):
+            raise ValidationError(
+                f"La nomenclature {value} n'est pas du type attendu (LOC_MARQUAGE)."
             )
         return value
 
@@ -321,10 +369,7 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     def get_tracking_device(self, obj):
         if obj.tracking_device:
-            return (
-                f"{obj.tracking_device.provider_name}"
-                f" - {obj.tracking_device.provider_device_id}"
-            )
+            return obj.tracking_device.device_label
         return None
 
     def get_digitiser(self, obj):
@@ -337,3 +382,15 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
 
     def get_deployment_location_name(self, obj):
         return get_label(obj.nomenclature_deployment_location)
+
+
+class IndividualsDeploymentsWriteSchema(IndividualsDeploymentsSchema):
+    """Used to create/update a deployment under an individual's PUT"""
+
+    __module_code__ = MODULE_CODE
+
+    id_individual = fields.Integer(dump_only=True)
+    id_digitiser = fields.Integer(dump_only=True)
+    # Loadable here: the base schema marks them dump_only for read use.
+    install_date = fields.DateTime(format="%Y-%m-%d")
+    removal_date = fields.DateTime(format="%Y-%m-%d", allow_none=True, required=False)

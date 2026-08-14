@@ -1,10 +1,9 @@
 <ng-template #formTemplate>
-  <div class="col-6 padding-sm">
+  <div class="padding-sm">
     <!-- individual_name -->
     <gn-individuals-input-text
       *ngIf="'individual_name' as field"
       [label]="'Individuals.Individuals.Fields.individual_name' | translate"
-      [containerClass]="'w-50'"
       [parentFormControl]="form.get('individual_name')"
       [maxLength]="formConstraints['individual_name'].maxLength"
       [errorKey]="'Individuals.Errors.' + [formConstraints['individual_name'].help] | translate"
@@ -13,7 +12,7 @@
 
     <!-- cd_nom : taxon -->
     <pnx-taxonomy
-      [ngClass]="'form-group w-50'"
+      [ngClass]="'form-group'"
       [label]="'Individuals.Individuals.Filters.cd_nom' | translate"
       [parentFormControl]="$any(form.get('cd_nom'))"
       [idList]="taxonListId"
@@ -22,7 +21,7 @@
 
     <!-- id_nomenclature_sex -->
     <pnx-nomenclature
-      class="form-group w-50"
+      class="form-group"
       [label]="'Individuals.Individuals.Fields.nomenclature_sex_name' | translate"
       [parentFormControl]="$any(form.get('id_nomenclature_sex'))"
       [codeNomenclatureType]="'SEXE'"
@@ -56,6 +55,38 @@
       [myFormGroup]="form.get('additional_data')"
       [formsDefinition]="additionalFields"
     ></pnx-dynamic-form-generator>
+
+    <!-- deployment data -->
+    <h3>deployment</h3>
+    <div>
+      <div
+        *ngFor="let deployment of form.get('deployments').controls; index as i"
+        class="shadow p-3 mb-5 bg-white rounded"
+      >
+        <gn-individuals-deployment-form
+          [deploymentsForm]="deployment"
+        ></gn-individuals-deployment-form>
+
+        <button
+          type="button"
+          mat-raised-button
+          color="warn"
+          class="uppercase"
+          (click)="supprimerDeployment(i)"
+        >
+          {{ 'Actions.Delete' | translate }}
+        </button>
+      </div>
+    </div>
+    <button
+      type="button"
+      mat-raised-button
+      color="primary"
+      class="uppercase"
+      (click)="addDeployment()"
+    >
+      {{ 'Actions.Add' | translate }}
+    </button>
   </div>
 </ng-template>
 
