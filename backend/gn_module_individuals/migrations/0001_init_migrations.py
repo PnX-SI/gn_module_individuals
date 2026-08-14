@@ -113,7 +113,19 @@ def downgrade():
     op.execute(sa.text("""
             DELETE FROM gn_permissions.t_objects
             WHERE code_object IN ('DEVICES', 'SAMPLES')
-            """))
+            """
+        )
+    )
+
+    conn.execute(
+        sa.text(
+            """
+                DELETE FROM gn_permissions.cor_object_module com
+                WHERE com.id_module = :module_id
+            """
+        ),
+        {"module_id": module_id},
+    )
 
     conn.execute(
         sa.text(
