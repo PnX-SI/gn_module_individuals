@@ -10,7 +10,7 @@ from pypnnomenclature.utils import NomenclaturesMixin
 
 
 class TrackingDevices(NomenclaturesMixin, DB.Model):
-    __tablename__ = "bib_tracking_devices"
+    __tablename__ = "t_tracking_devices"
     __table_args__ = {"schema": "gn_individual"}
 
     id_tracking_device = DB.Column(

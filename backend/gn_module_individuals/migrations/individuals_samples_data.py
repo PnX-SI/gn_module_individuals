@@ -23,7 +23,7 @@ depends_on = ("individuals",)
 def upgrade():
     conn = op.get_bind()
     op.execute(sa.text("""
-            INSERT INTO gn_individual.bib_tracking_devices (
+            INSERT INTO gn_individual.t_tracking_devices (
     id_nomenclature_device_type,
     provider_name,
     provider_device_id,
@@ -99,7 +99,7 @@ JOIN ref_nomenclatures.t_nomenclatures n
             ),
             devices AS (
                 SELECT id_tracking_device, provider_device_id
-                FROM gn_individual.bib_tracking_devices
+                FROM gn_individual.t_tracking_devices
             ),
             n_type AS (
                 SELECT n.id_nomenclature
@@ -630,8 +630,8 @@ BEGIN
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.tables
-               WHERE table_schema = 'gn_individual' AND table_name = 'bib_tracking_devices') THEN
-        DELETE FROM gn_individual.bib_tracking_devices;
+               WHERE table_schema = 'gn_individual' AND table_name = 't_tracking_devices') THEN
+        DELETE FROM gn_individual.t_tracking_devices;
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.tables

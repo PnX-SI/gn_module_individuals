@@ -23,28 +23,28 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
     id_individual = DB.Column(
         "id_individual",
         DB.Integer,
-        DB.ForeignKey("gn_monitoring.t_individuals.id_individual"),
+        DB.ForeignKey(TIndividuals.id_individual),
         nullable=False,
     )
 
     id_nomenclature_deployment_type = DB.Column(
         "id_nomenclature_deployment_type",
         DB.Integer,
-        DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
+        DB.ForeignKey(TNomenclatures.id_nomenclature),
         nullable=False,
     )
 
     id_nomenclature_deployment_location = DB.Column(
         "id_nomenclature_deployment_location",
         DB.Integer,
-        DB.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
+        DB.ForeignKey(TNomenclatures.id_nomenclature),
         nullable=False,
     )
 
     id_tracking_device = DB.Column(
         "id_tracking_device",
         DB.Integer,
-        DB.ForeignKey("gn_individual.bib_tracking_devices.id_tracking_device"),
+        DB.ForeignKey(TrackingDevices.id_tracking_device),
         nullable=True,
     )
 
@@ -75,7 +75,7 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
     id_digitiser = DB.Column(
         "id_digitiser",
         DB.Integer,
-        DB.ForeignKey("utilisateurs.t_roles.id_role"),
+        DB.ForeignKey(User.id_role),
         nullable=True,
     )
 

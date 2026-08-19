@@ -21,7 +21,7 @@ SCHEMA_NAME = "gn_individual"
 
 def upgrade():
     op.create_table(
-        "bib_tracking_devices",
+        "t_tracking_devices",
         sa.Column(
             "id_tracking_device",
             sa.Integer(),
@@ -103,7 +103,7 @@ def upgrade():
         sa.Column(
             "id_tracking_device",
             sa.Integer(),
-            sa.ForeignKey("gn_individual.bib_tracking_devices.id_tracking_device"),
+            sa.ForeignKey("gn_individual.t_tracking_devices.id_tracking_device"),
             nullable=True,
         ),
         sa.Column(
@@ -160,8 +160,8 @@ def upgrade():
     """)
 
     op.execute(f"""
-        CREATE TRIGGER tr_meta_dates_bib_tracking_devices
-        BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.bib_tracking_devices
+        CREATE TRIGGER tr_meta_dates_t_tracking_devices
+        BEFORE INSERT OR UPDATE ON {SCHEMA_NAME}.t_tracking_devices
         FOR EACH ROW
         EXECUTE FUNCTION {SCHEMA_NAME}.set_meta_dates();
     """)
@@ -174,8 +174,8 @@ def upgrade():
     """)
 
     op.execute(f"""
-        ALTER TABLE ONLY {SCHEMA_NAME}.bib_tracking_devices
-        ADD CONSTRAINT check_bib_tracking_devices_device_type
+        ALTER TABLE ONLY {SCHEMA_NAME}.t_tracking_devices
+        ADD CONSTRAINT check_t_tracking_devices_device_type
         CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_device_type, 'TYPE_DISPO_SUIVI'::character varying)) NOT VALID;
     """)
 
@@ -194,11 +194,11 @@ def upgrade():
 
 def downgrade():
     op.execute(
-        f"DROP TRIGGER IF EXISTS tr_meta_dates_bib_tracking_devices ON {SCHEMA_NAME}.bib_tracking_devices;"
+        f"DROP TRIGGER IF EXISTS tr_meta_dates_t_tracking_devices ON {SCHEMA_NAME}.t_tracking_devices;"
     )
     op.execute(
         f"DROP TRIGGER IF EXISTS tr_meta_dates_individual_deployments ON {SCHEMA_NAME}.t_individual_deployments;"
     )
     op.execute(f"DROP FUNCTION IF EXISTS {SCHEMA_NAME}.set_meta_dates();")
     op.drop_table("t_individual_deployments", schema=SCHEMA_NAME, if_exists=True)
-    op.drop_table("bib_tracking_devices", schema=SCHEMA_NAME, if_exists=True)
+    op.drop_table("t_tracking_devices", schema=SCHEMA_NAME, if_exists=True)
