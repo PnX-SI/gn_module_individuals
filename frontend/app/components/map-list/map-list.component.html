@@ -23,7 +23,6 @@
 
   <div id="list-container">
     <gn-individuals-list
-      [objectName]="objectName"
       [idFieldName]="idFieldName"
       [displayedColumnsParams]="displayedColumnsParams"
       [availableColumnsParams]="availableColumnsParams"
@@ -39,6 +38,9 @@
       (pagination)="onPage($event)"
       (sort)="onSort($event)"
       (select)="onTableSelect($event)"
+      (info)="onInfo($event)"
+      (add)="onAdd()"
+      (edit)="onEdit($event)"
       (delete)="onDelete($event)"
     ></gn-individuals-list>
   </div>

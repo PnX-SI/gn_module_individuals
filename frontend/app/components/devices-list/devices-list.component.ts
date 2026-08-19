@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
@@ -53,6 +53,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     private _devicesService: DevicesService,
     private _commonService: CommonService,
     private _activatedRoute: ActivatedRoute,
+    private _router: Router,
     private _ngbModal: NgbModal,
     private _errorHandler: ErrorHandlerService,
     private _translate: TranslateService
@@ -91,6 +92,35 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     this.sorts = $event.sorts;
 
     this._loadData();
+  }
+
+  /**
+   * Perform the add action
+   *
+   * @memberof DevicesListComponent
+   */
+  onAdd(): void {
+    this._router.navigate(['form'], { relativeTo: this._activatedRoute });
+  }
+
+  /**
+   * Perform the info action for the given row
+   *
+   * @param {*} $event
+   * @memberof DevicesListComponent
+   */
+  onInfo($event: any): void {
+    this._router.navigate(['info', $event.id_tracking_device], { relativeTo: this._activatedRoute });
+  }
+
+  /**
+   * Perform the edit action for the given row
+   *
+   * @param {*} $event
+   * @memberof DevicesListComponent
+   */
+  onEdit($event: any): void {
+    this._router.navigate(['form', $event.id_tracking_device], { relativeTo: this._activatedRoute });
   }
 
   /**

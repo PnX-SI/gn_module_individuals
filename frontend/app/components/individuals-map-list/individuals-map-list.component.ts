@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
@@ -64,6 +64,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     private _individualsService: IndividualsService,
     private _commonService: CommonService,
     private _activatedRoute: ActivatedRoute,
+    private _router: Router,
     private _ngbModal: NgbModal,
     private _errorHandler: ErrorHandlerService,
     private _translate: TranslateService
@@ -87,7 +88,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._destroy$.complete();
   }
 
-  public onPage($event: any): void {
+  onPage($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: Number($event.limit),
@@ -97,7 +98,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._loadData();
   }
 
-  public onSort($event: any): void {
+  onSort($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: this.nbRowsToDisplay,
@@ -115,11 +116,40 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @param {string} $event Current bbox
    * @memberof IndividualsMapListComponent
    */
-  public onBbox($event: string): void {
+  onBbox($event: string): void {
     // this._APIFiltersParams = {
     //   bbox: $event
     // }
     this._loadData();
+  }
+
+  /**
+   * Perform the add action
+   *
+   * @memberof DevicesListComponent
+   */
+  onAdd(): void {
+    this._router.navigate(['form'], { relativeTo: this._activatedRoute });
+  }
+
+  /**
+   * Perform the info action for the given row
+   *
+   * @param {*} $event
+   * @memberof DevicesListComponent
+   */
+  onInfo($event: any): void {
+    this._router.navigate(['info', $event.id_individual], { relativeTo: this._activatedRoute });
+  }
+
+  /**
+   * Perform the edit action for the given row
+   *
+   * @param {*} $event
+   * @memberof DevicesListComponent
+   */
+  onEdit($event: any): void {
+    this._router.navigate(['form', $event.id_individual], { relativeTo: this._activatedRoute });
   }
 
   /**
@@ -245,7 +275,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       data.items.forEach((item: Individual) => {
         // Delete access
         let deleteAccess: AccessResult = { id: item.id_individual, access: true };
-        console.log(item.id_individual, ' ', item.cruved);
+
         deleteAccess.access = item.cruved?.D ?? false;
         deleteAccess.message = deleteAccess.access
           ? null

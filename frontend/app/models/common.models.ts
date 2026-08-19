@@ -18,14 +18,23 @@ export interface APIPaginationParams extends Partial<Sort> {
   per_page: number;
 }
 
-export interface PaginatedItemCollection<T> extends APIPaginationParams {
+export interface ItemCollection<T> {
   items: T[];
+}
+
+export interface PaginatedItemCollection<T> extends APIPaginationParams, ItemCollection<T> {
   total: number;
   pages: number;
   prev_num: number | null;
   next_num: number | null;
   has_next: boolean;
   has_prev: boolean;
+}
+
+export interface DatatableColumnLink {
+  column_name: string;
+  link_prefix: string;
+  id_field_name: string;
 }
 
 export interface ApiError {

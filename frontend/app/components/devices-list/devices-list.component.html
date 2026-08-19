@@ -42,7 +42,6 @@
 </ng-template>
 
 <gn-individuals-list
-  [objectName]="'devices'"
   [idFieldName]="'id_tracking_device'"
   [displayedColumnsParams]="displayedColumnsParams"
   [availableColumnsParams]="availableColumnsParams"
@@ -56,5 +55,8 @@
   [filtersTemplate]="filtersTemplate"
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
+  (add)="onAdd()"
+  (info)="onInfo($event)"
+  (edit)="onEdit($event)"
   (delete)="openDeleteModal($event)"
 ></gn-individuals-list>

@@ -33,16 +33,16 @@ import { calcContentHeight } from '../../utils/functions.util';
   standalone: false,
 })
 export class MapListComponent implements OnInit, AfterViewInit {
-  // public userCruved: any;
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
-  // public currentTabCode: string;
-  // public apiEndPoint: string;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
+  @Output() add: EventEmitter<any> = new EventEmitter();
+  @Output() info: EventEmitter<any> = new EventEmitter();
+  @Output() edit: EventEmitter<any> = new EventEmitter();
   @Output() delete: EventEmitter<any> = new EventEmitter();
   @Output() idPage: EventEmitter<number> = new EventEmitter();
   @Output() bbox: EventEmitter<string> = new EventEmitter();
-  @Input() objectName!: string;
+
   @Input() idFieldName!: string;
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
@@ -122,6 +122,18 @@ export class MapListComponent implements OnInit, AfterViewInit {
 
   onSort($event: any): void {
     this.sort.emit($event);
+  }
+
+  onAdd(): void {
+    this.add.emit();
+  }
+
+  onInfo($event: any): void {
+    this.info.emit($event);
+  }
+
+  onEdit($event: any): void {
+    this.edit.emit($event);
   }
 
   onDelete($event: any): void {

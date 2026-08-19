@@ -15,7 +15,7 @@ import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { CONTENT_CONFIG, DATATABLE_CONFIG } from '../../utils/constants.util';
-import { Column, PaginatedItemCollection, AccessResult } from '../../models/common.models';
+import { Column, PaginatedItemCollection, ItemCollection, DatatableColumnLink, AccessResult } from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-list',
@@ -28,15 +28,25 @@ export class ListComponent implements OnInit {
   // ViewChild : To be visible dynamicaly in the parent component linked with the #dataTable reference in the child template
   @ViewChild('dataTable') dataTable: DatatableComponent | undefined;
   @Output() pagination: EventEmitter<any> = new EventEmitter();
+  @Output() add: EventEmitter<any> = new EventEmitter();
+  @Output() edit: EventEmitter<any> = new EventEmitter();
+  @Output() info: EventEmitter<any> = new EventEmitter()
   @Output() sort: EventEmitter<any> = new EventEmitter();
   @Output() rows: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<any> = new EventEmitter();
   @Output() delete: EventEmitter<any> = new EventEmitter();
-  @Input() objectName: string = '';
+
+  /**
+   * Field name used to identify the row in the table used to edit or delete it
+   *
+   * @type {string}
+   * @memberof ListComponent
+   */
   @Input() idFieldName: string = '';
+
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
-  @Input() dataTable$: Observable<PaginatedItemCollection<unknown>> = of();
+  @Input() dataTable$: Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>> = new Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>>();
   @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
   @Input() fieldsTranslation: string = '';
   @Input() sorts: Array<Object> = [];
@@ -45,6 +55,16 @@ export class ListComponent implements OnInit {
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
   @Input() selectedRows: unknown[] = [];
+  @Input() datatableColumnsLink: DatatableColumnLink[] = [];
+  @Input() usePagination: boolean = true;
+  @Input() displayAddButton: boolean = true;
+  @Input() displayFilterButton: boolean = true;
+  @Input() displayExportButton: boolean = true;
+  @Input() displaySummaryButtons: boolean = true;
+  @Input() displayInfoButtons: boolean = true;
+  @Input() displayEditButtons: boolean = true;
+  @Input() displayDeleteButtons: boolean = true;
+  @Input() displaySortButtons: boolean = true;
 
   public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
@@ -135,6 +155,35 @@ export class ListComponent implements OnInit {
   }
 
   /**
+   * Emit an add event
+   *
+   * @memberof ListComponent
+   */
+  onAdd(): void {
+    this.add.emit();
+  }
+
+  /**
+   * Emit an edit event
+   *
+   * @param {*} $event Current row.
+   * @memberof ListComponent
+   */
+  onEdit($event: any): void {
+    this.edit.emit($event);
+  }
+
+  /**
+   * Emit an info event
+   *
+   * @param {*} $event Current row.
+   * @memberof ListComponent
+   */
+  onInfo($event: any): void {
+    this.info.emit($event);
+  }
+
+  /**
    * Emit a delete event
    *
    * @param {*} $event Current row.
@@ -165,4 +214,19 @@ export class ListComponent implements OnInit {
   toggleShowFilters(): void {
     this.showFilters = !this.showFilters;
   }
+
+
+  /**
+   * Return the line of datatableColumnsLink corresponding to the column 
+   * name if it exists, otherwise return undefined
+   *
+   * @param {string} columnName
+   * @return {*}  {(DatatableColumnLink | undefined)}
+   * @memberof ListComponent
+   */
+  getColumnLink(columnName: string): DatatableColumnLink | undefined {
+  return this.datatableColumnsLink.find(
+    link => link.column_name === columnName
+  );
+}
 }

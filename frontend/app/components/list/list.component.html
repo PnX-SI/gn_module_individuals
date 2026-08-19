@@ -1,36 +1,29 @@
-<div [ngStyle]="{ 'min-height.px': contentHeight }">
-  <div class="action-buttons">
-    <!-- <ng-container *ngIf="userCruved?.C != '0'"> -->
-    <button
-      id="add"
-      mat-mini-fab
-      [matTooltip]="'Individuals.Actions.Add' | translate"
-      class="custom-mini-fab mr-1 bg-primary text-white border-0"
-      [disabled]="false"
-      [routerLink]="['/' + moduleName + '/' + objectName + '/form']"
-    >
-      <mat-icon>add</mat-icon>
-    </button>
-    <button
-      id="filter"
-      mat-mini-fab
-      [matTooltip]="'Individuals.Actions.Filter' | translate"
-      class="custom-mini-fab mr-1 bg-info text-white border-0"
-      [disabled]="false"
-      (click)="toggleShowFilters()"
-    >
-      <mat-icon>tune</mat-icon>
-    </button>
-    <button
-      id="download"
-      mat-mini-fab
-      [matTooltip]="'Individuals.Actions.Download' | translate"
-      class="custom-mini-fab mr-1 bg-secondary text-white border-0"
-      [disabled]="true"
-    >
-      <mat-icon>download</mat-icon>
-    </button>
-    <!-- </ng-container> -->
+<!-- <div [ngStyle]="{ 'min-height.px': contentHeight }"> -->
+<div>
+  <div class="top-action-buttons" *ngIf="displayFilterButton || displayExportButton">
+    <ng-container *ngIf="displayFilterButton">
+      <button
+        id="filter"
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Filter' | translate"
+        class="custom-mini-fab mr-1 bg-info text-white border-0"
+        (click)="toggleShowFilters()"
+        [disabled]="false"
+      >
+        <mat-icon>filter_alt</mat-icon>
+      </button>
+    </ng-container>
+    <ng-container *ngIf="displayExportButton">
+      <button
+        id="download"
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Download' | translate"
+        class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+        [disabled]="false"
+      >
+        <mat-icon>download</mat-icon>
+      </button>
+    </ng-container>
   </div>
   <div
     *ngIf="showFilters"
@@ -48,11 +41,11 @@
     [rowHeight]="rowHeight"
     [headerHeight]="rowHeight + 10"
     [footerHeight]="rowHeight + 10"
-    [externalPaging]="true"
+    [externalPaging]="usePagination"
     [messages]="tableMessages"
-    [count]="dataTable.total"
-    [limit]="nbRowsToDisplay"
-    [offset]="dataTable.page - 1"
+    [count]="usePagination ? $any(dataTable).total : dataTable.items.length"
+    [limit]="usePagination ? nbRowsToDisplay : undefined"
+    [offset]="$any(dataTable).page ?? 0"
     [rows]="dataTable.items"
     [sorts]="sorts"
     [selectionType]="selectionType.single"
@@ -61,7 +54,8 @@
     (sort)="onSort($event)"
     (select)="onSelect($event)"
   >
-    <ngx-datatable-row-detail [rowHeight]="$any('auto')">
+
+    <ngx-datatable-row-detail [rowHeight]="$any('auto')" *ngIf="displaySummaryButtons">
       <ng-template
         ngx-datatable-row-detail-template
         let-row="row"
@@ -70,7 +64,7 @@
         <ng-container *ngTemplateOutlet="summaryTemplate; context: { row: row }"></ng-container>
       </ng-template>
     </ngx-datatable-row-detail>
-    <ngx-datatable-column
+    <ngx-datatable-column *ngIf="displaySummaryButtons"
       id="summary"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -92,7 +86,7 @@
         ></button>
       </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column
+    <ngx-datatable-column *ngIf="displayInfoButtons"
       id="informations"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -107,12 +101,12 @@
         <button
           class="btn btn-row fa fa-info-circle"
           matTooltip="{{ 'Individuals.Actions.Informations' | translate }}"
-          [routerLink]="['info', row[idFieldName]]"
+          (click)="onInfo(row)"
           [disabled]="false"
         ></button>
       </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column
+    <ngx-datatable-column *ngIf="displayEditButtons"
       id="edit"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -131,13 +125,13 @@
         >
           <button
             class="btn btn-row fa fa-pencil-square-o"
-            [routerLink]="['form', row[idFieldName]]"
+            (click)="onEdit(row)"
             [disabled]="!allowedToEdit[row[idFieldName]]?.access"
           ></button>
         </span>
       </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column
+    <ngx-datatable-column *ngIf="displayDeleteButtons"
       id="delete"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -167,24 +161,52 @@
       *ngFor="let column of displayedColumns"
       [name]="column.name"
       [prop]="column.prop"
+      [sortable]="displaySortButtons"
     >
       <ng-template
         ngx-datatable-cell-template
         let-row="row"
         maxWidth="columnMaxWidth"
       >
-        <span>
-          {{
-            row[column.prop] === null || row[column.prop] === undefined
-              ? '-'
-              : row[column.prop] === false
-                ? ('Individuals.Others.No' | translate)
-                : row[column.prop] === true
-                  ? ('Individuals.Others.Yes' | translate)
-                  : row[column.prop]
-          }}
+        <span *ngIf="getColumnLink(column.prop) as columnLink; else withoutLink">
+          <a [routerLink]="[columnLink.link_prefix, row[columnLink.id_field_name]]">
+            {{
+              row[column.prop] === null || row[column.prop] === undefined
+                ? '-'
+                : row[column.prop] === false
+                  ? ('Individuals.Others.No' | translate)
+                  : row[column.prop] === true
+                    ? ('Individuals.Others.Yes' | translate)
+                    : row[column.prop]
+            }}
+          </a>
         </span>
+        <ng-template #withoutLink>
+          <span>
+            {{
+              row[column.prop] === null || row[column.prop] === undefined
+                ? '-'
+                : row[column.prop] === false
+                  ? ('Individuals.Others.No' | translate)
+                  : row[column.prop] === true
+                    ? ('Individuals.Others.Yes' | translate)
+                    : row[column.prop]
+            }}
+          </span>
+        </ng-template>    
       </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
+  <div class="bottom-action-buttons" *ngIf="displayAddButton">
+    <button
+      id="add"
+      mat-mini-fab
+      [matTooltip]="'Individuals.Actions.Add' | translate"
+      class="custom-mini-fab mr-1 bg-primary text-white border-0"
+      (click)="onAdd()"
+      [disabled]="false"
+    >
+      <mat-icon>add</mat-icon>
+    </button>
+  </div>
 </div>

@@ -13,8 +13,8 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Individual } from '../../models/individuals.models';
-import { Deployment } from '../../models/deployments.models';
-import { Column, AccessResult } from '../../models/common.models';
+import { DEPLOYMENT_MODEL, Deployment } from '../../models/deployments.models';
+import { Column, AccessResult, ItemCollection, DatatableColumnLink } from '../../models/common.models';
 import { IndividualsService } from '../../services/individuals.service';
 import { DeployementsService } from '../../services/deployments.service';
 import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.component';
@@ -28,15 +28,27 @@ import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.c
 })
 export class IndividualsInfoComponent implements OnInit {
   public dataTable$: Observable<Individual> = new Observable<Individual>();
+  public dataTable_deployments$: Observable<ItemCollection<Deployment>> = new Observable<ItemCollection<Deployment>>();
+  public dataTable: Individual = {} as Individual;
+  public availableColumnsParams = DEPLOYMENT_MODEL;
+  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
   public deploymentsColumns: Column<Deployment>[] = [];
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public allowedToDelete!: AccessResult;
   public allowedToEdit!: AccessResult;
+  public allowedToChangeDeployments: Record<number, AccessResult> = {};
   public defaultLang!: string;
   private _individualId!: number;
   public additionalFields: Array<any> = [];
-
+  public datatableColumnsLink: DatatableColumnLink[] = [
+    { 
+      column_name: "tracking_device_info",
+      link_prefix: "/individuals/devices/info",
+      id_field_name: "id_tracking_device" 
+    }
+  ]
   public modal: NgbModalRef;
+
   constructor(
     private _config: ConfigService,
     private _commonService: CommonService,
@@ -76,6 +88,18 @@ export class IndividualsInfoComponent implements OnInit {
 
       const datatable = individualData?.datatable;
       this.dataTable$ = of(datatable);
+
+      const deployments_datatable = {
+        items: Object.values(datatable?.deployments ?? {}),
+        total: Object.values(datatable?.deployments ?? {}).length,
+      };
+      console.log(deployments_datatable);
+
+      this.dataTable_deployments$ = of({
+        items: Object.values(datatable?.deployments ?? {}),
+        total: Object.values(datatable?.deployments ?? {}).length,
+      });
+
       this._individualId = datatable.id_individual;
 
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
@@ -93,12 +117,14 @@ export class IndividualsInfoComponent implements OnInit {
       const datatable = individualData;
       this.dataTable$ = of(datatable);
 
+
       // If they're deployments to display, create the columns table for ngx-datatable with translated fields
       if (datatable?.deployments?.length == 0) {
         datatable.deployments = [];
       }
     });
   }
+
   onDelete(): void {
     this._service.deleteIndividual(this._individualId).subscribe({
       next: (res) => {
@@ -127,6 +153,7 @@ export class IndividualsInfoComponent implements OnInit {
   private _setPermissions(datatable: Individual) {
     this.allowedToEdit = { id: datatable.id_individual, access: true };
     this.allowedToDelete = { id: datatable.id_individual, access: true };
+    this.allowedToChangeDeployments = {};
 
     this.allowedToDelete.access = datatable.cruved?.D;
     this.allowedToDelete.message = this.allowedToDelete.access
@@ -151,14 +178,34 @@ export class IndividualsInfoComponent implements OnInit {
       }
     }
 
-    // Edit Access
+    // Edit Access 
     this.allowedToEdit.access = datatable.cruved?.U ?? false;
     this.allowedToEdit.message = this.allowedToEdit.access
       ? null
       : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+
+    datatable.deployments?.forEach((deployment: Deployment) => {
+      // Edit and delete deployment have the same access rights of the individual 
+      this.allowedToChangeDeployments[deployment.id_deployment] = {
+      ...this.allowedToEdit,
+      id: deployment.id_deployment,
+    };
+  });
+  
   }
 
-  openModal(deployment) {
+  // openModal(deployment) {
+  //   this.modal = this.modalService.open(DeploymentModalComponent, {
+  //     centered: true,
+  //     size: 'lg',
+  //   });
+  //   this.modal.componentInstance.deployment = deployment;
+  //   this.modal.componentInstance.onSave.subscribe((deployment) =>
+  //     this.afterSaveDeployment(deployment)
+  //   );
+  // }
+
+  addOrEditDeployment(deployment) {
     this.modal = this.modalService.open(DeploymentModalComponent, {
       centered: true,
       size: 'lg',

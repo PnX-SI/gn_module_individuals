@@ -1,8 +1,16 @@
 @use '../../styles/buttons' as *;
 @use '../../styles/datatable.scss' as *;
 
-.action-buttons {
+.top-action-buttons {
+  display: flex;
+  justify-content: flex-start;
   margin-bottom: 10px;
+}
+
+.bottom-action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 
 // button box-shadow -> cancel this box shadow that appear on focus

@@ -90,7 +90,6 @@
 </ng-template>
 
 <gn-individuals-map-list
-  [objectName]="'individuals'"
   [idFieldName]="'id_individual'"
   [displayedColumnsParams]="displayedColumnsParams"
   [availableColumnsParams]="availableColumnsParams"
@@ -108,6 +107,9 @@
   [noGeometryMessage]="'Individuals.Individuals.Messages.NoGeometry' | translate"
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
+  (add)="onAdd()"
+  (info)="onInfo($event)"
+  (edit)="onEdit($event)"
   (delete)="openDeleteModal($event)"
   (idPage)="onIdPage($event)"
   (bbox)="onBbox($event)"
