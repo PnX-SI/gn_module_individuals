@@ -2,7 +2,6 @@
   <div class="padding-sm">
     <!-- individual_name -->
     <gn-individuals-input-text
-      *ngIf="'individual_name' as field"
       [label]="'Individuals.Individuals.Fields.individual_name' | translate"
       [parentFormControl]="form.get('individual_name')"
       [maxLength]="formConstraints['individual_name'].maxLength"
@@ -95,7 +94,7 @@
   [formTitle]="'Individuals.Individuals.Titles.Add' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
-  [objectName]="'devices'"
+  [objectName]="'individuals'"
   [canSave]="form.valid"
   (save)="onSave()"
 ></gn-individuals-form>

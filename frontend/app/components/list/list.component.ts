@@ -14,7 +14,8 @@ import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 
 import { ModuleService } from '@geonature/services/module.service';
 
-import { CONTENT_CONFIG, DATATABLE_CONFIG } from '../../utils/constants.util';
+import { DATATABLE_CONFIG } from '../../utils/constants.util';
+import { calcContentHeight } from '../../utils/functions.util';
 import { Column, PaginatedItemCollection, ItemCollection, DatatableColumnLink, AccessResult } from '../../models/common.models';
 
 @Component({
@@ -65,8 +66,8 @@ export class ListComponent implements OnInit {
   @Input() displayEditButtons: boolean = true;
   @Input() displayDeleteButtons: boolean = true;
   @Input() displaySortButtons: boolean = true;
+  @Input() contentHeight: number | null = calcContentHeight();
 
-  public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public actionColumnsWidth: number = DATATABLE_CONFIG.ACTION_COLUMNS_WIDTH;
   public columnMaxWidth: number = DATATABLE_CONFIG.COLUMN_MAX_WIDTH;

@@ -10,7 +10,6 @@ import {
 } from '@angular/core';
 
 import { ConfigService } from '@geonature/services/config.service';
-import { ModuleService } from '@geonature/services/module.service';
 
 @Component({
   selector: 'gn-individuals-form',
@@ -22,16 +21,14 @@ import { ModuleService } from '@geonature/services/module.service';
 })
 export class FormComponent implements OnInit, AfterViewInit {
   @Output() save: EventEmitter<any> = new EventEmitter();
+  @Output() cancel: EventEmitter<any> = new EventEmitter();
   @Input() formTemplate!: TemplateRef<any>;
   @Input() formTitle: string = '';
   @Input() formAction: string = '';
   @Input() canSave: boolean = false;
-  @Input() objectName: string = '';
-  public moduleName: string = this._moduleService.currentModule.module_url;
 
   constructor(
     public config: ConfigService,
-    private _moduleService: ModuleService
   ) {}
 
   ngOnInit(): void {}

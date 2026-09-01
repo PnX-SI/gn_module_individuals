@@ -16,7 +16,7 @@ import { Individual } from '../../models/individuals.models';
 import { FormConstraint } from '../../models/common.models';
 import { INDIVIDUALS_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { IndividualsService } from '../../services/individuals.service';
-import { DeployementsService } from '../../services/deployments.service';
+import { DeploymentsService } from '../../services/deployments.service';
 
 @Component({
   selector: 'gn-individuals-individuals-form',
@@ -44,7 +44,7 @@ export class IndividualsFormComponent implements OnInit {
     private _errorHandler: ErrorHandlerService,
     private _dfs: DataFormService,
     public moduleService: ModuleService,
-    public _deployementsService: DeployementsService
+    public _deploymentsService: DeploymentsService
   ) {}
 
   ngOnInit(): void {
@@ -89,7 +89,7 @@ export class IndividualsFormComponent implements OnInit {
           field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
         });
         individual.deployments.forEach((deployment) => {
-          const deploymentForm = this._deployementsService.generateDeploymentForm();
+          const deploymentForm = this._deploymentsService.generateDeploymentForm();
           deploymentForm.patchValue(deployment);
           (this.form.get('deployments') as FormArray).push(deploymentForm);
         });
@@ -138,7 +138,7 @@ export class IndividualsFormComponent implements OnInit {
   formToJson(individual: any): any {
     // Traitement des deployments
     individual.deployments.forEach((deployment: any) => {
-      this._deployementsService.formToJson(deployment);
+      this._deploymentsService.formToJson(deployment);
     });
 
     /* Champs additionnels - formatter les dates et les nomenclatures */
@@ -162,7 +162,7 @@ export class IndividualsFormComponent implements OnInit {
 
   addDeployment() {
     (this.form.get('deployments') as FormArray).push(
-      this._deployementsService.generateDeploymentForm()
+      this._deploymentsService.generateDeploymentForm()
     );
   }
 }

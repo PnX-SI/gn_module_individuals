@@ -1,6 +1,18 @@
-<!-- <div [ngStyle]="{ 'min-height.px': contentHeight }"> -->
-<div>
-  <div class="top-action-buttons" *ngIf="displayFilterButton || displayExportButton">
+<div [ngStyle]="contentHeight ? { 'min-height.px': contentHeight } : {}">
+<!-- <div> -->
+  <div class="action-buttons" *ngIf="displayAddButton || displayFilterButton || displayExportButton">
+    <ng-container *ngIf="displayAddButton">
+      <button
+        id="add"
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Add' | translate"
+        class="custom-mini-fab mr-1 bg-primary text-white border-0"
+        (click)="onAdd()"
+        [disabled]="false"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </ng-container>
     <ng-container *ngIf="displayFilterButton">
       <button
         id="filter"
@@ -197,16 +209,4 @@
       </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>
-  <div class="bottom-action-buttons" *ngIf="displayAddButton">
-    <button
-      id="add"
-      mat-mini-fab
-      [matTooltip]="'Individuals.Actions.Add' | translate"
-      class="custom-mini-fab mr-1 bg-primary text-white border-0"
-      (click)="onAdd()"
-      [disabled]="false"
-    >
-      <mat-icon>add</mat-icon>
-    </button>
-  </div>
 </div>

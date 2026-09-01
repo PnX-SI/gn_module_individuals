@@ -1,23 +1,25 @@
 import { ViewEncapsulation, Component, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of, forkJoin, combineLatest } from 'rxjs';
+import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
+import { takeUntil, tap, filter } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
-import { ModuleService } from '@geonature/services/module.service';
-import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Individual } from '../../models/individuals.models';
 import { DEPLOYMENT_MODEL, Deployment } from '../../models/deployments.models';
-import { Column, AccessResult, ItemCollection, DatatableColumnLink } from '../../models/common.models';
+import { AccessResult, ItemCollection, DatatableColumnLink } from '../../models/common.models';
+import { ModalComponent } from '../modal/modal.component'
 import { IndividualsService } from '../../services/individuals.service';
-import { DeployementsService } from '../../services/deployments.service';
+import { DeploymentsService } from '../../services/deployments.service';
+import { DeploymentsFormComponent } from '../deployments-form/deployments-form.component';
 import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.component';
+;
 @Component({
   selector: 'gn-individuals-individuals-info',
   templateUrl: 'individuals-info.component.html',
@@ -28,17 +30,21 @@ import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.c
 })
 export class IndividualsInfoComponent implements OnInit {
   public dataTable$: Observable<Individual> = new Observable<Individual>();
-  public dataTable_deployments$: Observable<ItemCollection<Deployment>> = new Observable<ItemCollection<Deployment>>();
-  public dataTable: Individual = {} as Individual;
-  public availableColumnsParams = DEPLOYMENT_MODEL;
-  public displayedColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
-  public deploymentsColumns: Column<Deployment>[] = [];
+  // public dataTable_deployments$: Observable<ItemCollection<Deployment>> = new Observable<ItemCollection<Deployment>>();
+  private _dataTable_deployments$ = new BehaviorSubject<ItemCollection<Deployment> | null>(null);
+  public dataTable_deployments$: Observable<ItemCollection<Deployment>> = this._dataTable_deployments$.pipe(
+    filter((data): data is ItemCollection<Deployment> => data !== null)
+  );
+  // public dataTable: Individual = {} as Individual;
+  public availableDeploymentsColumnsParams = DEPLOYMENT_MODEL;
+  public displayedDeploymentsColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
   public allowedToDelete!: AccessResult;
   public allowedToEdit!: AccessResult;
   public allowedToChangeDeployments: Record<number, AccessResult> = {};
   public defaultLang!: string;
   private _individualId!: number;
+  private _destroy$ = new Subject<void>();
   public additionalFields: Array<any> = [];
   public datatableColumnsLink: DatatableColumnLink[] = [
     { 
@@ -47,7 +53,6 @@ export class IndividualsInfoComponent implements OnInit {
       id_field_name: "id_tracking_device" 
     }
   ]
-  public modal: NgbModalRef;
 
   constructor(
     private _config: ConfigService,
@@ -56,72 +61,70 @@ export class IndividualsInfoComponent implements OnInit {
     private _translate: TranslateService,
     private _service: IndividualsService,
     private _location: Location,
-    private _dfs: DataFormService,
-    public moduleService: ModuleService,
-    private modalService: NgbModal,
+    private _modalService: NgbModal,
     private _individualsService: IndividualsService,
-    private _deploymentsService: DeployementsService
+    private _deploymentsService: DeploymentsService
   ) {}
 
   ngOnInit(): void {
-    const props = this._config.INDIVIDUALS.INDIVIDUALS
-      .DEPLOYMENT_LIST_COLUMNS as (keyof Deployment)[];
-
-    forkJoin(
-      props.map((prop) => this._translate.get(`Individuals.Deployments.Fields.${prop}`))
-    ).subscribe((translations) => {
-      this.deploymentsColumns = props.map((prop, name) => ({
-        prop: prop,
-        name: translations[name],
-      }));
-    });
-
-    // First initialisation of the table with the resolver data, to display something while waiting
-    // for translations to load and avoid having an empty table at the beginning
-    combineLatest([
-      this._dfs.getadditionalFields({
-        module_code: [this.moduleService.currentModule.module_code],
-      }),
-      this._route.data,
-    ]).subscribe(([additionalFields, individualData]) => {
-      this.additionalFields = additionalFields;
-
-      const datatable = individualData?.datatable;
+    // Resolver : First initialisation of the datatable and additional fields
+    this._route.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, additionnalFields }) => {
       this.dataTable$ = of(datatable);
+      this.additionalFields = additionnalFields ?? [];
 
-      const deployments_datatable = {
-        items: Object.values(datatable?.deployments ?? {}),
-        total: Object.values(datatable?.deployments ?? {}).length,
-      };
-      console.log(deployments_datatable);
-
-      this.dataTable_deployments$ = of({
-        items: Object.values(datatable?.deployments ?? {}),
-        total: Object.values(datatable?.deployments ?? {}).length,
+      // If they're deployments to display, create and ItemCollection for 
+      // the ListComponent
+      this._dataTable_deployments$.next({
+        items: Object.values(datatable?.deployments ?? {})
       });
 
       this._individualId = datatable.id_individual;
-
-      // If they're deployments to display, create the columns table for ngx-datatable with translated fields
-      if (datatable.deployments?.length == 0) {
-        datatable.deployments = [];
-      }
-
       this._setPermissions(datatable);
     });
     this.defaultLang = this._config['DEFAULT_LANGUAGE'];
   }
 
-  initData(): void {
-    this._individualsService.getIndividual(this._individualId).subscribe((individualData) => {
-      const datatable = individualData;
-      this.dataTable$ = of(datatable);
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
 
+  // addOrEditDeployment(deployment: Deployment | null) {
+  //   const modalRef = this._modalService.open(DeploymentModalComponent, {
+  //     centered: true,
+  //     size: 'lg',
+  //   });
+  //   modalRef.componentInstance.deployment = deployment;
+  //   modalRef.componentInstance.onSave.subscribe((deployment) =>
+  //     this._loadData()
+  //   );
+  // }
 
-      // If they're deployments to display, create the columns table for ngx-datatable with translated fields
-      if (datatable?.deployments?.length == 0) {
-        datatable.deployments = [];
-      }
+  addOrEditDeployment(deployment: Deployment | { id_individual: number }) {
+    const modalRef = this._modalService.open(ModalComponent);
+    modalRef.componentInstance.bodyComponent = DeploymentsFormComponent;
+    modalRef.componentInstance.bodyComponentData = deployment;
+    modalRef.componentInstance.validateButtonType = null;
+    modalRef.result.then(() => {
+      this._loadData();
+    });
+  }
+
+  deleteDeployment(id_deployment: number) {
+    this._deploymentsService.deleteDeployment(id_deployment).subscribe({
+      next: () => {
+        this._commonService.translateToaster('info', 'Individuals.Deployments.Messages.Deleted', {
+          id: id_deployment,
+        });
+        this._loadData();
+      },
+      error: (err) => {
+        const msg = err.name + ':' + err.message || JSON.stringify(err);
+        this._commonService.translateToaster('error', 'Individuals.Deployments.Errors.DeletedNOK', {
+          id: id_deployment,
+          error: msg,
+        });
+      },
     });
   }
 
@@ -141,6 +144,20 @@ export class IndividualsInfoComponent implements OnInit {
         });
       },
     });
+  }
+
+  private _loadData(): void {
+    this._individualsService
+      .getIndividual(this._individualId)
+      .pipe(
+        tap((data) => this._setPermissions(data)),
+        takeUntil(this._destroy$)
+      )
+      .subscribe((data) => this._dataTable_deployments$.next(
+        data.deployments ? 
+          { items: Object.values(data.deployments) } : 
+          { items: [] }
+      ));
   }
 
   /**
@@ -185,56 +202,12 @@ export class IndividualsInfoComponent implements OnInit {
       : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
 
     datatable.deployments?.forEach((deployment: Deployment) => {
-      // Edit and delete deployment have the same access rights of the individual 
+      // Edit and delete deployment actions have the same access rights
+      // of the individual 
       this.allowedToChangeDeployments[deployment.id_deployment] = {
-      ...this.allowedToEdit,
-      id: deployment.id_deployment,
-    };
-  });
-  
-  }
-
-  // openModal(deployment) {
-  //   this.modal = this.modalService.open(DeploymentModalComponent, {
-  //     centered: true,
-  //     size: 'lg',
-  //   });
-  //   this.modal.componentInstance.deployment = deployment;
-  //   this.modal.componentInstance.onSave.subscribe((deployment) =>
-  //     this.afterSaveDeployment(deployment)
-  //   );
-  // }
-
-  addOrEditDeployment(deployment) {
-    this.modal = this.modalService.open(DeploymentModalComponent, {
-      centered: true,
-      size: 'lg',
-    });
-    this.modal.componentInstance.deployment = deployment;
-    this.modal.componentInstance.onSave.subscribe((deployment) =>
-      this.afterSaveDeployment(deployment)
-    );
-  }
-
-  afterSaveDeployment(deployment) {
-    this.initData();
-  }
-
-  deleteDeployment(id_deployment: number) {
-    this._deploymentsService.deleteDeployment(id_deployment).subscribe({
-      next: () => {
-        this._commonService.translateToaster('info', 'Individuals.Deployments.Messages.Deleted', {
-          id: id_deployment,
-        });
-        this.initData();
-      },
-      error: (err) => {
-        const msg = err.name + ':' + err.message || JSON.stringify(err);
-        this._commonService.translateToaster('error', 'Individuals.Deployments.Errors.DeletedNOK', {
-          id: id_deployment,
-          error: msg,
-        });
-      },
+        ...this.allowedToEdit,
+        id: deployment.id_deployment,
+      };
     });
   }
 }

@@ -1,23 +1,24 @@
 import { Component, Output, EventEmitter, Input, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { DeployementsService } from '../../services/deployments.service';
+import { DeploymentsService } from '../../services/deployments.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { CommonService } from '@geonature_common/service/common.service';
 import { ErrorHandlerService } from '../../services/errors-handler.service';
 
 @Component({
-  selector: 'pnx-individuals-deployment-modal',
+  selector: 'gn-individuals-deployment-modal',
   templateUrl: './deployment-modal.component.html',
+  standalone: false,
 })
 export class DeploymentModalComponent implements OnInit {
   @Input() deployment;
   @Output() onSave = new EventEmitter();
   public form!: FormGroup;
-
+  
   constructor(
     public _activeModal: NgbActiveModal,
-    private _deploymentsService: DeployementsService,
+    private _deploymentsService: DeploymentsService,
     private _commonService: CommonService,
     private _errorHandler: ErrorHandlerService,
     private _fb: FormBuilder

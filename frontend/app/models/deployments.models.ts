@@ -33,7 +33,6 @@ export interface CreateDeploymentDto {
   install_date: string;
   removal_date: string;
   comment: string;
-  id_digitiser: number;
 }
 
 // This model is only used to PUT data to the API (dto = data transfer object)

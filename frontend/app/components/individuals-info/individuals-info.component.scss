@@ -1,1 +1,6 @@
 @use '../../styles/datatable.scss' as *;
+
+.modal-body .card.card-custom { 
+    margin-right: 0px; 
+    margin-left: 0px;
+}

@@ -34,25 +34,14 @@
     >
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.deployments' | translate }}</h3>
 
-      <!-- <div>
-        <button
-          id="add"
-          mat-mini-fab
-          [matTooltip]="'Individuals.Actions.Add' | translate"
-          class="custom-mini-fab mr-1 bg-primary text-white border-0"
-          (click)="openModal({ id_individual: dataTable['id_individual'] })"
-        >
-          <mat-icon>add</mat-icon>
-        </button>
-      </div> -->
-
-      <p *ngIf="dataTable['deployments']?.length > 0">
+      <p class="list-component">
         <gn-individuals-list
           [idFieldName]="'id_deployment'"
-          [displayedColumnsParams]="displayedColumnsParams"
-          [availableColumnsParams]="availableColumnsParams"
+          [displayedColumnsParams]="displayedDeploymentsColumnsParams"
+          [availableColumnsParams]="availableDeploymentsColumnsParams"
           [dataTable$]="dataTable_deployments$"
           [fieldsTranslation]="'Individuals.Deployments.Fields'"
+          [contentHeight]="null"
           [datatableColumnsLink]="datatableColumnsLink"
           [allowedToEdit]="allowedToChangeDeployments"
           [allowedToDelete]="allowedToChangeDeployments"
@@ -65,7 +54,6 @@
           (delete)="deleteDeployment($event.id_deployment)"
         ></gn-individuals-list>
       </p>
-      <p *ngIf="deploymentsColumns.length == 0">-</p>
     </div>
   </div>
   <div class="content row">

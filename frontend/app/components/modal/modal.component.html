@@ -1,0 +1,46 @@
+<div *ngIf="title" class="modal-header">
+  <h5 class="modal-title">
+    {{ title }}
+  </h5>
+</div>
+
+<div class="modal-body">
+  <ng-container *ngIf="bodyComponent; else simpleBody">
+    <ng-container *ngComponentOutlet="bodyComponent; injector: bodyInjector"></ng-container>
+  </ng-container>
+
+  <ng-template #simpleBody>
+    <div [innerHTML]="bodyHTML"></div>
+  </ng-template>
+</div>
+
+<div *ngIf="validateButtonType" class="modal-footer">
+  <button
+    type="button"
+    mat-stroked-button
+    (click)="onCancel()"
+  >
+    <mat-icon>cancel</mat-icon>
+    {{ 'Actions.Cancel' | translate }}
+  </button>
+
+  <button *ngIf="validateButtonType === 'delete'"
+    type="button"
+    mat-raised-button
+    color="warn"
+    (click)="onValidate()"
+  >
+    <mat-icon>delete</mat-icon>
+    {{ 'Actions.Delete' | translate }}
+  </button>
+
+  <button *ngIf="validateButtonType === 'save'"
+    type="button"
+    mat-raised-button
+    color="primary"
+    (click)="onValidate()"
+  >
+    <mat-icon>save</mat-icon>
+    {{ 'Actions.Save' | translate }}
+  </button>
+</div>

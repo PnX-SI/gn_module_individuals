@@ -13,6 +13,7 @@ import {
 } from '../models/devices.models';
 import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
 import { DEVICES_DEFAULT_SORT } from '../utils/constants.util';
+
 @Injectable()
 export class DevicesService {
   private _OBJECT_API: string;
@@ -67,18 +68,16 @@ export class DevicesService {
       comment: device.comment,
     };
 
-    if (formAction === 'EDIT') {
-      payload = {
-        ...payload,
-        id_tracking_device: device.id,
-      };
-    }
     if (formAction === 'ADD') {
       return this._http.post<Device>(`${this._OBJECT_API}`, payload, {
         params: params,
         headers: this._headers,
       });
     } else {
+      payload = {
+        ...payload,
+        id_tracking_device: device.id,
+      };
       return this._http.put<Device>(`${this._OBJECT_API}/${id}`, payload, {
         params: params,
         headers: this._headers,

@@ -20,13 +20,15 @@
                 "referer_name" : "Référent",
                 "digitiser_name" : "Rédacteur",
                 "last_individual_equipped_name" : "Dernier individu équipé",
-                "deployments" : "Individu(s) équipé(s)"
+                "deployments" : "Individu(s) équipé(s)",
+                "device_label" : "Dispositif de suivi"
             },
             "PlaceHolder": {
-                "provider_name": "Indiquer le nom du fournisseur",
-                "provider_device_id": "Indiquer l'identifiant du dispositif",
-                "id_referer": "Sélectionner le référent",
-                "comment": "En dire plus ..."
+                "provider_name": "Nom du fournisseur",
+                "provider_device_id": "Identifiant/n° série",
+                "id_referer": "Référent",
+                "comment": "En dire plus ...",
+                "device_label" : "Dispositif de suivi"
             },
             "Filters":{
                 "cd_nom": "Taxon"
@@ -67,6 +69,8 @@
                 "name_digitiser" : "Rédacteur"
             },
             "Titles": {
+                "Add": "Ajout d'un déploiement",
+                "Edit": "Modification du déploiement n°{{ id }}",
                 "Delete": "Suppression du déploiement n°{{ id }}"
             },
             "Messages": {
@@ -112,9 +116,9 @@
                 "Delete" : "Suppression de l'individu n°{{ id }}"
             },
             "Messages": {
-                "Added" : "Le dispositif de suivi a été créé.",
-                "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
-                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé.",
+                "Added" : "L'individu a été créé.",
+                "Edited" : "L'individu n°{{ id }} a été modifié.",
+                "Deleted" : "L'individu n°{{ id }} a été supprimé.",
                 "NoGeometry" : "Cet individu ne dispose pas encore d'observation"
             },
             "Errors": {
@@ -126,14 +130,18 @@
         "Messages": {
             "EmptyList" : "Aucune donnée à afficher",
             "TotalList" : "ligne(s) au total",
-            "NoGeometry" : "Cet élément ne dispose pas de géométrie."
+            "NoGeometry" : "Cet élément ne dispose pas de géométrie",
+            "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet",
+            "startDateNOK" : "Cette date doit être antérieure à la seconde et ne peut être dans le futur.",
+            "endDateNOK" : "Cette date doit être postérieure à la première et ne peut être dans le futur."
         },
         "Errors": {
             "Required" : "Ce champs est requis.",
             "MinLength" : "Vous devez choisir au moins une valeur.",
-            "PatternText1" : "Seulement des lettres, des chiffres, des espaces et les - ou _.",
-            "PatternText2" : "Seulement des lettres (sans accent), des chiffres et les - ou _.",
-            "PatternText3" : "Ne doit pas contenir de < ou >."
+            "PatternText1" : "Seulement des lettres, des chiffres, des espaces, des - ou _.",
+            "PatternText2" : "Seulement des lettres (sans accent), des chiffres, des - ou _.",
+            "PatternText3" : "Ne doit pas contenir de < ou >.",
+            "PatternText4" : "Seulement des lettres, des chiffres, des - ou _."
         },
         "ApiErrors": {
             "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
@@ -142,7 +150,7 @@
             "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
             "UnknownError": "Une erreur inattendue s'est produite.",
             "HasDeployment": "Cet objet ne peut pas être supprimé car un ou des déploiements lui sont associés.",
-            "HasObservation": "Cet objet e peut pas être supprimé car une ou des observations lui sont associées.",
+            "HasObservation": "Cet objet ne peut pas être supprimé car une ou des observations lui sont associées.",
             "NotFound": "L'objet n°{{ id }} est introuvable."
         },
         "DeletingPopup" : {
@@ -150,10 +158,12 @@
             "WarningDelete" : "Vous êtes sur le point de supprimer : ",
             "ConfirmDelete" : "Confirmer la suppression"
         },
-        "Form" : {
-            "PickGeom" : " Veuillez saisir une géométrie sur la carte ",
-            "firstLetters": "Saisir les premières lettres",
-            "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet"
+        "PlaceHolder": {
+            "select": "Sélectionner",
+            "writeText": "Saisissez du texte",
+            "writeNumber": "Saisissez une valeur",
+            "writeMore": "En dire plus ...",
+            "firstLetters": "Saisir les premières lettres"
         },
         "Actions" : {
             "Add" : "Ajouter",
@@ -162,7 +172,7 @@
             "Back" : "Retour",
             "Delete" : "Supprimer",
             "Summary" : "Afficher / Cacher le résumé",
-            "Informations" : "Détail complet",
+            "Informations" : "Fiche complète",
             "Edit" : "Modifier",
             "Save" : "Enregistrer",
             "Download" : "Télécharger",

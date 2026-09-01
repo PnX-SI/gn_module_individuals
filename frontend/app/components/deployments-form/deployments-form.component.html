@@ -1,0 +1,117 @@
+<ng-template #formTemplate>
+  <div class="col-12 padding-sm">
+    <!-- id_nomenclature_deployment_type -->
+    <pnx-nomenclature
+      class="form-group"
+      [label]="'Individuals.Deployments.Fields.deployment_type_name' | translate"
+      [parentFormControl]="$any(form.get('id_nomenclature_deployment_type'))"
+      [codeNomenclatureType]="'TYPE_MARQUAGE'"
+      ($currentCdNomenclature)="toogleTrakingDevice($event)"
+    ></pnx-nomenclature>
+
+    <!-- id_nomenclature_deployment_location -->
+    <pnx-nomenclature
+      class="form-group"
+      [label]="'Individuals.Deployments.Fields.deployment_location_name' | translate"
+      [parentFormControl]="$any(form.get('id_nomenclature_deployment_location'))"
+      [codeNomenclatureType]="'LOC_MARQUAGE'"
+    ></pnx-nomenclature>
+
+    <!-- id_tracking_device -->
+    <pnx-autocomplete
+      *ngIf="showDevice"
+      [apiEndPoint]="devicesApiEndPoint"
+      [queryParamSearch]="'search'"
+      [parentFormControl]="$any(form.get('id_tracking_device'))"
+      [formatter]="devicesFormatter"
+      [othersGetParams]=""
+      keyValue="device_label"
+      [label]="'Individuals.Devices.Fields.device_label' | translate"
+      [placeholder]="'Individuals.PlaceHolder.firstLetters' | translate"
+      class="'w-50'"
+    ></pnx-autocomplete>
+
+    <!-- marking_code -->
+    <gn-individuals-input-text
+      [label]="'Individuals.Deployments.Fields.marking_code' | translate"
+      [containerClass]="'w-50'"
+      [parentFormControl]="form.get('marking_code')"
+      [maxLength]="formConstraints['marking_code'].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints['marking_code'].help] | translate"
+      [placeHolder]="'Individuals.PlaceHolder.writeText' | translate"
+    ></gn-individuals-input-text>
+
+    <!-- install_date -->
+    <div class="form-group">
+      <small>{{ 'Individuals.Deployments.Fields.install_date' | translate }}</small>
+      <input
+        class="form-control form-control-sm"
+        type="date"
+        [formControl]="$any(form.get('install_date'))"
+        [class.input-placeholder]="!form.get('install_date')?.value"
+        [class.is-invalid]="
+          form.get('install_date')?.invalid ||
+          form.hasError('invalidStartDate')
+        "
+      />
+      <small
+        class="text-danger d-block d-flex justify-content-end"
+        *ngIf="form.hasError('invalidStartDate')"
+      >
+        {{ 'Individuals.Messages.startDateNOK' | translate }}
+      </small>
+    </div>
+
+    <!-- removal_date -->
+    <div class="form-group">
+      <small>{{ 'Individuals.Deployments.Fields.removal_date' | translate }}</small>
+      <input
+        class="form-control form-control-sm"
+        type="date"
+        [formControl]="$any(form.get('removal_date'))"
+        [class.placeholder]="!form.get('removal_date')?.value"
+        [class.is-invalid]="
+          form.get('removal_date')?.invalid ||
+          form.hasError('invalidEndDate')
+        "
+      />
+      <small
+        class="text-danger d-block d-flex justify-content-end"
+        *ngIf="form.hasError('invalidEndDate')"
+      >
+        {{ 'Individuals.Messages.endDateNOK' | translate }}
+      </small>
+    </div>
+
+    <!-- comment -->
+    <gn-individuals-textarea
+      [label]="'Individuals.Deployments.Fields.comment' | translate"
+      [containerClass]="'w-100'"
+      [parentFormControl]="form.get('comment')"
+      [maxLength]="formConstraints['comment'].maxLength"
+      [errorKey]="'Individuals.Errors.' + [formConstraints['comment'].help] | translate"
+      [placeHolder]="'Individuals.PlaceHolder.writeMore' | translate"
+    ></gn-individuals-textarea>
+  </div>
+</ng-template>
+
+<gn-individuals-form
+  *ngIf="formAction === 'ADD'; else editMode"
+  [formTitle]="'Individuals.Deployments.Titles.Add' | translate"
+  [formTemplate]="formTemplate"
+  [formAction]="formAction"
+  [canSave]="form.valid"
+  (save)="onSave()"
+  (cancel)="onCancel()"
+></gn-individuals-form>
+
+<ng-template #editMode>
+  <gn-individuals-form
+    [formTitle]="'Individuals.Deployments.Titles.Edit' | translate: { id: deploymentId }"
+    [formTemplate]="formTemplate"
+    [formAction]="formAction"
+    [canSave]="form.valid && form.dirty"
+    (save)="onSave()"
+    (cancel)="onCancel()"
+  ></gn-individuals-form>
+</ng-template>

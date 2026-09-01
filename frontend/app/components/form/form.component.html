@@ -10,7 +10,7 @@
         class="mr-1 bg-secondary text-white border-0"
         type="button"
         [disabled]="false"
-        [routerLink]="['/' + moduleName + '/' + objectName]"
+        (click)="cancel.emit()"
       >
         <mat-icon>close</mat-icon>
       </button>

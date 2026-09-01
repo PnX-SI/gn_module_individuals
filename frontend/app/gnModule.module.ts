@@ -19,6 +19,7 @@ import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
 import { InfoComponent } from './components/info/info.component';
 import { DeleteModalComponent } from './components/delete-modal/delete-modal.component';
+import { ModalComponent } from './components/modal/modal.component';
 import { FormComponent } from './components/form/form.component';
 import { InputTextComponent } from './components/input/input-text.component';
 import { TextareaComponent } from './components/input/textarea.component';
@@ -32,7 +33,6 @@ import { DevicesFormComponent } from './components/devices-form/devices-form.com
 import { DevicesInfoComponent } from './components/devices-info/devices-info.component';
 
 import { IndividualsService } from './services/individuals.service';
-import { DeployementsService } from './services/deployments.service';
 import {
   IndividualsMapResolver,
   IndividualsResolver,
@@ -42,7 +42,10 @@ import { IndividualsMapListComponent } from './components/individuals-map-list/i
 import { IndividualsFiltersComponent } from './components/individuals-map-list/individuals-filters.component';
 import { IndividualsInfoComponent } from './components/individuals-info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals-form/individuals-form.component';
-import { DeploymentFormComponent } from './components/deployment-form/deployment-form.component';
+
+import { DeploymentsService } from './services/deployments.service';
+import { DeploymentsFormComponent } from './components/deployments-form/deployments-form.component';
+import { DeploymentFormComponent } from './components/deployment-form-old/deployment-form.component';
 import { DeploymentModalComponent } from './components/deployment-modal/deployment-modal.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
@@ -59,6 +62,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     TextareaComponent,
     InputRadioComponent,
     DeleteModalComponent,
+    ModalComponent,
     DevicesListComponent,
     DevicesFiltersComponent,
     DevicesInfoComponent,
@@ -67,6 +71,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsFiltersComponent,
     IndividualsInfoComponent,
     IndividualsFormComponent,
+    DeploymentsFormComponent,
     DeploymentFormComponent,
     DeploymentModalComponent,
   ],
@@ -94,10 +99,10 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     DevicesResolver,
     DeviceResolver,
     IndividualsService,
-    DeployementsService,
     IndividualsResolver,
     IndividualsMapResolver,
     IndividualResolver,
+    DeploymentsService,
   ],
 })
 export class GeonatureModule {
