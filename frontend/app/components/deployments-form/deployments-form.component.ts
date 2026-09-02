@@ -1,5 +1,4 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -23,8 +22,6 @@ import { Deployment } from '../../models/deployments.models';
   standalone: false,
 })
 export class DeploymentsFormComponent implements OnInit {
-  // public availableFields!: Device;
-  public deploymentId!: number;
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEPLOYMENTS_FORM_CONSTRAINTS;
@@ -55,12 +52,11 @@ export class DeploymentsFormComponent implements OnInit {
     private _config: ConfigService,
     private _devicesService: DevicesService,
     private _deploymentsService: DeploymentsService,
-    private _location: Location,
     private _errorHandler: ErrorHandlerService,
     private _activeModal: NgbActiveModal,
     // Tells Angular to inject the value 
     // associated with the MODAL_BODY_DATA de the datatable property
-    @Inject(MODAL_BODY_DATA) private _datatable: Deployment,
+    @Inject(MODAL_BODY_DATA) public datatable: Deployment,
   ) {}
 
   ngOnInit(): void {
@@ -69,6 +65,7 @@ export class DeploymentsFormComponent implements OnInit {
     // Form initialization
     this.form = this._fb.group(
       {
+        id_deployment: [null],
         id_individual: [null],
         id_nomenclature_deployment_type: [null, Validators.required],
         id_nomenclature_deployment_location: [null, Validators.required],
@@ -96,19 +93,13 @@ export class DeploymentsFormComponent implements OnInit {
     );
 
     // Patch the form with the datatable
-    if (this._datatable && this._datatable['id_individual']) {
-      if (this._datatable['id_deployment']) {
-      this.formAction = 'EDIT';
-      this.deploymentId = this._datatable['id_deployment'];
-      } else {
-        this.formAction = 'ADD';
-      }
-      this.patchForm(this._datatable);
+    if (this.datatable && this.datatable.id_individual) {
+      this.formAction = this.datatable.id_deployment ? 'EDIT' : 'ADD';
+      this.patchForm(this.datatable);
     }
   }
 
   patchForm(deployment: any): void {
-    console.log('deployment patched', deployment);
     this.form.patchValue(deployment);
 
     // Get tracking device
@@ -140,13 +131,13 @@ export class DeploymentsFormComponent implements OnInit {
   onSave(): void {
     const deployment = this.form.getRawValue();
 
-    this._deploymentsService.createOrUpdateDeployment(deployment, this.formAction, this.deploymentId).subscribe({
+    this._deploymentsService.createOrUpdateDeployment(deployment, this.formAction).subscribe({
       next: (res) => {
         const successKey =
           this.formAction === 'ADD'
             ? 'Individuals.Deployments.Messages.Added'
             : 'Individuals.Deployments.Messages.Edited';
-        this._commonService.translateToaster('info', successKey, { id: this.deploymentId });
+        this._commonService.translateToaster('info', successKey, { id: this.datatable.id_deployment });
         this.form.markAsPristine();
         // The close method emits the value true to the modalRef.result promise in the parent component
         this._activeModal.close(true);
@@ -154,7 +145,7 @@ export class DeploymentsFormComponent implements OnInit {
       error: (err) => {
         this._errorHandler.handleHttpError(
           err,
-          { id: this.deploymentId },
+          { id: this.datatable.id_deployment },
           'Individuals.Deployments.ApiErrors'
         );
       },

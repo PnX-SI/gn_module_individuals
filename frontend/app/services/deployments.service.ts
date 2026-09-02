@@ -62,23 +62,22 @@ export class DeploymentsService {
   createOrUpdateDeployment(
     deployment: any,
     formAction: string,
-    id: number | null = null,
     params: Record<string, string> = {}
   ): Observable<Deployment> {
     params['format'] = 'json';
-console.log('deployment', deployment);
     // Map form to Dto
     let payload: CreateDeploymentDto | UpdateDeploymentDto = {
       id_individual: deployment.id_individual,
       id_tracking_device: deployment.id_tracking_device ? deployment.id_tracking_device.id_tracking_device : null,
       id_nomenclature_deployment_type: deployment.id_nomenclature_deployment_type,
       id_nomenclature_deployment_location: deployment.id_nomenclature_deployment_location,
-      marking_code: deployment.marking_code,
-      install_date: deployment.install_date,
-      removal_date: deployment.removal_date,
+      marking_code: deployment.marking_code < 0 ? null : deployment.marking_code,
+      // If we cancel the date with the calendar, it becomes an empty string and not set to null
+      install_date: deployment.install_date && deployment.install_date.length > 0 ? deployment.install_date : null,
+      removal_date: deployment.removal_date && deployment.removal_date.length > 0 ? deployment.removal_date : null,
       comment: deployment.comment,
     };
-    console.log('payload', payload);
+
     if (formAction === 'ADD') {
       return this._http.post<Deployment>(`${this._OBJECT_API}`, payload, {
         params: params,
@@ -89,8 +88,7 @@ console.log('deployment', deployment);
         ...payload,
         id_deployment: deployment.id_deployment,
       };
-      console.log('payload', payload);
-      return this._http.put<Deployment>(`${this._OBJECT_API}/${id}`, payload, {
+      return this._http.put<Deployment>(`${this._OBJECT_API}/${deployment.id_deployment}`, payload, {
         params: params,
         headers: this._headers,
       });

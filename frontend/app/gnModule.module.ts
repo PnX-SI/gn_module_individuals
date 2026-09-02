@@ -45,8 +45,6 @@ import { IndividualsFormComponent } from './components/individuals-form/individu
 
 import { DeploymentsService } from './services/deployments.service';
 import { DeploymentsFormComponent } from './components/deployments-form/deployments-form.component';
-import { DeploymentFormComponent } from './components/deployment-form-old/deployment-form.component';
-import { DeploymentModalComponent } from './components/deployment-modal/deployment-modal.component';
 
 export function createTranslateLoader(http: HttpClient, config: cs) {
   return new CustomTranslateLoader(http, config, { moduleName: 'individuals' });
@@ -72,8 +70,6 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsInfoComponent,
     IndividualsFormComponent,
     DeploymentsFormComponent,
-    DeploymentFormComponent,
-    DeploymentModalComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({

@@ -18,7 +18,6 @@ import { ModalComponent } from '../modal/modal.component'
 import { IndividualsService } from '../../services/individuals.service';
 import { DeploymentsService } from '../../services/deployments.service';
 import { DeploymentsFormComponent } from '../deployments-form/deployments-form.component';
-import { DeploymentModalComponent } from '../deployment-modal/deployment-modal.component';
 ;
 @Component({
   selector: 'gn-individuals-individuals-info',
@@ -89,17 +88,7 @@ export class IndividualsInfoComponent implements OnInit {
     this._destroy$.complete();
   }
 
-  // addOrEditDeployment(deployment: Deployment | null) {
-  //   const modalRef = this._modalService.open(DeploymentModalComponent, {
-  //     centered: true,
-  //     size: 'lg',
-  //   });
-  //   modalRef.componentInstance.deployment = deployment;
-  //   modalRef.componentInstance.onSave.subscribe((deployment) =>
-  //     this._loadData()
-  //   );
-  // }
-
+  
   addOrEditDeployment(deployment: Deployment | { id_individual: number }) {
     const modalRef = this._modalService.open(ModalComponent);
     modalRef.componentInstance.bodyComponent = DeploymentsFormComponent;

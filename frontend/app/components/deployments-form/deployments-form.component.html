@@ -107,7 +107,7 @@
 
 <ng-template #editMode>
   <gn-individuals-form
-    [formTitle]="'Individuals.Deployments.Titles.Edit' | translate: { id: deploymentId }"
+    [formTitle]="'Individuals.Deployments.Titles.Edit' | translate: { id: datatable.id_deployment }"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [canSave]="form.valid && form.dirty"
