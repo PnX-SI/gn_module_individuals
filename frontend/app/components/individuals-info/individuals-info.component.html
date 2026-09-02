@@ -1,3 +1,29 @@
+<!-- SUMMARY TEMPLATE -->
+<ng-template
+  #summaryTemplate
+  let-row="row"
+>
+  <div class="row mx-0">
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Deployments.Fields.comment' | translate }} :</strong>
+      {{ row.comment ?? '-' }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Deployments.Fields.meta_create_date' | translate }} :</strong>
+      {{ row.meta_create_date }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Deployments.Fields.meta_update_date' | translate }} :</strong>
+      {{ row.meta_update_date ?? '-' }}
+    </div>
+    <div class="col-12 col-md-6 px-0">
+      <strong>{{ 'Individuals.Devices.Fields.digitiser_name' | translate }} :</strong>
+      {{ row.digitiser_name }}
+    </div>
+  </div>
+</ng-template>
+
+<!-- INFO TEMPLATE -->
 <ng-template
   #infoTemplate
   let-dataTable="dataTable"
@@ -45,6 +71,7 @@
           [datatableColumnsLink]="datatableColumnsLink"
           [allowedToEdit]="allowedToChangeDeployments"
           [allowedToDelete]="allowedToChangeDeployments"
+          [summaryTemplate]="summaryTemplate"
           [usePagination]="false"
           [displayFilterButton]="false"
           [displayExportButton]="false"

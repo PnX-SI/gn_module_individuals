@@ -302,7 +302,7 @@ class IndividualsDeploymentsSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSch
     # only=[*[f"+{n}" for n in IndividualDeployments.__nomenclatures__]] when instantiating.
     individual_name = fields.Method("get_individual_name", dump_only=True)
     tracking_device_info = fields.Method("get_tracking_device", dump_only=True)
-    name_digitiser = fields.Method("get_digitiser", dump_only=True)
+    digitiser_name = fields.Method("get_digitiser", dump_only=True)
     deployment_type_name = fields.Method("get_deployment_type_name", dump_only=True)
     deployment_location_name = fields.Method("get_deployment_location_name", dump_only=True)
 
