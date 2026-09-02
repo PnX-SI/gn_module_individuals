@@ -21,7 +21,7 @@ class DeploymentWriteSchema(IndividualsDeploymentsSchema):
     __module_code__ = MODULE_CODE
 
     id_digitiser = fields.Integer(dump_only=True)
-    install_date = fields.DateTime(format="%Y-%m-%d")
+    install_date = fields.DateTime(format="%Y-%m-%d", allow_none=True, required=False)
     removal_date = fields.DateTime(format="%Y-%m-%d", allow_none=True, required=False)
 
 

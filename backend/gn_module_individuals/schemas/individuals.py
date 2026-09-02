@@ -1,9 +1,10 @@
-from apptax.taxonomie.models import Taxref
-from geonature.utils.env import db, ma
 from marshmallow import fields, validates, validates_schema, ValidationError
 from utils_flask_sqla.schema import SmartRelationshipsMixin
 from utils_flask_sqla_geo.schema import GeoAlchemyAutoSchema, GeoModelConverter, GeometryField
+from datetime import datetime
 
+from apptax.taxonomie.models import Taxref
+from geonature.utils.env import db, ma
 from geonature.utils.schema import CruvedSchemaMixin
 from geonature.core.gn_permissions.tools import get_scopes_by_action
 from pypnnomenclature.utils import NomenclaturesConverter
@@ -120,7 +121,7 @@ class IndividualsListSchema(IndividualsBaseSchema):
     def _active_deployments(self, obj):
         return sorted(
             (d for d in obj.deployments if d.removal_date is None),
-            key=lambda d: d.install_date,
+            key=lambda d: d.install_date or datetime.min,
             reverse=True,
         )
 
@@ -185,7 +186,7 @@ class IndividualsDetailSchema(IndividualsBaseSchema):
         return obj.last_obs_observers
 
     def get_deployments(self, obj):
-        deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
+        deployments = sorted(obj.deployments, key=lambda d: d.install_date or datetime.min, reverse=True)
         # individual_name is redundant here: we are already on that individual's page.
         return IndividualsDeploymentsSchema(many=True, exclude=("individual_name",)).dump(
             deployments

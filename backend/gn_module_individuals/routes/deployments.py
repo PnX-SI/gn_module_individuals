@@ -46,6 +46,8 @@ def create_deployment(scope):
     try:
         deployment = schema.load(data)
     except ValidationError as e:
+        print("Deployment validation error:", e.messages)
+        print("Received data:", data)
         raise APIError(
             ApiErrorCode.VALIDATION_ERROR,
             f"Validation failed: {json.dumps(e.messages)}",

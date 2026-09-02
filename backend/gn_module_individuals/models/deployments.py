@@ -57,7 +57,7 @@ class IndividualDeployments(NomenclaturesMixin, DB.Model):
     install_date = DB.Column(
         "install_date",
         DB.DateTime,
-        nullable=False,
+        nullable=True,
     )
 
     removal_date = DB.Column(

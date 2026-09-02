@@ -114,7 +114,7 @@ def upgrade():
         sa.Column(
             "install_date",
             sa.DateTime(),
-            nullable=False,
+            nullable=True,
         ),
         sa.Column(
             "removal_date",
