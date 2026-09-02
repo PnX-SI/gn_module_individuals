@@ -17,7 +17,6 @@ import { DevicesService } from '../../services/devices.service';
   standalone: false,
 })
 export class DevicesFormComponent implements OnInit {
-  public availableFields!: Device;
   public deviceId!: number;
   public formAction!: string;
   public form!: FormGroup;
@@ -35,6 +34,7 @@ export class DevicesFormComponent implements OnInit {
   ngOnInit(): void {
     // Form initialization
     this.form = this._fb.group({
+      id_tracking_device: [null],
       id_nomenclature_device_type: [null, Validators.required],
       provider_name: [
         null,
@@ -87,7 +87,7 @@ export class DevicesFormComponent implements OnInit {
   onSave(): void {
     const device = this.form.getRawValue();
 
-    this._service.createOrUpdateDevice(device, this.formAction, this.deviceId).subscribe({
+    this._service.createOrUpdateDevice(device, this.formAction).subscribe({
       next: (res) => {
         const successKey =
           this.formAction === 'ADD'

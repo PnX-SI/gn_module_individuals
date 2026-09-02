@@ -53,7 +53,6 @@
   [formTitle]="'Individuals.Devices.Titles.Add' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
-  [objectName]="'devices'"
   [canSave]="form.valid"
   (save)="onSave()"
 ></gn-individuals-form>
@@ -63,7 +62,6 @@
     [formTitle]="'Individuals.Devices.Titles.Edit' | translate: { id: deviceId }"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
-    [objectName]="'devices'"
     [canSave]="form.valid && form.dirty"
     (save)="onSave()"
   ></gn-individuals-form>

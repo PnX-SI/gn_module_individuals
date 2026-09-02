@@ -55,7 +55,6 @@ export class DevicesService {
   createOrUpdateDevice(
     device: any,
     formAction: string,
-    id: number | null = null,
     params: Record<string, string> = {}
   ): Observable<Device> {
     params['format'] = 'json';
@@ -76,9 +75,9 @@ export class DevicesService {
     } else {
       payload = {
         ...payload,
-        id_tracking_device: device.id,
+        id_tracking_device: device.id_tracking_device,
       };
-      return this._http.put<Device>(`${this._OBJECT_API}/${id}`, payload, {
+      return this._http.put<Device>(`${this._OBJECT_API}/${device.id_tracking_device}`, payload, {
         params: params,
         headers: this._headers,
       });
