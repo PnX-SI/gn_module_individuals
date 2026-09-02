@@ -126,7 +126,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   /**
    * Perform the add action
    *
-   * @memberof DevicesListComponent
+   * @memberof IndividualsMapListComponent
    */
   onAdd(): void {
     this._router.navigate(['form'], { relativeTo: this._activatedRoute });
@@ -136,7 +136,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * Perform the info action for the given row
    *
    * @param {*} $event
-   * @memberof DevicesListComponent
+   * @memberof IndividualsMapListComponent
    */
   onInfo($event: any): void {
     this._router.navigate(['info', $event.id_individual], { relativeTo: this._activatedRoute });
@@ -146,7 +146,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * Perform the edit action for the given row
    *
    * @param {*} $event
-   * @memberof DevicesListComponent
+   * @memberof IndividualsMapListComponent
    */
   onEdit($event: any): void {
     this._router.navigate(['form', $event.id_individual], { relativeTo: this._activatedRoute });

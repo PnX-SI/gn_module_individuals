@@ -76,7 +76,7 @@
           [displayFilterButton]="false"
           [displayExportButton]="false"
           [displayInfoButtons]="false"
-          (add)="addOrEditDeployment({ id_individual: dataTable['id_individual'] })"
+          (add)="addOrEditDeployment({ id_individual: dataTable.id_individual })"
           (edit)="addOrEditDeployment($event)"
           (delete)="deleteDeployment($event.id_deployment)"
         ></gn-individuals-list>

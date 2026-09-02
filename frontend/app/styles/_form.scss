@@ -15,12 +15,14 @@ $input-invalid-color: #ff0000;
 }
 
 // The input keep the size of its content, not the size of the form-group
-.form-group .form-control:not(textarea) {
+.form-group .form-control:not(textarea),.form-group .form-check, .ng-dropdown-panel {
   width: fit-content;
 }
 
+// For ng-select
 .form-group > .form-group {
     margin-bottom: 0;
+    width: fit-content;
 }
 
 .form-group > small:not(:first-of-type) {
@@ -116,6 +118,7 @@ with bootstrap components (.form-control-sm)
   flex-wrap: wrap;
   column-gap: 1.5rem;
   padding-left: calc(0.25rem + 1.5rem);
+  border: none;
   border-left: 5px solid transparent;
 }
 
@@ -124,9 +127,8 @@ with bootstrap components (.form-control-sm)
 }
 
 
-.form-group.ng-invalid.is-required .form-check,  {
+.form-group.ng-invalid.is-required .form-check {
   border-radius: 0.2rem;
-  border: $border;
   border-left: 5px solid $input-invalid-color;
 }
 

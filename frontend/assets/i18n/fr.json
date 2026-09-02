@@ -138,6 +138,8 @@
         "Errors": {
             "Required" : "Ce champs est requis.",
             "MinLength" : "Vous devez choisir au moins une valeur.",
+            "FormInvalid" : "Le formulaire est invalide. Veuillez vérifier l'ensemble des champs.",
+            "FormNotModified" : "Le formulaire n'a pas été modifié. Veuillez modifier au moins un champ.",
             "PatternText1" : "Seulement des lettres, des chiffres, des espaces, des - ou _.",
             "PatternText2" : "Seulement des lettres (sans accent), des chiffres, des - ou _.",
             "PatternText3" : "Ne doit pas contenir de < ou >.",

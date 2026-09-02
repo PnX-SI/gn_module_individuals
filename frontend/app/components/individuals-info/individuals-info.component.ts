@@ -5,10 +5,10 @@ import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
-
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { Individual } from '../../models/individuals.models';
@@ -29,12 +29,11 @@ import { DeploymentsFormComponent } from '../deployments-form/deployments-form.c
 })
 export class IndividualsInfoComponent implements OnInit {
   public dataTable$: Observable<Individual> = new Observable<Individual>();
-  // public dataTable_deployments$: Observable<ItemCollection<Deployment>> = new Observable<ItemCollection<Deployment>>();
   private _dataTable_deployments$ = new BehaviorSubject<ItemCollection<Deployment> | null>(null);
   public dataTable_deployments$: Observable<ItemCollection<Deployment>> = this._dataTable_deployments$.pipe(
     filter((data): data is ItemCollection<Deployment> => data !== null)
   );
-  // public dataTable: Individual = {} as Individual;
+
   public availableDeploymentsColumnsParams = DEPLOYMENT_MODEL;
   public displayedDeploymentsColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
   public rowHeight: number = DATATABLE_CONFIG.TABLE_ROW_HEIGHT;
@@ -67,9 +66,9 @@ export class IndividualsInfoComponent implements OnInit {
 
   ngOnInit(): void {
     // Resolver : First initialisation of the datatable and additional fields
-    this._route.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, additionnalFields }) => {
+    this._route.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, additionalFields }) => {
       this.dataTable$ = of(datatable);
-      this.additionalFields = additionnalFields ?? [];
+      this.additionalFields = additionalFields ?? [];
 
       // If they're deployments to display, create and ItemCollection for 
       // the ListComponent
@@ -88,14 +87,13 @@ export class IndividualsInfoComponent implements OnInit {
     this._destroy$.complete();
   }
 
-  
   addOrEditDeployment(deployment: Deployment | { id_individual: number }) {
     const modalRef = this._modalService.open(ModalComponent);
     modalRef.componentInstance.bodyComponent = DeploymentsFormComponent;
     modalRef.componentInstance.bodyComponentData = deployment;
     modalRef.componentInstance.validateButtonType = null;
     modalRef.result.then(() => {
-      this._loadData();
+      this._loadDeploymentData();
     });
   }
 
@@ -105,7 +103,7 @@ export class IndividualsInfoComponent implements OnInit {
         this._commonService.translateToaster('info', 'Individuals.Deployments.Messages.Deleted', {
           id: id_deployment,
         });
-        this._loadData();
+        this._loadDeploymentData();
       },
       error: (err) => {
         const msg = err.name + ':' + err.message || JSON.stringify(err);
@@ -135,7 +133,7 @@ export class IndividualsInfoComponent implements OnInit {
     });
   }
 
-  private _loadData(): void {
+  private _loadDeploymentData(): void {
     this._individualsService
       .getIndividual(this._individualId)
       .pipe(

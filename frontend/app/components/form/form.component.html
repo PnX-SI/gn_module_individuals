@@ -14,16 +14,22 @@
       >
         <mat-icon>close</mat-icon>
       </button>
-      <button
-        mat-mini-fab
-        [matTooltip]="'Individuals.Actions.Save' | translate"
-        class="mr-1 bg-success text-white border-0"
-        type="button"
-        [disabled]="!canSave"
-        (click)="save.emit()"
+      <span
+        [matTooltip]="
+          allowedToSave.message ?? ('Individuals.Actions.Save' | translate)
+        "
       >
-        <mat-icon>save</mat-icon>
-      </button>
+        <button
+          mat-mini-fab
+          [matTooltip]="'Individuals.Actions.Save' | translate"
+          class="mr-1 bg-success text-white border-0"
+          type="button"
+          [disabled]="!allowedToSave.access"
+          (click)="save.emit()"
+        >
+          <mat-icon>save</mat-icon>
+        </button>
+      </span>
     </div>
   </h2>
   <div

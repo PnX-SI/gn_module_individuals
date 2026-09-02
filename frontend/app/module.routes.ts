@@ -48,11 +48,17 @@ export const routes: Routes = [
       {
         path: 'individuals/form',
         component: IndividualsFormComponent,
+        resolve: { 
+          additionalFields: AdditionalFieldsResolver 
+        },
       },
       {
         path: 'individuals/form/:id_individual',
         component: IndividualsFormComponent,
-        resolve: { datatable: IndividualResolver },
+        resolve: { 
+          datatable: IndividualResolver,
+          additionalFields: AdditionalFieldsResolver 
+        },
       },
       {
         path: 'observations',

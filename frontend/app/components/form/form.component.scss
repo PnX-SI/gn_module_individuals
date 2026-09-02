@@ -2,3 +2,7 @@
 @use '../../styles/cards' as *;
 @use '../../styles/global' as *;
 @use '../../styles/form' as *;
+
+.card-body p.list-component {
+    margin-top: 12px;
+}

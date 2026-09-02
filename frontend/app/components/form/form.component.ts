@@ -11,6 +11,8 @@ import {
 
 import { ConfigService } from '@geonature/services/config.service';
 
+import { AccessResult } from '../../models/common.models';
+
 @Component({
   selector: 'gn-individuals-form',
   templateUrl: 'form.component.html',
@@ -25,7 +27,7 @@ export class FormComponent implements OnInit, AfterViewInit {
   @Input() formTemplate!: TemplateRef<any>;
   @Input() formTitle: string = '';
   @Input() formAction: string = '';
-  @Input() canSave: boolean = false;
+  @Input() allowedToSave: AccessResult = { id: 0, access: true };
 
   constructor(
     public config: ConfigService,

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
@@ -109,10 +109,10 @@ export class IndividualsService {
   createOrUpdateIndividual(
     individual: any,
     formAction: string,
-    id: number | null = null,
     params: Record<string, string> = {}
   ): Observable<Individual> {
     params['format'] = 'json';
+
     // Map form to Dto
     let payload: CreateIndividualDto | UpdateIndividualDto = {
       individual_name: individual.individual_name,
@@ -124,26 +124,21 @@ export class IndividualsService {
       deployments: individual.deployments,
     };
 
-    if (formAction === 'EDIT') {
-      payload = {
-        ...payload,
-        id_individual: individual.id,
-      };
-    }
-    console.log('Parameters sent to API params:', params, 'payload', payload);
-
     if (formAction === 'ADD') {
       return this._http.post<Individual>(`${this._OBJECT_API}`, payload, {
         params: params,
         headers: this._headers,
       });
     } else {
-      return this._http.put<Individual>(`${this._OBJECT_API}/${id}`, payload, {
+      payload = {
+        ...payload,
+        id_individual: individual.id_individual,
+      };
+      return this._http.put<Individual>(`${this._OBJECT_API}/${individual.id_individual}`, payload, {
         params: params,
         headers: this._headers,
       });
     }
-    // return of();
   }
 
   deleteIndividual(id: number): Observable<Individual> {

@@ -65,6 +65,7 @@ export class DeploymentsService {
     params: Record<string, string> = {}
   ): Observable<Deployment> {
     params['format'] = 'json';
+    
     // Map form to Dto
     let payload: CreateDeploymentDto | UpdateDeploymentDto = {
       id_individual: deployment.id_individual,

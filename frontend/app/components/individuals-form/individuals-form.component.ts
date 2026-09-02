@@ -1,55 +1,76 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
-import { NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Subject, BehaviorSubject, Observable } from 'rxjs';
+import { takeUntil, tap, filter } from 'rxjs/operators';
+import { TranslateService } from '@ngx-translate/core';
 
-import { combineLatest } from 'rxjs';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ModuleService } from '@geonature/services/module.service';
 import { CommonService } from '@geonature_common/service/common.service';
 import { ConfigService } from '@geonature/services/config.service';
-import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
 import { Individual } from '../../models/individuals.models';
-import { FormConstraint } from '../../models/common.models';
+import { DEPLOYMENT_MODEL, Deployment } from '../../models/deployments.models';
+import { FormConstraint, ItemCollection, DatatableColumnLink, AccessResult } from '../../models/common.models';
 import { INDIVIDUALS_FORM_CONSTRAINTS } from '../../utils/constants.util';
 import { IndividualsService } from '../../services/individuals.service';
 import { DeploymentsService } from '../../services/deployments.service';
-
+import { ModalComponent } from '../modal/modal.component'
+import { DeploymentsFormComponent } from '../deployments-form/deployments-form.component';
+;
 @Component({
   selector: 'gn-individuals-individuals-form',
   templateUrl: 'individuals-form.component.html',
   standalone: false,
 })
 export class IndividualsFormComponent implements OnInit {
-  public availableFields!: Individual;
   public individualId!: number;
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = INDIVIDUALS_FORM_CONSTRAINTS;
   public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
-
+  public datatable!: Individual;
   public additionalFields: Array<any> = [];
+  public availableDeploymentsColumnsParams = DEPLOYMENT_MODEL;
+  public displayedDeploymentsColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
+  private _dataTable_deployments$ = new BehaviorSubject<ItemCollection<Deployment> | null>(null);
+  public dataTable_deployments$: Observable<ItemCollection<Deployment>> = this._dataTable_deployments$.pipe(
+    filter((data): data is ItemCollection<Deployment> => data !== null)
+  );
+  private _destroy$ = new Subject<void>();
+  public datatableColumnsLink: DatatableColumnLink[] = [
+    { 
+      column_name: "tracking_device_info",
+      link_prefix: "/individuals/devices/info",
+      id_field_name: "id_tracking_device" 
+    }
+  ]
+  public allowedToSave!: AccessResult;
+  public allowedToChangeDeployments: Record<number, AccessResult> = {};
 
   constructor(
     private _route: ActivatedRoute,
+    private _router: Router,
+    private _translate: TranslateService,
     private _config: ConfigService,
     private _commonService: CommonService,
-    private dateParser: NgbDateParserFormatter,
     private _fb: FormBuilder,
     private _service: IndividualsService,
     private _location: Location,
     private _errorHandler: ErrorHandlerService,
-    private _dfs: DataFormService,
     public moduleService: ModuleService,
-    public _deploymentsService: DeploymentsService
+    public _deploymentsService: DeploymentsService,
+    private _modalService: NgbModal,
   ) {}
 
   ngOnInit(): void {
     // Form initialization
     this.form = this._fb.group({
+      id_individual: [null],
       individual_name: [
         null,
         [
@@ -72,30 +93,61 @@ export class IndividualsFormComponent implements OnInit {
       additional_data: this._fb.group({}),
     });
 
-    combineLatest([
-      this._dfs.getadditionalFields({
-        module_code: [this.moduleService.currentModule.module_code],
-      }),
-      this._route.data,
-    ]).subscribe(([additionalFields, individualData]) => {
+    // Resolver : First initialisation of the datatable and additional fields
+    this._route.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, additionalFields }) => {
       this.additionalFields = additionalFields;
-      const individual = individualData?.datatable;
-      if (individual?.id_individual) {
-        this.individualId = individual.id_individual;
-        this.formAction = 'EDIT';
-        this.patchForm(individual);
-        // Patch additional fields with individual data
-        this.additionalFields.forEach((field) => {
-          field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
-        });
-        individual.deployments.forEach((deployment) => {
-          const deploymentForm = this._deploymentsService.generateDeploymentForm();
-          deploymentForm.patchValue(deployment);
-          (this.form.get('deployments') as FormArray).push(deploymentForm);
-        });
-      } else {
-        this.formAction = 'ADD';
+      this.datatable = datatable;
+      this.formAction = datatable?.id_individual ? 'EDIT' : 'ADD';
+
+      if (datatable?.id_individual) {
+        this.individualId = datatable.id_individual;
+        this.patchForm(datatable);
       }
+
+      // If they're deployments to display, create and ItemCollection for 
+      // the ListComponent
+      this._dataTable_deployments$.next({
+        items: Object.values(datatable?.deployments ?? {})
+      });
+
+      this._setPermissions(datatable);
+    });
+
+    this.form.valueChanges.subscribe(() => {
+      this._setPermissions(this.datatable);
+    });
+  }
+
+  ngOnDestroy() {
+    this._destroy$.next();
+    this._destroy$.complete();
+  }
+
+  addOrEditDeployment(deployment: Deployment | { id_individual: number }) {
+    const modalRef = this._modalService.open(ModalComponent);
+    modalRef.componentInstance.bodyComponent = DeploymentsFormComponent;
+    modalRef.componentInstance.bodyComponentData = deployment;
+    modalRef.componentInstance.validateButtonType = null;
+    modalRef.result.then(() => {
+      this._loadDeploymentData();
+    });
+  }
+
+  deleteDeployment(id_deployment: number) {
+    this._deploymentsService.deleteDeployment(id_deployment).subscribe({
+      next: () => {
+        this._commonService.translateToaster('info', 'Individuals.Deployments.Messages.Deleted', {
+          id: id_deployment,
+        });
+        // this._loadData();
+      },
+      error: (err) => {
+        const msg = err.name + ':' + err.message || JSON.stringify(err);
+        this._commonService.translateToaster('error', 'Individuals.Deployments.Errors.DeletedNOK', {
+          id: id_deployment,
+          error: msg,
+        });
+      },
     });
   }
 
@@ -111,10 +163,10 @@ export class IndividualsFormComponent implements OnInit {
 
   onSave(): void {
     let individual = this.form.getRawValue();
-    individual = this.formToJson(individual);
+    // individual = this.formToJson(individual);
 
     this._service
-      .createOrUpdateIndividual(individual, this.formAction, this.individualId)
+      .createOrUpdateIndividual(individual, this.formAction)
       .subscribe({
         next: (res) => {
           const successKey =
@@ -135,34 +187,56 @@ export class IndividualsFormComponent implements OnInit {
       });
   }
 
-  formToJson(individual: any): any {
-    // Traitement des deployments
-    individual.deployments.forEach((deployment: any) => {
-      this._deploymentsService.formToJson(deployment);
+  private _loadDeploymentData(): void {
+    this._service
+      .getIndividual(this.individualId)
+      .pipe(
+        tap((data) => this._setPermissions(data)),
+        takeUntil(this._destroy$)
+      )
+      .subscribe((data) => this._dataTable_deployments$.next(
+        data.deployments ? 
+          { items: Object.values(data.deployments) } : 
+          { items: [] }
+      ));
+  }
+
+  onCancel(): void {
+    this._router.navigate(['/individuals/individuals']);
+  }
+
+  /**
+   * Set edit and delete permissions
+   *
+   * @private
+   * @param {Individual} datatable
+   * @memberof IndividualsInfoComponent
+   */
+  private _setPermissions(datatable: Individual) {
+    this.allowedToSave = { id: datatable.id_individual, access: true };
+    this.allowedToChangeDeployments = {};
+    console.log(this.form.valid, this.form.dirty, datatable.cruved?.U);
+    // Edit Access 
+    if (datatable.cruved?.U === false) {
+      this.allowedToSave.access = datatable.cruved?.U ?? false;
+      this.allowedToSave.message = this._translate.instant('Individuals.ApiErrors.InsufficientPermissions');
+    }
+    else if (!this.form.valid) {
+      this.allowedToSave.access = false;
+      this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormInvalid');
+    }
+    else if (this.formAction === 'EDIT' && !this.form.dirty) {
+      this.allowedToSave.access = false;
+      this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormNotModified');
+    }
+
+    datatable.deployments?.forEach((deployment: Deployment) => {
+      // Edit and delete deployment actions have the same access rights
+      // of the individual 
+      this.allowedToChangeDeployments[deployment.id_deployment] = {
+        ...this.allowedToSave,
+        id: deployment.id_deployment,
+      };
     });
-
-    /* Champs additionnels - formatter les dates et les nomenclatures */
-    this.additionalFields.forEach((fieldForm: any) => {
-      if (fieldForm.type_widget == 'date') {
-        individual.additional_data[fieldForm.attribut_name] = this.dateParser.format(
-          individual.additional_data[fieldForm.attribut_name]
-        );
-      }
-    });
-    return individual;
-  }
-
-  dataToForm(individual: any): any {
-    return individual;
-  }
-
-  supprimerDeployment(index: number) {
-    (this.form.get('deployments') as FormArray).removeAt(index);
-  }
-
-  addDeployment() {
-    (this.form.get('deployments') as FormArray).push(
-      this._deploymentsService.generateDeploymentForm()
-    );
   }
 }
