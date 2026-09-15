@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Location } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, BehaviorSubject, Observable } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
@@ -10,6 +9,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModuleService } from '@geonature/services/module.service';
 import { CommonService } from '@geonature_common/service/common.service';
 import { ConfigService } from '@geonature/services/config.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { ErrorHandlerService } from '../../../services/errors-handler.service';
 import { Individual } from '../../../models/individuals.models';
@@ -27,7 +27,6 @@ import { DeploymentsFormComponent } from '../../deployments-form/deployments-for
   standalone: false,
 })
 export class IndividualsFormComponent implements OnInit {
-  public individualId!: number;
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = INDIVIDUALS_FORM_CONSTRAINTS;
@@ -51,6 +50,8 @@ export class IndividualsFormComponent implements OnInit {
   public allowedToSave: AccessResult = { id: 0, access: false, message: null };
   public allowedToChangeDeployments: Record<number, AccessResult> = {};
   public allowedToAddDeployments: AccessResult = { id: 0, access: false, message: null };
+  private _currentModule!: any;
+  private _currentModuleObjectCode = 'INDIVIDUALS';
 
   constructor(
     private _route: ActivatedRoute,
@@ -60,14 +61,16 @@ export class IndividualsFormComponent implements OnInit {
     private _commonService: CommonService,
     private _fb: FormBuilder,
     private _service: IndividualsService,
-    private _location: Location,
     private _errorHandler: ErrorHandlerService,
     private _module: ModuleService,
     public _deploymentsService: DeploymentsService,
     private _modalService: NgbModal,
+    private _dataFormService: DataFormService
   ) {}
 
   ngOnInit(): void {
+    this._currentModule = this._module.currentModule;
+
     // Form initialization
     this.form = this._fb.group({
       id_individual: [null],
@@ -93,22 +96,37 @@ export class IndividualsFormComponent implements OnInit {
       additional_data: this._fb.group({}),
     });
 
-    // Resolver : First initialisation of the datatable and additional fields
-    this._route.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, additionalFields }) => {
-      this.additionalFields = additionalFields;
-      this.datatable = datatable;
-      this.formAction = datatable?.id_individual ? 'EDIT' : 'ADD';
+    // First initialisation of the datatable (resolver) and
+    // additional data
+    this._route.data
+      .pipe(takeUntil(this._destroy$))
+      .subscribe(({ datatable }) => {
+        this.datatable = datatable;
+        this.formAction = datatable?.id_individual ? 'EDIT' : 'ADD';
 
-      if (datatable?.id_individual) {
-        this.individualId = datatable.id_individual;
-        this.patchForm(datatable);
-      }
+        // If they're deployments to display, create and ItemCollection for 
+        // the ListComponent
+        this._dataTable_deployments$.next({
+          items: Object.values(datatable?.deployments ?? {})
+        });
 
-      // If they're deployments to display, create and ItemCollection for 
-      // the ListComponent
-      this._dataTable_deployments$.next({
-        items: Object.values(datatable?.deployments ?? {})
-      });
+        // Get additional data if exists
+        this._dataFormService
+          .getadditionalFields({
+            module_code: [this._currentModule.module_code],
+            object_code: [this._currentModuleObjectCode],
+            // En attente des devs pour pouvoir sélectionner le taxon
+            // cd_nom: [datatable.cd_nom]
+          })
+          .pipe(takeUntil(this._destroy$))
+          .subscribe ((additionalFields) => {
+            this.additionalFields = additionalFields;
+            if (datatable?.id_individual) {
+                this.patchForm(datatable);
+            }
+          });
+
+
     });
 
     // To be sure to wait translations before setting permissions
@@ -140,6 +158,13 @@ export class IndividualsFormComponent implements OnInit {
     this._destroy$.complete();
   }
 
+  /**
+   * Open a modal with the DeploymentsFormComponent to add or edit a deployment
+   * to the given id_individual
+   *
+   * @param {(Deployment | { id_individual: number })} deployment
+   * @memberof IndividualsFormComponent
+   */
   addOrEditDeployment(deployment: Deployment | { id_individual: number }) {
     const modalRef = this._modalService.open(ModalComponent);
     modalRef.componentInstance.bodyComponent = DeploymentsFormComponent;
@@ -155,13 +180,19 @@ export class IndividualsFormComponent implements OnInit {
       });
   }
 
+  /**
+   * Delete the deployment linked to the given id_deployment
+   *
+   * @param {number} id_deployment
+   * @memberof IndividualsFormComponent
+   */
   deleteDeployment(id_deployment: number) {
     this._deploymentsService.deleteDeployment(id_deployment).subscribe({
       next: () => {
         this._commonService.translateToaster('info', 'Individuals.Deployments.Messages.Deleted', {
           id: id_deployment,
         });
-        // this._loadData();
+        this._loadDeploymentData();
       },
       error: (err) => {
         const msg = err.name + ':' + err.message || JSON.stringify(err);
@@ -173,45 +204,68 @@ export class IndividualsFormComponent implements OnInit {
     });
   }
 
+  /**
+   * Path the form with the given individual properties
+   *
+   * @param {*} individual
+   * @memberof IndividualsFormComponent
+   */
   patchForm(individual: any): void {
     this.form.patchValue(individual);
     this.form.patchValue(
       {
-        // En attendant la correction de l'API
         cd_nom: { cd_nom: individual.cd_nom, nom_valide: individual.nom_vern },
         id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
       }
     );
+    console.log("1) patchForm: individual.additional_data",individual.additional_data)
+    console.log("2) patchForm: additionalFields",this.additionalFields)
+    this.additionalFields.forEach((field) => {
+      field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
+    });
+    console.log("3) patchForm: additionalFields",this.additionalFields)
   }
 
+  /**
+   * Save the individual after edit or add action. Called when 
+   * the save button is clicked
+   *
+   * @memberof IndividualsFormComponent
+   */
   onSave(): void {
     let individual = this.form.getRawValue();
 
     this._service
       .createOrUpdateIndividual(individual, this.formAction)
       .subscribe({
-        next: (res) => {
+        next: (result: Individual) => {
           const successKey =
             this.formAction === 'ADD'
               ? 'Individuals.Individuals.Messages.Added'
               : 'Individuals.Individuals.Messages.Edited';
-          this._commonService.translateToaster('info', successKey, { id: this.individualId });
+          this._commonService.translateToaster('info', successKey, { name: result.individual_name, id: result.id_individual });
           this.form.markAsPristine();
-          this._location.back();
+          this._router.navigate(['/individuals/individuals/info',result.id_individual])
         },
         error: (err) => {
           this._errorHandler.handleHttpError(
             err,
-            { id: this.individualId },
+            { id: this.datatable.id_individual },
             'Individuals.Individuals.ApiErrors'
           );
         },
       });
   }
 
+  /**
+   * Reload the deployments list
+   *
+   * @private
+   * @memberof IndividualsFormComponent
+   */
   private _loadDeploymentData(): void {
     this._service
-      .getIndividual(this.individualId)
+      .getIndividual(this.datatable.id_individual)
       .pipe(
         tap((data) => this._setPermissions(data)),
         takeUntil(this._destroy$)
@@ -223,12 +277,20 @@ export class IndividualsFormComponent implements OnInit {
       ));
   }
 
+  /**
+   * Cancel the add or edit action. Called when the cancel button
+   * is clicked
+   *
+   * @memberof IndividualsFormComponent
+   */
   onCancel(): void {
     this._router.navigate(['/individuals/individuals']);
   }
 
   /**
-   * Set save and edit deployments permissions
+   * Set access permissions on
+   *  - Add and edit individuals
+   *  - Add, edit end delete deployments
    *
    * @private
    * @param {Individual} datatable
@@ -248,7 +310,7 @@ export class IndividualsFormComponent implements OnInit {
     }
     else {
       // Add mode
-      const currentObject = this._module.currentModule.module_objects['INDIVIDUALS'];
+      const currentObject = this._currentModule.module_objects[this._currentModuleObjectCode];
       this.allowedToSave = {
         id: 0,
         access: currentObject?.cruved?.C == 0 ? false : true,

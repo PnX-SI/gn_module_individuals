@@ -6,8 +6,10 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
+import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { DATATABLE_CONFIG } from '../../../utils/constants.util';
 import { Individual } from '../../../models/individuals.models';
@@ -51,6 +53,8 @@ export class IndividualsInfoComponent implements OnInit {
       id_field_name: "id_tracking_device" 
     }
   ]
+  private _currentModule!: any;
+  private _currentModuleObjectCode = 'INDIVIDUALS';
 
   constructor(
     private _config: ConfigService,
@@ -61,24 +65,41 @@ export class IndividualsInfoComponent implements OnInit {
     private _service: IndividualsService,
     private _modalService: NgbModal,
     private _individualsService: IndividualsService,
-    private _deploymentsService: DeploymentsService
+    private _deploymentsService: DeploymentsService,
+    private _module: ModuleService,
+    private _dataFormService: DataFormService
   ) {}
 
   ngOnInit(): void {
-    // Resolver : First initialisation of the datatable and additional fields
-    this._route.data.pipe(takeUntil(this._destroy$)).subscribe(({ datatable, additionalFields }) => {
-      this.datatable = datatable;
+    this._currentModule = this._module.currentModule;
 
-      this.additionalFields = additionalFields ?? [];
+    // First initialisation of the datatable (resolver) and
+    // additional data
+    this._route.data.pipe(takeUntil(this._destroy$))
+      .subscribe(({ datatable }) => {
+        this.datatable = datatable;
 
-      // If they're deployments to display, create and ItemCollection for 
-      // the ListComponent
-      this._datatable_deployments$.next({
-        items: Object.values(datatable?.deployments ?? {})
-      });
+        // If they're deployments to display, create and ItemCollection for 
+        // the ListComponent
+        this._datatable_deployments$.next({
+          items: Object.values(datatable?.deployments ?? {})
+        });
 
-      this._individualId = datatable.id_individual;
-      this._setPermissions(datatable);
+        this._individualId = datatable.id_individual;
+        this._setPermissions(datatable);
+
+        // Get additional data if exists
+        this._dataFormService
+          .getadditionalFields({
+            module_code: [this._currentModule.module_code],
+            object_code: [this._currentModuleObjectCode],
+            // En attente des devs pour pouvoir sélectionner le taxon
+            // cd_nom: [datatable.cd_nom]
+          })
+          .pipe(takeUntil(this._destroy$))
+          .subscribe ((additionalFields) => {
+            this.additionalFields = additionalFields;
+          });
     });
 
     // To be sure to wait translations before setting permissions

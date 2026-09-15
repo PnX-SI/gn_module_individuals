@@ -17,8 +17,6 @@ import {
 import { IndividualsInfoComponent } from './components/individuals/info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals/form/individuals-form.component';
 
-import { AdditionalFieldsResolver } from './resolvers/additionnal-fields.resolver';
-
 export const routes: Routes = [
   {
     path: '',
@@ -40,25 +38,16 @@ export const routes: Routes = [
       {
         path: 'individuals/info/:id_individual',
         component: IndividualsInfoComponent,
-        resolve: { 
-          datatable: IndividualResolver,
-          additionalFields: AdditionalFieldsResolver 
-        },
+        resolve: { datatable: IndividualResolver }
       },
       {
         path: 'individuals/form',
         component: IndividualsFormComponent,
-        resolve: { 
-          additionalFields: AdditionalFieldsResolver 
-        },
       },
       {
         path: 'individuals/form/:id_individual',
         component: IndividualsFormComponent,
-        resolve: { 
-          datatable: IndividualResolver,
-          additionalFields: AdditionalFieldsResolver 
-        },
+        resolve: { datatable: IndividualResolver},
       },
       {
         path: 'observations',

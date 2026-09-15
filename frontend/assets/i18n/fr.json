@@ -111,13 +111,13 @@
             "Titles": {
                 "Info": "Individu n°{{ id }}",
                 "Add" : "Ajout d'un individu",
-                "Edit" : "Modification de l'individu n°{{ id }}",
+                "Edit" : "Modification de l'individu '{{ name }}' (n°{{ id }})",
                 "Delete" : "Suppression de l'individu n°{{ id }}"
             },
             "Messages": {
-                "Added" : "L'individu a été créé.",
-                "Edited" : "L'individu n°{{ id }} a été modifié.",
-                "Deleted" : "L'individu n°{{ id }} a été supprimé.",
+                "Added" : "L'individu '{{ name }}' (n°{{ id }}) a été créé",
+                "Edited" : "L'individu '{{ name }}' n°{{ id }} a été modifié.",
+                "Deleted" : "L'individu '{{ name }}' n°{{ id }} a été supprimé.",
                 "NoGeometry" : "Cet individu ne dispose pas encore d'observation"
             },
             "Errors": {
