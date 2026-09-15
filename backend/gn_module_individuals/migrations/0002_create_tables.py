@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "0002_create_tables"
-down_revision = "0001_init_migrations"
+down_revision = "0001_init_module_permissions"
 branch_labels = None
 depends_on = None
 

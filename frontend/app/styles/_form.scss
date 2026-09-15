@@ -36,10 +36,12 @@ pnx-autocomplete small {
   margin-bottom: 0.5rem;
 }
 
-/* To delete margin if there's 2 following <small> */
-.form-group textarea + small:has(+ small) {
+// Delete margin-bottom for all the <small> brothers after <textarea>
+.form-group textarea ~ small {
     margin-bottom: 0 !important;
 }
+
+// Delete margin-top for the 2nd <small> brother after <textarea>
 .form-group textarea + small + small {
   margin-top: 0 !important;;
 }
@@ -141,4 +143,16 @@ with bootstrap components (.form-control-sm)
   border-left: 5px solid $input-invalid-color;
   background-image: none;
   padding-right: 0.5rem;
+}
+
+// Additionnal fields
+.dynamic-form {
+  .ng-star-inserted {
+    line-height: 18px;
+    margin-bottom: 0.5rem;
+  }
+
+  small {
+    line-height: 18px;
+  }
 }

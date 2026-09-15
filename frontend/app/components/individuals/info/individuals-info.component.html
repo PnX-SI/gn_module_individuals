@@ -49,17 +49,30 @@
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.comment' | translate }}</h3>
-      <p>
+      <p style="white-space: pre-line;">
         {{ datatable['comment'] ?? '-' }}
       </p>
     </div>
   </div>
+
+  <div *ngIf="additionalFields.length > 0" class="content row">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
+      *ngFor="let field of additionalFields"
+    >
+      <h3 class="text-muted">
+        {{ field.attribut_label }}
+      </h3>
+      <p style="white-space: pre-line;">
+        {{ field.value ?? "-" }}
+      </p>
+    </div>
+  </div>
+
   <div class="content row one-per-row">
     <div
       class="col-12 padding-sm"
     >
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.deployments' | translate }}</h3>
-
       <p class="list-component">
         <gn-individuals-list
           [idFieldName]="'id_deployment'"
@@ -84,6 +97,7 @@
       </p>
     </div>
   </div>
+
   <div class="content row">
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.digitiser_name' | translate }}</h3>
@@ -107,14 +121,6 @@
         {{ datatable['meta_update_date'] ?? '-' }}
       </p>
     </div>
-  </div>
-  <h3 class="text-muted">infos complémentaires</h3>
-  <div
-    class="content row"
-    *ngFor="let additionalField of additionalFields"
-  >
-    <b>{{ additionalField.attribut_label }} :</b>
-    {{ datatable['additional_data'][additionalField.attribut_name] }}
   </div>
 </ng-template>
 
