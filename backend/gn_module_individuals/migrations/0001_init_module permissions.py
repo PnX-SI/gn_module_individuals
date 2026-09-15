@@ -1,6 +1,6 @@
-"""init model
+"""init module permissions
 
-Revision ID: 0001_init_migrations
+Revision ID: 0001_init_module_permissions
 Revises:
 Create Date: 2023-03-27 11:54:34.602380
 
@@ -10,10 +10,9 @@ from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = "0001_init_migrations"
+revision = "0001_init_module_permissions"
 down_revision = None
-#branch_labels = ("individuals",)
-# depends_on = "78c7e705efd3"
+branch_labels = ("individuals",)
 
 MODULE_CODE = "INDIVIDUALS"
 SCHEMA_NAME = "gn_individual"
@@ -27,11 +26,22 @@ def upgrade():
         INSERT INTO gn_permissions.t_objects 
             (code_object, description_object)
         VALUES
-            ('DEVICES', 'Gestion des devices'),
-            ('SAMPLES', 'Gestion des échantillons')
+            ('DEVICES', 'Gestion des devices')
         ON CONFLICT (code_object) DO NOTHING
         """))
 
+    op.execute(sa.text("""
+        UPDATE gn_permissions.t_objects 
+        SET support_additional_fields = true
+        WHERE code_object = 'INDIVIDUALS'
+        """))
+
+    op.execute(sa.text("""
+        UPDATE gn_commons.t_modules 
+        SET support_additional_fields = true
+        WHERE module_code = 'INDIVIDUALS'
+        """))
+    
     op.execute(sa.text(f"""
             INSERT INTO gn_permissions.cor_object_module (
                 id_object,
