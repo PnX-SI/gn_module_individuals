@@ -2,7 +2,7 @@
 [GLOBAL]
     # Id of the taxref list (created in the admin interface) to use for this module
     # If not set, API queries will return all taxons
-    ID_TAXON_LIST=101
+    # ID_TAXON_LIST=101
 
     # Colors used for the map layers
     # SELECTED_LAYER_COLOR=#d7191c
