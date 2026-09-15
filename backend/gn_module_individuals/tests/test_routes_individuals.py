@@ -347,7 +347,14 @@ class TestListIndividuals:
             url_for("individuals.list_individuals", prop="individual_name", dir="desc")
         )
         assert r.status_code == 200
-        names = [item["individual_name"] for item in r.get_json()["items"]]
+        # Scoped to the fixture's individuals: the table may hold other rows whose
+        # relative order under the database's collation Python's sorted() can't replicate.
+        fixture_ids = {ind.id_individual for ind in individuals}
+        names = [
+            item["individual_name"]
+            for item in r.get_json()["items"]
+            if item["id_individual"] in fixture_ids
+        ]
         assert names == sorted(names, reverse=True)
 
     def test_sort_by_last_observation_date_desc(self, users, source, individuals):
@@ -508,7 +515,7 @@ class TestGetIndividual:
         missing = self.EXPECTED_FIELDS - payload.keys()
         assert not missing, f"Missing fields in payload: {missing}"
         # Only the nested digitiser object is exposed, not the raw FK, and none
-        # of the list-specific computed fields (those belong to IndividualsListSchema).
+        # of the list-specific computed fields (those belong to IndividualListSchema).
         assert "id_digitiser" not in payload
         assert "taxref_cd_nom" not in payload
         assert "digitiser_name" not in payload
@@ -571,7 +578,7 @@ class TestGetIndividual:
         assert dep["install_date"] == "2024-01-01"
         assert dep["marking_code"] is None
         assert dep["removal_date"] is None
-        assert dep["name_digitiser"] is None
+        assert dep["digitiser_name"] is None
         assert dep["deployment_type_name"] == "Dispositif de suivi"
         assert dep["deployment_location_name"] == "Encolure"
         assert "individual_name" not in dep

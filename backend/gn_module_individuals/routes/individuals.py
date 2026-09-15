@@ -1,6 +1,6 @@
 import json
 
-from flask import make_response, request, g
+from flask import make_response, request, g, jsonify
 from marshmallow import EXCLUDE, ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload, raiseload, selectinload
@@ -11,22 +11,22 @@ from geonature.core.gn_permissions.decorators import login_required
 from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
-from utils_flask_sqla_geo.utils import geojsonify
 
 from .. import MODULE_CODE
 from ..blueprint import blueprint
 from ..models import IndividualDeployments, TrackingDevices
 from ..models.individuals import (
     individual_last_observation_date_expression,
+    individual_last_observation_geojson_expression,
     individual_last_observation_geom_expression,
     individual_last_observation_observers_expression,
 )
+from ..schemas.deployments import IndividualDeploymentWriteSchema
 from ..schemas.individuals import (
-    IndividualsDeploymentsWriteSchema,
-    IndividualsDetailSchema,
-    IndividualsListSchema,
-    IndividualsMapSchema,
-    IndividualsWriteSchema,
+    IndividualDetailSchema,
+    IndividualListSchema,
+    IndividualMapSchema,
+    IndividualWriteSchema,
 )
 from ..utils.errors import APIError, ApiErrorCode
 
@@ -232,21 +232,59 @@ def individuals_geometry(scope):
     )
 
     individuals = db.session.scalars(query).unique().all()
-    _assign_last_observation(individuals)
+    if not individuals:
+        return jsonify({"type": "FeatureCollection", "features": []})
 
-    schema = IndividualsMapSchema(
+    ids = [individual.id_individual for individual in individuals]
+    # Geometries are serialized to GeoJSON directly by PostGIS (ST_AsGeoJSON)
+    # instead of via the schema's GeometryField, which would deserialize each
+    # row's WKB into a Shapely object in Python before re-serializing it to
+    # GeoJSON. Letting PostgreSQL do this set-based conversion is much faster
+    # than the per-row Python/Shapely round-trip.
+    rows = db.session.execute(
+        select(
+            TIndividuals.id_individual,
+            individual_last_observation_geojson_expression().label("geom_geojson"),
+            individual_last_observation_date_expression().label("obs_date"),
+            individual_last_observation_observers_expression().label("observers"),
+        ).where(TIndividuals.id_individual.in_(ids))
+    )
+    by_id = {row.id_individual: row for row in rows}
+    for individual in individuals:
+        row = by_id[individual.id_individual]
+        individual.last_obs_date = row.obs_date
+        individual.last_obs_observers = row.observers
+
+    schema = IndividualMapSchema(
         many=True,
-        as_geojson=True,
         only=(
             "id_individual",
             "individual_name",
-            "geom",
             "taxref_nom_vern",
             "last_observation_date",
             "last_observation_observers_name",
         ),
     )
-    return geojsonify(schema.dump(individuals))
+    properties_by_id = {item["id_individual"]: item for item in schema.dump(individuals)}
+
+    features = [
+        {
+            "type": "Feature",
+            "id": individual.id_individual,
+            # json.loads() only parses the already-valid GeoJSON text
+            # produced by ST_AsGeoJSON; no geometry object is built here.
+            "geometry": json.loads(by_id[individual.id_individual].geom_geojson),
+            "properties": properties_by_id[individual.id_individual],
+        }
+        for individual in individuals
+    ]
+
+    # jsonify() (Flask's fast JSON encoder) is used here instead of
+    # geojsonify()/schema.dump(as_geojson=True): since the geometries above
+    # are already plain GeoJSON dicts, there is no remaining Shapely object
+    # for the schema to serialize, so building the FeatureCollection by hand
+    # and returning it with jsonify() avoids that extra marshmallow pass.
+    return jsonify({"type": "FeatureCollection", "features": features})
 
 
 @blueprint.route("/individuals/<int(signed=True):id_individual>", methods=["GET"])
@@ -297,7 +335,7 @@ def individual(id_individual, scope):
 
     _assign_last_observation([result])
 
-    schema = IndividualsDetailSchema(only=["+cruved", "nomenclature_sex", "digitiser"])
+    schema = IndividualDetailSchema(only=["+cruved", "nomenclature_sex", "digitiser"])
     return schema.dump(result)
 
 
@@ -313,7 +351,7 @@ def create_individual(scope):
 
     .. :quickref: Individuals;
 
-    Expects a JSON body matching ``IndividualsWriteSchema``. May include a
+    Expects a JSON body matching ``IndividualWriteSchema``. May include a
     ``deployments`` list to create deployments attached to the new individual
     in the same request. See :func:`_sync_deployments`.
 
@@ -329,7 +367,7 @@ def create_individual(scope):
             400,
         )
 
-    schema = IndividualsWriteSchema(unknown=EXCLUDE)
+    schema = IndividualWriteSchema(unknown=EXCLUDE)
     try:
         individual = schema.load(data)
     except ValidationError as e:
@@ -364,7 +402,7 @@ def _sync_deployments(individual, deployments_data, scope):
     if not isinstance(deployments_data, list):
         raise APIError(ApiErrorCode.VALIDATION_ERROR, "deployments must be a list", 400)
 
-    deployment_schema = IndividualsDeploymentsWriteSchema(unknown=EXCLUDE)
+    deployment_schema = IndividualDeploymentWriteSchema(unknown=EXCLUDE)
     kept_deployments = []
 
     for index, deployment_data in enumerate(deployments_data):
@@ -442,7 +480,7 @@ def update_individual(id_individual, scope):
 
     .. :quickref: Individuals;
 
-    Expects a JSON body matching ``IndividualsWriteSchema``. May include a
+    Expects a JSON body matching ``IndividualWriteSchema``. May include a
     ``deployments`` list to create/update deployments in the same request:
     an item with an ``id_deployment`` updates the matching existing
     deployment, an item without one creates a new deployment attached to
@@ -478,7 +516,7 @@ def update_individual(id_individual, scope):
             403,
         )
 
-    schema = IndividualsWriteSchema(unknown=EXCLUDE)
+    schema = IndividualWriteSchema(unknown=EXCLUDE)
     try:
         individual = schema.load(data, instance=individual)
     except ValidationError as e:
@@ -595,7 +633,7 @@ def list_individuals(scope):
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
     query = _build_individuals_query(scope, filters, sort)
-    schema = IndividualsListSchema(many=True, only=["+cruved"])
+    schema = IndividualListSchema(many=True, only=["+cruved"])
 
     if page is not None and per_page is not None:
         paginated = db.paginate(query, page=page, per_page=per_page)

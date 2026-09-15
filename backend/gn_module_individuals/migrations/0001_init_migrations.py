@@ -13,7 +13,7 @@ import sqlalchemy as sa
 revision = "0001_init_migrations"
 down_revision = None
 branch_labels = ("individuals",)
-depends_on = "ad8b797d89c0"
+# depends_on = "78c7e705efd3"
 
 MODULE_CODE = "INDIVIDUALS"
 SCHEMA_NAME = "gn_individual"

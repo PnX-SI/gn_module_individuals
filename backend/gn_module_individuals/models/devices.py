@@ -138,16 +138,16 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         return query
 
     def has_instance_permission(self, scope):
-        user = g.current_user
         # Nothing
         if scope == 0:
             return False
+        # All
+        elif scope == 3:
+            return True
+        user = g.current_user
         # My data
-        elif scope == 1:
+        if scope == 1:
             return user == self.digitiser or user == self.referer
         # My company's data
         elif scope == 2 and user.id_organisme is not None:
             return user.id_organisme in self.organism_actors
-        # All
-        elif scope == 3:
-            return True

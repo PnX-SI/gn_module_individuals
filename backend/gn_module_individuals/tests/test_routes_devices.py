@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import pytest
 from flask import url_for, g
 
 from pypnusershub.tests.utils import set_logged_user
 
-from gn_module_individuals.schemas import TrackingDevicesDetailSchema, TrackingDevicesWriteSchema
+from gn_module_individuals.schemas import TrackingDeviceDetailSchema, TrackingDeviceWriteSchema
 from gn_module_individuals.utils.errors import ApiErrorCode
 
 # ===========================================================================
@@ -86,6 +88,76 @@ class TestListDevices:
         r = self.client.get(url_for("individuals.list_devices", cd_nom=-1))
         assert r.get_json() == []
 
+    def test_filter_by_search_matches_device_label(self, users, devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", search="ornitela"))
+        # The DB may hold other rows also matching "ornitela": only check that our
+        # fixture devices land on the right side of the filter.
+        ids = {item["id_tracking_device"] for item in r.get_json()}
+        assert devices[0].id_tracking_device in ids  # provider_name "Ornitela"
+        assert devices[3].id_tracking_device in ids  # provider_name "Ornitela"
+        assert devices[1].id_tracking_device not in ids  # provider_name "Lotek"
+        assert devices[2].id_tracking_device not in ids  # provider_name "Vifly"
+
+    def test_filter_by_search_no_match_returns_empty(self, users, devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", search="__no_match_xyz__"))
+        assert r.get_json() == []
+
+    # --- available filter ---------------------------------------------
+
+    def test_available_true_excludes_device_with_active_deployment(
+        self, users, device_with_deployment, devices
+    ):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available="true"))
+        ids = {item["id_tracking_device"] for item in r.get_json()}
+        assert device_with_deployment.id_tracking_device not in ids
+        # devices without any deployment remain available.
+        assert devices[0].id_tracking_device in ids
+
+    def test_available_false_returns_device_with_active_deployment(
+        self, users, device_with_deployment
+    ):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available="false"))
+        ids = {item["id_tracking_device"] for item in r.get_json()}
+        assert device_with_deployment.id_tracking_device in ids
+
+    def test_available_true_includes_device_whose_deployment_was_removed(
+        self, users, device_with_deployment
+    ):
+        # A removal_date on the last deployment makes the device available again.
+        device_with_deployment.deployments[0].removal_date = datetime(2024, 6, 1)
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available="true"))
+        ids = {item["id_tracking_device"] for item in r.get_json()}
+        assert device_with_deployment.id_tracking_device in ids
+
+    @pytest.mark.parametrize("value", ["true", "1", "yes", "y"])
+    def test_available_accepts_truthy_aliases(self, users, devices, value):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available=value))
+        assert r.status_code == 200
+
+    @pytest.mark.parametrize("value", ["false", "0", "no", "n"])
+    def test_available_accepts_falsy_aliases(self, users, devices, value):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available=value))
+        assert r.status_code == 200
+
+    def test_available_invalid_value_returns_400(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available="not-a-bool"))
+        assert r.status_code == 400
+
+    def test_available_invalid_value_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_devices", available="not-a-bool"))
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.INVALID_FILTER
+        assert "description" in payload
+
     # --- sorting -----------------------------------------------------
 
     def test_sort_by_provider_name_asc(self, users, devices):
@@ -162,6 +234,24 @@ class TestGetDevice:
         )
         assert r.status_code == 403
 
+    def test_forbidden_without_scope_permission(self, users, devices):
+        # self_user a le droit R mais scope=1 (ses données uniquement).
+        # devices[0] appartient à admin_user (digitiseur ET référent) → 403
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.get(
+            url_for("individuals.device", id_tracking_device=devices[0].id_tracking_device)
+        )
+        assert r.status_code == 403
+
+    def test_forbidden_scope_returns_structured_error(self, users, devices):
+        set_logged_user(self.client, users["self_user"])
+        r = self.client.get(
+            url_for("individuals.device", id_tracking_device=devices[0].id_tracking_device)
+        )
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
+        assert "description" in payload
+
     def test_not_found_returns_404(self, users):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.device", id_tracking_device=-1))
@@ -181,7 +271,8 @@ class TestGetDevice:
         )
         assert r.status_code == 200
         data = r.get_json()
-        expected_keys = set(TrackingDevicesDetailSchema().fields.keys())
+        schema = TrackingDeviceDetailSchema()
+        expected_keys = {field.data_key or name for name, field in schema.fields.items()}
         missing = expected_keys - data.keys()
         assert not missing, f"Champs manquants dans la réponse : {missing}"
 
@@ -246,7 +337,7 @@ class TestCreateDevice:
         r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
         assert r.status_code == 201
         data = r.get_json()
-        expected_keys = set(TrackingDevicesWriteSchema().fields.keys())
+        expected_keys = set(TrackingDeviceWriteSchema().fields.keys())
         missing = expected_keys - data.keys()
         assert not missing, f"Champs manquants dans la réponse : {missing}"
 
@@ -290,6 +381,26 @@ class TestCreateDevice:
             json={**self.VALID_PAYLOAD, "id_referer": -999},
         )
         assert r.status_code == 400
+
+    def test_wrong_field_type_returns_400(self, users):
+        """id_referer must deserialize to an int: a non-numeric string fails at
+        the marshmallow schema level, before any custom @validates runs."""
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_device"),
+            json={**self.VALID_PAYLOAD, "id_referer": "not-an-integer"},
+        )
+        assert r.status_code == 400
+
+    def test_wrong_field_type_returns_structured_error(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_device"),
+            json={**self.VALID_PAYLOAD, "id_referer": "not-an-integer"},
+        )
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.VALIDATION_ERROR
+        assert "description" in payload
 
     def test_computed_fields_in_payload_are_ignored(self, users):
         set_logged_user(self.client, users["admin_user"])
@@ -413,7 +524,7 @@ class TestUpdateDevice:
         )
         assert r.status_code == 200
         data = r.get_json()
-        expected_keys = set(TrackingDevicesWriteSchema().fields.keys())
+        expected_keys = set(TrackingDeviceWriteSchema().fields.keys())
         missing = expected_keys - data.keys()
         assert not missing, f"Champs manquants dans la réponse : {missing}"
 
@@ -470,6 +581,46 @@ class TestUpdateDevice:
             },
         )
         assert r.status_code == 400
+
+    def test_wrong_field_type_returns_400(self, users, device):
+        """id_referer must deserialize to an int: a non-numeric string fails at
+        the marshmallow schema level, before any custom @validates runs."""
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+            json={"provider_name": "X", "provider_device_id": "Y", "id_referer": "not-an-integer"},
+        )
+        assert r.status_code == 400
+
+    def test_wrong_field_type_returns_structured_error(self, users, device):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+            json={"provider_name": "X", "provider_device_id": "Y", "id_referer": "not-an-integer"},
+        )
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.VALIDATION_ERROR
+        assert "description" in payload
+
+    def test_missing_body_returns_400(self, users, device):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+            data="",
+            content_type="application/json",
+        )
+        assert r.status_code == 400
+
+    def test_missing_body_returns_structured_error(self, users, device):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
+            data="",
+            content_type="application/json",
+        )
+        payload = r.get_json()
+        assert payload.get("name") == ApiErrorCode.MISSING_JSON_BODY
+        assert "description" in payload
 
 
 # ===========================================================================

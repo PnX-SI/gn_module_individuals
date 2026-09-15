@@ -3,7 +3,7 @@ from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import DB
 from pypnnomenclature.models import TNomenclatures as Nomenclature
-from sqlalchemy import select, inspect
+from sqlalchemy import select, inspect, func
 
 
 def _add_mapper_property(name, prop):
@@ -60,6 +60,19 @@ def _individual_last_synthese_column(column):
 
 def individual_last_observation_geom_expression():
     return _individual_last_synthese_column(Synthese.the_geom_point)
+
+
+def individual_last_observation_geojson_expression():
+    """Geometry of an individual's last observation, already serialized to
+    GeoJSON text by PostGIS (``ST_AsGeoJSON``).
+
+    Doing the WKB -> GeoJSON conversion in SQL avoids parsing every row's
+    geometry into a Shapely object in Python (what
+    ``GeometryField._serialize_geojson`` does via
+    ``to_shape(...).__geo_interface__``) and is significantly faster than
+    that per-row Python conversion, especially for large result sets.
+    """
+    return _individual_last_synthese_column(func.ST_AsGeoJSON(Synthese.the_geom_point))
 
 
 def individual_last_observation_date_expression():

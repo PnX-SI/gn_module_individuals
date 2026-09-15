@@ -1,1 +1,190 @@
-{}
+{
+    "Individuals" : {
+        "NavigationTabs": {
+            "Individuals" : "Individuals",
+            "Observations": "Observations",
+            "Captures": "Captures",
+            "TrackingDevices": "Tracking devices"
+        },
+        "Devices": {
+            "Fields": {
+                "id_tracking_device" : "ID",
+                "id_nomenclature_device_type" : "Device type",
+                "provider_name" : "Provider",
+                "provider_device_id" : "Provider ID",
+                "id_referer" : "Referer",
+                "comment" : "Comment",
+                "meta_create_date" : "Creation date",
+                "meta_update_date" : "Last update date",
+                "nomenclature_device_type_name" : "Device type",
+                "referer_name" : "Referer name",
+                "digitiser_name" : "Author",
+                "last_individual_equipped_name" : "Last individual equipped",
+                "deployments" : "Equipped individual(s)",
+                "device_label" : "Tracking device"
+            },
+            "PlaceHolder": {
+                "provider_name": "Provider name",
+                "provider_device_id": "ID/serial number",
+                "id_referer": "Referer",
+                "comment": "Tell us more ...",
+                "device_label" : "Tracking device"
+            },
+            "Filters":{
+                "cd_nom": "Taxon"
+            },
+            "Titles": {
+                "Info": "Tracking device n°{{ id }}",
+                "Add" : "Add a tracking device",
+                "Edit" : "Edit tracking device n°{{ id }}",
+                "Delete" : "Delete tracking device n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "The tracking device has been created.",
+                "Edited" : "Tracking device n°{{ id }} has been edited.",
+                "Deleted" : "Tracking device n°{{ id }} has been deleted."
+            },
+            "Errors": {
+                "AddedNOK" : "This device could not be created. Error: {{ error }}",
+                "EditedNOK" : "Device n°{{ id }} could not be edited. Error: {{ error }}",
+                "DeletedNOK" : "Device n°{{ id }} could not be deleted. Error: {{ error }}"
+            }
+        },
+        "Deployments": {
+            "Label": "Deployment",
+            "Fields": {
+                "id_deployment" : "Deployment ID",
+                "id_tracking_device" : "Tracking device ID",
+                "tracking_device_info" : "Tracking device",
+                "install_date" : "Deployment date",
+                "removal_date" : "Removal date",
+                "deployment_type_name" : "Type",
+                "deployment_location_name" : "Location",
+                "marking_code" : "Marking",
+                "comment" : "Comment",
+                "meta_create_date" : "Creation date",
+                "meta_update_date" : "Last update date",
+                "individual_name" : "Individual name",
+                "digitiser_name" : "Author",
+                "name_digitiser" : "Author"
+            },
+            "Titles": {
+                "Add": "Add a deployment",
+                "Edit": "Edit deployment n°{{ id }}",
+                "Delete": "Delete deployment n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "The deployment has been created.",
+                "Edited" : "Deployment n°{{ id }} has been edited.",
+                "Deleted" : "Deployment n°{{ id }} has been deleted."
+            },
+            "Errors": {
+                "AddedNOK" : "This deployment could not be created. Error: {{ error }}",
+                "EditedNOK" : "Deployment n°{{ id }} could not be edited. Error: {{ error }}",
+                "DeletedNOK" : "Deployment n°{{ id }} could not be deleted. Error: {{ error }}"
+            }
+        },
+        "Individuals": {
+            "Fields": {
+                "id_individual" : "ID",
+                "uuid_individual" : "Individual unique identifier",
+                "individual_name": "Name",
+                "active" : "Active",
+                "comment" : "Comment",
+                "meta_create_date" : "Creation date",
+                "meta_update_date" : "Last update date",
+                "digitiser_name" : "Author",
+                "nomenclature_sex_name" : "Sex",
+                "last_observation_date" : "Last observation",
+                "last_observation_observers_name" : "Last observer(s)",
+                "taxref_nom_vern" : "Taxon",
+                "deployed_devices" : "Deployed tracking device(s)",
+                "deployed_markings" : "Deployed marking(s)",
+                "deployments" : "Associated deployment(s)"
+            },
+            "PlaceHolder": {
+                "individual_name": "Enter the individual's name",
+                "comment": "Tell us more ..."
+            },
+            "Filters":{
+                "cd_nom": "Taxon"
+            },
+            "Titles": {
+                "Info": "Individual n°{{ id }}",
+                "Add" : "Add an individual",
+                "Edit" : "Edit individual n°{{ id }}",
+                "Delete" : "Delete individual n°{{ id }}"
+            },
+            "Messages": {
+                "Added" : "The individual has been created.",
+                "Edited" : "Individual n°{{ id }} has been edited.",
+                "Deleted" : "Individual n°{{ id }} has been deleted.",
+                "NoGeometry" : "This individual does not have any observation yet"
+            },
+            "Errors": {
+                "AddedNOK" : "This device could not be created. Error: {{ error }}",
+                "EditedNOK" : "Device n°{{ id }} could not be edited. Error: {{ error }}",
+                "DeletedNOK" : "Device n°{{ id }} could not be deleted. Error: {{ error }}"
+            }
+        },
+        "Messages": {
+            "EmptyList" : "No data to display",
+            "TotalList" : "row(s) total",
+            "NoGeometry" : "This item does not have a geometry",
+            "MissingPermissions" : "You do not have the necessary permissions to edit this object",
+            "startDateNOK" : "This date must be before the second one and cannot be in the future.",
+            "endDateNOK" : "This date must be after the first one and cannot be in the future."
+        },
+        "Errors": {
+            "Required" : "This field is required.",
+            "MinLength" : "You must select at least one value.",
+            "FormInvalid" : "The form is invalid. Please check all fields.",
+            "FormNotModified" : "The form has not been modified. Please modify at least one field.",
+            "PatternText1" : "Only letters, digits, spaces, - or _.",
+            "PatternText2" : "Only letters (no accents), digits, - or _.",
+            "PatternText3" : "Must not contain < or >.",
+            "PatternText4" : "Only letters, digits, - or _."
+        },
+        "ApiErrors": {
+            "JsonBodyMissing": "The request body is missing or invalid.",
+            "ValidationError": "The entered data is invalid. Please check the form.",
+            "InsufficientPermissions": "You do not have the necessary permissions to perform this action.",
+            "InvalidFilter": "One of the filter, sort or pagination parameters is invalid.",
+            "UnknownError": "An unexpected error occurred.",
+            "HasDeployment": "This object cannot be deleted because one or more deployments are associated with it.",
+            "HasObservation": "This object cannot be deleted because one or more observations are associated with it.",
+            "NotFound": "Object n°{{ id }} could not be found."
+        },
+        "DeletingPopup" : {
+            "Warning" : "Warning",
+            "WarningDelete" : "You are about to delete: ",
+            "ConfirmDelete" : "Confirm deletion"
+        },
+        "PlaceHolder": {
+            "select": "Select",
+            "writeText": "Enter text",
+            "writeNumber": "Enter a value",
+            "writeMore": "Tell us more ...",
+            "firstLetters": "Enter the first letters"
+        },
+        "Actions" : {
+            "Add" : "Add",
+            "Validate" : "Validate",
+            "Cancel" : "Cancel",
+            "Back" : "Back",
+            "Delete" : "Delete",
+            "Summary" : "Show / Hide summary",
+            "Informations" : "Full record",
+            "Edit" : "Edit",
+            "Save" : "Save",
+            "Download" : "Download",
+            "Filter" : "Filter",
+            "Reset" : "Reset"
+        },
+        "Others" : {
+            "Yes" : "Yes",
+            "No" : "No",
+            "All" : "All"
+        }
+    }
+}

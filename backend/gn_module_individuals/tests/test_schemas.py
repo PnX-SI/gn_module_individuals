@@ -8,130 +8,187 @@ from geonature.tests.utils import get_id_nomenclature
 from geonature.utils.env import db
 from pypnnomenclature.models import TNomenclatures
 
-from gn_module_individuals.models import IndividualDeployments
+from gn_module_individuals.models import IndividualDeployments, TrackingDevices
 from gn_module_individuals.schemas import (
-    TrackingDevicesBaseSchema,
-    TrackingDevicesDetailSchema,
-    IndividualsDeploymentsSchema,
+    TrackingDeviceBaseSchema,
+    TrackingDeviceDetailSchema,
+    DeploymentSchema,
 )
 from gn_module_individuals.schemas.individuals import (
-    IndividualsMapSchema,
-    IndividualsListSchema,
+    IndividualMapSchema,
+    IndividualListSchema,
 )
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestTrackingDevicesBaseSchema:
+class TestTrackingDeviceBaseSchema:
 
     # --- validators: None branches  --------------------------
 
     def test_validate_nomenclature_device_type_accepts_none(self, app):
-        assert TrackingDevicesBaseSchema().validate_nomenclature_device_type(None) is None
+        assert TrackingDeviceBaseSchema().validate_nomenclature_device_type(None) is None
 
     def test_validate_nomenclature_device_type_accepts_valid_id(self, app):
         valid_id = get_id_nomenclature("TYPE_DISPO_SUIVI", "1")
-        assert TrackingDevicesBaseSchema().validate_nomenclature_device_type(valid_id) == valid_id
+        assert TrackingDeviceBaseSchema().validate_nomenclature_device_type(valid_id) == valid_id
 
     def test_validate_referer_accepts_none(self, app):
-        assert TrackingDevicesBaseSchema().validate_referer(None) is None
+        assert TrackingDeviceBaseSchema().validate_referer(None) is None
 
     def test_validate_referer_accepts_valid_id(self, app, users):
         user_id = users["admin_user"].id_role
-        assert TrackingDevicesBaseSchema().validate_referer(user_id) == user_id
+        assert TrackingDeviceBaseSchema().validate_referer(user_id) == user_id
 
     def test_get_nomenclature_name_returns_label(self, app, devices):
-        result = TrackingDevicesBaseSchema().get_nomenclature_name(devices[0])
+        result = TrackingDeviceBaseSchema().get_nomenclature_name(devices[0])
         assert result is not None
 
     def test_get_digitiser_returns_name(self, app, devices):
-        result = TrackingDevicesBaseSchema().get_digitiser_name(devices[0])
+        result = TrackingDeviceBaseSchema().get_digitiser_name(devices[0])
         assert result is not None
 
     def test_get_referer_returns_name(self, app, devices):
-        result = TrackingDevicesBaseSchema().get_referer_name(devices[0])
+        result = TrackingDeviceBaseSchema().get_referer_name(devices[0])
         assert result is not None
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestTrackingDevicesDetailSchema:
+class TestTrackingDeviceDetailSchema:
 
     def test_get_nomenclature_name_returns_label(self, app, devices):
-        assert TrackingDevicesDetailSchema().get_nomenclature_name(devices[0]) is not None
+        assert TrackingDeviceDetailSchema().get_nomenclature_name(devices[0]) is not None
 
     def test_get_digitiser_returns_name(self, app, devices):
-        assert TrackingDevicesDetailSchema().get_digitiser_name(devices[0]) is not None
+        assert TrackingDeviceDetailSchema().get_digitiser_name(devices[0]) is not None
 
     def test_get_referer_returns_name(self, app, devices):
-        assert TrackingDevicesDetailSchema().get_referer_name(devices[0]) is not None
+        assert TrackingDeviceDetailSchema().get_referer_name(devices[0]) is not None
 
     def test_get_deployments_returns_list_with_individual_name(self, app, device_with_deployment):
-        result = TrackingDevicesDetailSchema().get_deployments(device_with_deployment)
+        result = TrackingDeviceDetailSchema().get_deployments(device_with_deployment)
         assert isinstance(result, list)
         assert len(result) > 0
         assert result[0]["individual_name"] is not None
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestIndividualsDeploymentsSchema:
+class TestTrackingDevicesPermission:
+
+    # --- has_instance_permission scope 2 -----------------------
+
+    def test_has_instance_permission_scope_2_same_organism_grants_access(
+        self, app, users, devices
+    ):
+        # associate_user shares admin_user's organism (devices[0]'s digitiser/referer)
+        # but is neither its digitiser nor its referer.
+        g.current_user = users["associate_user"]
+        assert devices[0].has_instance_permission(scope=2) is True
+
+    def test_has_instance_permission_scope_2_without_organism_denies_access(
+        self, app, users, devices
+    ):
+        # stranger_user has no organism: the scope-2 organism check never runs.
+        g.current_user = users["stranger_user"]
+        assert not devices[0].has_instance_permission(scope=2)
+
+    # --- filter_by_scope -----------------------------------------
+
+    def test_filter_by_scope_0_returns_no_devices(self, app, users, devices):
+        query = TrackingDevices.filter_by_scope(
+            select(TrackingDevices), scope=0, user=users["noright_user"]
+        )
+        assert db.session.execute(query).scalars().all() == []
+
+    def test_filter_by_scope_1_returns_only_own_devices(self, app, users, devices):
+        query = TrackingDevices.filter_by_scope(
+            select(TrackingDevices), scope=1, user=users["self_user"]
+        )
+        result_ids = {d.id_tracking_device for d in db.session.execute(query).scalars()}
+        # self_user is digitiser or referer on devices[1], [2] and [3], but not [0].
+        assert result_ids == {
+            devices[1].id_tracking_device,
+            devices[2].id_tracking_device,
+            devices[3].id_tracking_device,
+        }
+
+    def test_filter_by_scope_2_extends_to_colleagues(self, app, users, devices):
+        # associate_user shares the fixture devices' organism but digitised none of them.
+        query = TrackingDevices.filter_by_scope(
+            select(TrackingDevices), scope=2, user=users["associate_user"]
+        )
+        result_ids = {d.id_tracking_device for d in db.session.execute(query).scalars()}
+        assert result_ids == {d.id_tracking_device for d in devices}
+
+    def test_filter_by_scope_2_without_organism_behaves_like_scope_1(self, app, users, devices):
+        # stranger_user has no organism, and is neither digitiser nor referer of any device.
+        query = TrackingDevices.filter_by_scope(
+            select(TrackingDevices), scope=2, user=users["stranger_user"]
+        )
+        result = db.session.execute(query).scalars().all()
+        assert result == []
+
+
+@pytest.mark.usefixtures("temporary_transaction")
+class TestDeploymentSchema:
 
     # --- validate_individual --------------------------------
 
     def test_validate_individual_accepts_valid_id(self, app, individual):
-        result = IndividualsDeploymentsSchema().validate_individual(individual.id_individual)
+        result = DeploymentSchema().validate_individual(individual.id_individual)
         assert result == individual.id_individual
 
     def test_validate_individual_rejects_unknown_id(self, app):
-        with pytest.raises(ValidationError, match="n'existe pas"):
-            IndividualsDeploymentsSchema().validate_individual(-1)
+        with pytest.raises(ValidationError, match="does not exist"):
+            DeploymentSchema().validate_individual(-1)
 
     # --- validate_tracking_device  ---------------------------
 
     def test_validate_tracking_device_accepts_none(self, app):
-        assert IndividualsDeploymentsSchema().validate_tracking_device(None) is None
+        assert DeploymentSchema().validate_tracking_device(None) is None
 
     def test_validate_tracking_device_accepts_valid_id(self, app, device):
-        result = IndividualsDeploymentsSchema().validate_tracking_device(device.id_tracking_device)
+        result = DeploymentSchema().validate_tracking_device(device.id_tracking_device)
         assert result == device.id_tracking_device
 
     def test_validate_tracking_device_rejects_unknown_id(self, app):
-        with pytest.raises(ValidationError, match="n'existe pas"):
-            IndividualsDeploymentsSchema().validate_tracking_device(-1)
+        with pytest.raises(ValidationError, match="does not exist"):
+            DeploymentSchema().validate_tracking_device(-1)
 
     # --- validate_nomenclature_deployment_type  --------------
 
     def test_validate_nomenclature_deployment_type_rejects_none(self, app):
-        with pytest.raises(ValidationError, match="n'existe pas"):
-            IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(None)
+        with pytest.raises(ValidationError, match="does not exist"):
+            DeploymentSchema().validate_nomenclature_deployment_type(None)
 
     def test_validate_nomenclature_deployment_type_accepts_valid_id(self, app):
         valid_id = get_id_nomenclature("TYPE_MARQUAGE", "1")
-        result = IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(valid_id)
+        result = DeploymentSchema().validate_nomenclature_deployment_type(valid_id)
         assert result == valid_id
 
     def test_validate_nomenclature_deployment_type_rejects_unknown_id(self, app):
-        with pytest.raises(ValidationError, match="n'existe pas"):
-            IndividualsDeploymentsSchema().validate_nomenclature_deployment_type(-1)
+        with pytest.raises(ValidationError, match="does not exist"):
+            DeploymentSchema().validate_nomenclature_deployment_type(-1)
 
     # --- validate_nomenclature_deployment_location ----------
 
     def test_validate_nomenclature_deployment_location_rejects_none(self, app):
-        with pytest.raises(ValidationError, match="n'existe pas"):
-            IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(None)
+        with pytest.raises(ValidationError, match="does not exist"):
+            DeploymentSchema().validate_nomenclature_deployment_location(None)
 
     def test_validate_nomenclature_deployment_location_accepts_valid_id(self, app):
         valid_id = get_id_nomenclature("LOC_MARQUAGE", "1")
-        result = IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(valid_id)
+        result = DeploymentSchema().validate_nomenclature_deployment_location(valid_id)
         assert result == valid_id
 
     def test_validate_nomenclature_deployment_location_rejects_unknown_id(self, app):
-        with pytest.raises(ValidationError, match="n'existe pas"):
-            IndividualsDeploymentsSchema().validate_nomenclature_deployment_location(-1)
+        with pytest.raises(ValidationError, match="does not exist"):
+            DeploymentSchema().validate_nomenclature_deployment_location(-1)
 
     # --- validate_dates -------------------------------------
 
     def test_validate_dates_rejects_removal_before_install(self, app):
         with pytest.raises(ValidationError):
-            IndividualsDeploymentsSchema().validate_dates(
+            DeploymentSchema().validate_dates(
                 {
                     "install_date": datetime(2024, 6, 1),
                     "removal_date": datetime(2024, 1, 1),
@@ -139,7 +196,7 @@ class TestIndividualsDeploymentsSchema:
             )
 
     def test_validate_dates_accepts_valid_order(self, app):
-        IndividualsDeploymentsSchema().validate_dates(
+        DeploymentSchema().validate_dates(
             {
                 "install_date": datetime(2024, 1, 1),
                 "removal_date": datetime(2024, 6, 1),
@@ -150,12 +207,12 @@ class TestIndividualsDeploymentsSchema:
 
     def test_get_tracking_device_returns_string(self, app, device_with_deployment):
         deployment = device_with_deployment.deployments[0]
-        result = IndividualsDeploymentsSchema().get_tracking_device(deployment)
+        result = DeploymentSchema().get_tracking_device(deployment)
         assert result is not None
 
     def test_get_individual_name_returns_name(self, app, device_with_deployment):
         deployment = device_with_deployment.deployments[0]
-        result = IndividualsDeploymentsSchema().get_individual_name(deployment)
+        result = DeploymentSchema().get_individual_name(deployment)
         assert result is not None
 
     def test_dump_nomenclature_deployment_type_returns_nomenclature(
@@ -163,7 +220,7 @@ class TestIndividualsDeploymentsSchema:
     ):
         deployment = device_with_deployment.deployments[0]
         only = [f"+{n}" for n in IndividualDeployments.__nomenclatures__]
-        dumped = IndividualsDeploymentsSchema(only=only).dump(deployment)
+        dumped = DeploymentSchema(only=only).dump(deployment)
         assert dumped["nomenclature_deployment_type"]["cd_nomenclature"] == "4"
 
     def test_dump_nomenclature_deployment_location_returns_nomenclature(
@@ -171,19 +228,19 @@ class TestIndividualsDeploymentsSchema:
     ):
         deployment = device_with_deployment.deployments[0]
         only = [f"+{n}" for n in IndividualDeployments.__nomenclatures__]
-        dumped = IndividualsDeploymentsSchema(only=only).dump(deployment)
+        dumped = DeploymentSchema(only=only).dump(deployment)
         assert dumped["nomenclature_deployment_location"]["cd_nomenclature"] == "3"
 
     def test_get_digitiser_returns_none_when_unset(self, app, device_with_deployment):
         deployment = device_with_deployment.deployments[0]
-        assert IndividualsDeploymentsSchema().get_digitiser(deployment) is None
+        assert DeploymentSchema().get_digitiser(deployment) is None
 
     def test_get_deployment_type_name_returns_nomenclature_label(
         self, app, device_with_deployment, individual
     ):
         deployment = individual.deployments[0]
         # device_with_deployment sets id_nomenclature_deployment_type to DISPO_SUIVI
-        result = IndividualsDeploymentsSchema().get_deployment_type_name(deployment)
+        result = DeploymentSchema().get_deployment_type_name(deployment)
         assert result == "Dispositif de suivi"
 
     def test_get_deployment_location_name_returns_nomenclature_label(
@@ -191,7 +248,7 @@ class TestIndividualsDeploymentsSchema:
     ):
         deployment = individual.deployments[0]
         # device_with_deployment sets id_nomenclature_deployment_location to ENCOLURE
-        result = IndividualsDeploymentsSchema().get_deployment_location_name(deployment)
+        result = DeploymentSchema().get_deployment_location_name(deployment)
         assert result == "Encolure"
 
     def test_has_instance_permission_scope_0_always_false(self, app, device):
@@ -232,79 +289,79 @@ class TestIndividualsDeploymentsSchema:
 
 
 # ===========================================================================
-# IndividualsMapSchema
+# IndividualMapSchema
 # ===========================================================================
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestIndividualsMapSchema:
+class TestIndividualMapSchema:
 
     def test_get_taxref_nom_vern_returns_none_when_no_taxon(self, app, individual):
         individual.taxon = None
-        result = IndividualsMapSchema().get_taxref_nom_vern(individual)
+        result = IndividualMapSchema().get_taxref_nom_vern(individual)
         assert result is None
 
     def test_get_taxref_nom_vern_returns_string_or_none(self, app, individual):
         # Taxon is loaded via fixture (valid cd_nom).
         # taxref_nom_vern may be None if the taxon has no vernacular name.
-        result = IndividualsMapSchema().get_taxref_nom_vern(individual)
+        result = IndividualMapSchema().get_taxref_nom_vern(individual)
         assert result is None or isinstance(result, str)
 
     def test_get_last_observation_date_returns_none_when_no_date(self, app, individual):
         individual.last_obs_date = None
-        assert IndividualsMapSchema().get_last_observation_date(individual) is None
+        assert IndividualMapSchema().get_last_observation_date(individual) is None
 
     def test_get_last_observation_date_format_dd_mm_yyyy(self, app, individual):
         individual.last_obs_date = datetime(2024, 1, 5)
-        result = IndividualsMapSchema().get_last_observation_date(individual)
+        result = IndividualMapSchema().get_last_observation_date(individual)
         assert result == "05-01-2024"
 
     def test_get_last_observation_observers_name_returns_value(self, app, individual):
         individual.last_obs_observers = "Alice Martin"
-        result = IndividualsMapSchema().get_last_observation_observers_name(individual)
+        result = IndividualMapSchema().get_last_observation_observers_name(individual)
         assert result == "Alice Martin"
 
     def test_get_last_observation_observers_name_can_be_none(self, app, individual):
         individual.last_obs_observers = None
-        result = IndividualsMapSchema().get_last_observation_observers_name(individual)
+        result = IndividualMapSchema().get_last_observation_observers_name(individual)
         assert result is None
 
 
 # ===========================================================================
-# IndividualsListSchema
+# IndividualListSchema
 # ===========================================================================
 
 
 @pytest.mark.usefixtures("temporary_transaction")
-class TestIndividualsListSchema:
+class TestIndividualListSchema:
 
     def test_get_digitiser_name_returns_none_when_no_digitiser(self, app, individual):
         individual.digitiser = None
-        result = IndividualsListSchema().get_digitiser_name(individual)
+        result = IndividualListSchema().get_digitiser_name(individual)
         assert result is None
 
     def test_get_digitiser_name_returns_full_name(self, app, individual):
         # individual fixture uses admin_user as digitiser (lazy="joined")
-        result = IndividualsListSchema().get_digitiser_name(individual)
+        result = IndividualListSchema().get_digitiser_name(individual)
         assert result is not None
         assert isinstance(result, str)
 
     def test_get_last_observation_date_returns_none_when_no_date(self, app, individual):
         individual.last_obs_date = None
-        assert IndividualsListSchema().get_last_observation_date(individual) is None
+        assert IndividualListSchema().get_last_observation_date(individual) is None
 
     def test_get_last_observation_date_format_dd_mm_yyyy(self, app, individual):
         individual.last_obs_date = datetime(2024, 6, 15)
-        result = IndividualsListSchema().get_last_observation_date(individual)
+        result = IndividualListSchema().get_last_observation_date(individual)
         assert result == "15-06-2024"
 
     def test_get_last_observation_observers_name_returns_value(self, app, individual):
         individual.last_obs_observers = "Bob Dupont"
-        result = IndividualsListSchema().get_last_observation_observers_name(individual)
+        result = IndividualListSchema().get_last_observation_observers_name(individual)
         assert result == "Bob Dupont"
 
     def test_get_deployed_devices_returns_empty_dict_without_deployments(self, app, individual):
-        assert IndividualsListSchema().get_deployed_devices(individual) == {}
+        assert IndividualListSchema().get_deployed_devices(individual) == {}
 
     def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual):
         dep = IndividualDeployments(
@@ -318,13 +375,13 @@ class TestIndividualsListSchema:
             db.session.add(dep)
             db.session.flush()
         db.session.refresh(individual)
-        assert IndividualsListSchema().get_deployed_devices(individual) == {}
+        assert IndividualListSchema().get_deployed_devices(individual) == {}
 
     def test_get_deployed_devices_ignores_removed_deployment(
         self, app, device_with_deployment, individual
     ):
         individual.deployments[0].removal_date = datetime(2024, 6, 1)
-        assert IndividualsListSchema().get_deployed_devices(individual) == {}
+        assert IndividualListSchema().get_deployed_devices(individual) == {}
 
     def test_get_deployed_devices_returns_label_for_active_device(self, app, devices, individual):
         dep = IndividualDeployments(
@@ -338,17 +395,17 @@ class TestIndividualsListSchema:
             db.session.add(dep)
             db.session.flush()
         db.session.refresh(individual)
-        result = IndividualsListSchema().get_deployed_devices(individual)
+        result = IndividualListSchema().get_deployed_devices(individual)
         assert result == {"device_1": {"location_name": "Encolure", "name": "Balise GPS"}}
 
     def test_get_deployed_markings_returns_empty_dict_without_deployments(self, app, individual):
-        assert IndividualsListSchema().get_deployed_markings(individual) == {}
+        assert IndividualListSchema().get_deployed_markings(individual) == {}
 
     def test_get_deployed_markings_excludes_device_deployments(
         self, app, device_with_deployment, individual
     ):
         # device_with_deployment has a tracking device → not a physical marking
-        assert IndividualsListSchema().get_deployed_markings(individual) == {}
+        assert IndividualListSchema().get_deployed_markings(individual) == {}
 
     def test_get_deployed_markings_returns_active_physical_markings(self, app, individual):
         dep = IndividualDeployments(
@@ -362,7 +419,7 @@ class TestIndividualsListSchema:
             db.session.add(dep)
             db.session.flush()
         db.session.refresh(individual)
-        result = IndividualsListSchema().get_deployed_markings(individual)
+        result = IndividualListSchema().get_deployed_markings(individual)
         assert result == {
             "marking_1": {"type_name": "Plaque", "location_name": "Oreille droite", "code": "Vert"}
         }
@@ -380,7 +437,7 @@ class TestIndividualsListSchema:
             db.session.add(dep)
             db.session.flush()
         db.session.refresh(individual)
-        assert IndividualsListSchema().get_deployed_markings(individual) == {}
+        assert IndividualListSchema().get_deployed_markings(individual) == {}
 
 
 # ===========================================================================
@@ -412,9 +469,10 @@ class TestTIndividualsPermission:
         g.current_user = users["admin_user"]
         assert individuals[0].has_instance_permission(scope=2) is True
 
-    def test_scope_2_grants_access_when_organisme_is_none(self, app, users, individuals):
-        # In test fixtures, id_organisme is None for all users.
-        # has_instance_permission checks `current_user.id_organisme in organism_actors`,
-        # i.e. `None in [None]` → True: access granted even when digitiser differs.
+    def test_scope_2_grants_access_when_same_organism(self, app, users, individuals):
+        # self_user and admin_user share the same organism in the test fixtures
+        # (individuals[0]'s digitiser). has_instance_permission checks
+        # `current_user.id_organisme in organism_actors`: access granted even
+        # though self_user isn't the digitiser.
         g.current_user = users["self_user"]
         assert individuals[0].has_instance_permission(scope=2) is True

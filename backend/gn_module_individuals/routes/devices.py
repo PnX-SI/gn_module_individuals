@@ -3,7 +3,7 @@ import json
 from flask import request, jsonify, g, make_response
 from marshmallow import EXCLUDE, ValidationError
 
-from sqlalchemy import func, select
+from sqlalchemy import func
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.exc import IntegrityError
 
@@ -20,9 +20,9 @@ from ..utils.errors import APIError, ApiErrorCode
 
 from .. import MODULE_CODE
 from ..schemas import (
-    TrackingDevicesDetailSchema,
-    TrackingDevicesListSchema,
-    TrackingDevicesWriteSchema,
+    TrackingDeviceDetailSchema,
+    TrackingDeviceListSchema,
+    TrackingDeviceWriteSchema,
 )
 from ..models import TrackingDevices, IndividualDeployments
 
@@ -60,54 +60,6 @@ def _device_available_expression():
     return db.or_(~has_deployment, last_removal_date.isnot(None))
 
 
-def _device_sort_columns():
-    """Some `prop` values correspond to computed schema fields
-    (nomenclature_device_type_name, digitiser_name, referer_name,
-    last_individual_equipped_name) that don't exist on the model: map them
-    here to an equivalent SQL expression (correlated subquery), same
-    principle as occtax.repositories (SORT_COLUMNS + dispatch)."""
-    return {
-        "id_tracking_device": TrackingDevices.id_tracking_device,
-        "id_nomenclature_device_type": TrackingDevices.id_nomenclature_device_type,
-        "provider_name": TrackingDevices.provider_name,
-        "provider_device_id": TrackingDevices.provider_device_id,
-        "id_referer": TrackingDevices.id_referer,
-        "comment": TrackingDevices.comment,
-        "id_digitiser": TrackingDevices.id_digitiser,
-        "meta_create_date": TrackingDevices.meta_create_date,
-        "meta_update_date": TrackingDevices.meta_update_date,
-        "nomenclature_device_type_name": (
-            select(TNomenclatures.label_default)
-            .where(TNomenclatures.id_nomenclature == TrackingDevices.id_nomenclature_device_type)
-            .correlate(TrackingDevices)
-            .scalar_subquery()
-        ),
-        "digitiser_name": (
-            select(func.concat(User.prenom_role, " ", User.nom_role))
-            .where(User.id_role == TrackingDevices.id_digitiser)
-            .correlate(TrackingDevices)
-            .scalar_subquery()
-        ),
-        "referer_name": (
-            select(func.concat(User.prenom_role, " ", User.nom_role))
-            .where(User.id_role == TrackingDevices.id_referer)
-            .correlate(TrackingDevices)
-            .scalar_subquery()
-        ),
-        "last_individual_equipped_name": (
-            select(TIndividuals.individual_name)
-            .select_from(IndividualDeployments)
-            .join(TIndividuals, TIndividuals.id_individual == IndividualDeployments.id_individual)
-            .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
-            .order_by(IndividualDeployments.install_date.desc())
-            .limit(1)
-            .correlate(TrackingDevices)
-            .scalar_subquery()
-        ),
-        "device_label": TrackingDevices.device_label,
-    }
-
-
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope(
@@ -129,7 +81,7 @@ def device(id_tracking_device, scope):
     """
     # Detail schema always exposes every relationship of the model.
     relationship_fields = list(TrackingDevices.__nomenclatures__) + ["referer", "digitiser"]
-    schema = TrackingDevicesDetailSchema(only=["+cruved"] + relationship_fields)
+    schema = TrackingDeviceDetailSchema(only=["+cruved"] + relationship_fields)
 
     query = (
         db.select(TrackingDevices)
@@ -204,7 +156,7 @@ def list_devices(scope):
 
     paginated = page is not None and per_page is not None
 
-    schema = TrackingDevicesListSchema(only=["+cruved"])
+    schema = TrackingDeviceListSchema(only=["+cruved"])
 
     virtual_sort_cols = {
         "referer_name": (
@@ -310,7 +262,7 @@ def create_device(scope):
 
     .. :quickref: Devices;
 
-    Expects a JSON body matching ``TrackingDevicesWriteSchema``.
+    Expects a JSON body matching ``TrackingDeviceWriteSchema``.
 
     :returns: the created device
     :rtype: dict<TrackingDevices>
@@ -324,7 +276,7 @@ def create_device(scope):
             400,
         )
 
-    schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
+    schema = TrackingDeviceWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data)
     except ValidationError as e:
@@ -354,7 +306,7 @@ def update_device(id_tracking_device, scope):
 
     .. :quickref: Devices;
 
-    Expects a JSON body matching ``TrackingDevicesWriteSchema``.
+    Expects a JSON body matching ``TrackingDeviceWriteSchema``.
 
     :param id_tracking_device: the id_tracking_device
     :type id_tracking_device: int
@@ -384,7 +336,7 @@ def update_device(id_tracking_device, scope):
             403,
         )
 
-    schema = TrackingDevicesWriteSchema(unknown=EXCLUDE)
+    schema = TrackingDeviceWriteSchema(unknown=EXCLUDE)
     try:
         device = schema.load(data, instance=device)
     except ValidationError as e:
