@@ -41,7 +41,7 @@ def upgrade():
         SET support_additional_fields = true
         WHERE module_code = 'INDIVIDUALS'
         """))
-    
+
     op.execute(sa.text(f"""
             INSERT INTO gn_permissions.cor_object_module (
                 id_object,

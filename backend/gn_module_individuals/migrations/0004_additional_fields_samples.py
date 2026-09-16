@@ -13,6 +13,7 @@ import sqlalchemy as sa
 revision = "0004_additional_fields_samples"
 down_revision = "0003_monitoring_indiv_samples"
 
+
 def upgrade():
     conn = op.get_bind()
 
@@ -63,35 +64,30 @@ def upgrade():
             ('death_date',  'Date du décès',        false,      'Date du décès présumée',       9,          false,          '',     '{}',                     '',                     '{}',             false,          0,          '',     true,       2,          '');
     """))
 
-    op.execute(
-        sa.text("""
+    op.execute(sa.text("""
             INSERT INTO gn_commons.cor_field_dataset
                 (id_field, id_dataset)
             SELECT id_field, :id_dataset
             FROM gn_commons.t_additional_fields
             WHERE field_name IN ('birth_year', 'death_date');
-        """).bindparams(id_dataset = id_dataset)
-    )
+        """).bindparams(id_dataset=id_dataset))
 
-    op.execute(
-        sa.text("""
+    op.execute(sa.text("""
             INSERT INTO gn_commons.cor_field_module
                 (id_field, id_module)
             SELECT id_field, :id_module
             FROM gn_commons.t_additional_fields
             WHERE field_name IN ('birth_year', 'death_date');
-        """).bindparams(id_module = id_module)
-    )
+        """).bindparams(id_module=id_module))
 
-    op.execute(
-        sa.text("""
+    op.execute(sa.text("""
             INSERT INTO gn_commons.cor_field_object
                 (id_field, id_object)
             SELECT id_field, :id_object
             FROM gn_commons.t_additional_fields
             WHERE field_name IN ('birth_year', 'death_date');
-        """).bindparams(id_object = id_object)
-    )
+        """).bindparams(id_object=id_object))
+
 
 def downgrade():
     op.execute(sa.text("""
@@ -101,5 +97,7 @@ def downgrade():
 
     # cor_module_dataset is deleted in cascade with the dataset.
     op.execute(
-        sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'ADDITIONAL_DATA_INDIVIDUALS'")
+        sa.text(
+            "DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'ADDITIONAL_DATA_INDIVIDUALS'"
+        )
     )

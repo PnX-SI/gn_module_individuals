@@ -13,6 +13,7 @@ import sqlalchemy as sa
 revision = "0002_occtax_indiv_samples"
 down_revision = "0001_individuals_samples"
 
+
 def upgrade():
     # --- Occtax integration: a few Vanoise records referencing our individuals ---
     # Dedicated acquisition framework and dataset for this test data, so no
@@ -200,7 +201,7 @@ def upgrade():
             '2026-07-03 11:30', '2026-07-10 13:10', '2026-07-18 07:55'
         )
         """))
-    
+
     op.execute(sa.text("""
         INSERT INTO pr_occtax.t_occurrences_occtax (id_releve_occtax, cd_nom, nom_cite, meta_v_taxref)
         SELECT r.id_releve_occtax, 61098, 'Bouquetin des Alpes', 'Taxref v18'
@@ -296,6 +297,7 @@ def upgrade():
         WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
     """))
 
+
 def downgrade():
     conn = op.get_bind()
 
@@ -315,7 +317,9 @@ def downgrade():
 
     # cor_module_dataset is deleted in cascade with the dataset.
     op.execute(
-        sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'OCCTAX_INDIVIDUALS_TEST'")
+        sa.text(
+            "DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'OCCTAX_INDIVIDUALS_TEST'"
+        )
     )
 
     op.execute(sa.text("""
