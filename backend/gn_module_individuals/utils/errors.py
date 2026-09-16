@@ -15,6 +15,7 @@ class ApiErrorCode(str, Enum):
     NOT_FOUND = "NotFound"
     HAS_DEPLOYMENT = "HasDeployment"
     HAS_OBSERVATION = "HasObservation"
+    ALREADY_LINKED = "AlreadyLinked"
     INVALID_FILTER = "InvalidFilter"
     MISSING_JSON_BODY = "JsonBodyMissing"
     VALIDATION_ERROR = "ValidationError"

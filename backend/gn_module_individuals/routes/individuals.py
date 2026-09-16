@@ -319,6 +319,7 @@ def individual(id_individual, scope):
                 joinedload(IndividualDeployments.nomenclature_deployment_type),
                 joinedload(IndividualDeployments.nomenclature_deployment_location),
             ),
+            selectinload(TIndividuals.modules),
         )
         .where(TIndividuals.id_individual == id_individual)
     )

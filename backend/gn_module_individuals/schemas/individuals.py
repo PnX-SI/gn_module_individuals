@@ -16,6 +16,7 @@ from geonature.core.gn_commons.models import TAdditionalFields
 
 from .. import MODULE_CODE
 from .deployments import DeploymentSchema
+from .modules import IndividualModuleSchema
 from .utils import get_label, is_nomenclature_of_type
 from ..utils.errors import APIError, ApiErrorCode
 
@@ -173,6 +174,9 @@ class IndividualDetailSchema(IndividualBaseSchema):
     # would otherwise try to read `.deferred` off that RelationshipProperty and crash, since
     # only ColumnProperty supports it. data_key keeps the JSON output key as "deployments".
     deployments_list = fields.Method("get_deployments", dump_only=True, data_key="deployments")
+    # Named differently from the model's `modules` relationship for the same
+    # reason as deployments_list above.
+    modules_list = fields.Method("get_modules", dump_only=True, data_key="modules")
 
     last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
     last_observation_observers = fields.Method("get_last_observation_observers", dump_only=True)
@@ -182,6 +186,9 @@ class IndividualDetailSchema(IndividualBaseSchema):
 
     def get_lb_nom(self, obj):
         return obj.taxon.lb_nom if obj.taxon else None
+
+    def get_modules(self, obj):
+        return IndividualModuleSchema(many=True).dump(obj.modules)
 
     def get_last_observation_date(self, obj):
         if obj.last_obs_date is None:
