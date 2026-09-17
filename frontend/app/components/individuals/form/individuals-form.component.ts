@@ -125,8 +125,6 @@ export class IndividualsFormComponent implements OnInit {
                 this.patchForm(datatable);
             }
           });
-
-
     });
 
     // To be sure to wait translations before setting permissions
@@ -218,12 +216,10 @@ export class IndividualsFormComponent implements OnInit {
         id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
       }
     );
-    console.log("1) patchForm: individual.additional_data",individual.additional_data)
-    console.log("2) patchForm: additionalFields",this.additionalFields)
+
     this.additionalFields.forEach((field) => {
       field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
     });
-    console.log("3) patchForm: additionalFields",this.additionalFields)
   }
 
   /**
@@ -250,8 +246,8 @@ export class IndividualsFormComponent implements OnInit {
         error: (err) => {
           this._errorHandler.handleHttpError(
             err,
-            { id: this.datatable.id_individual },
-            'Individuals.Individuals.ApiErrors'
+            { id: this.datatable.id_individual, name: this.datatable.individual_name },
+            this.formAction === 'ADD' ? 'Individuals.Individuals.Errors.AddedNOK' : 'Individuals.Individuals.Errors.EditedNOK'
           );
         },
       });

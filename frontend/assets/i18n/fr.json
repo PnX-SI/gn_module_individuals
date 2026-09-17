@@ -121,9 +121,9 @@
                 "NoGeometry" : "Cet individu ne dispose pas encore d'observation"
             },
             "Errors": {
-                "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
-                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
-                "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+                "AddedNOK" : "Cet individu n'a pas pu être créé. Erreur : {{ error }}",
+                "EditedNOK" : "L'individu' '{{ name }}' n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+                "DeletedNOK" : "L'individu' '{{ name }}' n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
             }
         },
         "Messages": {

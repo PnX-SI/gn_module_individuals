@@ -12,6 +12,8 @@ import { CommonService } from '@geonature_common/service/common.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import { DATATABLE_CONFIG } from '../../../utils/constants.util';
+import { dateFormat, timeFormat, getValuesLabels } from '../../../utils/functions.util';
+
 import { Individual } from '../../../models/individuals.models';
 import { DEPLOYMENT_MODEL, Deployment } from '../../../models/deployments.models';
 import { AccessResult, ItemCollection, DatatableColumnLink } from '../../../models/common.models';
@@ -19,7 +21,6 @@ import { ModalComponent } from '../../modal/modal.component'
 import { IndividualsService } from '../../../services/individuals.service';
 import { DeploymentsService } from '../../../services/deployments.service';
 import { DeploymentsFormComponent } from '../../deployments-form/deployments-form.component';
-
 
 @Component({
   selector: 'gn-individuals-individuals-info',
@@ -43,7 +44,6 @@ export class IndividualsInfoComponent implements OnInit {
   public allowedToEdit: AccessResult = {id: 0, access: false, message: null};
   public allowedToChangeDeployments: Record<number, AccessResult> = {};
   public defaultLang!: string;
-  private _individualId!: number;
   private _destroy$ = new Subject<void>();
   public additionalFields: Array<any> = [];
   public datatableColumnsLink: DatatableColumnLink[] = [
@@ -55,6 +55,9 @@ export class IndividualsInfoComponent implements OnInit {
   ]
   private _currentModule!: any;
   private _currentModuleObjectCode = 'INDIVIDUALS';
+  public dateFormat = dateFormat;
+  public getValuesLabels = getValuesLabels;
+  public timeFormat = timeFormat;
 
   constructor(
     private _config: ConfigService,
@@ -85,7 +88,6 @@ export class IndividualsInfoComponent implements OnInit {
           items: Object.values(datatable?.deployments ?? {})
         });
 
-        this._individualId = datatable.id_individual;
         this._setPermissions(datatable);
 
         // Get additional data if exists
@@ -154,17 +156,19 @@ export class IndividualsInfoComponent implements OnInit {
   }
 
   onDelete(): void {
-    this._service.deleteIndividual(this._individualId).subscribe({
+    this._service.deleteIndividual(this.datatable.id_individual).subscribe({
       next: (res) => {
         this._commonService.translateToaster('info', 'Individuals.Individuals.Messages.Deleted', {
-          id: this._individualId,
+          id: this.datatable.id_individual,
+          name: this.datatable.individual_name
         });
         this._router.navigate(['/individuals/individuals']);
       },
       error: (err) => {
         const msg = err.name + ':' + err.message || JSON.stringify(err);
         this._commonService.translateToaster('error', 'Individuals.Individuals.Errors.DeletedNOK', {
-          id: this._individualId,
+          id: this.datatable.id_individual,
+          name: this.datatable.individual_name,
           error: msg,
         });
       },
@@ -173,7 +177,7 @@ export class IndividualsInfoComponent implements OnInit {
 
   private _loadDeploymentData(): void {
     this._individualsService
-      .getIndividual(this._individualId)
+      .getIndividual(this.datatable.id_individual)
       .pipe(
         tap((data) => this._setPermissions(data)),
         takeUntil(this._destroy$)

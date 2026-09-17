@@ -39,7 +39,7 @@
         [class.is-invalid]="form.get('individual_name')?.invalid"
       />
       <small
-        class="text-danger d-block d-flex justify-content-end"
+        class="text-danger d-block d-flex"
         *ngIf="form.get('individual_name')?.errors?.['pattern']"
       >
         {{ 'Individuals.Errors.' + [formConstraints['individual_name'].help] | translate }}
@@ -95,7 +95,7 @@
     </div>
 
     <!-- TEXTAREA : comment -->
-    <div class="form-group w-100">
+    <div class="form-group">
       <label class="small">{{ 'Individuals.Individuals.Fields.comment' | translate }}</label>
       <textarea
         type="textarea"
@@ -105,11 +105,11 @@
         [placeholder]="'Individuals.PlaceHolder.writeMore' | translate"
         [class.is-invalid]="form.get('comment')?.invalid"
       ></textarea>
-      <small class="d-flex justify-content-end text-muted">
+      <small class="d-flex text-muted">
         {{ $any(form.get('comment'))?.value?.length || 0 }}/{{ formConstraints['comment'].maxLength }}
       </small>
       <small
-          class="text-danger d-block d-flex justify-content-end"
+          class="text-danger d-block d-flex"
           *ngIf="form.get('comment')?.errors?.['pattern']"
         >
           {{ 'Individuals.Errors.' + [formConstraints['comment'].help] | translate }}
