@@ -212,6 +212,7 @@ def upgrade():
         JOIN n_loc nl        ON nl.mnemonique      = d.loc_mnemo;
     """))
 
+
 def downgrade():
     conn = op.get_bind()
 

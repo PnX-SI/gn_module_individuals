@@ -13,6 +13,7 @@ import sqlalchemy as sa
 revision = "0003_monitoring_indiv_samples"
 down_revision = "0002_occtax_indiv_samples"
 
+
 def upgrade():
     conn = op.get_bind()
 
@@ -112,6 +113,7 @@ def upgrade():
             JOIN gn_monitoring.t_individuals i ON i.individual_name = o.individual_name
         """))
 
+
 def downgrade():
     conn = op.get_bind()
 
@@ -135,7 +137,7 @@ def downgrade():
                     'Pointe de la Réchasse', 'Plan du Lac', 'Refuge de l''Arpont', 'Col d''Aussois'
                 )
                 """))
-        
+
         # cor_module_dataset is deleted in cascade with the dataset.
         op.execute(
             sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'CMR_BOUQUETIN'")
