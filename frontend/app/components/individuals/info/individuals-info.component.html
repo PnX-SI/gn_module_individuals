@@ -62,8 +62,30 @@
       <h3 class="text-muted">
         {{ field.attribut_label }}
       </h3>
-      <p style="white-space: pre-line;">
-        {{ field.value ?? "-" }}
+      <p *ngIf="field.type_widget == 'date'" style="white-space: pre-line;">
+        {{ dateFormat(datatable['additional_data']?.[field.attribut_name]) ?? "-" }}
+      </p>
+      <p *ngIf="field.type_widget == 'time'" style="white-space: pre-line;">
+        {{ timeFormat(datatable['additional_data']?.[field.attribut_name]) ?? "-" }}
+      </p>
+      <p *ngIf="field.type_widget == 'select' || field.type_widget == 'radio' || field.type_widget == 'checkbox' || field.type_widget == 'multiselect'" style="white-space: pre-line;">
+        {{ getValuesLabels(field.values,datatable['additional_data']?.[field.attribut_name]) ?? "-" }}
+      </p>
+      <p *ngIf="field.type_widget == 'number' || field.type_widget == 'text' || field.type_widget == 'textarea'" style="white-space: pre-line;">
+        {{ datatable['additional_data']?.[field.attribut_name] ?? "-" }}
+      </p>
+    </div>
+  </div>
+
+  <div class="content row">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.modules' | translate }}</h3>
+      <p>
+        <span *ngFor="let module of datatable['modules']; let last = last">
+          {{ module.module_code}}
+          <span *ngIf="!last">,</span>  
+        </span>
+        <span *ngIf="datatable['modules'].length == 0">-</span>
       </p>
     </div>
   </div>

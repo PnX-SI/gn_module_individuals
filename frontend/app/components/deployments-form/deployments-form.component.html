@@ -43,7 +43,7 @@
         [class.is-invalid]="form.get('marking_code')?.invalid"
       />
       <small
-        class="text-danger d-block d-flex justify-content-end"
+        class="text-danger d-block d-flex"
         *ngIf="form.get('marking_code')?.errors?.['pattern']"
       >
         {{ 'Individuals.Errors.' + [formConstraints['marking_code'].help] | translate }}
@@ -64,7 +64,7 @@
         "
       />
       <small
-        class="text-danger d-block d-flex justify-content-end"
+        class="text-danger d-block d-flex"
         *ngIf="form.hasError('invalidStartDate')"
       >
         {{ 'Individuals.Messages.startDateNOK' | translate }}
@@ -85,7 +85,7 @@
         "
       />
       <small
-        class="text-danger d-block d-flex justify-content-end"
+        class="text-danger d-block d-flex"
         *ngIf="form.hasError('invalidEndDate')"
       >
         {{ 'Individuals.Messages.endDateNOK' | translate }}
@@ -103,11 +103,11 @@
         [placeholder]="'Individuals.PlaceHolder.writeMore' | translate"
         [class.is-invalid]="form.get('comment')?.invalid"
       ></textarea>
-      <small class="d-flex justify-content-end text-muted">
+      <small class="d-flex text-muted">
         {{ $any(form.get('comment'))?.value?.length || 0 }}/{{ formConstraints['comment'].maxLength }}
       </small>
       <small
-          class="text-danger d-block d-flex justify-content-end"
+          class="text-danger d-block d-flex"
           *ngIf="form.get('comment')?.errors?.['pattern']"
         >
           {{ 'Individuals.Errors.' + [formConstraints['comment'].help] | translate }}

@@ -25,6 +25,7 @@ export const INDIVIDUAL_MODEL = {
   deployed_devices: '',
   additional_data: {},
   deployments: [],
+  modules: []
 };
 
 export type Individual = typeof INDIVIDUAL_MODEL & { cruved: Cruved };
@@ -56,6 +57,7 @@ export interface CreateIndividualDto {
   comment: string;
   deployments: [];
   additional_data: {};
+  modules: [];
 }
 
 // This model is only used to PUT data to the API (dto = data transfer object)

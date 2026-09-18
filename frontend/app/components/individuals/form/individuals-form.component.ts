@@ -52,6 +52,7 @@ export class IndividualsFormComponent implements OnInit {
   public allowedToAddDeployments: AccessResult = { id: 0, access: false, message: null };
   private _currentModule!: any;
   private _currentModuleObjectCode = 'INDIVIDUALS';
+  public individualsObjectModules: any[] = [];
 
   constructor(
     private _route: ActivatedRoute,
@@ -70,31 +71,13 @@ export class IndividualsFormComponent implements OnInit {
 
   ngOnInit(): void {
     this._currentModule = this._module.currentModule;
-
-    // Form initialization
-    this.form = this._fb.group({
-      id_individual: [null],
-      individual_name: [
-        null,
-        [
-          Validators.required,
-          Validators.maxLength(this.formConstraints.individual_name.maxLength),
-          Validators.pattern(this.formConstraints.individual_name.pattern),
-        ],
-      ],
-      cd_nom: [null, Validators.required],
-      id_nomenclature_sex: [null, Validators.required],
-      active: [null, Validators.required],
-      comment: [
-        null,
-        [
-          Validators.maxLength(this.formConstraints.comment.maxLength),
-          Validators.pattern(this.formConstraints.comment.pattern),
-        ],
-      ],
-      deployments: this._fb.array<FormGroup>([]),
-      additional_data: this._fb.group({}),
-    });
+    this.individualsObjectModules = this._module.getModules()
+      .filter(module => !!(module as any).module_objects?.INDIVIDUALS)
+      .map(module => ({
+            label: (module as any).module_code,
+            value: (module as any).id_module
+        })
+      );
 
     // First initialisation of the datatable (resolver) and
     // additional data
@@ -125,8 +108,35 @@ export class IndividualsFormComponent implements OnInit {
                 this.patchForm(datatable);
             }
           });
+    });
 
-
+    // Form initialization
+    this.form = this._fb.group({
+      id_individual: [null],
+      modules: [
+        this.formAction === 'ADD' ? [this._currentModule.id_module] : [],
+        Validators.required
+      ],
+      individual_name: [
+        null,
+        [
+          Validators.required,
+          Validators.maxLength(this.formConstraints.individual_name.maxLength),
+          Validators.pattern(this.formConstraints.individual_name.pattern),
+        ],
+      ],
+      cd_nom: [null, Validators.required],
+      id_nomenclature_sex: [null, Validators.required],
+      active: [null, Validators.required], // In DB is nullable
+      comment: [
+        null,
+        [
+          Validators.maxLength(this.formConstraints.comment.maxLength),
+          Validators.pattern(this.formConstraints.comment.pattern),
+        ],
+      ],
+      deployments: this._fb.array<FormGroup>([]),
+      additional_data: this._fb.group({}),
     });
 
     // To be sure to wait translations before setting permissions
@@ -216,14 +226,18 @@ export class IndividualsFormComponent implements OnInit {
       {
         cd_nom: { cd_nom: individual.cd_nom, nom_valide: individual.nom_vern },
         id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
+        modules: individual.modules.map((module: any) => module.id_module)
+          // value: individual.modules[0].id_module, // Mettre Individuals par défaut
+        // {
+        //   label: this._currentModule.module_name,
+        //   value: this._currentModule.id_module, // Mettre Individuals par défaut
+        // },
       }
     );
-    console.log("1) patchForm: individual.additional_data",individual.additional_data)
-    console.log("2) patchForm: additionalFields",this.additionalFields)
+
     this.additionalFields.forEach((field) => {
       field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
     });
-    console.log("3) patchForm: additionalFields",this.additionalFields)
   }
 
   /**
@@ -250,8 +264,8 @@ export class IndividualsFormComponent implements OnInit {
         error: (err) => {
           this._errorHandler.handleHttpError(
             err,
-            { id: this.datatable.id_individual },
-            'Individuals.Individuals.ApiErrors'
+            { id: this.datatable.id_individual, name: this.datatable.individual_name },
+            this.formAction === 'ADD' ? 'Individuals.Individuals.Errors.AddedNOK' : 'Individuals.Individuals.Errors.EditedNOK'
           );
         },
       });

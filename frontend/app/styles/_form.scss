@@ -3,7 +3,10 @@ $input-font-weight: 400;
 $input-color: #495057;
 $border: 1px solid #ced4da;
 $input-place-holder-color: #6c757d;
-$input-invalid-color: #ff0000;
+$invalid-color: #ff0000;
+$input-border-radius: 0.2rem;
+$input-border-left-valid: 5px solid transparent;
+$input-border-left-invalid: 5px solid $invalid-color;
 
 /* Space between label and input */
 .form-group, pnx-autocomplete {
@@ -15,12 +18,21 @@ $input-invalid-color: #ff0000;
 }
 
 // The input keep the size of its content, not the size of the form-group
-.form-group .form-control:not(textarea),.form-group .form-check, .ng-dropdown-panel {
+// .dynamic-form .form-control for additional data forms (dynamic-form-generator component)
+// exept for the date and multiselect widgets that needs .input-group and .ng-select-container
+.form-group .form-control:not(textarea), .dynamic-form .form-control:not(textarea),
+.dynamic-form .input-group, .dynamic-form .ng-select {
   width: fit-content;
 }
 
+.form-group textarea, .dynamic-form textarea {
+  min-width: 200px;
+  max-width: 100%;
+  width: 50%;
+}
+
 // For ng-select
-.form-group > .form-group {
+.form-group .ng-select-searchable {
     margin-bottom: 0;
     width: fit-content;
 }
@@ -29,16 +41,16 @@ $input-invalid-color: #ff0000;
   margin-top: 0.5rem;
 }
 
-.form-group small,
-.form-group label,
-pnx-autocomplete small {
+.form-group > small,
+.form-group > label,
+pnx-autocomplete > small, pnx-date > small {
   display: inline-block;
   margin-bottom: 0.5rem;
 }
 
 // Delete margin-bottom for all the <small> brothers after <textarea>
 .form-group textarea ~ small {
-    margin-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 // Delete margin-top for the 2nd <small> brother after <textarea>
@@ -59,6 +71,10 @@ with bootstrap components (.form-control-sm)
 }
 */
 // Select options
+.ng-dropdown-panel {
+  width: fit-content;
+}
+
 .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
   font-size: $input-font-size;
   font-weight: $input-font-weight;
@@ -80,7 +96,7 @@ with bootstrap components (.form-control-sm)
 .ng-select.ng-select-single .ng-select-container {
   height: calc(1.5em + 0.5rem + 2px);
   min-height: calc(1.5em + 0.5rem + 2px);
-  border-radius: 0.2rem;
+  border-radius: $input-border-radius;
   border: $border
 }
 
@@ -116,31 +132,90 @@ with bootstrap components (.form-control-sm)
   font-size: $input-font-size;
 }
 
-// Radio buttons
+// Input Radio and checkbox
+// The input keep the size of its content, not the size of the form-group
+// .radio-group-container (radio), .ng-star-inserted (checkbox)
 .form-check {
+  width: fit-content; // The input keep the size of its content, not the size of the form-group
   display: flex;
   flex-wrap: wrap;
-  column-gap: 1.5rem;
-  padding-left: calc(0.25rem + 1.5rem);
+  flex-direction: row;
+  column-gap: 1.6rem;
   border: none;
-  border-left: 5px solid transparent;
+  border-left: $input-border-left-valid;
+
+  label {
+    font-size: $input-font-size;
+    font-weight: $input-font-weight;
+    color: $input-color;
+  }
+
+  .form-check-input {
+    margin-left: calc(-1.25rem + 5px)
+  }
+
+  label {
+    margin-left: 5px;
+  }
 }
 
-.form-check-input {
-  accent-color: $input-color;
+// For radio et checkbox : for additional data forms (dynamic-form-generator component)
+.dynamic-form div[ng-reflect-ng-switch="checkbox"] div, .radio-group-container {
+  width: fit-content; // The input keep the size of its content, not the size of the form-group
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  column-gap: 0.5rem;
+  border: none;
+  border-left: $input-border-left-valid;
+  padding-left: 5px;
+
+  .custom-checkbox {
+    width: fit-content;
+    border: none;
+    padding-left: 1.5rem; 
+  }
+
+  label {
+    font-size: $input-font-size;
+    font-weight: $input-font-weight;
+    color: $input-color;
+  }
+
+  // For radio 
+  &.border-red {
+    border-left: $input-border-left-invalid !important;
+    border-radius: $input-border-radius !important;
+    padding-left: 5px !important;
+  }
+
+  // For checkbox : To apply the invalid border to this element 
+  // and not to each input
+  &:has(.custom-checkbox.ng-invalid) {
+    border-left: $input-border-left-invalid !important;
+    border-radius: $input-border-radius !important;
+    padding-left: 5px !important;
+  }
+
+  .custom-checkbox.ng-invalid {
+    border-left: none !important;
+  }
 }
 
+.radio-group-container {
+    padding-left: 5px !important;
+}
 
 .form-group.ng-invalid.is-required .form-check {
-  border-radius: 0.2rem;
-  border-left: 5px solid $input-invalid-color;
+  border-radius: $input-border-radius;
+  border-left: $input-border-left-invalid;
 }
 
 // Input type=date
 .form-control.is-invalid {
-  border-radius: 0.2rem;
+  border-radius: $input-border-radius;
   border: $border;
-  border-left: 5px solid $input-invalid-color;
+  border-left:$input-border-left-valid;
   background-image: none;
   padding-right: 0.5rem;
 }
