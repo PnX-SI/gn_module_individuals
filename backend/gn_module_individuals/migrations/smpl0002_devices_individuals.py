@@ -1,5 +1,7 @@
 """Insert devices, individuals and deployments samples data for demo
 
+Individuals-samples demo data.
+
 Revision ID: smpl0002_devices_individuals
 Revises: smpl0001_metadata
 Create Date: 2026-09-18 00:00:00.000000
@@ -65,17 +67,17 @@ def upgrade():
         INSERT INTO gn_monitoring.t_individuals
             (individual_name, cd_nom, id_nomenclature_sex, active, "comment", id_digitiser, additional_data)
         VALUES
-            ('Cynthia',  459629, ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Jolie petite femelle lagopède',  4, '{"birth_year": 2020}'),
-            ('Claire',     2962, ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Magnifique femelle tétras',      6, '{"birth_year": 2019}'),
-            ('Christophe', 2962, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Chef de tous les tétras',        4, '{"birth_year": 2018}'),
-            ('Tempête',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Bouquetin marqué',               6, '{"birth_year": 2015}'),
-            ('Patastrophe',61098,ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               3, '{"birth_year": 2016}'),
-            ('Obiwan',    61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               4, '{"birth_year": 2017}'),
-            ('Evasion',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Bouquetin marqué',               6, '{"birth_year": 2014}'),
-            ('Queen',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       3, '{"birth_year": 2013, "death_date": {"year": 2023, "month": 8, "day": 1}}'),
-            ('Quechua',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               3, '{"birth_year": 2012}'),
-            ('Kalinka',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       4, '{"birth_year": 2011, "death_date": {"year": 2023, "month": 9, "day": 1}}'),
-            ('Pavot',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               4, '{"birth_year": 2019}')
+            ('Cynthia',     2962,   ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Femelle Tétras pas commode',    4, '{"birth_year": 2020}'),
+            ('Clairette',   2962,   ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Magnifique nageuse',            6, '{"birth_year": 2019}'),
+            ('Christophe',  2962,   ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Chef de tous les tétras',       4, '{"birth_year": 2018}'),
+            ('Tempête',     61098,  ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Bouquetin marqué',              6, '{"birth_year": 2015}'),
+            ('Patastrophe', 61098,  ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',              3, '{"birth_year": 2016}'),
+            ('Obiwan',      61098,  ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',              4, '{"birth_year": 2017}'),
+            ('Evasion',     61098,  ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Bouquetin marqué',              6, '{"birth_year": 2014}'),
+            ('Queen',       61098,  ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',      3, '{"birth_year": 2013, "death_date": {"year": 2023, "month": 8, "day": 1}}'),
+            ('Quechua',     61098,  ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',              3, '{"birth_year": 2012}'),
+            ('Kalinka',     61098,  ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',      4, '{"birth_year": 2011, "death_date": {"year": 2023, "month": 9, "day": 1}}'),
+            ('Pavot',       61098,  ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',              4, '{"birth_year": 2019}')
     """))
 
     op.execute(sa.text("""

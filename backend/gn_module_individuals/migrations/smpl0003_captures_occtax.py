@@ -1,5 +1,9 @@
-"""Insert Occtax sightings (marked bouquetins, tracking) and captures
-(bouquetins and tétras-lyre) samples data for demo, with the additional
+"""Insert Occtax observation and captures
+
+Individuals-samples demo data.
+
+Observations (marked bouquetins, tracking) and captures
+(bouquetins and tétras-lyre), with the additional
 fields from smpl0001_metadata, and link individuals to modules (OCCTAX, and
 CMR_BOUQUETIN if installed) via cor_individual_module.
 
