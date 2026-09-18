@@ -77,6 +77,19 @@
     </div>
   </div>
 
+  <div class="content row">
+    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
+      <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.modules' | translate }}</h3>
+      <p>
+        <span *ngFor="let module of datatable['modules']; let last = last">
+          {{ module.module_code}}
+          <span *ngIf="!last">,</span>  
+        </span>
+        <span *ngIf="datatable['modules'].length == 0">-</span>
+      </p>
+    </div>
+  </div>
+
   <div class="content row one-per-row">
     <div
       class="col-12 padding-sm"

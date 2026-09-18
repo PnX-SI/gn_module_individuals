@@ -119,6 +119,7 @@ export class IndividualsService {
       comment: individual.comment,
       additional_data: individual.additional_data,
       deployments: individual.deployments,
+      modules: individual.modules,
     };
 
     if (formAction === 'ADD') {

@@ -99,7 +99,8 @@
                 "taxref_nom_vern" : "Taxon",
                 "deployed_devices" : "Dispositif(s) de suivi déployé(s)",
                 "deployed_markings" : "Marquage(s) déployé(s)",
-                "deployments" : "Déploiement(s) associé(s)"
+                "deployments" : "Déploiement(s) associé(s)",
+                "modules": "Module(s) GeoNature associé(s)"
             },
             "PlaceHolder": {
                 "individual_name": "Indiquer le nom de l'individu",
