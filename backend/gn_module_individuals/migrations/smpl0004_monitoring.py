@@ -1,8 +1,9 @@
-"""Insert monitoring individuals samples data for demo only if submodule cmr_bouquetins is installed
+"""Insert monitoring individuals samples data for demo only if submodule
+cmr_bouquetins is installed
 
-Revision ID: 0003_monitoring_indiv_samples
-Revises:
-Create Date: 2026-03-19 16:53:24.982945
+Revision ID: smpl0004_monitoring
+Revises: smpl0003_captures_occtax
+Create Date: 2026-09-18 00:00:00.000000
 
 """
 
@@ -10,8 +11,8 @@ from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = "0003_monitoring_indiv_samples"
-down_revision = "0002_occtax_indiv_samples"
+revision = "smpl0004_monitoring"
+down_revision = "smpl0003_captures_occtax"
 
 
 def upgrade():
@@ -19,7 +20,8 @@ def upgrade():
 
     # --- Monitoring integration: CMR_BOUQUETIN sub-module on our marked ibex ---
     # The sub-module must have been installed beforehand via
-    # ./scripts/setup_cmr_demo.sh (see that script for details).
+    # ./scripts/setup_cmr_demo.sh (see that script for details). Its dataset
+    # is created by smpl0001_metadata.
     cmr_installed = conn.execute(
         sa.text(
             "SELECT EXISTS (SELECT 1 FROM gn_commons.t_modules WHERE module_code = 'CMR_BOUQUETIN')"
@@ -27,28 +29,6 @@ def upgrade():
     ).scalar()
 
     if cmr_installed:
-        # Dedicated dataset: the dataset "1" reused for Occtax is associated
-        # (gn_commons.cor_module_dataset) with the OCCTAX module only, not CMR_BOUQUETIN.
-        op.execute(sa.text("""
-            INSERT INTO gn_meta.t_datasets (
-                id_acquisition_framework, dataset_name, dataset_shortname, dataset_desc,
-                marine_domain, terrestrial_domain, id_digitizer
-            )
-            SELECT
-                af.id_acquisition_framework, 'Suivi CMR bouquetins TEST', 'CMR_BOUQUETIN',
-                'Jeu de données du suivi capture-marquage-recapture des bouquetins du Parc national de la Vanoise',
-                FALSE, TRUE, 4
-            FROM gn_meta.t_acquisition_frameworks af
-            WHERE af.acquisition_framework_name = 'Cadre d''acquisition de test Individus'
-        """))
-
-        op.execute(sa.text("""
-            INSERT INTO gn_commons.cor_module_dataset (id_module, id_dataset)
-            SELECT m.id_module, d.id_dataset
-            FROM gn_commons.t_modules m, gn_meta.t_datasets d
-            WHERE m.module_code = 'CMR_BOUQUETIN' AND d.dataset_shortname = 'CMR_BOUQUETIN'
-        """))
-
         op.execute(sa.text("""
             WITH site_data (base_site_name, lon, lat, id_digitiser) AS (
                 VALUES
@@ -117,15 +97,9 @@ def upgrade():
 def downgrade():
     conn = op.get_bind()
 
-    dataset = conn.execute(
-        sa.text(
-            "SELECT id_dataset FROM gn_meta.t_datasets WHERE dataset_shortname = 'CMR_BOUQUETIN'"
-        )
-    ).scalar()
-
-    # DELETEs (ON DELETE CASCADE) to
-    # visits/observations and occurrences/counts, including synthese
-    # (synthese deletion triggers on occtax and monitoring).
+    # DELETEs (ON DELETE CASCADE) to visits/observations, including synthese
+    # (synthese deletion triggers on monitoring). The CMR_BOUQUETIN dataset
+    # itself is created by, and deleted with, smpl0001_metadata.
     if conn.execute(
         sa.text(
             "SELECT EXISTS (SELECT 1 FROM gn_commons.t_modules WHERE module_code = 'CMR_BOUQUETIN')"
@@ -137,13 +111,3 @@ def downgrade():
                     'Pointe de la Réchasse', 'Plan du Lac', 'Refuge de l''Arpont', 'Col d''Aussois'
                 )
                 """))
-
-        # cor_module_dataset is deleted in cascade with the dataset.
-        op.execute(
-            sa.text("DELETE FROM gn_meta.t_datasets WHERE dataset_shortname = 'CMR_BOUQUETIN'")
-        )
-
-    op.execute(sa.text("""
-            DELETE FROM gn_monitoring.t_base_visits
-            WHERE id_dataset = :dataset
-            """).bindparams(dataset=dataset))

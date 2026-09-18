@@ -1,12 +1,8 @@
-"""Insert individuals samples data for demo
+"""Insert devices, individuals and deployments samples data for demo
 
-Standalone "individuals-samples" branch: not applied by `geonature db
-autoupgrade`, run manually (or in CI) with:
-    geonature db upgrade individuals-samples@head
-
-Revision ID: individuals_samples
-Revises:
-Create Date: 2026-03-19 16:53:24.982945
+Revision ID: smpl0002_devices_individuals
+Revises: smpl0001_metadata
+Create Date: 2026-09-18 00:00:00.000000
 
 """
 
@@ -14,10 +10,8 @@ from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = "0001_individuals_samples"
-down_revision = None
-branch_labels = ("individuals-samples",)
-depends_on = ("individuals",)
+revision = "smpl0002_devices_individuals"
+down_revision = "smpl0001_metadata"
 
 
 def upgrade():
@@ -65,6 +59,8 @@ def upgrade():
             ON n.mnemonique = v.mnemonique;
     """))
 
+    # Queen and Kalinka are the 2 inactive bouquetins: they carry a death_date
+    # in addition to their birth_year.
     op.execute(sa.text("""
         INSERT INTO gn_monitoring.t_individuals
             (individual_name, cd_nom, id_nomenclature_sex, active, "comment", id_digitiser, additional_data)
@@ -76,9 +72,9 @@ def upgrade():
             ('Patastrophe',61098,ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               3, '{"birth_year": 2016}'),
             ('Obiwan',    61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               4, '{"birth_year": 2017}'),
             ('Evasion',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), TRUE,  'Bouquetin marqué',               6, '{"birth_year": 2014}'),
-            ('Queen',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       3, '{"birth_year": 2013}'),
+            ('Queen',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       3, '{"birth_year": 2013, "death_date": {"year": 2023, "month": 8, "day": 1}}'),
             ('Quechua',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               3, '{"birth_year": 2012}'),
-            ('Kalinka',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       4, '{"birth_year": 2011}'),
+            ('Kalinka',   61098, ref_nomenclatures.get_id_nomenclature('SEXE','2'), FALSE, 'Bouquetin marqué inactif',       4, '{"birth_year": 2011, "death_date": {"year": 2023, "month": 9, "day": 1}}'),
             ('Pavot',     61098, ref_nomenclatures.get_id_nomenclature('SEXE','3'), TRUE,  'Bouquetin marqué',               4, '{"birth_year": 2019}')
     """))
 
@@ -214,8 +210,6 @@ def upgrade():
 
 
 def downgrade():
-    conn = op.get_bind()
-
     op.execute(sa.text("""
 DO $$
 BEGIN
