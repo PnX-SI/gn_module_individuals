@@ -348,13 +348,18 @@ def individual(id_individual, scope):
 @json_resp
 def create_individual(scope):
     """
-    Post one new individual, optionally with its deployments
+    Post one new individual, optionally with its deployments and linked modules
 
     .. :quickref: Individuals;
 
     Expects a JSON body matching ``IndividualWriteSchema``. May include a
     ``deployments`` list to create deployments attached to the new individual
     in the same request. See :func:`_sync_deployments`.
+
+    May also include a ``modules`` list to link the individual to modules in
+    the same request (same pattern as ``TDatasets.modules`` for datasets in
+    gn_meta): there is no dedicated link/unlink endpoint, an individual is
+    only ever associated to a module by creating or updating the individual.
 
     :returns: the created individual
     :rtype: dict<TIndividuals>
@@ -486,6 +491,12 @@ def update_individual(id_individual, scope):
     an item with an ``id_deployment`` updates the matching existing
     deployment, an item without one creates a new deployment attached to
     this individual. See :func:`_upsert_deployments`.
+
+    May also include a ``modules`` list to replace the individual's linked
+    modules in the same request: an omitted ``modules`` key leaves existing
+    links untouched, an empty list clears them. There is no dedicated
+    link/unlink endpoint (same pattern as ``TDatasets.modules`` for datasets
+    in gn_meta).
 
     :param id_individual: the id_individual
     :type id_individual: int

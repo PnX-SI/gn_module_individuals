@@ -1,4 +1,4 @@
-from marshmallow import fields, validates
+from marshmallow import ValidationError, fields, validates
 from utils_flask_sqla.schema import SmartRelationshipsMixin
 from utils_flask_sqla_geo.schema import GeoAlchemyAutoSchema, GeoModelConverter, GeometryField
 from datetime import datetime
@@ -12,7 +12,7 @@ from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
 from pypnusershub.schemas import UserSchema
 from geonature.core.gn_monitoring.models import TIndividuals
-from geonature.core.gn_commons.models import TAdditionalFields
+from geonature.core.gn_commons.models import TAdditionalFields, TModules
 
 from .. import MODULE_CODE
 from .deployments import DeploymentSchema
@@ -216,8 +216,36 @@ class IndividualWriteSchema(IndividualBaseSchema):
     uuid_individual = fields.UUID(dump_only=True)
     # See IndividualDetailSchema for why this can't be named `deployments`.
     deployments_list = fields.Method("get_deployments", dump_only=True, data_key="deployments")
+    # Only `id_module` is accepted on write: each entry is resolved to the existing
+    # TModules row (never modified), and assigning the list to TIndividuals.modules
+    # makes SQLAlchemy insert/delete the cor_individual_module rows on commit. There is
+    # no dedicated link/unlink endpoint; the association always goes through creating
+    # or updating the individual. A Method field (not Nested) so that
+    # SmartRelationshipsMixin does not exclude it by default, named `modules_list`
+    # (see IndividualDetailSchema) and mapped back to the relationship via `attribute`.
+    modules_list = fields.Method(
+        "get_modules", deserialize="load_modules", data_key="modules", attribute="modules"
+    )
 
     # Serialization
+
+    def get_modules(self, obj):
+        return IndividualModuleSchema(many=True).dump(obj.modules)
+
+    def load_modules(self, value):
+        if not isinstance(value, list):
+            raise ValidationError("modules must be a list.")
+        modules = []
+        for index, item in enumerate(value):
+            id_module = item.get("id_module") if isinstance(item, dict) else None
+            if not isinstance(id_module, int) or isinstance(id_module, bool):
+                raise ValidationError(f"modules[{index}].id_module must be an integer.")
+            module = db.session.get(TModules, id_module)
+            if module is None:
+                raise ValidationError(f"The module {id_module} does not exist.")
+            if module not in modules:
+                modules.append(module)
+        return modules
 
     def get_deployments(self, obj):
         deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
