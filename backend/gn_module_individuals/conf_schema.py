@@ -5,13 +5,17 @@ Toml Schema Specification for Configuration Parameters
 from marshmallow import Schema, fields
 
 
+class AdditionalFieldSchema(Schema):
+    CD_NOM = fields.Integer(required=True)
+    DATASET_SHORT_NAME = fields.String(required=True)
+    ID_DATASET = fields.Integer(required=True)
+    
 class GlobalSchema(Schema):
     ID_TAXON_LIST = fields.Integer(load_default=None)
     SELECTED_LAYER_COLOR = fields.String()
     UNSELECTED_LAYER_COLOR = fields.String()
     SELECTED_LAYER_OPACITY = fields.Integer()
     UNSELECTED_LAYER_OPACITY = fields.Integer()
-
 
 class IndividualsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
@@ -35,7 +39,10 @@ class IndividualsSchema(Schema):
             "removal_date",
         ],
     )
-
+    TAXON_DATASET = fields.List(
+        fields.Nested(AdditionalFieldSchema),
+        load_default=list
+    )
 
 class DevicesSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
