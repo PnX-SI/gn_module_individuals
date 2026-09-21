@@ -847,6 +847,112 @@ class TestUpdateIndividual:
 
 
 # ===========================================================================
+# modules integration in POST/PUT /individuals/individuals
+# (create_individual, update_individual)
+# ===========================================================================
+#
+# There is no dedicated link/unlink endpoint: an individual is associated to a
+# module only by creating or updating the individual with a `modules` list in
+# the payload (same pattern as TDatasets.modules in gn_meta's DatasetSchema).
+
+
+@pytest.fixture
+def target_module(modules):
+    """A module distinct from INDIVIDUALS."""
+    return modules[0]
+
+
+def _module_item(module):
+    return {"id_module": module.id_module}
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestIndividualModulesIntegration:
+
+    def test_create_individual_links_modules(self, users, target_module):
+        cd_nom = db.session.scalar(select(Taxref.cd_nom).limit(1))
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={
+                "individual_name": "New Individual",
+                "cd_nom": cd_nom,
+                "modules": [_module_item(target_module)],
+            },
+        )
+        assert r.status_code == 201
+        payload = r.get_json()
+        assert [m["id_module"] for m in payload["modules"]] == [target_module.id_module]
+
+        detail = self.client.get(
+            url_for("individuals.individual", id_individual=payload["id_individual"])
+        ).get_json()
+        assert [m["id_module"] for m in detail["modules"]] == [target_module.id_module]
+
+    def test_unknown_module_returns_400(self, users, individual):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "modules": [{"id_module": -1}],
+            },
+        )
+        assert r.status_code == 400
+        assert r.get_json()["name"] == ApiErrorCode.VALIDATION_ERROR
+
+    def test_update_individual_links_modules(self, users, individual, target_module):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "modules": [_module_item(target_module)],
+            },
+        )
+        assert r.status_code == 200
+        payload = r.get_json()
+        assert [m["id_module"] for m in payload["modules"]] == [target_module.id_module]
+        assert target_module in individual.modules
+
+    def test_update_individual_with_empty_modules_list_unlinks(
+        self, users, individual, target_module
+    ):
+        with db.session.begin_nested():
+            individual.modules.append(target_module)
+            db.session.flush()
+
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={
+                "individual_name": individual.individual_name,
+                "cd_nom": individual.cd_nom,
+                "modules": [],
+            },
+        )
+        assert r.status_code == 200
+        assert target_module not in individual.modules
+
+    def test_update_individual_without_modules_key_keeps_existing_links(
+        self, users, individual, target_module
+    ):
+        with db.session.begin_nested():
+            individual.modules.append(target_module)
+            db.session.flush()
+
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.put(
+            url_for("individuals.update_individual", id_individual=individual.id_individual),
+            json={"individual_name": individual.individual_name, "cd_nom": individual.cd_nom},
+        )
+        assert r.status_code == 200
+        assert target_module in individual.modules
+
+
+# ===========================================================================
 # _sync_deployments (invoked from create_individual / update_individual)
 # ===========================================================================
 
