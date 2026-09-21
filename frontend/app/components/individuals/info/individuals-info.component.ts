@@ -55,6 +55,8 @@ export class IndividualsInfoComponent implements OnInit {
   ]
   private _currentModule!: any;
   private _currentModuleObjectCode = 'INDIVIDUALS';
+  private _currentDataset = "";
+
   public dateFormat = dateFormat;
   public getValuesLabels = getValuesLabels;
   public timeFormat = timeFormat;
@@ -90,12 +92,16 @@ export class IndividualsInfoComponent implements OnInit {
 
         this._setPermissions(datatable);
 
+        // Get the temporaly configured dataset for the curent cd_nom
+        this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom).ID_DATASET;
+
         // Get additional data if exists
         this._dataFormService
           .getadditionalFields({
-            module_code: [this._currentModule.module_code],
-            object_code: [this._currentModuleObjectCode],
+            module_code: this._currentModule.module_code,
+            object_code: this._currentModuleObjectCode,
             // En attente des devs pour pouvoir sélectionner le taxon
+            id_dataset: this._currentDataset,
             // cd_nom: [datatable.cd_nom]
           })
           .pipe(takeUntil(this._destroy$))
