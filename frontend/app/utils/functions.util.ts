@@ -86,3 +86,15 @@ export function getValuesLabels(
 
   return labels.length > 0 ? labels.join(', ') : null;
 }
+
+/**
+ * Returns a decreasing ratio between 1 and 0 based on the value's position
+ * within the range.
+ * The first value returns 1 and the last value returns 0.
+ *
+ * @param rangeValue - Current position in the range (starting at 1).
+ * @param nbRanges - Total number of values in the range.
+ */
+export function getRatio(rangeValue: number, nbRanges: number): number {
+  return 1 - (rangeValue - 1) / (nbRanges - 1);
+}

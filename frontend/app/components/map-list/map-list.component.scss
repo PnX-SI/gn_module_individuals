@@ -40,15 +40,6 @@
   pointer-events: none;
 }
 
-// :host ::ng-deep #list-container {
-//   width: 100%;
-//   min-width: 0;
-// }
-
-// :host ::ng-deep #list-container > div {
-//   width: 100%;
-// }
-
 @media (max-width: 992px) {
   .map-list-container {
     grid-template-columns: 1fr;

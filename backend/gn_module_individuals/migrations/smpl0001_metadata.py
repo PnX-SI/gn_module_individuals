@@ -1,5 +1,6 @@
-"""Insert test metadata: acquisition framework, datasets and additional
-fields for the individuals-samples demo data.
+"""Insert acquisition framework, datasets and additional fields 
+
+Individuals-samples demo data.
 
 Standalone "individuals-samples" branch: not applied by `geonature db
 autoupgrade`, run manually (or in CI) with:
@@ -58,6 +59,14 @@ ADDITIONAL_FIELDS = {
         "description": "Date du décès présumée",
         "widget_name": "date",
         "field_order": 2,
+        "object_code": "INDIVIDUALS",
+        "module_code": "INDIVIDUALS",
+    },
+    "feather_obs": {
+        "field_label": "Plumage",
+        "description": "Observations du plumage",
+        "widget_name": "text",
+        "field_order": 3,
         "object_code": "INDIVIDUALS",
         "module_code": "INDIVIDUALS",
     },
@@ -138,6 +147,7 @@ ADDITIONAL_FIELDS = {
 FIELD_DATASETS = {
     "birth_year": ("CAPTURES_BOUQUETIN_TEST", "CAPTURES_TETRAS_TEST"),
     "death_date": ("CAPTURES_BOUQUETIN_TEST", "CAPTURES_TETRAS_TEST"),
+    "feather_obs": ("CAPTURES_BOUQUETIN_TEST", "CAPTURES_TETRAS_TEST"),
     "capture_type": ("CAPTURES_BOUQUETIN_TEST", "CAPTURES_TETRAS_TEST"),
     "capture_event": ("CAPTURES_BOUQUETIN_TEST", "CAPTURES_TETRAS_TEST"),
     "weight": ("CAPTURES_BOUQUETIN_TEST", "CAPTURES_TETRAS_TEST"),

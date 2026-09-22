@@ -20,6 +20,7 @@ import { IndividualsService } from '../../../services/individuals.service';
 import { DeploymentsService } from '../../../services/deployments.service';
 import { ModalComponent } from '../../modal/modal.component'
 import { DeploymentsFormComponent } from '../../deployments-form/deployments-form.component';
+import { DatasetsComponent } from '@geonature/GN2CommonModule/form/datasets/datasets.component';
 ;
 @Component({
   selector: 'gn-individuals-individuals-form',
@@ -53,6 +54,7 @@ export class IndividualsFormComponent implements OnInit {
   private _currentModule!: any;
   private _currentModuleObjectCode = 'INDIVIDUALS';
   public individualsObjectModules: any[] = [];
+  private _currentDataset = "";
 
   constructor(
     private _route: ActivatedRoute,
@@ -78,7 +80,7 @@ export class IndividualsFormComponent implements OnInit {
             value: (module as any).id_module
         })
       );
-
+ 
     // First initialisation of the datatable (resolver) and
     // additional data
     this._route.data
@@ -92,13 +94,17 @@ export class IndividualsFormComponent implements OnInit {
         this._dataTable_deployments$.next({
           items: Object.values(datatable?.deployments ?? {})
         });
+        
+        // Get the temporaly configured dataset for the curent cd_nom
+        // this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom).ID_DATASET;
 
         // Get additional data if exists
         this._dataFormService
           .getadditionalFields({
-            module_code: [this._currentModule.module_code],
-            object_code: [this._currentModuleObjectCode],
+            module_code: this._currentModule.module_code,
+            object_code: this._currentModuleObjectCode,
             // En attente des devs pour pouvoir sélectionner le taxon
+            id_dataset: this._currentDataset,
             // cd_nom: [datatable.cd_nom]
           })
           .pipe(takeUntil(this._destroy$))
@@ -264,7 +270,7 @@ export class IndividualsFormComponent implements OnInit {
         error: (err) => {
           this._errorHandler.handleHttpError(
             err,
-            { id: this.datatable.id_individual, name: this.datatable.individual_name },
+            this.formAction === 'EDIT' ? { id: this.datatable.id_individual, name: this.datatable.individual_name } : {},
             this.formAction === 'ADD' ? 'Individuals.Individuals.Errors.AddedNOK' : 'Individuals.Individuals.Errors.EditedNOK'
           );
         },

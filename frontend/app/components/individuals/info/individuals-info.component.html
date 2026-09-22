@@ -146,13 +146,64 @@
   </div>
 </ng-template>
 
-<gn-individuals-info
-  [infoTemplate]="infoTemplate"
-  [datatable]="datatable"
-  [infoTitle]="'Individuals.Individuals.Titles.Info' | translate: { id: datatable.id_individual }"
-  [objectName]="'individuals'"
-  [objectId]="datatable.id_individual"
-  [allowedToEdit]="allowedToEdit"
-  [allowedToDelete]="allowedToDelete"
-  (delete)="onDelete()"
-></gn-individuals-info>
+<ng-template
+  #featurePopupTemplate
+  let-feature="feature"
+>
+  <div>
+    <span>
+      <strong>{{ 'Date' | translate }} :</strong>
+      {{ feature.properties.date_min }}
+    </span>
+    <br />
+    <span>
+      <strong>
+        {{ 'Observers?' | translate }} :
+      </strong>
+      {{ feature.properties.observers }}
+    </span>
+    <br />
+    <span>
+      <strong>{{ 'MetaData.DatasetName' | translate }} :</strong>
+      {{ feature.properties.dataset_name }}
+    </span>
+
+  </div>
+</ng-template>
+
+<div id="map-list-container">
+  <div
+    id="map-container"
+    [ngStyle]="{ 'min-height.px': contentHeight }"
+  >
+    <div
+      *ngIf="noGeometry"
+      class="map-overlay-message"
+    >
+      {{ 'Individuals.Individuals.Messages.NoGeometry' | translate }}
+    </div>
+    <pnx-map
+      [height]="contentHeight + 'px'"
+      [searchBar]="true"
+    ></pnx-map>
+    <pnx-geojson
+      *ngIf="mapReady"
+      [geojson]="mapData$ | async"
+      [zoomOnLayer]="false"
+      [onEachFeature]="onEachFeature.bind(this)"
+    ></pnx-geojson>
+  </div>
+  
+  <div id="info-container">
+    <gn-individuals-info
+      [infoTemplate]="infoTemplate"
+      [datatable]="datatable"
+      [infoTitle]="'Individuals.Individuals.Titles.Info' | translate: { id: datatable.id_individual }"
+      [objectName]="'individuals'"
+      [objectId]="datatable.id_individual"
+      [allowedToEdit]="allowedToEdit"
+      [allowedToDelete]="allowedToDelete"
+      (delete)="onDelete()"
+    ></gn-individuals-info>
+  </div>
+</div>

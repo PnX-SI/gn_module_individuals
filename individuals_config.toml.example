@@ -23,6 +23,27 @@
     # Have to be those of the corresponding API response /individuals/individuals/:id
     DEPLOYMENT_LIST_COLUMNS=["deployment_type_name","deployment_location_name","marking_code","install_date","removal_date"]
 
+    # This param is usefull until the possibility to link directly additional data to cd_nom
+    # in the additional fields configuration
+    # TAXON_DATASET = [
+    #    {
+    #        CD_NOM=61098,
+    #        DATASET_SHORT_NAME="CAPTURES_INDIVIDUS_BOUQUETIN",
+    #        ID_DATASET=35
+    #    },
+    #    {
+    #        CD_NOM=2962,
+    #        DATASET_SHORT_NAME="CAPTURES_INDIVIDUS_TETRAS",
+    #        ID_DATASET=36
+    #    }
+    # ]
+
+    # Range used for change the layer opacity
+    # OPACITY_RANGE=10
+    
+    # Max last observations to display
+    # MAX_OBS_NB=20
+
 # Observations object configuration
 [OBSERVATIONS]
     # Pagination : Nb max of lines displayed per page (default 10)
