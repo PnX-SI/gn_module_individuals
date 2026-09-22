@@ -1,8 +1,9 @@
-import { ViewEncapsulation, Component, OnInit } from '@angular/core';
+import { ViewEncapsulation, Component, OnInit, HostListener, TemplateRef, ViewChild} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
+import * as L from 'leaflet';
 
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -10,13 +11,15 @@ import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
 import { CommonService } from '@geonature_common/service/common.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
+import { SyntheseDataService } from '@geonature/GN2CommonModule/form/synthese-form/synthese-data.service';
+import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 
-import { DATATABLE_CONFIG } from '../../../utils/constants.util';
-import { dateFormat, timeFormat, getValuesLabels } from '../../../utils/functions.util';
+import { CONTENT_CONFIG, DATATABLE_CONFIG, MAP_CONFIG } from '../../../utils/constants.util';
+import { calcContentHeight, dateFormat, timeFormat, getValuesLabels, getRatio } from '../../../utils/functions.util';
 
 import { Individual } from '../../../models/individuals.models';
 import { DEPLOYMENT_MODEL, Deployment } from '../../../models/deployments.models';
-import { AccessResult, ItemCollection, DatatableColumnLink } from '../../../models/common.models';
+import { AccessResult, ItemCollection, DatatableColumnLink, Feature, FeatureCollection } from '../../../models/common.models';
 import { ModalComponent } from '../../modal/modal.component'
 import { IndividualsService } from '../../../services/individuals.service';
 import { DeploymentsService } from '../../../services/deployments.service';
@@ -31,6 +34,8 @@ import { DeploymentsFormComponent } from '../../deployments-form/deployments-for
   standalone: false,
 })
 export class IndividualsInfoComponent implements OnInit {
+  @ViewChild('featurePopupTemplate') featurePopupTemplate!: TemplateRef<{ feature: Feature<unknown> }>;
+  public contentHeight: number = CONTENT_CONFIG.MIN_HEIGHT;
   public datatable!: Individual;
   private _datatable_deployments$ = new BehaviorSubject<ItemCollection<Deployment> | null>(null);
   public datatable_deployments$: Observable<ItemCollection<Deployment>> = this._datatable_deployments$.pipe(
@@ -57,9 +62,22 @@ export class IndividualsInfoComponent implements OnInit {
   private _currentModuleObjectCode = 'INDIVIDUALS';
   private _currentDataset = "";
 
+  public mapReady: boolean = false;
+  public noGeometry: boolean = false;
+  mapData$: Observable<FeatureCollection<unknown>> = new Observable<
+    FeatureCollection<unknown>
+  >();
+  private _mapLayersById: {id: number, layer: L.Layer | null}[] = [];
+  private _mapMoveHandler: (() => void) | null = null;
+  private _ignoreNextMapMoveEnd = false;
+  private _selectedLayer: L.Layer | null = null;
+  private _selectedFeature: Feature<any> | null = null;
+  private _selectedObservation!: number;
+
   public dateFormat = dateFormat;
   public getValuesLabels = getValuesLabels;
   public timeFormat = timeFormat;
+
 
   constructor(
     private _config: ConfigService,
@@ -72,7 +90,9 @@ export class IndividualsInfoComponent implements OnInit {
     private _individualsService: IndividualsService,
     private _deploymentsService: DeploymentsService,
     private _module: ModuleService,
-    private _dataFormService: DataFormService
+    private _dataFormService: DataFormService,
+    private _syntheseService: SyntheseDataService,
+    private _mapService: MapService,
   ) {}
 
   ngOnInit(): void {
@@ -122,6 +142,41 @@ export class IndividualsInfoComponent implements OnInit {
       });
 
     this.defaultLang = this._config['DEFAULT_LANGUAGE'];
+
+    // Get Individual geometries
+    this._syntheseService.getSyntheseData(
+      { 
+        limit: this._config.INDIVIDUALS.INDIVIDUALS.MAX_OBS_NB ?? null,
+        modif_since_validation: false, 
+        individuals: [this.datatable.id_individual]
+      },
+      { "format": "ungrouped_geom" },
+    ).subscribe((mapData) => {
+      this.mapData$ = of(mapData);
+
+      mapData.features
+        // Copy befor change
+        .slice()
+        // To have a table sorted in descending order of observation date, used for display
+        // .reverse() 
+        .forEach((feature: any) => {
+          this._mapLayersById.push({id: feature.properties.id_synthese, layer: null});
+        });
+    });
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => { // Usefull to wait the DOM build before calculation
+      this.contentHeight = calcContentHeight();
+      this._zoomOnFeatures();
+      this._bindMapMove();
+    }, 0);
+  }
+
+  // Listen to window resize event to recalculate the content height and resize the map
+  @HostListener('window:resize', ['$event'])
+    onWindowResize($event: any): void {
+      this.contentHeight = calcContentHeight();
   }
 
   ngOnDestroy() {
@@ -245,5 +300,235 @@ export class IndividualsInfoComponent implements OnInit {
         );
       }
     }
+  }
+
+  /**
+   * Prepare each feature display: Style, actions on event, popup information, etc.
+   *
+   * @param {Feature<Individual>} feature
+   * @param {L.Layer} layer
+   * @return {*}  {void}
+   * @memberof IndividualsInfoComponent
+   */
+  onEachFeature(feature: Feature<unknown>, layer: L.Layer): void {
+    // Access the identifier dynamically. `idFieldName` is configured by the parent,
+    // so TypeScript cannot verify the property at compile time. The identifier field
+    // is guaranteed by the component contract to be a number.
+    
+    const id = (feature.properties as Record<string, unknown>)["id_synthese"] as number;
+    let nbFeatures = 0;
+    const item = this._mapLayersById.find(item => item.id === id);
+
+    if (item) {
+      item.layer = layer;
+    }
+
+    this.mapData$.subscribe((featuresCollection) => nbFeatures = featuresCollection.features.length)
+    
+    // Set layer style
+    this._setLayerStyle(layer, id === this._selectedObservation, id);
+    layer.on('click', () => this.onMapFeatureClick(feature, layer));
+
+    // Prepare popup
+    if (feature.properties) {
+      layer.bindPopup(this._buildPopupContent(feature));
+    }
+
+    if (id === this._selectedObservation) {
+      this._selectedLayer = layer;
+      this._selectedFeature = feature;
+      this._openLayerPopup(layer);
+    }
+  }
+
+  /**
+   * Reload data whenever the map extent changes (bbox).
+   *
+   * @private
+   * @return {*}  {void}
+   * @memberof IndividualsInfoComponent
+   */
+  private _bindMapMove(): void {
+    const map = this._mapService.getMap();
+    if (!map) {
+      return;
+    }
+    // Store the map move function in a property so we can remove it later if needed
+    this._mapMoveHandler = () => {
+      // _zoomOnFeature emit a movenend : we needs to ignore it to avoid an API call
+      if (this._ignoreNextMapMoveEnd) {
+        this._ignoreNextMapMoveEnd = false;
+        return;
+      }
+    };
+
+    // Install a listner on the moveend event
+    map.on('moveend', this._mapMoveHandler);
+  }
+
+  /**
+   * Zoom the map on current features
+   *
+   * @private
+   * @memberof IndividualsInfoComponent
+   */
+  private _zoomOnFeatures(): void {
+    this.mapData$.subscribe((mapData) => {
+      const layer = L.geoJSON(mapData);
+      const map = this._mapService.getMap();
+
+      if (!map) {
+        return;
+      }
+
+      if (layer.getBounds().isValid()) {
+        this._ignoreNextMapMoveEnd = true;
+        map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+      }
+      else {
+        this._showNoGeometryMessage();
+      }
+
+      this.mapReady = true;
+    });
+  }
+
+  /**
+   *
+   * @private
+   * @param {L.Layer} layer
+   * @param {boolean} selected
+   * @return {*}  {void}
+   * @memberof IndividualsInfoComponent
+   */
+  // private _setLayerStyle(layer: L.Layer, selected: boolean, position: number | null = null, coeffForDisplay: number | null = null): void {
+  private _setLayerStyle(layer: L.Layer, selected: boolean, id: number | null = null): void {
+    if (!(layer as any).setStyle) {
+      return;
+    }
+    
+    let nbFeatures = 0;
+    let date = "";
+    this.mapData$.subscribe((featuresCollection) => {
+      nbFeatures = featuresCollection.features.length
+
+      featuresCollection.features.forEach((feature: any) => {
+        if(feature.properties.id_synthese === id) {
+          date = feature.properties.date_min
+        }
+      })
+    });
+
+    let layerRank = this._mapLayersById.findIndex(item => item.id === id) + 1;
+    let coeffForDisplay = getRatio(
+      Math.ceil(layerRank / this._config.INDIVIDUALS.INDIVIDUALS.OPACITY_RANGE),
+      Math.ceil(nbFeatures / this._config.INDIVIDUALS.INDIVIDUALS.OPACITY_RANGE)
+    );
+
+    let layerSelected = {
+      color: this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR,
+      fillColor: this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR,
+      fillOpacity: this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_OPACITY ?? MAP_CONFIG.SELECTED_LAYER_OPACITY,
+      radius: MAP_CONFIG.SELECTED_LAYER_RADIUS,
+      weight: MAP_CONFIG.SELECTED_LAYER_WEIGHT
+    };
+
+    let layerUnselected = {
+      fillColor: layerRank && layerRank == 1 
+        ? (this._config.INDIVIDUALS.GLOBAL.FIRST_LAYER_COLOR ?? MAP_CONFIG.FIRST_LAYER_COLOR)
+        : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR),
+      color: this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
+      fillOpacity: coeffForDisplay ?? this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_OPACITY ?? MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
+      radius: MAP_CONFIG.UNSELECTED_LAYER_RADIUS,
+      weight: MAP_CONFIG.UNSELECTED_LAYER_WEIGHT
+    };
+
+    (layer as any).setStyle(selected ? layerSelected : layerUnselected);
+  }
+
+  /**
+   * Toggle the layers colors (selected or not) and the layer position (bring to front or not)
+   *
+   * @private
+   * @param {L.Layer} layer
+   * @memberof IndividualsInfoComponent
+   */
+  private _highlightLayer(feature: Feature<any>, layer: L.Layer): void {
+    // Old selected layer: reset style
+    if (this._selectedLayer && this._selectedFeature) {
+      this._setLayerStyle(this._selectedLayer, false, this._selectedFeature.properties.id_synthese);
+    }
+
+    // New selected layer: set style and bring to front
+    this._selectedLayer = layer;
+    this._selectedFeature = feature;
+    this._setLayerStyle(layer, true, feature.properties.id_synthese);
+
+    if ((layer as any).bringToFront) {
+      (layer as any).bringToFront();
+    }
+  }
+
+  public onMapFeatureClick(feature: Feature<unknown>, layer: L.Layer): void {
+    this._selectedObservation = (feature.properties as Record<string, unknown>)["id_synthese"] as number;
+    this._highlightLayer(feature, layer);
+  }
+
+  /**
+   * Build popup content from the parent-provided template.
+   *
+   * If the parent passes a featurePopupTemplate, this method creates
+   * an embedded view for the clicked feature and renders its DOM nodes
+   * into a container element. The resulting HTMLElement is returned so
+   * Leaflet can display it inside the popup.
+   *
+   * If no template is provided, the popup content is empty.
+   *
+   * @param {Feature<unknown>} feature - The clicked GeoJSON feature.
+   * @returns {HTMLElement | string} Rendered popup content.
+   * @memberof IndividualsInfoComponent
+   */
+  private _buildPopupContent(feature: Feature<unknown>): HTMLElement | string {
+    if (!this.featurePopupTemplate) {
+      return '';
+    }
+
+    // Create an embedded view using the parent template and the current feature.
+    const view = this.featurePopupTemplate.createEmbeddedView({ feature });
+    view.detectChanges();
+
+    const HTMLDom = document.createElement('div');
+
+    // Append each rendered DOM node from the template into the container.
+    view.rootNodes.forEach((node) => {
+      if (node instanceof Node) {
+        HTMLDom.appendChild(node);
+      }
+    });
+
+    return HTMLDom;
+  }
+
+  /**
+   * Open the given layer popup
+   *
+   * @private
+   * @param {L.Layer} layer
+   * @memberof IndividualsInfoComponent
+   */
+  private _openLayerPopup(layer: L.Layer): void {
+    if ((layer as any).openPopup) {
+      (layer as any).openPopup();
+    }
+  }
+
+  /**
+   * Show a message explaining that the selected list element as no corresponding geometry
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  private _showNoGeometryMessage(): void {
+    this.noGeometry = true;
   }
 }

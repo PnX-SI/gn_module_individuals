@@ -96,7 +96,7 @@ export class IndividualsFormComponent implements OnInit {
         });
         
         // Get the temporaly configured dataset for the curent cd_nom
-        this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom).ID_DATASET;
+        // this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom).ID_DATASET;
 
         // Get additional data if exists
         this._dataFormService
@@ -270,7 +270,7 @@ export class IndividualsFormComponent implements OnInit {
         error: (err) => {
           this._errorHandler.handleHttpError(
             err,
-            { id: this.datatable.id_individual, name: this.datatable.individual_name },
+            this.formAction === 'EDIT' ? { id: this.datatable.id_individual, name: this.datatable.individual_name } : {},
             this.formAction === 'ADD' ? 'Individuals.Individuals.Errors.AddedNOK' : 'Individuals.Individuals.Errors.EditedNOK'
           );
         },

@@ -218,21 +218,27 @@ def upgrade():
     # for a single animal (Cynthia).
     op.execute(sa.text("""
         WITH RECURSIVE gps_points(seq, geom) AS (
-            SELECT 1, ST_SetSRID(ST_MakePoint(6.9200, 45.4100), 4326)
+            SELECT
+                1, ST_SetSRID(ST_MakePoint(6.9200, 45.4100), 4326)
             UNION ALL
-            SELECT seq + 1,
-                ST_Project(geom::geography, 100, radians((seq * 35)::float))::geometry
+            SELECT
+                seq + 1,
+                ST_Project(
+                    geom::geography,
+                    50 + random() * 950,
+                    radians(random() * 360)
+                )::geometry
             FROM gps_points
             WHERE seq < 12
         ),
         gps_times (seq, fix_time) AS (
             VALUES
-            (1, '2026-07-20 06:00'::timestamp), (2, '2026-07-20 12:00'::timestamp),
-            (3, '2026-07-20 18:00'::timestamp), (4, '2026-07-20 22:00'::timestamp),
-            (5, '2026-07-21 06:00'::timestamp), (6, '2026-07-21 12:00'::timestamp),
-            (7, '2026-07-21 18:00'::timestamp), (8, '2026-07-21 22:00'::timestamp),
-            (9, '2026-07-22 06:00'::timestamp), (10, '2026-07-22 12:00'::timestamp),
-            (11, '2026-07-22 18:00'::timestamp), (12, '2026-07-22 22:00'::timestamp)
+            (1, '2026-07-12 06:00'::timestamp), (2, '2026-07-18 12:00'::timestamp),
+            (3, '2026-07-13 18:00'::timestamp), (4, '2026-07-19 22:00'::timestamp),
+            (5, '2026-07-14 06:00'::timestamp), (6, '2026-07-20 12:00'::timestamp),
+            (7, '2026-07-15 18:00'::timestamp), (8, '2026-07-21 22:00'::timestamp),
+            (9, '2026-07-16 06:00'::timestamp), (10, '2026-07-22 12:00'::timestamp),
+            (11, '2026-07-17 18:00'::timestamp), (12, '2026-08-01 22:00'::timestamp)
         ),
         occtax_module AS (
             SELECT id_module FROM gn_commons.t_modules WHERE module_code = 'OCCTAX'
@@ -255,14 +261,14 @@ def upgrade():
         INSERT INTO pr_occtax.cor_role_releves_occtax (id_releve_occtax, id_role)
         SELECT r.id_releve_occtax, 4
         FROM pr_occtax.t_releves_occtax r
-        WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
+        WHERE r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
     """))
 
     op.execute(sa.text("""
         INSERT INTO pr_occtax.t_occurrences_occtax (id_releve_occtax, cd_nom, nom_cite, meta_v_taxref)
         SELECT r.id_releve_occtax, 459629, 'Lagopède alpin', 'Taxref v18'
         FROM pr_occtax.t_releves_occtax r
-        WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
+        WHERE r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
     """))
 
     op.execute(sa.text("""
@@ -273,7 +279,7 @@ def upgrade():
         FROM pr_occtax.t_occurrences_occtax o
         JOIN pr_occtax.t_releves_occtax r ON r.id_releve_occtax = o.id_releve_occtax
         JOIN gn_monitoring.t_individuals i ON i.individual_name = 'Cynthia'
-        WHERE r.date_min BETWEEN '2026-07-20 00:00' AND '2026-07-22 23:59'
+        WHERE r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
     """))
 
     # --- Bouquetin captures: dates match the tracking device/marking

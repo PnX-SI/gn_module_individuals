@@ -119,8 +119,8 @@ export class IndividualsService {
       comment: individual.comment,
       additional_data: individual.additional_data,
       deployments: individual.deployments,
-      modules: individual.modules,
-    };
+      modules: individual.modules.map((id: number) => ({"id_module": id}))
+    }
 
     if (formAction === 'ADD') {
       return this._http.post<Individual>(`${this._OBJECT_API}`, payload, {
@@ -131,9 +131,8 @@ export class IndividualsService {
       payload = {
         ...payload,
         id_individual: individual.id_individual,
-        modules: individual.modules.map((id: number) => ({"id_module": id}))
       };
-      console.log(payload);
+
       return this._http.put<Individual>(`${this._OBJECT_API}/${individual.id_individual}`, payload, {
         params: params,
         headers: this._headers,

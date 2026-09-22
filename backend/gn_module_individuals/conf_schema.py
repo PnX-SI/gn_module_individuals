@@ -14,8 +14,6 @@ class GlobalSchema(Schema):
     ID_TAXON_LIST = fields.Integer(load_default=None)
     SELECTED_LAYER_COLOR = fields.String()
     UNSELECTED_LAYER_COLOR = fields.String()
-    SELECTED_LAYER_OPACITY = fields.Integer()
-    UNSELECTED_LAYER_OPACITY = fields.Integer()
 
 class IndividualsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
@@ -43,6 +41,8 @@ class IndividualsSchema(Schema):
         fields.Nested(AdditionalFieldSchema),
         load_default=list
     )
+    OPACITY_RANGE = fields.Integer(load_default=10)
+    MAX_OBS_NB = fields.Integer(load_default=20)
 
 class DevicesSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)

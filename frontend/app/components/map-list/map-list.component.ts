@@ -13,7 +13,6 @@ import * as L from 'leaflet';
 import { TranslateService } from '@ngx-translate/core';
 
 import { MapService } from '@geonature/GN2CommonModule/map/map.service';
-import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
 
 import {
@@ -66,7 +65,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
 
   public mapReady: boolean = false;
   public noGeometry: boolean = false;
-
   private _selectedId: number | null = null;
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
@@ -75,7 +73,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
   private _ignoreNextMapMoveEnd = false;
 
   constructor(
-    private _moduleService: ModuleService,
     private _mapService: MapService,
     private _config: ConfigService,
     private _translate: TranslateService
@@ -92,10 +89,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.mapReady = true;
       this.contentHeight = calcContentHeight();
       this._zoomOnFeatures();
       this._bindMapMove();
+      this.mapReady = true;
     }, 0);
   }
 
@@ -192,12 +189,11 @@ export class MapListComponent implements OnInit, AfterViewInit {
         : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ??
           MAP_CONFIG.UNSELECTED_LAYER_COLOR),
       fillOpacity: selected
-        ? (this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_OPACITY ??
-          MAP_CONFIG.SELECTED_LAYER_OPACITY)
-        : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_OPACITY ??
-          MAP_CONFIG.UNSELECTED_LAYER_OPACITY),
-      radius: selected ? 8 : 6,
-      weight: selected ? 3 : 2,
+        ? MAP_CONFIG.SELECTED_LAYER_OPACITY : MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
+      radius: selected
+        ? MAP_CONFIG.SELECTED_LAYER_RADIUS : MAP_CONFIG.UNSELECTED_LAYER_RADIUS,
+      weight: selected
+        ? MAP_CONFIG.SELECTED_LAYER_WEIGHT : MAP_CONFIG.UNSELECTED_LAYER_WEIGHT,
     });
   }
 

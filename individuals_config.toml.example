@@ -38,6 +38,12 @@
     #    }
     # ]
 
+    # Range used for change the layer opacity
+    # OPACITY_RANGE=10
+    
+    # Max last observations to display
+    # MAX_OBS_NB=20
+
 # Observations object configuration
 [OBSERVATIONS]
     # Pagination : Nb max of lines displayed per page (default 10)
