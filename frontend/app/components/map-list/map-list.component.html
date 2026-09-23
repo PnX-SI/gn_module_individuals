@@ -36,6 +36,7 @@
       [summaryTemplate]="summaryTemplate"
       [filtersTemplate]="filtersTemplate"
       [selectedRows]="selectedRows"
+      [exportFormats]="exportFormats"
       (pagination)="onPage($event)"
       (sort)="onSort($event)"
       (select)="onTableSelect($event)"
@@ -43,6 +44,7 @@
       (add)="onAdd()"
       (edit)="onEdit($event)"
       (delete)="onDelete($event)"
+      (export)="onExport($event)"
     ></gn-individuals-list>
   </div>
 </div>
