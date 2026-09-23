@@ -274,6 +274,29 @@ class TestListIndividuals:
         assert len(items) >= 1
         assert all(item["active"] is False for item in items)
 
+    def test_out_of_range_page_with_filter_returns_empty_items_not_404(self, users, individuals):
+        """A page/per_page combination valid for the unfiltered list can fall
+        past the last page once a filter (e.g. active=true) shrinks the total
+        result count; this must return an empty page, not a 404."""
+        set_logged_user(self.client, users["admin_user"])
+        r_first = self.client.get(
+            url_for("individuals.list_individuals", page=1, per_page=1, active="true")
+        )
+        total_pages = r_first.get_json()["pages"]
+
+        r = self.client.get(
+            url_for(
+                "individuals.list_individuals",
+                page=total_pages + 1,
+                per_page=1,
+                active="true",
+            )
+        )
+        assert r.status_code == 200
+        payload = r.get_json()
+        assert payload["items"] == []
+        assert payload["page"] == total_pages + 1
+
     def test_scope_restricts_to_own_data(self, users, individuals):
         """self_user (scope=1) only sees individuals they digitised."""
         set_logged_user(self.client, users["self_user"])

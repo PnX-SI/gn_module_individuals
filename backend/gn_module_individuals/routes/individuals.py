@@ -648,7 +648,7 @@ def list_individuals(scope):
     schema = IndividualListSchema(many=True, only=["+cruved"])
 
     if page is not None and per_page is not None:
-        paginated = db.paginate(query, page=page, per_page=per_page)
+        paginated = db.paginate(query, page=page, per_page=per_page, error_out=False)
         _assign_last_observation(paginated.items)
         return _pagination_payload(paginated, schema, sort)
 
