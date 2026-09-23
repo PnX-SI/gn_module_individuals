@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import {
   Device,
@@ -24,7 +25,8 @@ export class DevicesService {
   constructor(
     private _http: HttpClient,
     private _config: ConfigService,
-    private _moduleService: ModuleService
+    private _moduleService: ModuleService,
+    private _dataFormService: DataFormService
   ) {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/devices`;
   }
@@ -85,5 +87,39 @@ export class DevicesService {
 
   deleteDevice(id: number): Observable<Device> {
     return this._http.delete<Device>(`${this._OBJECT_API}/${id}`);
+  }
+
+  /**
+   * Export the devices list in the given format, with the same filters and
+   * sort currently applied to the list (no pagination: the backend exports
+   * the whole filtered list, bounded by its own NB_MAX_EXPORT). Triggers a
+   * browser download once the file is received.
+   *
+   * @param {string} format One of config.INDIVIDUALS.DEVICES.EXPORT_FORMAT
+   * @param {APIDeviceFiltersParams} filters Currently applied filters
+   * @param {{ prop?: string; dir?: string }} [sort] Currently applied sort
+   * @memberof DevicesService
+   */
+  exportDevices(
+    format: string,
+    filters: APIDeviceFiltersParams,
+    sort?: { prop?: string; dir?: string }
+  ): void {
+    let httpParams = new HttpParams();
+    const params: Record<string, string | number | undefined> = { ...filters, ...sort };
+    Object.keys(params).forEach((key) => {
+      if (params[key] != null && params[key] !== '') {
+        httpParams = httpParams.set(key, String(params[key]));
+      }
+    });
+
+    const source = this._http.post(`${this._OBJECT_API}/export/${format}`, null, {
+      params: httpParams,
+      observe: 'events',
+      responseType: 'blob',
+      reportProgress: true,
+    });
+
+    this._dataFormService.subscribeAndDownload(source, 'devices', format);
   }
 }

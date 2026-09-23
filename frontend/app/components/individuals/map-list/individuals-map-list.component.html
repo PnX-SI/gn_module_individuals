@@ -51,7 +51,7 @@
   </div>
 </ng-template>
 
-<ng-template #noDeployment> -</ng-template>
+<ng-template #noDeployment>-</ng-template>
 
 <ng-template #filtersTemplate>
   <gn-individuals-individuals-filters
@@ -106,6 +106,7 @@
   [mapData$]="mapData$"
   [selectedRows]="selectedRows"
   [noGeometryMessage]="'Individuals.Individuals.Messages.NoGeometry' | translate"
+  [exportFormats]="exportFormats"
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
   (add)="onAdd()"
@@ -114,4 +115,5 @@
   (delete)="openDeleteModal($event)"
   (idPage)="onIdPage($event)"
   (bbox)="onBbox($event)"
+  (export)="onExport($event)"
 ></gn-individuals-map-list>
