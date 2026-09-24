@@ -1,8 +1,9 @@
 # Installation du module gn_module_individuals
 
 ## Prérequis
-Disposer d'une instance de GeoNature >= 2.17
-Disposer de UsersHub
+GeoNature >= 2.17
+UsersHub
+Monitoring >= ???
 
 ## Installation
 
