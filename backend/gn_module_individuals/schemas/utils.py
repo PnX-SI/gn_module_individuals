@@ -13,3 +13,6 @@ def get_label(nomenclature):
 def is_nomenclature_of_type(nomenclature, mnemonique):
     """Whether a TNomenclatures instance belongs to the given type (by mnemonique)."""
     return nomenclature is not None and nomenclature.nomenclature_type.mnemonique == mnemonique
+
+def test_branch_trop_cool(you):
+  print("Hello you")
