@@ -1,4 +1,4 @@
-"""Insert acquisition framework, datasets and additional fields 
+"""Insert acquisition framework, datasets and additional fields
 
 Individuals-samples demo data.
 
@@ -29,16 +29,19 @@ DATASETS = {
         "dataset_name": "Individus et captures bouquetins TEST",
         "dataset_desc": "Individus et captures (pose de marquage, mesures) des bouquetins de test",
         "module_code": "OCCTAX",
+        "collecting_method": 405,
     },
     "CAPTURES_TETRAS_TEST": {
         "dataset_name": "Individus et captures tétras-lyre TEST",
         "dataset_desc": "Individus et captures (pose de marquage, mesures) des tétras-lyre de test",
         "module_code": "OCCTAX",
+        "collecting_method": 405,
     },
     "OCCTAX_BOUQMARQ_TEST": {
         "dataset_name": "Occtax bouquetins marqués TEST",
         "dataset_desc": "Relevés Occtax (observations de terrain, suivi GPS) de test du module Individus",
         "module_code": "OCCTAX",
+        "collecting_method": 396,
     },
 }
 
@@ -192,11 +195,11 @@ def upgrade():
             sa.text("""
                 INSERT INTO gn_meta.t_datasets (
                     id_acquisition_framework, dataset_name, dataset_shortname, dataset_desc,
-                    marine_domain, terrestrial_domain, id_digitizer
+                    marine_domain, terrestrial_domain, id_nomenclature_collecting_method, id_digitizer
                 )
                 SELECT
                     af.id_acquisition_framework, :dataset_name, :shortname, :dataset_desc,
-                    FALSE, TRUE, 4
+                    FALSE, TRUE, :collecting_method, 4
                 FROM gn_meta.t_acquisition_frameworks af
                 WHERE af.acquisition_framework_name = :af_name
                     AND NOT EXISTS (
@@ -207,6 +210,7 @@ def upgrade():
                 shortname=shortname,
                 dataset_name=dataset["dataset_name"],
                 dataset_desc=dataset["dataset_desc"],
+                collecting_method=dataset["collecting_method"],
             )
         )
         op.execute(sa.text("""
