@@ -6,5 +6,8 @@
   "scripts": {
     "format": "prettier --config .prettierrc --ignore-path .prettierignore --write '**/*.{ts,html,scss}'",
     "format:check": "prettier --config .prettierrc --ignore-path .prettierignore '**/*.{ts,html,scss}'"
+  },
+  "devDependencies": {
+    "prettier": "~3.3"
   }
 }
