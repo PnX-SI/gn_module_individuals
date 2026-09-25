@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { ConfigService } from '@geonature/services/config.service';
 import { ModuleService } from '@geonature/services/module.service';
+import { DataFormService } from '@geonature_common/form/data-form.service';
 
 import {
   Individual,
@@ -29,7 +30,8 @@ export class IndividualsService {
   constructor(
     private _http: HttpClient,
     private _config: ConfigService,
-    private _moduleService: ModuleService
+    private _moduleService: ModuleService,
+    private _dataFormService: DataFormService
   ) {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/individuals`;
   }
@@ -142,5 +144,39 @@ export class IndividualsService {
 
   deleteIndividual(id: number): Observable<Individual> {
     return this._http.delete<Individual>(`${this._OBJECT_API}/${id}`);
+  }
+
+  /**
+   * Export the individuals list in the given format, with the same filters
+   * and sort currently applied to the list/map (no pagination: the backend
+   * exports the whole filtered list, bounded by its own NB_MAX_EXPORT).
+   * Triggers a browser download once the file is received.
+   *
+   * @param {string} format One of config.INDIVIDUALS.INDIVIDUALS.EXPORT_FORMAT
+   * @param {APIIndividualFiltersParams} filters Currently applied filters
+   * @param {{ prop?: string; dir?: string }} [sort] Currently applied sort
+   * @memberof IndividualsService
+   */
+  exportIndividuals(
+    format: string,
+    filters: APIIndividualFiltersParams,
+    sort?: { prop?: string; dir?: string }
+  ): void {
+    let httpParams = new HttpParams();
+    const params: Record<string, string | number | undefined> = { ...filters, ...sort };
+    Object.keys(params).forEach((key) => {
+      if (params[key] != null && params[key] !== '') {
+        httpParams = httpParams.set(key, String(params[key]));
+      }
+    });
+
+    const source = this._http.post(`${this._OBJECT_API}/export/${format}`, null, {
+      params: httpParams,
+      observe: 'events',
+      responseType: 'blob',
+      reportProgress: true,
+    });
+
+    this._dataFormService.subscribeAndDownload(source, 'individuals', format);
   }
 }

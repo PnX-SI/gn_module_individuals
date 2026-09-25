@@ -16,7 +16,13 @@ import { ModuleService } from '@geonature/services/module.service';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
 import { calcContentHeight } from '../../utils/functions.util';
-import { Column, PaginatedItemCollection, ItemCollection, DatatableColumnLink, AccessResult } from '../../models/common.models';
+import {
+  Column,
+  PaginatedItemCollection,
+  ItemCollection,
+  DatatableColumnLink,
+  AccessResult,
+} from '../../models/common.models';
 
 @Component({
   selector: 'gn-individuals-list',
@@ -31,11 +37,16 @@ export class ListComponent implements OnInit {
   @Output() pagination: EventEmitter<any> = new EventEmitter();
   @Output() add: EventEmitter<any> = new EventEmitter();
   @Output() edit: EventEmitter<any> = new EventEmitter();
-  @Output() info: EventEmitter<any> = new EventEmitter()
+  @Output() info: EventEmitter<any> = new EventEmitter();
   @Output() sort: EventEmitter<any> = new EventEmitter();
   @Output() rows: EventEmitter<any> = new EventEmitter();
   @Output() select: EventEmitter<any> = new EventEmitter();
   @Output() delete: EventEmitter<any> = new EventEmitter();
+  /**
+   * Emits the format chosen in the export panel (one of `exportFormats`)
+   * when the user confirms the download.
+   */
+  @Output() export: EventEmitter<string> = new EventEmitter();
 
   /**
    * Field name used to identify the row in the table used to edit or delete it
@@ -47,7 +58,8 @@ export class ListComponent implements OnInit {
 
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
-  @Input() dataTable$: Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>> = new Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>>();
+  @Input() dataTable$: Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>> =
+    new Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>>();
   @Input() nbRowsToDisplay: number = DATATABLE_CONFIG.PER_PAGE_OPTION;
   @Input() fieldsTranslation: string = '';
   @Input() sorts: Array<Object> = [];
@@ -61,6 +73,14 @@ export class ListComponent implements OnInit {
   @Input() usePagination: boolean = true;
   @Input() displayAddButton: boolean = true;
   @Input() displayFilterButton: boolean = true;
+  /**
+   * Export formats offered in the export panel (e.g. ['csv', 'geojson',
+   * 'gpkg']), typically read by the parent from the module config
+   * (config.<MODULE>.<ENTITY>.EXPORT_FORMAT). The export button/panel is
+   * only shown when this list is non-empty: an entity without configured
+   * export formats simply doesn't display the feature yet.
+   */
+  @Input() exportFormats: string[] = [];
   @Input() displayExportButton: boolean = true;
   @Input() displaySummaryButtons: boolean = true;
   @Input() displayInfoButtons: boolean = true;
@@ -78,6 +98,8 @@ export class ListComponent implements OnInit {
   public tableMessages = {};
 
   public showFilters: boolean = false;
+  public showExportPanel: boolean = false;
+  public selectedExportFormat: string | null = null;
 
   constructor(
     private _translate: TranslateService,
@@ -217,9 +239,33 @@ export class ListComponent implements OnInit {
     this.showFilters = !this.showFilters;
   }
 
+  /**
+   * Show/hide the export panel. Defaults the format selection to the first
+   * configured one so the "Télécharger" button is usable right away.
+   *
+   * @memberof ListComponent
+   */
+  toggleShowExportPanel(): void {
+    this.showExportPanel = !this.showExportPanel;
+    if (this.showExportPanel && this.selectedExportFormat === null) {
+      this.selectedExportFormat = this.exportFormats[0] ?? null;
+    }
+  }
 
   /**
-   * Return the line of datatableColumnsLink corresponding to the column 
+   * Emit the export event with the currently selected format.
+   *
+   * @memberof ListComponent
+   */
+  onExport(): void {
+    if (!this.selectedExportFormat) {
+      return;
+    }
+    this.export.emit(this.selectedExportFormat);
+  }
+
+  /**
+   * Return the line of datatableColumnsLink corresponding to the column
    * name if it exists, otherwise return undefined
    *
    * @param {string} columnName
@@ -227,8 +273,6 @@ export class ListComponent implements OnInit {
    * @memberof ListComponent
    */
   getColumnLink(columnName: string): DatatableColumnLink | undefined {
-  return this.datatableColumnsLink.find(
-    link => link.column_name === columnName
-  );
-}
+    return this.datatableColumnsLink.find((link) => link.column_name === columnName);
+  }
 }

@@ -1,190 +1,198 @@
 {
-    "Individuals" : {
-        "NavigationTabs": {
-            "Individuals" : "Individus",
-            "Observations": "Observations",
-            "Captures": "Captures",
-            "TrackingDevices": "Dispositifs de suivi"
-        },
-        "Devices": {
-            "Fields": {
-                "id_tracking_device" : "Identifiant",
-                "id_nomenclature_device_type" : "Type de dispositif",
-                "provider_name" : "Fournisseur",
-                "provider_device_id" : "ID chez le fournisseur",
-                "id_referer" : "Référent",
-                "comment" : "Commentaire",
-                "meta_create_date" : "Date de création",
-                "meta_update_date" : "Date de mise à jour",
-                "nomenclature_device_type_name" : "Type de dispositif",
-                "referer_name" : "Référent",
-                "digitiser_name" : "Rédacteur",
-                "last_individual_equipped_name" : "Dernier individu équipé",
-                "deployments" : "Individu(s) équipé(s)",
-                "device_label" : "Dispositif de suivi"
-            },
-            "PlaceHolder": {
-                "provider_name": "Nom du fournisseur",
-                "provider_device_id": "Identifiant/n° série",
-                "id_referer": "Référent",
-                "device_label" : "Dispositif de suivi"
-            },
-            "Filters":{
-                "cd_nom": "Taxon"
-            },
-            "Titles": {
-                "Info": "Dispositif de suivi n°{{ id }}",
-                "Add" : "Ajout d'un dispositif de suivi",
-                "Edit" : "Modification du dispositif de suivi n°{{ id }}",
-                "Delete" : "Suppression du dispositif de suivi n°{{ id }}"
-            },
-            "Messages": {
-                "Added" : "Le dispositif de suivi a été créé.",
-                "Edited" : "Le dispositif de suivi n°{{ id }} a été modifié.",
-                "Deleted" : "Le dispositif de suivi n°{{ id }} a été supprimé."
-            },
-            "Errors": {
-                "AddedNOK" : "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
-                "EditedNOK" : "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
-                "DeletedNOK" : "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            }
-        },
-        "Deployments": {
-            "Label": "Déploiement",
-            "Fields": {
-                "id_deployment" : "ID du déploiement",
-                "id_tracking_device" : "ID du dispositif de suivi",
-                "tracking_device_info" : "Dispositif de suivi",
-                "install_date" : "Date de déploiement",
-                "removal_date" : "Date de retrait",
-                "deployment_type_name" : "Type",
-                "deployment_location_name" : "Localisation",
-                "marking_code" : "Marquage",
-                "comment" : "Commentaire",
-                "meta_create_date" : "Date de création",
-                "meta_update_date" : "Date de mise à jour",
-                "individual_name" : "Nom de l'individu",
-                "digitiser_name" : "Rédacteur",
-                "name_digitiser" : "Rédacteur"
-            },
-            "Titles": {
-                "Add": "Ajout d'un déploiement",
-                "Edit": "Modification du déploiement n°{{ id }}",
-                "Delete": "Suppression du déploiement n°{{ id }}"
-            },
-            "Messages": {
-                "Added" : "Le déploiement a été créé.",
-                "Edited" : "Le déploiement n°{{ id }} a été modifié.",
-                "Deleted" : "Le déploiement n°{{ id }} a été supprimé."
-            },
-            "Errors": {
-                "AddedNOK" : "Ce déploiement n'a pas pu être créé. Erreur : {{ error }}",
-                "EditedNOK" : "Le déploiement n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
-                "DeletedNOK" : "Le déploiement n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            }
-        },
-        "Individuals": {
-            "Fields": {
-                "id_individual" : "Identifiant",
-                "uuid_individual" : "Identifiant unique de l'individus",
-                "individual_name": "Nom",
-                "active" : "Actif",
-                "comment" : "Commentaire",
-                "meta_create_date" : "Date de création",
-                "meta_update_date" : "Date de mise à jour",
-                "digitiser_name" : "Rédacteur",
-                "nomenclature_sex_name" : "Sexe",
-                "last_observation_date" : "Dernière observation",
-                "last_observation_observers_name" : "Dernier(s) observateur(s)",
-                "taxref_nom_vern" : "Taxon",
-                "deployed_devices" : "Dispositif(s) de suivi déployé(s)",
-                "deployed_markings" : "Marquage(s) déployé(s)",
-                "deployments" : "Déploiement(s) associé(s)",
-                "modules": "Module(s) GeoNature associé(s)"
-            },
-            "PlaceHolder": {
-                "individual_name": "Indiquer le nom de l'individu",
-                "comment": "En dire plus ..."
-            },
-            "Filters":{
-                "cd_nom": "Taxon"
-            },
-            "Titles": {
-                "Info": "Individu n°{{ id }}",
-                "Add" : "Ajout d'un individu",
-                "Edit" : "Modification de l'individu '{{ name }}' (n°{{ id }})",
-                "Delete" : "Suppression de l'individu n°{{ id }}"
-            },
-            "Messages": {
-                "Added" : "L'individu '{{ name }}' (n°{{ id }}) a été créé",
-                "Edited" : "L'individu '{{ name }}' n°{{ id }} a été modifié.",
-                "Deleted" : "L'individu '{{ name }}' n°{{ id }} a été supprimé.",
-                "NoGeometry" : "Cet individu ne dispose pas encore d'observation"
-            },
-            "Errors": {
-                "AddedNOK" : "Cet individu n'a pas pu être créé. Erreur : {{ error }}",
-                "EditedNOK" : "L'individu' '{{ name }}' n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
-                "DeletedNOK" : "L'individu' '{{ name }}' n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
-            }
-        },
-        "Messages": {
-            "EmptyList" : "Aucune donnée à afficher",
-            "TotalList" : "ligne(s) au total",
-            "NoGeometry" : "Cet élément ne dispose pas de géométrie",
-            "MissingPermissions" : "Vous n'avez pas les permissions nécessaires pour éditer l'objet",
-            "startDateNOK" : "Cette date doit être antérieure à la seconde et ne peut être dans le futur.",
-            "endDateNOK" : "Cette date doit être postérieure à la première et ne peut être dans le futur."
-        },
-        "Errors": {
-            "Required" : "Ce champs est requis.",
-            "MinLength" : "Vous devez choisir au moins une valeur.",
-            "FormInvalid" : "Le formulaire est invalide. Veuillez vérifier l'ensemble des champs.",
-            "FormNotModified" : "Le formulaire n'a pas été modifié. Veuillez modifier au moins un champ.",
-            "PatternText1" : "Seulement des lettres, des chiffres, des espaces, des - ou _.",
-            "PatternText2" : "Seulement des lettres (sans accent), des chiffres, des - ou _.",
-            "PatternText3" : "Ne doit pas contenir de < ou >.",
-            "PatternText4" : "Seulement des lettres, des chiffres, des - ou _."
-        },
-        "ApiErrors": {
-            "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
-            "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
-            "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
-            "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
-            "UnknownError": "Une erreur inattendue s'est produite.",
-            "HasDeployment": "Cet objet ne peut pas être supprimé car un ou des déploiements lui sont associés.",
-            "HasObservation": "Cet objet ne peut pas être supprimé car une ou des observations lui sont associées.",
-            "NotFound": "L'objet n°{{ id }} est introuvable."
-        },
-        "DeletingPopup" : {
-            "Warning" : "Attention",
-            "WarningDelete" : "Vous êtes sur le point de supprimer : ",
-            "ConfirmDelete" : "Confirmer la suppression"
-        },
-        "PlaceHolder": {
-            "select": "Sélectionner",
-            "writeText": "Saisissez du texte",
-            "writeNumber": "Saisissez une valeur",
-            "writeMore": "En dire plus ...",
-            "firstLetters": "Saisir les premières lettres"
-        },
-        "Actions" : {
-            "Add" : "Ajouter",
-            "Validate" : "Valider",
-            "Cancel" : "Annuler",
-            "Back" : "Retour",
-            "Delete" : "Supprimer",
-            "Summary" : "Afficher / Cacher le résumé",
-            "Informations" : "Fiche complète",
-            "Edit" : "Modifier",
-            "Save" : "Enregistrer",
-            "Download" : "Télécharger",
-            "Filter" : "Filtrer",
-            "Reset" : "Réinitialiser"
-        },
-        "Others" : {
-            "Yes" : "Oui",
-            "No" : "Non",
-            "All" : "Tout"
-        }
+  "Individuals": {
+    "NavigationTabs": {
+      "Individuals": "Individus",
+      "Observations": "Observations",
+      "Captures": "Captures",
+      "TrackingDevices": "Dispositifs de suivi"
+    },
+    "Devices": {
+      "Fields": {
+        "id_tracking_device": "Identifiant",
+        "id_nomenclature_device_type": "Type de dispositif",
+        "provider_name": "Fournisseur",
+        "provider_device_id": "ID chez le fournisseur",
+        "id_referer": "Référent",
+        "comment": "Commentaire",
+        "meta_create_date": "Date de création",
+        "meta_update_date": "Date de mise à jour",
+        "nomenclature_device_type_name": "Type de dispositif",
+        "referer_name": "Référent",
+        "digitiser_name": "Rédacteur",
+        "last_individual_equipped_name": "Dernier individu équipé",
+        "deployments": "Individu(s) équipé(s)",
+        "device_label": "Dispositif de suivi"
+      },
+      "PlaceHolder": {
+        "provider_name": "Nom du fournisseur",
+        "provider_device_id": "Identifiant/n° série",
+        "id_referer": "Référent",
+        "device_label": "Dispositif de suivi"
+      },
+      "Filters": {
+        "cd_nom": "Taxon"
+      },
+      "Titles": {
+        "Info": "Dispositif de suivi n°{{ id }}",
+        "Add": "Ajout d'un dispositif de suivi",
+        "Edit": "Modification du dispositif de suivi n°{{ id }}",
+        "Delete": "Suppression du dispositif de suivi n°{{ id }}"
+      },
+      "Messages": {
+        "Added": "Le dispositif de suivi a été créé.",
+        "Edited": "Le dispositif de suivi n°{{ id }} a été modifié.",
+        "Deleted": "Le dispositif de suivi n°{{ id }} a été supprimé."
+      },
+      "Errors": {
+        "AddedNOK": "Ce dispositif n'a pas pu être créé. Erreur : {{ error }}",
+        "EditedNOK": "Le dispositif n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+        "DeletedNOK": "Le dispositif n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+      }
+    },
+    "Deployments": {
+      "Label": "Déploiement",
+      "Fields": {
+        "id_deployment": "ID du déploiement",
+        "id_tracking_device": "ID du dispositif de suivi",
+        "tracking_device_info": "Dispositif de suivi",
+        "install_date": "Date de déploiement",
+        "removal_date": "Date de retrait",
+        "deployment_type_name": "Type",
+        "deployment_location_name": "Localisation",
+        "marking_code": "Marquage",
+        "comment": "Commentaire",
+        "meta_create_date": "Date de création",
+        "meta_update_date": "Date de mise à jour",
+        "individual_name": "Nom de l'individu",
+        "digitiser_name": "Rédacteur",
+        "name_digitiser": "Rédacteur"
+      },
+      "Titles": {
+        "Add": "Ajout d'un déploiement",
+        "Edit": "Modification du déploiement n°{{ id }}",
+        "Delete": "Suppression du déploiement n°{{ id }}"
+      },
+      "Messages": {
+        "Added": "Le déploiement a été créé.",
+        "Edited": "Le déploiement n°{{ id }} a été modifié.",
+        "Deleted": "Le déploiement n°{{ id }} a été supprimé."
+      },
+      "Errors": {
+        "AddedNOK": "Ce déploiement n'a pas pu être créé. Erreur : {{ error }}",
+        "EditedNOK": "Le déploiement n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+        "DeletedNOK": "Le déploiement n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+      }
+    },
+    "Individuals": {
+      "Fields": {
+        "id_individual": "Identifiant",
+        "uuid_individual": "Identifiant unique de l'individus",
+        "individual_name": "Nom",
+        "active": "Actif",
+        "comment": "Commentaire",
+        "meta_create_date": "Date de création",
+        "meta_update_date": "Date de mise à jour",
+        "digitiser_name": "Rédacteur",
+        "nomenclature_sex_name": "Sexe",
+        "last_observation_date": "Dernière observation",
+        "last_observation_observers_name": "Dernier(s) observateur(s)",
+        "taxref_nom_vern": "Taxon",
+        "deployed_devices": "Dispositif(s) de suivi déployé(s)",
+        "deployed_markings": "Marquage(s) déployé(s)",
+        "deployments": "Déploiement(s) associé(s)",
+        "modules": "Module(s) GeoNature associé(s)"
+      },
+      "PlaceHolder": {
+        "individual_name": "Indiquer le nom de l'individu",
+        "comment": "En dire plus ..."
+      },
+      "Filters": {
+        "cd_nom": "Taxon"
+      },
+      "Titles": {
+        "Info": "Individu n°{{ id }}",
+        "Add": "Ajout d'un individu",
+        "Edit": "Modification de l'individu '{{ name }}' (n°{{ id }})",
+        "Delete": "Suppression de l'individu n°{{ id }}"
+      },
+      "Messages": {
+        "Added": "L'individu '{{ name }}' (n°{{ id }}) a été créé",
+        "Edited": "L'individu '{{ name }}' n°{{ id }} a été modifié.",
+        "Deleted": "L'individu '{{ name }}' n°{{ id }} a été supprimé.",
+        "NoGeometry": "Cet individu ne dispose pas encore d'observation"
+      },
+      "Errors": {
+        "AddedNOK": "Cet individu n'a pas pu être créé. Erreur : {{ error }}",
+        "EditedNOK": "L'individu' '{{ name }}' n°{{ id }} n'a pas pu être modifié. Erreur : {{ error }}",
+        "DeletedNOK": "L'individu' '{{ name }}' n°{{ id }} n'a pas pu être supprimé. Erreur : {{ error }}"
+      }
+    },
+    "Messages": {
+      "EmptyList": "Aucune donnée à afficher",
+      "TotalList": "ligne(s) au total",
+      "NoGeometry": "Cet élément ne dispose pas de géométrie",
+      "MissingPermissions": "Vous n'avez pas les permissions nécessaires pour éditer l'objet",
+      "startDateNOK": "Cette date doit être antérieure à la seconde et ne peut être dans le futur.",
+      "endDateNOK": "Cette date doit être postérieure à la première et ne peut être dans le futur."
+    },
+    "Errors": {
+      "Required": "Ce champs est requis.",
+      "MinLength": "Vous devez choisir au moins une valeur.",
+      "FormInvalid": "Le formulaire est invalide. Veuillez vérifier l'ensemble des champs.",
+      "FormNotModified": "Le formulaire n'a pas été modifié. Veuillez modifier au moins un champ.",
+      "PatternText1": "Seulement des lettres, des chiffres, des espaces, des - ou _.",
+      "PatternText2": "Seulement des lettres (sans accent), des chiffres, des - ou _.",
+      "PatternText3": "Ne doit pas contenir de < ou >.",
+      "PatternText4": "Seulement des lettres, des chiffres, des - ou _."
+    },
+    "ApiErrors": {
+      "JsonBodyMissing": "Le corps de la requête est manquant ou invalide.",
+      "ValidationError": "Les données saisies sont invalides. Veuillez vérifier le formulaire.",
+      "InsufficientPermissions": "Vous n'avez pas les permissions nécessaires pour effectuer cette action.",
+      "InvalidFilter": "Un des filtres ou paramètres de tri/pagination est invalide.",
+      "UnknownError": "Une erreur inattendue s'est produite.",
+      "HasDeployment": "Cet objet ne peut pas être supprimé car un ou des déploiements lui sont associés.",
+      "HasObservation": "Cet objet ne peut pas être supprimé car une ou des observations lui sont associées.",
+      "NotFound": "L'objet n°{{ id }} est introuvable."
+    },
+    "DeletingPopup": {
+      "Warning": "Attention",
+      "WarningDelete": "Vous êtes sur le point de supprimer : ",
+      "ConfirmDelete": "Confirmer la suppression"
+    },
+    "PlaceHolder": {
+      "select": "Sélectionner",
+      "writeText": "Saisissez du texte",
+      "writeNumber": "Saisissez une valeur",
+      "writeMore": "En dire plus ...",
+      "firstLetters": "Saisir les premières lettres"
+    },
+    "Actions": {
+      "Add": "Ajouter",
+      "Validate": "Valider",
+      "Cancel": "Annuler",
+      "Back": "Retour",
+      "Delete": "Supprimer",
+      "Summary": "Afficher / Cacher le résumé",
+      "Informations": "Fiche complète",
+      "Edit": "Modifier",
+      "Save": "Enregistrer",
+      "Download": "Télécharger",
+      "Filter": "Filtrer",
+      "Reset": "Réinitialiser"
+    },
+    "Others": {
+      "Yes": "Oui",
+      "No": "Non",
+      "All": "Tout"
+    },
+    "Export": {
+      "Title": "Format d'export",
+      "Formats": {
+        "csv": "CSV",
+        "geojson": "GeoJSON",
+        "gpkg": "GeoPackage"
+      }
     }
+  }
 }

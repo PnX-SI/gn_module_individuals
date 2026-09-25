@@ -50,6 +50,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     dir: DEVICES_DEFAULT_SORT.dir,
   };
   private _APIFiltersParams: APIDeviceFiltersParams = {};
+  public exportFormats: string[] = this._config.INDIVIDUALS?.DEVICES?.EXPORT_FORMAT ?? [];
 
   constructor(
     private _config: ConfigService,
@@ -77,12 +78,11 @@ export class DevicesListComponent implements OnInit, OnDestroy {
         'Individuals.Devices.Fields.provider_name',
         'Individuals.Devices.Fields.provider_device_id',
         'Individuals.ApiErrors.InsufficientPermissions',
-        'Individuals.ApiErrors.HasDeployment'
+        'Individuals.ApiErrors.HasDeployment',
       ])
       .subscribe(() => {
         this._setPermissions(this._datatable);
       });
-
   }
 
   ngOnDestroy() {
@@ -128,7 +128,9 @@ export class DevicesListComponent implements OnInit, OnDestroy {
    * @memberof DevicesListComponent
    */
   onInfo($event: any): void {
-    this._router.navigate(['info', $event.id_tracking_device], { relativeTo: this._activatedRoute });
+    this._router.navigate(['info', $event.id_tracking_device], {
+      relativeTo: this._activatedRoute,
+    });
   }
 
   /**
@@ -138,7 +140,9 @@ export class DevicesListComponent implements OnInit, OnDestroy {
    * @memberof DevicesListComponent
    */
   onEdit($event: any): void {
-    this._router.navigate(['form', $event.id_tracking_device], { relativeTo: this._activatedRoute });
+    this._router.navigate(['form', $event.id_tracking_device], {
+      relativeTo: this._activatedRoute,
+    });
   }
 
   /**
@@ -178,6 +182,21 @@ export class DevicesListComponent implements OnInit, OnDestroy {
       }
     }
     this._loadData();
+  }
+
+  /**
+   * Export the devices list in the given format, with the filters and sort
+   * currently applied to the list (not the pagination: the export always
+   * covers the whole filtered list).
+   *
+   * @param {string} format
+   * @memberof DevicesListComponent
+   */
+  onExport(format: string): void {
+    this._devicesService.exportDevices(format, this._APIFiltersParams, {
+      prop: this._APIPaginationParams.prop,
+      dir: this._APIPaginationParams.dir,
+    });
   }
 
   private _onDelete(): void {
@@ -228,36 +247,49 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     if (datatable.items) {
       this.allowedToDelete = {};
       this.allowedToEdit = {};
-    
+
       // Add access
       const currentObject = this._module.currentModule.module_objects['DEVICES'];
       this.allowedToAdd = {
         id: 0,
         access: currentObject?.cruved?.C == 0 ? false : true,
-        message: currentObject?.cruved?.C == 0 ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') : null,
+        message:
+          currentObject?.cruved?.C == 0
+            ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+            : null,
       };
 
       datatable.items.forEach((item: Device) => {
         // Edit access
-        this.allowedToEdit[item.id_tracking_device] = { 
-          id: item.id_tracking_device, 
-          access: item.cruved?.U ?? false, 
-          message: item.cruved?.U ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
+        this.allowedToEdit[item.id_tracking_device] = {
+          id: item.id_tracking_device,
+          access: item.cruved?.U ?? false,
+          message:
+            (item.cruved?.U ?? false)
+              ? null
+              : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
         };
 
         // Delete access
-        this.allowedToDelete[item.id_tracking_device] = { 
-          id: item.id_tracking_device, 
-          access: item.cruved?.D ?? false, 
-          message: item.cruved?.D ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
+        this.allowedToDelete[item.id_tracking_device] = {
+          id: item.id_tracking_device,
+          access: item.cruved?.D ?? false,
+          message:
+            (item.cruved?.D ?? false)
+              ? null
+              : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
         };
 
         // Not allowed to delete if deployments exists
-        if (this.allowedToDelete[item.id_tracking_device].access && item.last_individual_equipped_name != null) {
+        if (
+          this.allowedToDelete[item.id_tracking_device].access &&
+          item.last_individual_equipped_name != null
+        ) {
           this.allowedToDelete[item.id_tracking_device].access = false;
-          this.allowedToDelete[item.id_tracking_device].message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
+          this.allowedToDelete[item.id_tracking_device].message = this._translate.instant(
+            'Individuals.ApiErrors.HasDeployment'
+          );
         }
-
       });
     }
   }

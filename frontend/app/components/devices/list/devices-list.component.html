@@ -54,10 +54,12 @@
   [allowedToAdd]="allowedToAdd"
   [summaryTemplate]="summaryTemplate"
   [filtersTemplate]="filtersTemplate"
+  [exportFormats]="exportFormats"
   (pagination)="onPage($event)"
   (sort)="onSort($event)"
   (add)="onAdd()"
   (info)="onInfo($event)"
   (edit)="onEdit($event)"
   (delete)="openDeleteModal($event)"
+  (export)="onExport($event)"
 ></gn-individuals-list>

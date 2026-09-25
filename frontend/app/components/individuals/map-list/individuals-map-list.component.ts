@@ -53,6 +53,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     FeatureCollection<Individual>
   >();
   public defaultFilters: APIIndividualFiltersParams = {};
+  public exportFormats: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.EXPORT_FORMAT ?? [];
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
     page: 1,
@@ -95,7 +96,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
         'Individuals.Individuals.Fields.nomenclature_sex_name',
         'Individuals.ApiErrors.InsufficientPermissions',
         'Individuals.ApiErrors.HasObservation',
-        'Individuals.ApiErrors.HasDeployment'
+        'Individuals.ApiErrors.HasDeployment',
       ])
       .subscribe(() => {
         this._setPermissions(this._datatable);
@@ -215,6 +216,21 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._loadData();
   }
 
+  /**
+   * Export the individuals list in the given format, with the filters and
+   * sort currently applied to the list/map (not the pagination: the export
+   * always covers the whole filtered list).
+   *
+   * @param {string} format
+   * @memberof IndividualsMapListComponent
+   */
+  public onExport(format: string): void {
+    this._individualsService.exportIndividuals(format, this._APIFiltersParams, {
+      prop: this._APIPaginationParams.prop,
+      dir: this._APIPaginationParams.dir,
+    });
+  }
+
   private _onDelete(): void {
     if (this.selectedRows.length > 0) {
       const selectedId = this.selectedRows[0].id_individual;
@@ -284,7 +300,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
 
   /**
    * Set the allowToDelete, allowToEdit and allowToAdd variables considering the item cruved or object cruved
-   * 
+   *
    * For each item id, if a deployment or observation exists
    * set the corresponding array entry to false, else to true
    *
@@ -302,29 +318,40 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
       this.allowedToAdd = {
         id: 0,
         access: currentObject?.cruved?.C == 0 ? false : true,
-        message: currentObject?.cruved?.C == 0 ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') : null,
+        message:
+          currentObject?.cruved?.C == 0
+            ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+            : null,
       };
 
       datatable.items.forEach((item: Individual) => {
         // Edit access
-        this.allowedToEdit[item.id_individual] = { 
-          id: item.id_individual, 
-          access: item.cruved?.U ?? false, 
-          message: item.cruved?.U ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
+        this.allowedToEdit[item.id_individual] = {
+          id: item.id_individual,
+          access: item.cruved?.U ?? false,
+          message:
+            (item.cruved?.U ?? false)
+              ? null
+              : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
         };
 
         // Delete access
-         this.allowedToDelete[item.id_individual] = { 
-          id: item.id_individual, 
-          access: item.cruved?.D ?? false, 
-          message: item.cruved?.D ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
+        this.allowedToDelete[item.id_individual] = {
+          id: item.id_individual,
+          access: item.cruved?.D ?? false,
+          message:
+            (item.cruved?.D ?? false)
+              ? null
+              : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
         };
 
         if (this.allowedToDelete[item.id_individual].access) {
           // Not allowed to delete if deployments exists
           if (item.last_observation_date) {
             this.allowedToDelete[item.id_individual].access = false;
-            this.allowedToDelete[item.id_individual].message = this._translate.instant('Individuals.ApiErrors.HasObservation');
+            this.allowedToDelete[item.id_individual].message = this._translate.instant(
+              'Individuals.ApiErrors.HasObservation'
+            );
           }
           // Not Allowed to delete if observations exists
           else if (
@@ -332,14 +359,16 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
             Object.keys(item.deployed_markings).length > 0
           ) {
             this.allowedToDelete[item.id_individual].access = false;
-            this.allowedToDelete[item.id_individual].message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
+            this.allowedToDelete[item.id_individual].message = this._translate.instant(
+              'Individuals.ApiErrors.HasDeployment'
+            );
           }
         }
       });
-      this.allowedToEdit[28] = { 
-        id: 28, 
-        access: false, 
-        message: this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
+      this.allowedToEdit[28] = {
+        id: 28,
+        access: false,
+        message: this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
       };
     }
   }

@@ -1,8 +1,11 @@
 <div [ngStyle]="contentHeight ? { 'min-height.px': contentHeight } : {}">
-<!-- <div> -->
-  <div class="action-buttons" *ngIf="displayAddButton || displayFilterButton || displayExportButton">
+  <!-- <div> -->
+  <div
+    class="action-buttons"
+    *ngIf="displayAddButton || displayFilterButton || displayExportButton"
+  >
     <ng-container *ngIf="displayAddButton">
-      <span 
+      <span
         [matTooltip]="allowedToAdd?.message ?? ('Individuals.Actions.Add' | translate)"
         [class.cursor-not-allowed]="!allowedToAdd.access"
       >
@@ -30,12 +33,13 @@
         <mat-icon>filter_alt</mat-icon>
       </button>
     </ng-container>
-    <ng-container *ngIf="displayExportButton">
+    <ng-container *ngIf="displayExportButton && exportFormats.length > 0">
       <button
         id="download"
         mat-mini-fab
         [matTooltip]="'Individuals.Actions.Download' | translate"
         class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+        (click)="toggleShowExportPanel()"
         [disabled]="false"
       >
         <mat-icon>download</mat-icon>
@@ -47,6 +51,45 @@
     class="ngx-datatable material filters"
   >
     <ng-container *ngTemplateOutlet="filtersTemplate"></ng-container>
+  </div>
+  <div
+    *ngIf="showExportPanel"
+    class="ngx-datatable material filters export-panel"
+  >
+    <div class="d-flex flex-wrap filters-form">
+      <div class="form-group">
+        <label class="small">{{ 'Individuals.Export.Title' | translate }}</label>
+        <div class="form-check">
+          <div *ngFor="let format of exportFormats">
+            <input
+              type="radio"
+              class="form-check-input"
+              [id]="'export-format-' + format"
+              name="exportFormat"
+              [value]="format"
+              [checked]="selectedExportFormat === format"
+              (change)="selectedExportFormat = format"
+            />
+            <label
+              class="small"
+              [for]="'export-format-' + format"
+            >
+              {{ 'Individuals.Export.Formats.' + format | translate }}
+            </label>
+          </div>
+        </div>
+      </div>
+      <button
+        id="confirm-download"
+        mat-mini-fab
+        [matTooltip]="'Individuals.Actions.Download' | translate"
+        class="custom-mini-fab bg-secondary text-white border-0"
+        (click)="onExport()"
+        [disabled]="!selectedExportFormat"
+      >
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
   </div>
   <ngx-datatable
     *ngIf="dataTable$ | async as dataTable"
@@ -71,8 +114,10 @@
     (sort)="onSort($event)"
     (select)="onSelect($event)"
   >
-
-    <ngx-datatable-row-detail [rowHeight]="$any('auto')" *ngIf="displaySummaryButtons">
+    <ngx-datatable-row-detail
+      [rowHeight]="$any('auto')"
+      *ngIf="displaySummaryButtons"
+    >
       <ng-template
         ngx-datatable-row-detail-template
         let-row="row"
@@ -81,7 +126,8 @@
         <ng-container *ngTemplateOutlet="summaryTemplate; context: { row: row }"></ng-container>
       </ng-template>
     </ngx-datatable-row-detail>
-    <ngx-datatable-column *ngIf="displaySummaryButtons"
+    <ngx-datatable-column
+      *ngIf="displaySummaryButtons"
       id="summary"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -103,7 +149,8 @@
         ></button>
       </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column *ngIf="displayInfoButtons"
+    <ngx-datatable-column
+      *ngIf="displayInfoButtons"
       id="informations"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -123,7 +170,8 @@
         ></button>
       </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column *ngIf="displayEditButtons"
+    <ngx-datatable-column
+      *ngIf="displayEditButtons"
       id="edit"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -148,7 +196,8 @@
         </span>
       </ng-template>
     </ngx-datatable-column>
-    <ngx-datatable-column *ngIf="displayDeleteButtons"
+    <ngx-datatable-column
+      *ngIf="displayDeleteButtons"
       id="delete"
       [width]="actionColumnsWidth"
       [resizeable]="false"
@@ -210,7 +259,7 @@
                     : row[column.prop]
             }}
           </span>
-        </ng-template>    
+        </ng-template>
       </ng-template>
     </ngx-datatable-column>
   </ngx-datatable>

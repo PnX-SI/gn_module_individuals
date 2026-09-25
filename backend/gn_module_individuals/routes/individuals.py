@@ -1,6 +1,6 @@
 import json
 
-from flask import make_response, request, g, jsonify
+from flask import make_response, request, g, jsonify, send_from_directory
 from marshmallow import EXCLUDE, ValidationError
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload, raiseload, selectinload
@@ -10,7 +10,7 @@ from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
 from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import db
-from utils_flask_sqla.response import json_resp
+from utils_flask_sqla.response import json_resp, to_csv_resp, to_json_resp
 
 from .. import MODULE_CODE
 from ..blueprint import blueprint
@@ -24,11 +24,13 @@ from ..models.individuals import (
 from ..schemas.deployments import IndividualDeploymentWriteSchema
 from ..schemas.individuals import (
     IndividualDetailSchema,
+    IndividualExportSchema,
     IndividualListSchema,
     IndividualMapSchema,
     IndividualWriteSchema,
 )
 from ..utils.errors import APIError, ApiErrorCode
+from .utils import check_export_format, export_filename, write_geopackage
 
 
 def _parse_filters(args):
@@ -718,3 +720,74 @@ def individual_page(id_individual, scope):
         "page": ((rank - 1) // per_page) + 1,
         "per_page": per_page,
     }
+
+
+@blueprint.route("/individuals/export/<export_format>", methods=["POST"])
+@login_required
+# The "E" (Export) CRUVED action is not configured for this module yet, so
+# exporting is gated on "R" instead: anyone who can read the list can export
+# it. Once "E" is set up (permission admin UI), swap the two lines below.
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
+# @permissions.check_cruved_scope(
+#     "E", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+# )
+def export_individuals(export_format, scope):
+    """
+    Export the currently filtered individuals list
+
+    .. :quickref: Individuals;
+
+    The route is in POST to accept the same filters as GET /individuals
+    without an overly long query string.
+
+    Exports the whole filtered/sorted/scoped list (not a selection of checked
+    rows), bounded by INDIVIDUALS.NB_MAX_EXPORT. GeoJSON/GeoPackage use the
+    individual's last known observation position (gn_synthese.synthese, see
+    models/individuals.py): since that position is a Python attribute
+    assigned after the fact by _assign_last_observation() rather than a
+    mapped column, the list is fully materialized before being serialized.
+
+    :param export_format: ``csv``, ``geojson`` or ``gpkg`` (see the
+        INDIVIDUALS.EXPORT_FORMAT module config)
+    :type export_format: str
+
+    :returns: a file attachment
+    """
+    entity_config = blueprint.config["INDIVIDUALS"]
+    check_export_format(export_format, entity_config)
+
+    filters = _parse_filters(request.args)
+    sort = _parse_sort(request.args)
+    # eager_load=True (the default): the export schema reads the same
+    # taxon/digitiser/nomenclature_sex relationships as IndividualListSchema.
+    query = _build_individuals_query(scope, filters, sort).limit(entity_config["NB_MAX_EXPORT"])
+
+    individuals = db.session.scalars(query).unique().all()
+    _assign_last_observation(individuals)
+
+    columns = entity_config["EXPORT_COLUMNS"] or None
+    filename = export_filename("individuals")
+
+    if export_format == "csv":
+        schema = IndividualExportSchema(only=columns)
+        return to_csv_resp(
+            filename,
+            schema.dump(individuals, many=True),
+            columns=list(schema.dump_fields.keys()),
+            separator=";",
+        )
+
+    schema = IndividualExportSchema(as_geojson=True, feature_geometry="geom", only=columns)
+    feature_collection = schema.dump(individuals, many=True)
+
+    if export_format == "geojson":
+        return to_json_resp(feature_collection, as_file=True, filename=filename, indent=4)
+
+    # gn_synthese.synthese.the_geom_point, the source of an individual's last
+    # observation position, is always stored in EPSG:4326 (WGS84), so it's read
+    # straight from that column's type rather than hardcoded here.
+    srid = Synthese.the_geom_point.type.srid
+    dir_name, file_name = write_geopackage(feature_collection, filename, srid)
+    return send_from_directory(dir_name, file_name, as_attachment=True)
