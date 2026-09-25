@@ -63,7 +63,6 @@ class IndividualsSchema(Schema):
     )
 
 
-
 class DevicesSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
     LIST_COLUMNS = fields.List(
