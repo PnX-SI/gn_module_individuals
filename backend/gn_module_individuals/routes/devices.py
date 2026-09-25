@@ -11,7 +11,7 @@ from geonature.core.gn_permissions import decorators as permissions
 from geonature.core.gn_permissions.decorators import login_required
 from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.utils.env import db
-from utils_flask_sqla.response import json_resp
+from utils_flask_sqla.response import json_resp, to_csv_resp
 
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
@@ -27,6 +27,7 @@ from ..schemas import (
 from ..models import TrackingDevices, IndividualDeployments
 
 from ..blueprint import blueprint
+from .utils import check_export_format, export_filename
 
 
 def _parse_bool(value):
@@ -410,3 +411,49 @@ def delete_device(id_tracking_device, scope):
     db.session.delete(device)
     db.session.commit()
     return make_response("", 204)
+
+
+@blueprint.route("/devices/export/<export_format>", methods=["POST"])
+@login_required
+# See export_individuals() in routes/individuals.py: "R" until "E"
+# is configured.
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
+# @permissions.check_cruved_scope(
+#     "E", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+# )
+def export_devices(export_format, scope):
+    """
+    Export the currently filtered devices list
+
+    .. :quickref: Devices;
+
+    The route is in POST to accept the same filters as GET /devices without
+    an overly long query string. Exports the whole filtered/sorted/scoped
+    list (not a selection of checked rows), bounded by DEVICES.NB_MAX_EXPORT.
+
+    :param export_format: ``csv`` (see the DEVICES.EXPORT_FORMAT module config)
+    :type export_format: str
+
+    :returns: a file attachment
+    """
+    entity_config = blueprint.config["DEVICES"]
+    check_export_format(export_format, entity_config)
+
+    filters = _parse_device_filters(request.args)
+    # eager_load=True (the default): TrackingDeviceListSchema reads the same
+    # nomenclature_device_type/digitiser/referer/deployments relationships as
+    # list_devices().
+    query = _build_devices_query(scope, filters).limit(entity_config["NB_MAX_EXPORT"])
+
+    devices = db.session.scalars(query).unique().all()
+
+    columns = entity_config["EXPORT_COLUMNS"] or None
+    schema = TrackingDeviceListSchema(only=columns)
+    return to_csv_resp(
+        export_filename("devices"),
+        schema.dump(devices, many=True),
+        columns=list(schema.dump_fields.keys()),
+        separator=";",
+    )
