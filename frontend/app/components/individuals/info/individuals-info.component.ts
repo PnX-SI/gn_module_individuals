@@ -153,6 +153,7 @@ export class IndividualsInfoComponent implements OnInit {
       { "format": "ungrouped_geom" },
     ).subscribe((mapData) => {
       this.mapData$ = of(mapData);
+      this._zoomOnFeatures();
 
       mapData.features
         // Copy befor change
@@ -168,7 +169,6 @@ export class IndividualsInfoComponent implements OnInit {
   ngAfterViewInit(): void {
     setTimeout(() => { // Usefull to wait the DOM build before calculation
       this.contentHeight = calcContentHeight();
-      this._zoomOnFeatures();
       this._bindMapMove();
     }, 0);
   }
