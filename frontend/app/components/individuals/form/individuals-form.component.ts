@@ -1,11 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, Data } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subject, BehaviorSubject, Observable } from 'rxjs';
-import { takeUntil, tap, filter } from 'rxjs/operators';
+import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
+import { takeUntil, tap, filter, switchMap, map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
 import { ModuleService } from '@geonature/services/module.service';
 import { CommonService } from '@geonature_common/service/common.service';
 import { ConfigService } from '@geonature/services/config.service';
@@ -80,47 +79,12 @@ export class IndividualsFormComponent implements OnInit {
             value: (module as any).id_module
         })
       );
- 
-    // First initialisation of the datatable (resolver) and
-    // additional data
-    this._route.data
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(({ datatable }) => {
-        this.datatable = datatable;
-        this.formAction = datatable?.id_individual ? 'EDIT' : 'ADD';
-
-        // If they're deployments to display, create and ItemCollection for 
-        // the ListComponent
-        this._dataTable_deployments$.next({
-          items: Object.values(datatable?.deployments ?? {})
-        });
-        
-        // Get the temporaly configured dataset for the curent cd_nom
-        // this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom).ID_DATASET;
-
-        // Get additional data if exists
-        this._dataFormService
-          .getadditionalFields({
-            module_code: this._currentModule.module_code,
-            object_code: this._currentModuleObjectCode,
-            // En attente des devs pour pouvoir sélectionner le taxon
-            id_dataset: this._currentDataset,
-            // cd_nom: [datatable.cd_nom]
-          })
-          .pipe(takeUntil(this._destroy$))
-          .subscribe ((additionalFields) => {
-            this.additionalFields = additionalFields;
-            if (datatable?.id_individual) {
-                this.patchForm(datatable);
-            }
-          });
-    });
 
     // Form initialization
     this.form = this._fb.group({
       id_individual: [null],
       modules: [
-        this.formAction === 'ADD' ? [this._currentModule.id_module] : [],
+        [this._currentModule.id_module],
         Validators.required
       ],
       individual_name: [
@@ -145,19 +109,6 @@ export class IndividualsFormComponent implements OnInit {
       additional_data: this._fb.group({}),
     });
 
-    // To be sure to wait translations before setting permissions
-    this._translate
-      .get([
-        'Individuals.ApiErrors.InsufficientPermissions',
-        'Individuals.Errors.FormInvalid',
-        'Individuals.Errors.FormNotModified',
-      ])
-      .subscribe(() => {
-        this._setPermissions(this.datatable);
-        // Angular consider that the form content is not modified
-        this.form.markAsPristine();
-      });
-
     // Update permissions when form values change
     this.form.valueChanges
       .pipe(
@@ -167,6 +118,88 @@ export class IndividualsFormComponent implements OnInit {
       .subscribe(() => {
         this._setPermissions(this.datatable);
       });
+
+    // Update additionalFields whend cd_nom change
+    this.form.get('cd_nom')?.valueChanges
+      .pipe(
+        filter(() => this.form.get('cd_nom')?.dirty ?? false),
+        filter((taxon) => taxon !== null && typeof taxon === 'object'),
+        tap((taxon) => {
+          // Get the temporaly configured dataset for the curent cd_nom
+          this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === taxon.cd_nom)?.ID_DATASET;
+        }),
+        switchMap(() => this._getAdditionalFields()),
+        takeUntil(this._destroy$))
+      .subscribe((additionalFields) => {
+        if (this.formAction === 'EDIT') {
+          this.patchAdditionalFieldsForm(this.datatable, additionalFields);
+        }
+        this.additionalFields = additionalFields;
+      });
+
+    // First initialisation of the datatable (resolver) and
+    // additional data
+    this._route.data
+      .pipe(
+        takeUntil(this._destroy$),
+        tap (({datatable}: Data) => {
+          this.datatable = datatable;
+          this.formAction = datatable?.id_individual ? 'EDIT' : 'ADD';
+
+          // If they're deployments to display, create and ItemCollection for 
+          // the ListComponent
+          this._dataTable_deployments$.next({
+            items: Object.values(datatable?.deployments ?? {})
+          });
+        }),
+        // Get additional data if exists and init additionalFields variable
+        switchMap(({ datatable }) => {
+          if (this.formAction == 'EDIT' && datatable?.id_individual) { 
+            // Get the temporaly configured dataset for the curent cd_nom
+            this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom)?.ID_DATASET;
+
+            return this._getAdditionalFields()
+              .pipe(
+                map((additionalFields) => ({
+                  datatable,
+                  additionalFields
+                }))
+              );
+          }
+          return of({
+            datatable,
+            additionalFields: []
+          });
+        }),
+        // Patch form and additional fields
+        tap(({ datatable, additionalFields }) => {
+          this.patchForm(datatable);
+
+          this.additionalFields = additionalFields;
+
+          if (this.formAction === 'EDIT') {
+            this.patchAdditionalFieldsForm(
+              datatable,
+              additionalFields
+            );
+          }
+
+          this.form.markAsPristine();
+        }),
+        // Get permissions tranlations
+        switchMap(() =>
+          this._translate.get([
+            'Individuals.ApiErrors.InsufficientPermissions',
+            'Individuals.Errors.FormInvalid',
+            'Individuals.Errors.FormNotModified',
+          ])
+        ),
+        // Set Permissions
+        tap(() => {
+          this._setPermissions(this.datatable);
+        })
+      )
+      .subscribe();
   }
 
   ngOnDestroy() {
@@ -230,19 +263,17 @@ export class IndividualsFormComponent implements OnInit {
     this.form.patchValue(individual);
     this.form.patchValue(
       {
-        cd_nom: { cd_nom: individual.cd_nom, nom_valide: individual.nom_vern },
+        cd_nom: { cd_nom: individual.cd_nom, nom_vern: individual.nom_vern },
         id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
         modules: individual.modules.map((module: any) => module.id_module)
-          // value: individual.modules[0].id_module, // Mettre Individuals par défaut
-        // {
-        //   label: this._currentModule.module_name,
-        //   value: this._currentModule.id_module, // Mettre Individuals par défaut
-        // },
-      }
+      },
+      { emitEvent: false }
     );
+  }
 
-    this.additionalFields.forEach((field) => {
-      field.value = individual.additional_data?.[field.attribut_name] ?? field.value;
+  patchAdditionalFieldsForm(individual: any, fields = this.additionalFields): void {
+    fields.forEach((field) => {
+      field.value = individual?.additional_data?.[field.attribut_name] ?? field.value;
     });
   }
 
@@ -370,5 +401,14 @@ export class IndividualsFormComponent implements OnInit {
         };
       });
     }
+  }
+
+  private _getAdditionalFields(): Observable<any> {
+    return this._dataFormService
+      .getadditionalFields({
+        module_code: this._currentModule.module_code,
+        object_code: this._currentModuleObjectCode,
+        id_dataset: this._currentDataset,
+      });
   }
 }
