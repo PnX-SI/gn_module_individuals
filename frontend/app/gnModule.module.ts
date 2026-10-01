@@ -21,13 +21,6 @@ import { InfoComponent } from './components/info/info.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { FormComponent } from './components/form/form.component';
 
-import { DevicesService } from './services/devices.service';
-import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
-import { DevicesListComponent } from './components/devices/list/devices-list.component';
-import { DevicesFiltersComponent } from './components/devices/list/devices-filters.component';
-import { DevicesFormComponent } from './components/devices/form/devices-form.component';
-import { DevicesInfoComponent } from './components/devices/info/devices-info.component';
-
 import { IndividualsService } from './services/individuals.service';
 import {
   IndividualsMapResolver,
@@ -38,6 +31,17 @@ import { IndividualsMapListComponent } from './components/individuals/map-list/i
 import { IndividualsFiltersComponent } from './components/individuals/map-list/individuals-filters.component';
 import { IndividualsInfoComponent } from './components/individuals/info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals/form/individuals-form.component';
+
+import { ObservationsService } from './services/observations.service';
+import { ObservationsMapListComponent } from './components/observations-map-list/observations-map-list.component';
+
+import { DevicesService } from './services/devices.service';
+import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+import { DevicesListComponent } from './components/devices/list/devices-list.component';
+import { DevicesFiltersComponent } from './components/devices/list/devices-filters.component';
+import { DevicesFormComponent } from './components/devices/form/devices-form.component';
+import { DevicesInfoComponent } from './components/devices/info/devices-info.component';
+
 
 import { DeploymentsService } from './services/deployments.service';
 import { DeploymentsFormComponent } from './components/deployments-form/deployments-form.component';
@@ -62,6 +66,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsInfoComponent,
     IndividualsFormComponent,
     DeploymentsFormComponent,
+    ObservationsMapListComponent
   ],
   imports: [
     HttpClientXsrfModule.withOptions({
@@ -91,6 +96,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsMapResolver,
     IndividualResolver,
     DeploymentsService,
+    ObservationsService,
   ],
 })
 export class GeonatureModule {
