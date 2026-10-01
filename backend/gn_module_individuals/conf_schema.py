@@ -13,8 +13,8 @@ class AdditionalFieldSchema(Schema):
 
 class GlobalSchema(Schema):
     ID_TAXON_LIST = fields.Integer(load_default=None)
-    SELECTED_LAYER_COLOR = fields.String()
-    UNSELECTED_LAYER_COLOR = fields.String()
+    SELECTED_LAYER_COLOR = fields.String(load_default="#d7191c")
+    UNSELECTED_LAYER_COLOR = fields.String(load_default="#007bff")
 
 
 class IndividualsSchema(Schema):
@@ -62,6 +62,17 @@ class IndividualsSchema(Schema):
         ],
     )
 
+class ObservationsSchema(Schema):
+    DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
+    LIST_COLUMNS = fields.List(
+        fields.String(),
+        load_default=[
+            "nom_vern_or_lb_nom",
+            "date_min",
+            "observers",
+            "dataset_name"
+        ],
+    )
 
 class DevicesSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
@@ -102,5 +113,7 @@ class DevicesSchema(Schema):
 
 class GnModuleSchemaConf(Schema):
     GLOBAL = fields.Nested(GlobalSchema, load_default=GlobalSchema().load({}))
-    DEVICES = fields.Nested(DevicesSchema, load_default=DevicesSchema().load({}))
     INDIVIDUALS = fields.Nested(IndividualsSchema, load_default=IndividualsSchema().load({}))
+    OBSERVATIONS = fields.Nested(ObservationsSchema, load_default=ObservationsSchema().load({}))
+    DEVICES = fields.Nested(DevicesSchema, load_default=DevicesSchema().load({}))
+
