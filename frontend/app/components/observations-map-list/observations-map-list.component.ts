@@ -21,10 +21,11 @@ import {
   APIPaginationParams,
   FeatureCollection,
   AccessResult,
+  DatatableColumnLink,
 } from '../../models/common.models';
 import { ObservationsService } from '../../services/observations.service';
 import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
-
+import { convertDateTimeToDateStr } from '../../utils/functions.util';
 import { ModalComponent } from '../modal/modal.component';
 
 @Component({
@@ -40,7 +41,15 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   public datatable$: Observable<ItemCollection<Observation>> = this._datatable$.pipe(
     filter((data): data is ItemCollection<Observation> => data !== null)
   );
-  private _datatable!: ItemCollection<Observation>;
+  private _destroy$ = new Subject<void>();
+  // private _APIPaginationParams: APIPaginationParams = {
+    // page: 1,
+    // per_page: this.nbRowsToDisplay,
+    // prop: INDIVIDUALS_DEFAULT_SORT.prop,
+    // dir: INDIVIDUALS_DEFAULT_SORT.dir,
+  // };
+  private _APIFiltersParams: APIObservationFiltersParams = { active: 'true' };
+  private _selectedId: number | null = null;
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.OBSERVATIONS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
@@ -52,15 +61,15 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     FeatureCollection<Observation>
   >();
   public defaultFilters: APIObservationFiltersParams = {};
-  private _destroy$ = new Subject<void>();
-  // private _APIPaginationParams: APIPaginationParams = {
-  //   page: 1,
-  //   per_page: this.nbRowsToDisplay,
-  //   prop: INDIVIDUALS_DEFAULT_SORT.prop,
-  //   dir: INDIVIDUALS_DEFAULT_SORT.dir,
-  // };
-  private _APIFiltersParams: APIObservationFiltersParams = { active: 'true' };
-  private _selectedId: number | null = null;
+  public datatableColumnsLink: DatatableColumnLink[] = [
+    { 
+      column_name: "dataset_name",
+      link_prefix: "/metadata/dataset_detail/",
+      id_field_name: "id_dataset",
+      target: "_blank"
+    }
+  ]
+  public convertDateTimeToDateStr = convertDateTimeToDateStr;
 
   constructor(
     private _config: ConfigService,
@@ -151,9 +160,9 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    * @param {*} $event
    * @memberof ObservationsMapListComponent
    */
-  // onInfo($event: any): void {
-  //   this._router.navigate(['info', $event.id_individual], { relativeTo: this._activatedRoute });
-  // }
+  onInfo($event: Observation): void {
+    window.open($event.url_source + '/' + $event.entity_source_pk_value, '_blank', 'noopener,noreferrer');
+  }
 
   /**
    * Perform the edit action for the given row

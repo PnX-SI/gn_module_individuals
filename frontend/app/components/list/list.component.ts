@@ -15,7 +15,7 @@ import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
-import { calcContentHeight } from '../../utils/functions.util';
+import { calcContentHeight, isDateTime, convertDateTimeToDateStr } from '../../utils/functions.util';
 import {
   Column,
   PaginatedItemCollection,
