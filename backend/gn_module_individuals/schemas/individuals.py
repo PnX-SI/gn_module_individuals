@@ -76,7 +76,33 @@ class IndividualBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlc
     id_digitiser = fields.Integer(dump_only=True)
 
 
-class IndividualListSchema(IndividualBaseSchema):
+class IndividualComputedFieldsMixin:
+    """get_* methods shared by every schema exposing the flattened
+    taxon/digitiser/sex/last-observation labels (IndividualListSchema,
+    IndividualExportSchema). Pure Python mixin (no Meta, no __init__): safe to
+    combine with any Schema base without affecting its MRO/options class."""
+
+    def get_digitiser_name(self, obj):
+        if obj.digitiser:
+            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
+        return None
+
+    def get_nomenclature_sex_name(self, obj):
+        return get_label(obj.nomenclature_sex) if obj.nomenclature_sex else None
+
+    def get_taxref_nom_vern(self, obj):
+        return obj.taxon.nom_vern if obj.taxon else None
+
+    def get_last_observation_date(self, obj):
+        if obj.last_obs_date is None:
+            return None
+        return obj.last_obs_date.strftime("%d-%m-%Y")
+
+    def get_last_observation_observers_name(self, obj):
+        return obj.last_obs_observers
+
+
+class IndividualListSchema(IndividualComputedFieldsMixin, IndividualBaseSchema):
     """Adds only computed fields on top of the base: no relationships."""
 
     class Meta(IndividualBaseSchema.Meta):
@@ -100,27 +126,8 @@ class IndividualListSchema(IndividualBaseSchema):
     deployed_devices = fields.Method("get_deployed_devices", dump_only=True)
     deployed_markings = fields.Method("get_deployed_markings", dump_only=True)
 
-    def get_digitiser_name(self, obj):
-        if obj.digitiser:
-            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
-        return None
-
-    def get_nomenclature_sex_name(self, obj):
-        return get_label(obj.nomenclature_sex) if obj.nomenclature_sex else None
-
-    def get_taxref_nom_vern(self, obj):
-        return obj.taxon.nom_vern if obj.taxon else None
-
     def get_taxref_lb_nom(self, obj):
         return obj.taxon.lb_nom if obj.taxon else None
-
-    def get_last_observation_date(self, obj):
-        if obj.last_obs_date is None:
-            return None
-        return obj.last_obs_date.strftime("%d-%m-%Y")
-
-    def get_last_observation_observers_name(self, obj):
-        return obj.last_obs_observers
 
     def _active_deployments(self, obj):
         return sorted(
@@ -153,6 +160,50 @@ class IndividualListSchema(IndividualBaseSchema):
             }
             for i, deployment in enumerate(markings, start=1)
         }
+
+
+class IndividualExportSchema(
+    IndividualComputedFieldsMixin, SmartRelationshipsMixin, GeoAlchemyAutoSchema
+):
+    """Same flattened columns as IndividualListSchema, plus a `geom` field
+    (the individual's last known observation position, from gn_synthese) so
+    this schema can also produce CSV rows (with geom as WKT if requested),
+    GeoJSON or geopackage features.
+
+    Built on GeoAlchemyAutoSchema directly (like IndividualMapSchema) rather
+    than by subclassing IndividualListSchema: mixing GeoAlchemyAutoSchema into
+    a class whose MRO already goes through ma.SQLAlchemyAutoSchema makes the
+    schema pick up the wrong (non-geo) options class, silently dropping
+    geometry support.
+    """
+
+    class Meta:
+        model = TIndividuals
+        include_fk = True
+        load_instance = True
+        sqla_session = db.session
+        include_relationships = False
+        model_converter = IndividualMapConverter
+        feature_id = "id_individual"
+        feature_geometry = "geom"
+        exclude = ("uuid_individual", "cd_nom")
+
+    __module_code__ = MODULE_CODE
+    __object_code__ = "INDIVIDUALS"
+
+    meta_create_date = fields.DateTime(format="%d-%m-%Y", dump_only=True)
+    meta_update_date = fields.DateTime(format="%d-%m-%Y", dump_only=True, allow_none=True)
+    id_digitiser = fields.Integer(dump_only=True)
+    geom = GeometryField(metadata={"exclude": True}, dump_only=True)
+
+    taxref_cd_nom = fields.Integer(attribute="cd_nom", dump_only=True)
+    taxref_nom_vern = fields.Method("get_taxref_nom_vern", dump_only=True)
+    digitiser_name = fields.Method("get_digitiser_name", dump_only=True)
+    nomenclature_sex_name = fields.Method("get_nomenclature_sex_name", dump_only=True)
+    last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
+    last_observation_observers_name = fields.Method(
+        "get_last_observation_observers_name", dump_only=True
+    )
 
 
 class IndividualDetailSchema(IndividualBaseSchema):

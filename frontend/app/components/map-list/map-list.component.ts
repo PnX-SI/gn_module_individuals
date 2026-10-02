@@ -41,8 +41,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Output() delete: EventEmitter<any> = new EventEmitter();
   @Output() idPage: EventEmitter<number> = new EventEmitter();
   @Output() bbox: EventEmitter<string> = new EventEmitter();
+  @Output() export: EventEmitter<string> = new EventEmitter();
 
   @Input() idFieldName!: string;
+  @Input() exportFormats: string[] = [];
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
   @Input() datatable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
@@ -136,6 +138,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
 
   onDelete($event: any): void {
     this.delete.emit($event);
+  }
+
+  onExport($event: string): void {
+    this.export.emit($event);
   }
 
   /**
