@@ -55,7 +55,8 @@ export class IndividualsInfoComponent implements OnInit {
     { 
       column_name: "tracking_device_info",
       link_prefix: "/individuals/devices/info",
-      id_field_name: "id_tracking_device" 
+      id_field_name: "id_tracking_device",
+      target: undefined
     }
   ]
   private _currentModule!: any;

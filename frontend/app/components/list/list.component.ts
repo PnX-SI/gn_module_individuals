@@ -15,7 +15,7 @@ import { DatatableComponent, SelectionType } from '@swimlane/ngx-datatable';
 import { ModuleService } from '@geonature/services/module.service';
 
 import { DATATABLE_CONFIG } from '../../utils/constants.util';
-import { calcContentHeight } from '../../utils/functions.util';
+import { calcContentHeight, isDateTime, convertDateTimeToDateStr } from '../../utils/functions.util';
 import {
   Column,
   PaginatedItemCollection,
@@ -96,10 +96,11 @@ export class ListComponent implements OnInit {
   public moduleName: string = this._moduleService.currentModule.module_url;
   public selectionType = SelectionType;
   public tableMessages = {};
-
   public showFilters: boolean = false;
   public showExportPanel: boolean = false;
   public selectedExportFormat: string | null = null;
+  public isDateTime = isDateTime;
+  public convertDateTimeToDateStr = convertDateTimeToDateStr;
 
   constructor(
     private _translate: TranslateService,
@@ -273,6 +274,8 @@ export class ListComponent implements OnInit {
    * @memberof ListComponent
    */
   getColumnLink(columnName: string): DatatableColumnLink | undefined {
-    return this.datatableColumnsLink.find((link) => link.column_name === columnName);
+    return this.datatableColumnsLink.find(
+      link => link.column_name === columnName
+    );
   }
 }

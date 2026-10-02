@@ -44,7 +44,8 @@ export class IndividualsFormComponent implements OnInit {
     { 
       column_name: "tracking_device_info",
       link_prefix: "/individuals/devices/info",
-      id_field_name: "id_tracking_device" 
+      id_field_name: "id_tracking_device",
+      target: undefined
     }
   ]
   public allowedToSave: AccessResult = { id: 0, access: false, message: null };

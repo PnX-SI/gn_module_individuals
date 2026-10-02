@@ -14,8 +14,9 @@ export interface Sort {
 
 // Partial : Sort attributes not mandatory
 export interface APIPaginationParams extends Partial<Sort> {
-  page: number;
-  per_page: number;
+  // A CORRIGER : Retirer les ? dès que possible
+  page?: number;
+  per_page?: number;
 }
 
 export interface ItemCollection<T> {
@@ -35,6 +36,7 @@ export interface DatatableColumnLink {
   column_name: string;
   link_prefix: string;
   id_field_name: string;
+  target: string | undefined;
 }
 
 export interface ApiError {

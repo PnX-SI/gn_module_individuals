@@ -14,6 +14,20 @@ export function calcContentHeight(): number {
   return height >= CONTENT_CONFIG.MIN_HEIGHT ? height - 12 : CONTENT_CONFIG.MIN_HEIGHT;
 }
 
+export function isDateTime(string: string): boolean {
+  const dateTimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
+  return dateTimeRegex.test(string);
+}
+
+export function convertDateTimeToDateStr(string: string): string | null {
+  if (isDateTime(string)) {
+    const [datePart] = string.split('T'); // datePart egal to the 1st element
+    const [year, month, day] = datePart.split('-');
+    return dateFormat({ day: parseInt(day), month: parseInt(month), year: parseInt(year) });
+  }
+  return null
+}
+
 /**
  * Return the date formatted according to the navigator language
  *
