@@ -235,7 +235,10 @@
         maxWidth="columnMaxWidth"
       >
         <span *ngIf="getColumnLink(column.prop) as columnLink; else withoutLink">
-          <a [routerLink]="[columnLink.link_prefix, row[columnLink.id_field_name]]">
+          <a 
+            [routerLink]="[columnLink.link_prefix, row[columnLink.id_field_name]]"
+            [target]="columnLink.target"
+          >
             {{
               row[column.prop] === null || row[column.prop] === undefined
                 ? '-'
@@ -243,7 +246,9 @@
                   ? ('Individuals.Others.No' | translate)
                   : row[column.prop] === true
                     ? ('Individuals.Others.Yes' | translate)
-                    : row[column.prop]
+                    : isDateTime(row[column.prop])
+                      ? convertDateTimeToDateStr(row[column.prop])
+                      : row[column.prop]
             }}
           </a>
         </span>
@@ -256,7 +261,9 @@
                   ? ('Individuals.Others.No' | translate)
                   : row[column.prop] === true
                     ? ('Individuals.Others.Yes' | translate)
-                    : row[column.prop]
+                    : isDateTime(row[column.prop])
+                      ? convertDateTimeToDateStr(row[column.prop])
+                      : row[column.prop]
             }}
           </span>
         </ng-template>

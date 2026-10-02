@@ -19,7 +19,9 @@ import {
   Feature,
   FeatureCollection,
   PaginatedItemCollection,
+  ItemCollection,
   AccessResult,
+  DatatableColumnLink,
 } from '../../models/common.models';
 import { Individual } from '../../models/individuals.models';
 import { CONTENT_CONFIG, MAP_CONFIG } from '../../utils/constants.util';
@@ -47,12 +49,21 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() exportFormats: string[] = [];
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
-  @Input() datatable$: Observable<PaginatedItemCollection<unknown>> = new Observable<
+   @Input() datatableColumnsLink: DatatableColumnLink[] = [];
+  @Input() datatable$: Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>> = new Observable<
     PaginatedItemCollection<unknown>
   >();
   @Input() nbRowsToDisplay!: number;
+  @Input() usePagination!: boolean;
   @Input() fieldsTranslation: string = '';
   @Input() sorts: Array<Object> = [];
+  @Input() displayFilterButton: boolean = true;
+  @Input() displayExportButton: boolean = true;
+  @Input() displayAddButton: boolean = true;
+  @Input() displayInfoButtons: boolean = true;
+  @Input() displaySummaryButtons: boolean = true;
+  @Input() displayEditButtons: boolean = true;
+  @Input() displayDeleteButtons: boolean = true;
   @Input() allowedToEdit: Record<number, AccessResult> = {};
   @Input() allowedToDelete: Record<number, AccessResult> = {};
   @Input() allowedToAdd: AccessResult = { id: 0, access: false, message: null };
