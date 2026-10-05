@@ -17,6 +17,7 @@ import { MainComponent } from './components/main/main.component';
 
 import { MapListComponent } from './components/map-list/map-list.component';
 import { ListComponent } from './components/list/list.component';
+import { ExportPanelComponent } from './components/list/export-panel/export-panel.component';
 import { InfoComponent } from './components/info/info.component';
 import { ModalComponent } from './components/modal/modal.component';
 import { FormComponent } from './components/form/form.component';
@@ -53,6 +54,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
   declarations: [
     MainComponent,
     ListComponent,
+    ExportPanelComponent,
     MapListComponent,
     InfoComponent,
     FormComponent,

@@ -1,0 +1,34 @@
+<div class="d-flex flex-wrap filters-form">
+  <div class="form-group">
+    <label class="small">{{ 'Individuals.Export.Title' | translate }}</label>
+    <div class="form-check">
+      <div *ngFor="let format of exportFormats">
+        <input
+          type="radio"
+          class="form-check-input"
+          [id]="'export-format-' + format"
+          name="exportFormat"
+          [value]="format"
+          [checked]="selectedExportFormat === format"
+          (change)="selectedExportFormat = format"
+        />
+        <label
+          class="small"
+          [for]="'export-format-' + format"
+        >
+          {{ 'Individuals.Export.Formats.' + format | translate }}
+        </label>
+      </div>
+    </div>
+  </div>
+  <button
+    id="confirm-download"
+    mat-mini-fab
+    [matTooltip]="'Individuals.Actions.Download' | translate"
+    class="custom-mini-fab bg-secondary text-white border-0"
+    (click)="onExport()"
+    [disabled]="!selectedExportFormat"
+  >
+    <mat-icon>download</mat-icon>
+  </button>
+</div>
