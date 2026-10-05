@@ -25,21 +25,18 @@ def upgrade():
     conn = op.get_bind()
 
     # --- Occtax sightings: a few Vanoise records referencing our individuals,
-    # in the "Occtax bouquetins marqués" dataset (created by smpl0001) ---
+    # bouquetins in the "Occtax bouquetins marqués" dataset and tétras-lyre in
+    # the "captures tétras-lyre" dataset (both created by smpl0001) ---
     op.execute(sa.text("""
-        WITH releve_data (place_name, lon, lat, obs_date, id_digitiser) AS (
+        WITH releve_data (place_name, lon, lat, obs_date, id_digitiser, dataset_shortname) AS (
             VALUES
-            ('Col de la Vanoise',    6.9313, 45.3944, '2026-07-02 09:30'::timestamp, 4),
-            ('Refuge de Prariond',   6.9800, 45.4500, '2026-07-05 07:15'::timestamp, 6),
-            ('Pointe de la Réchasse',6.9100, 45.4050, '2026-07-09 11:00'::timestamp, 4),
-            ('Plan du Lac',          6.9050, 45.3160, '2026-07-14 08:45'::timestamp, 6)
+            ('Col de la Vanoise',    6.9313, 45.3944, '2026-07-02 09:30'::timestamp, 4, 'CAPTURES_TETRAS_TEST'),
+            ('Refuge de Prariond',   6.9800, 45.4500, '2026-07-05 07:15'::timestamp, 6, 'CAPTURES_TETRAS_TEST'),
+            ('Pointe de la Réchasse',6.9100, 45.4050, '2026-07-09 11:00'::timestamp, 4, 'OCCTAX_BOUQMARQ_TEST'),
+            ('Plan du Lac',          6.9050, 45.3160, '2026-07-14 08:45'::timestamp, 6, 'OCCTAX_BOUQMARQ_TEST')
         ),
         occtax_module AS (
             SELECT id_module FROM gn_commons.t_modules WHERE module_code = 'OCCTAX'
-        ),
-        test_dataset AS (
-            SELECT id_dataset FROM gn_meta.t_datasets
-            WHERE dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
         )
         INSERT INTO pr_occtax.t_releves_occtax (
             id_dataset, id_digitiser, id_module, date_min, date_max,
@@ -56,7 +53,7 @@ def upgrade():
             ST_Transform(ST_SetSRID(ST_MakePoint(d.lon, d.lat), 4326), 2154)
         FROM releve_data d
         CROSS JOIN occtax_module m
-        CROSS JOIN test_dataset ds
+        JOIN gn_meta.t_datasets ds ON ds.dataset_shortname = d.dataset_shortname
     """))
 
     # Col de la Vanoise: 2 observers, Refuge de Prariond: 3 observers,
@@ -78,14 +75,14 @@ def upgrade():
         FROM pr_occtax.t_releves_occtax r
         JOIN observer_data o ON o.place_name = r.place_name
         JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
-        WHERE ds.dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
+        WHERE ds.dataset_shortname IN ('OCCTAX_BOUQMARQ_TEST', 'CAPTURES_TETRAS_TEST')
     """))
 
     # Plan du Lac is Evasion's sighting (bouquetin femelle) : with_young is set.
     op.execute(sa.text("""
         WITH releve_species (place_name, cd_nom, nom_cite, with_young) AS (
             VALUES
-            ('Col de la Vanoise',     459629, 'Lagopède alpin',      NULL),
+            ('Col de la Vanoise',       2962, 'Tétras lyre',         NULL),
             ('Refuge de Prariond',      2962, 'Tétras lyre',         NULL),
             ('Pointe de la Réchasse', 61098, 'Bouquetin des Alpes',  NULL),
             ('Plan du Lac',           61098, 'Bouquetin des Alpes',  'Probable')
@@ -101,14 +98,14 @@ def upgrade():
         FROM pr_occtax.t_releves_occtax r
         JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
         JOIN releve_species s ON s.place_name = r.place_name
-        WHERE ds.dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
+        WHERE ds.dataset_shortname IN ('OCCTAX_BOUQMARQ_TEST', 'CAPTURES_TETRAS_TEST')
     """))
 
     op.execute(sa.text("""
         WITH occ_individual (place_name, individual_name) AS (
             VALUES
             ('Col de la Vanoise', 'Cynthia'),
-            ('Refuge de Prariond', 'Claire'),
+            ('Refuge de Prariond', 'Clairette'),
             ('Pointe de la Réchasse', 'Obiwan'),
             ('Plan du Lac', 'Evasion')
         )
@@ -121,7 +118,7 @@ def upgrade():
         JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
         JOIN occ_individual oi ON oi.place_name = r.place_name
         JOIN gn_monitoring.t_individuals i ON i.individual_name = oi.individual_name
-        WHERE ds.dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
+        WHERE ds.dataset_shortname IN ('OCCTAX_BOUQMARQ_TEST', 'CAPTURES_TETRAS_TEST')
     """))
 
     # Field sightings identified by physical marking (no place name, random
@@ -163,7 +160,10 @@ def upgrade():
         INSERT INTO pr_occtax.cor_role_releves_occtax (id_releve_occtax, id_role)
         SELECT DISTINCT r.id_releve_occtax, CASE WHEN r.date_min < '2026-07-06' THEN 3 ELSE 6 END
         FROM pr_occtax.t_releves_occtax r
-        WHERE r.date_min IN (
+        JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
+        WHERE ds.dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
+          AND r.place_name IS NULL
+          AND r.date_min IN (
             '2026-07-01 10:15', '2026-07-04 14:40', '2026-07-08 09:05',
             '2026-07-12 16:20', '2026-07-15 08:50',
             '2026-07-03 11:30', '2026-07-10 13:10', '2026-07-18 07:55'
@@ -189,7 +189,9 @@ def upgrade():
                 THEN jsonb_build_object('with_young', si.with_young)
             END
         FROM pr_occtax.t_releves_occtax r
+        JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
         JOIN sighting_individual si ON si.obs_date = r.date_min
+        WHERE ds.dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
         """))
 
     op.execute(sa.text("""
@@ -210,12 +212,14 @@ def upgrade():
         SELECT o.id_occurrence_occtax, 1, 1, i.id_individual
         FROM pr_occtax.t_occurrences_occtax o
         JOIN pr_occtax.t_releves_occtax r ON r.id_releve_occtax = o.id_releve_occtax
+        JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
         JOIN sighting_individual si ON si.obs_date = r.date_min
         JOIN gn_monitoring.t_individuals i ON i.individual_name = si.individual_name
+        WHERE ds.dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
         """))
 
     # Simulated GPS tag data: 4 points/day over 3 days, 100m apart,
-    # for a single animal (Cynthia).
+    # for a single animal (Cynthia, tétras-lyre), in the tétras-lyre dataset.
     op.execute(sa.text("""
         WITH RECURSIVE gps_points(seq, geom) AS (
             SELECT
@@ -245,7 +249,7 @@ def upgrade():
         ),
         test_dataset AS (
             SELECT id_dataset FROM gn_meta.t_datasets
-            WHERE dataset_shortname = 'OCCTAX_BOUQMARQ_TEST'
+            WHERE dataset_shortname = 'CAPTURES_TETRAS_TEST'
         )
         INSERT INTO pr_occtax.t_releves_occtax (
             id_dataset, id_digitiser, id_module, date_min, date_max, geom_4326, geom_local
@@ -261,14 +265,18 @@ def upgrade():
         INSERT INTO pr_occtax.cor_role_releves_occtax (id_releve_occtax, id_role)
         SELECT r.id_releve_occtax, 4
         FROM pr_occtax.t_releves_occtax r
-        WHERE r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
+        JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
+        WHERE ds.dataset_shortname = 'CAPTURES_TETRAS_TEST'
+          AND r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
     """))
 
     op.execute(sa.text("""
         INSERT INTO pr_occtax.t_occurrences_occtax (id_releve_occtax, cd_nom, nom_cite, meta_v_taxref)
-        SELECT r.id_releve_occtax, 459629, 'Lagopède alpin', 'Taxref v18'
+        SELECT r.id_releve_occtax, 2962, 'Tétras lyre', 'Taxref v18'
         FROM pr_occtax.t_releves_occtax r
-        WHERE r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
+        JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
+        WHERE ds.dataset_shortname = 'CAPTURES_TETRAS_TEST'
+          AND r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
     """))
 
     op.execute(sa.text("""
@@ -278,8 +286,10 @@ def upgrade():
         SELECT o.id_occurrence_occtax, 1, 1, i.id_individual
         FROM pr_occtax.t_occurrences_occtax o
         JOIN pr_occtax.t_releves_occtax r ON r.id_releve_occtax = o.id_releve_occtax
+        JOIN gn_meta.t_datasets ds ON ds.id_dataset = r.id_dataset
         JOIN gn_monitoring.t_individuals i ON i.individual_name = 'Cynthia'
-        WHERE r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
+        WHERE ds.dataset_shortname = 'CAPTURES_TETRAS_TEST'
+          AND r.date_min BETWEEN '2026-07-12 00:00' AND '2026-08-31 23:59'
     """))
 
     # --- Bouquetin captures: dates match the tracking device/marking
@@ -381,14 +391,14 @@ def upgrade():
     """))
 
     # --- Tétras-lyre captures: Christophe's capture matches his 2026-01-06
-    # device replacement (recapture), Claire's matches her single device
+    # device replacement (recapture), Clairette's matches her single device
     # install (capture) ---
     op.execute(sa.text("""
         WITH capture_data (
             place_name, lon, lat, capture_date, id_digitiser, capture_type, capture_event, individual_name
         ) AS (
             VALUES
-            ('Refuge du Fond des Fours', 6.8233, 45.3667, '2025-03-15 09:00'::timestamp, 6, 'Filet', 'Capture',   'Claire'),
+            ('Refuge du Fond des Fours', 6.8233, 45.3667, '2025-03-15 09:00'::timestamp, 6, 'Filet', 'Capture',   'Clairette'),
             ('Col de la Leisse',         6.9847, 45.4144, '2026-01-06 08:30'::timestamp, 4, 'Cage',  'Recapture', 'Christophe')
         ),
         occtax_module AS (
@@ -455,7 +465,7 @@ def upgrade():
     op.execute(sa.text("""
         WITH occ_individual (place_name, individual_name) AS (
             VALUES
-            ('Refuge du Fond des Fours', 'Claire'),
+            ('Refuge du Fond des Fours', 'Clairette'),
             ('Col de la Leisse', 'Christophe')
         )
         INSERT INTO pr_occtax.cor_counting_occtax (

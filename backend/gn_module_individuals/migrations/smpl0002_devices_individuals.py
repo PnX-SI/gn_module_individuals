@@ -118,7 +118,7 @@ def upgrade():
                 VALUES
                 ('Cynthia', '182243', NULL, '2024-01-01', '2024-06-01', 'Premier équipement', 4),
                 ('Cynthia', '121256-AZ', NULL, '2024-06-02', NULL, 'Remplacement GPS', 4),
-                ('Claire', '182A256POX', NULL, '2025-03-15', NULL, 'Pose unique', 6),
+                ('Clairette', '182A256POX', NULL, '2025-03-15', NULL, 'Pose unique', 6),
                 ('Christophe', '210709', NULL, '2025-02-01', '2026-01-06', 'VHF actif', 4),
                 ('Christophe', '182A256ARG', NULL, '2026-01-06', NULL, 'Remplacement CHF par GPS', 4),
                 ('Tempête', '18256-9G', NULL, '2022-01-01', '2023-01-01', 'Ancien dispositif', 6),

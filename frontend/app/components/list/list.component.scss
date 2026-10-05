@@ -1,8 +1,6 @@
 @use '../../styles/buttons' as *;
 @use '../../styles/datatable.scss' as *;
-// .form-group/.form-check (export panel radios) and .filters-form (export panel layout),
-// otherwise only styled where the filters component itself imports them.
-@use '../../styles/form' as *;
+// .ngx-datatable.filters (filters and export panel containers)
 @use '../../styles/filters' as *;
 
 .action-buttons {

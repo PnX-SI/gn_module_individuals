@@ -25,7 +25,35 @@ class IndividualMapConverter(NomenclaturesConverter, GeoModelConverter):
     pass
 
 
-class IndividualMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
+class IndividualComputedFieldsMixin:
+    """get_* methods shared by every schema exposing the flattened
+    taxon/digitiser/sex/last-observation labels (IndividualMapSchema,
+    IndividualListSchema, IndividualExportSchema). Python mixin (no Meta, no __init__): safe to
+    combine with any Schema."""
+
+    def get_digitiser_name(self, obj):
+        if obj.digitiser:
+            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
+        return None
+
+    def get_nomenclature_sex_name(self, obj):
+        return get_label(obj.nomenclature_sex) if obj.nomenclature_sex else None
+
+    def get_taxref_nom_vern(self, obj):
+        return obj.taxon.nom_vern if obj.taxon else None
+
+    def get_last_observation_date(self, obj):
+        if obj.last_obs_date is None:
+            return None
+        return obj.last_obs_date.strftime("%d-%m-%Y")
+
+    def get_last_observation_observers_name(self, obj):
+        return obj.last_obs_observers
+
+
+class IndividualMapSchema(
+    IndividualComputedFieldsMixin, SmartRelationshipsMixin, GeoAlchemyAutoSchema
+):
     class Meta:
         model = TIndividuals
         include_fk = False
@@ -41,17 +69,6 @@ class IndividualMapSchema(SmartRelationshipsMixin, GeoAlchemyAutoSchema):
     last_observation_observers_name = fields.Method(
         "get_last_observation_observers_name", dump_only=True
     )
-
-    def get_taxref_nom_vern(self, obj):
-        return obj.taxon.nom_vern if obj.taxon else None
-
-    def get_last_observation_date(self, obj):
-        if obj.last_obs_date is None:
-            return None
-        return obj.last_obs_date.strftime("%d-%m-%Y")
-
-    def get_last_observation_observers_name(self, obj):
-        return obj.last_obs_observers
 
 
 class IndividualBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
@@ -74,32 +91,6 @@ class IndividualBaseSchema(CruvedSchemaMixin, SmartRelationshipsMixin, ma.SQLAlc
     # id_digitiser is always set by the route from the current user, regardless of
     # what is submitted here (see routes/individuals.py), so it must not be loadable.
     id_digitiser = fields.Integer(dump_only=True)
-
-
-class IndividualComputedFieldsMixin:
-    """get_* methods shared by every schema exposing the flattened
-    taxon/digitiser/sex/last-observation labels (IndividualListSchema,
-    IndividualExportSchema). Pure Python mixin (no Meta, no __init__): safe to
-    combine with any Schema base without affecting its MRO/options class."""
-
-    def get_digitiser_name(self, obj):
-        if obj.digitiser:
-            return f"{obj.digitiser.prenom_role} {obj.digitiser.nom_role}"
-        return None
-
-    def get_nomenclature_sex_name(self, obj):
-        return get_label(obj.nomenclature_sex) if obj.nomenclature_sex else None
-
-    def get_taxref_nom_vern(self, obj):
-        return obj.taxon.nom_vern if obj.taxon else None
-
-    def get_last_observation_date(self, obj):
-        if obj.last_obs_date is None:
-            return None
-        return obj.last_obs_date.strftime("%d-%m-%Y")
-
-    def get_last_observation_observers_name(self, obj):
-        return obj.last_obs_observers
 
 
 class IndividualListSchema(IndividualComputedFieldsMixin, IndividualBaseSchema):

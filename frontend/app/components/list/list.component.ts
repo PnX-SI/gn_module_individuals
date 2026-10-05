@@ -98,7 +98,6 @@ export class ListComponent implements OnInit {
   public tableMessages = {};
   public showFilters: boolean = false;
   public showExportPanel: boolean = false;
-  public selectedExportFormat: string | null = null;
   public isDateTime = isDateTime;
   public convertDateTimeToDateStr = convertDateTimeToDateStr;
 
@@ -241,28 +240,12 @@ export class ListComponent implements OnInit {
   }
 
   /**
-   * Show/hide the export panel. Defaults the format selection to the first
-   * configured one so the "Télécharger" button is usable right away.
+   * Show/hide the export panel
    *
    * @memberof ListComponent
    */
   toggleShowExportPanel(): void {
     this.showExportPanel = !this.showExportPanel;
-    if (this.showExportPanel && this.selectedExportFormat === null) {
-      this.selectedExportFormat = this.exportFormats[0] ?? null;
-    }
-  }
-
-  /**
-   * Emit the export event with the currently selected format.
-   *
-   * @memberof ListComponent
-   */
-  onExport(): void {
-    if (!this.selectedExportFormat) {
-      return;
-    }
-    this.export.emit(this.selectedExportFormat);
   }
 
   /**

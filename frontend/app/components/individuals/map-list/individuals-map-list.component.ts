@@ -346,14 +346,14 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
         };
 
         if (this.allowedToDelete[item.id_individual].access) {
-          // Not allowed to delete if deployments exists
+          // Not allowed to delete if observations exists
           if (item.last_observation_date) {
             this.allowedToDelete[item.id_individual].access = false;
             this.allowedToDelete[item.id_individual].message = this._translate.instant(
               'Individuals.ApiErrors.HasObservation'
             );
           }
-          // Not Allowed to delete if observations exists
+          // Not allowed to delete if deployments exists
           else if (
             Object.keys(item.deployed_devices).length > 0 ||
             Object.keys(item.deployed_markings).length > 0
@@ -365,11 +365,6 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
           }
         }
       });
-      this.allowedToEdit[28] = {
-        id: 28,
-        access: false,
-        message: this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
-      };
     }
   }
 }
