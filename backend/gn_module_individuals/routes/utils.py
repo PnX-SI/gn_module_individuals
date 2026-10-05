@@ -60,6 +60,28 @@ def parse_sort(args, default_prop):
     }
 
 
+def pagination_payload(paginated, items, sort):
+    """Standard pagination envelope of the list routes.
+
+    :param paginated: result of db.paginate()
+    :param items: the already serialized paginated.items
+    :param sort: as returned by parse_sort()
+    """
+    return {
+        "items": items,
+        "total": paginated.total,
+        "pages": paginated.pages,
+        "page": paginated.page,
+        "per_page": paginated.per_page,
+        "has_next": paginated.has_next,
+        "has_prev": paginated.has_prev,
+        "next_num": paginated.next_num,
+        "prev_num": paginated.prev_num,
+        "prop": sort["prop"],
+        "dir": sort["dir"],
+    }
+
+
 def export_filename(prefix):
     timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%Hh%Mm%S")
     return filemanager.removeDisallowedFilenameChars(f"{prefix}_{timestamp}")

@@ -33,6 +33,7 @@ from ..utils.errors import APIError, ApiErrorCode
 from .utils import (
     check_export_format,
     export_filename,
+    pagination_payload,
     parse_bbox,
     parse_bool,
     parse_sort,
@@ -150,22 +151,6 @@ def _assign_last_observation(individuals):
         individual.geom = row.geom if row else None
         individual.last_obs_date = row.obs_date if row else None
         individual.last_obs_observers = row.observers if row else None
-
-
-def _pagination_payload(paginated, schema, sort):
-    return {
-        "items": schema.dump(paginated.items),
-        "total": paginated.total,
-        "pages": paginated.pages,
-        "page": paginated.page,
-        "per_page": paginated.per_page,
-        "has_next": paginated.has_next,
-        "has_prev": paginated.has_prev,
-        "next_num": paginated.next_num,
-        "prev_num": paginated.prev_num,
-        "prop": sort["prop"],
-        "dir": sort["dir"],
-    }
 
 
 @blueprint.route("/individuals/geometry", methods=["GET"])
@@ -618,7 +603,7 @@ def list_individuals(scope):
     if page is not None and per_page is not None:
         paginated = db.paginate(query, page=page, per_page=per_page, error_out=False)
         _assign_last_observation(paginated.items)
-        return _pagination_payload(paginated, schema, sort)
+        return pagination_payload(paginated, schema.dump(paginated.items), sort)
 
     individuals = db.session.scalars(query).unique().all()
     _assign_last_observation(individuals)
