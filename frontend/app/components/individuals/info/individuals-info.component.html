@@ -194,7 +194,10 @@
     ></pnx-geojson>
   </div>
   
-  <div id="info-container">
+  <div 
+    id="info-container"
+    [ngStyle]="{'height': + contentHeight + 'px'}"
+  >
     <gn-individuals-info
       [infoTemplate]="infoTemplate"
       [datatable]="datatable"
