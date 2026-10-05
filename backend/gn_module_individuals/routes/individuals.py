@@ -30,7 +30,14 @@ from ..schemas.individuals import (
     IndividualWriteSchema,
 )
 from ..utils.errors import APIError, ApiErrorCode
-from .utils import check_export_format, export_filename, write_geopackage
+from .utils import (
+    check_export_format,
+    export_filename,
+    parse_bbox,
+    parse_bool,
+    parse_sort,
+    write_geopackage,
+)
 
 
 def _parse_filters(args):
@@ -44,38 +51,11 @@ def _parse_filters(args):
     }
 
 
-def _parse_bool(value):
-    if value is None or value == "":
-        return None
-    normalized = value.lower()
-    if normalized in ("true", "1", "yes", "y"):
-        return True
-    if normalized in ("false", "0", "no", "n"):
-        return False
-    raise APIError(ApiErrorCode.INVALID_FILTER, "Unsupported active value", 400)
-
-
-def _parse_bbox(value):
-    if not value:
-        return None
-    try:
-        west, south, east, north = [float(part) for part in value.split(",")]
-    except ValueError as exc:
-        raise APIError(
-            ApiErrorCode.INVALID_FILTER,
-            "bbox must be formatted as west,south,east,north",
-            400,
-        ) from exc
-    if west >= east or south >= north:
-        raise APIError(ApiErrorCode.INVALID_FILTER, "bbox coordinates are inconsistent", 400)
-    return west, south, east, north
-
-
 def _apply_filters(query, filters):
     if filters["cd_nom"] is not None:
         query = query.where(TIndividuals.cd_nom == filters["cd_nom"])
 
-    active = _parse_bool(filters["active"])
+    active = parse_bool(filters["active"], "active")
     if active is not None:
         query = query.where(TIndividuals.active == active)
 
@@ -99,7 +79,7 @@ def _apply_filters(query, filters):
         )
         query = query.where(deployed_device_match)
 
-    bbox = _parse_bbox(filters["bbox"])
+    bbox = parse_bbox(filters["bbox"])
     if bbox is not None:
         west, south, east, north = bbox
         envelope = func.ST_MakeEnvelope(west, south, east, north, 4326)
@@ -108,16 +88,6 @@ def _apply_filters(query, filters):
         )
 
     return query
-
-
-def _parse_sort(args):
-    direction = args.get("dir", "desc", type=str).lower()
-    if direction not in ("asc", "desc"):
-        raise APIError(ApiErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
-    return {
-        "prop": args.get("prop", "last_observation_date", type=str),
-        "dir": direction,
-    }
 
 
 def _sort_expression(sort):
@@ -140,10 +110,6 @@ def _sort_expression(sort):
     return expression, TIndividuals.id_individual.asc()
 
 
-def _ordered(query, sort):
-    return query.order_by(*_sort_expression(sort))
-
-
 def _build_individuals_query(scope, filters, sort, *, eager_load=True):
     query = select(TIndividuals)
     if eager_load:
@@ -162,7 +128,7 @@ def _build_individuals_query(scope, filters, sort, *, eager_load=True):
         )
     query = _apply_filters(query, filters)
     query = TIndividuals.filter_by_scope(query, scope)
-    return _ordered(query, sort)
+    return query.order_by(*_sort_expression(sort))
 
 
 def _assign_last_observation(individuals):
@@ -643,7 +609,7 @@ def list_individuals(scope):
     :rtype: dict
     """
     filters = _parse_filters(request.args)
-    sort = _parse_sort(request.args)
+    sort = parse_sort(request.args, "last_observation_date")
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
     query = _build_individuals_query(scope, filters, sort)
@@ -690,7 +656,7 @@ def individual_page(id_individual, scope):
     :rtype: dict
     """
     filters = _parse_filters(request.args)
-    sort = _parse_sort(request.args)
+    sort = parse_sort(request.args, "last_observation_date")
     per_page = request.args.get("per_page", 20, type=int)
     if per_page < 1:
         raise APIError(ApiErrorCode.INVALID_FILTER, "per_page must be greater than 0", 400)
@@ -759,7 +725,7 @@ def export_individuals(export_format, scope):
     check_export_format(export_format, entity_config)
 
     filters = _parse_filters(request.args)
-    sort = _parse_sort(request.args)
+    sort = parse_sort(request.args, "last_observation_date")
     # eager_load=True (the default): the export schema reads the same
     # taxon/digitiser/nomenclature_sex relationships as IndividualListSchema.
     query = _build_individuals_query(scope, filters, sort).limit(entity_config["NB_MAX_EXPORT"])

@@ -1,4 +1,5 @@
-"""Shared functions for export routes (individuals.py, devices.py)."""
+"""Shared functions for routes (individuals.py, devices.py): query parameters
+parsing and exports."""
 
 import datetime
 from pathlib import Path
@@ -10,6 +11,53 @@ from flask import current_app
 from geonature.utils import filemanager
 
 from ..utils.errors import APIError, ApiErrorCode
+
+
+def parse_bool(value, field_name):
+    """Parse a boolean query parameter, None if empty.
+
+    :param field_name: name of the query parameter, used in the error message
+    """
+    if value is None or value == "":
+        return None
+    normalized = value.lower()
+    if normalized in ("true", "1", "yes", "y"):
+        return True
+    if normalized in ("false", "0", "no", "n"):
+        return False
+    raise APIError(ApiErrorCode.INVALID_FILTER, f"Unsupported {field_name} value", 400)
+
+
+def parse_bbox(value):
+    """Parse a ``west,south,east,north`` bbox query parameter, None if empty."""
+    if not value:
+        return None
+    try:
+        west, south, east, north = [float(part) for part in value.split(",")]
+    except ValueError as exc:
+        raise APIError(
+            ApiErrorCode.INVALID_FILTER,
+            "bbox must be formatted as west,south,east,north",
+            400,
+        ) from exc
+    if west >= east or south >= north:
+        raise APIError(ApiErrorCode.INVALID_FILTER, "bbox coordinates are inconsistent", 400)
+    return west, south, east, north
+
+
+def parse_sort(args, default_prop):
+    """Parse the ``prop`` and ``dir`` sort query parameters.
+
+    :param default_prop: column to sort on when ``prop`` is not given
+    :return: ``{"prop": ..., "dir": "asc" | "desc"}`` (``dir`` defaults to desc)
+    """
+    direction = args.get("dir", "desc", type=str).lower()
+    if direction not in ("asc", "desc"):
+        raise APIError(ApiErrorCode.INVALID_FILTER, "dir must be asc or desc", 400)
+    return {
+        "prop": args.get("prop", default_prop, type=str),
+        "dir": direction,
+    }
 
 
 def export_filename(prefix):

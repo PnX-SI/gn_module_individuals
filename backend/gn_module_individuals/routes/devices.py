@@ -27,18 +27,7 @@ from ..schemas import (
 from ..models import TrackingDevices, IndividualDeployments
 
 from ..blueprint import blueprint
-from .utils import check_export_format, export_filename
-
-
-def _parse_bool(value):
-    if value is None or value == "":
-        return None
-    normalized = value.lower()
-    if normalized in ("true", "1", "yes", "y"):
-        return True
-    if normalized in ("false", "0", "no", "n"):
-        return False
-    raise APIError(ApiErrorCode.INVALID_FILTER, "Unsupported available value", 400)
+from .utils import check_export_format, export_filename, parse_bool, parse_sort
 
 
 def _device_available_expression():
@@ -119,7 +108,7 @@ def _parse_device_filters(args):
         "provider_name": args.get("provider_name", type=str),
         "search": args.get("search", type=str),
         "id_referer": args.get("id_referer", type=int),
-        "available": _parse_bool(args.get("available")),
+        "available": parse_bool(args.get("available"), "available"),
     }
 
 
@@ -234,14 +223,13 @@ def list_devices(scope):
     page = request.args.get("page", type=int)
     per_page = request.args.get("per_page", type=int)
 
-    prop = request.args.get("prop", type=str, default="meta_create_date")
-    dir = request.args.get("dir", type=str, default="desc")
+    sort = parse_sort(request.args, "meta_create_date")
 
     paginated = page is not None and per_page is not None
 
     schema = TrackingDeviceListSchema(only=["+cruved"])
 
-    query = _build_devices_query(scope, filters, prop=prop, dir=dir)
+    query = _build_devices_query(scope, filters, prop=sort["prop"], dir=sort["dir"])
 
     if paginated:
         pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
