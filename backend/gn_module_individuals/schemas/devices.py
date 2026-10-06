@@ -6,7 +6,7 @@ from geonature.utils.schema import CruvedSchemaMixin
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
-from pypnusershub.schemas import UserSchema
+from pypnusershub.schemas import UserSafeSchema
 from pypnusershub.db.models import User
 from geonature.core.gn_monitoring.models import TIndividuals
 
@@ -155,8 +155,8 @@ class TrackingDeviceDetailSchema(TrackingDeviceBaseSchema):
     __object_code__ = "INDIVIDUALS"
 
     nomenclature_device_type = fields.Nested(NomenclatureSchema, dump_only=True)
-    referer = fields.Nested(UserSchema, dump_only=True)
-    digitiser = fields.Nested(UserSchema, dump_only=True)
+    referer = fields.Nested(UserSafeSchema, dump_only=True)
+    digitiser = fields.Nested(UserSafeSchema, dump_only=True)
     # Named differently from the model's `deployments` relationship: SmartRelationshipsMixin
     # would otherwise try to read `.deferred` off that RelationshipProperty and crash, since
     # only ColumnProperty supports it. data_key keeps the JSON output key as "deployments".

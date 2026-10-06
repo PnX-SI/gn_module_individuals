@@ -9,7 +9,7 @@ from geonature.utils.schema import CruvedSchemaMixin
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
-from pypnusershub.schemas import UserSchema
+from pypnusershub.schemas import UserSafeSchema
 from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_commons.models import TAdditionalFields, TModules
 
@@ -210,7 +210,7 @@ class IndividualDetailSchema(IndividualBaseSchema):
     nomenclature_sex = ma.Nested(NomenclatureSchema, dump_only=True)
     # The exclusion of max_level_profil avoid to load the relationship User.groups
     # thanks to that no error "Internal Server Error 'User.groups' is not available due to lazy='raise'"
-    digitiser = ma.Nested(UserSchema(exclude=("max_level_profil",)), dump_only=True)
+    digitiser = ma.Nested(UserSafeSchema, dump_only=True)
     # Named differently from the model's `deployments` relationship: SmartRelationshipsMixin
     # would otherwise try to read `.deferred` off that RelationshipProperty and crash, since
     # only ColumnProperty supports it. data_key keeps the JSON output key as "deployments".
