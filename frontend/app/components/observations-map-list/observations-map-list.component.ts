@@ -1,15 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+
 
 import { ConfigService } from '@geonature/services/config.service';
-import { CommonService } from '@geonature_common/service/common.service';
-import { ModuleService } from '@geonature/services/module.service';
 
-import { ErrorHandlerService } from '../../services/errors-handler.service';
 import {
   Observation,
   OBSERVATION_MODEL,
@@ -26,7 +21,6 @@ import {
 import { ObservationsService } from '../../services/observations.service';
 import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { convertDateTimeToDateStr } from '../../utils/functions.util';
-import { ModalComponent } from '../modal/modal.component';
 
 @Component({
   selector: 'gn-individuals-observations-map-list',
@@ -74,34 +68,10 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   constructor(
     private _config: ConfigService,
     private _observationsService: ObservationsService,
-    private _commonService: CommonService,
-    private _module: ModuleService,
-    private _activatedRoute: ActivatedRoute,
-    private _router: Router,
-    private _ngbModal: NgbModal,
-    private _errorHandler: ErrorHandlerService,
-    private _translate: TranslateService
   ) {}
 
   ngOnInit(): void {
-    // Resolver : First initialisation of the table
     this._loadData();
-
-    // To be sure to wait translations before setting permissions
-    // this._translate
-    //   .get([
-    //     'Individuals.Individuals.Titles.Delete',
-    //     'Individuals.Individuals.Fields.individual_name',
-    //     'Individuals.Individuals.Fields.taxref_nom_vern',
-    //     'Individuals.Individuals.Fields.nomenclature_sex_name',
-    //     'Individuals.ApiErrors.InsufficientPermissions',
-    //     'Individuals.ApiErrors.HasObservation',
-    //     'Individuals.ApiErrors.HasDeployment'
-    //   ])
-    //   .subscribe(() => {
-    //     this._setPermissions(this._datatable);
-    //   });
-
     this.defaultFilters = this._APIFiltersParams;
   }
 
@@ -146,15 +116,6 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Perform the add action
-   *
-   * @memberof ObservationsMapListComponent
-   */
-  // onAdd(): void {
-  //   this._router.navigate(['form'], { relativeTo: this._activatedRoute });
-  // }
-
-  /**
    * Perform the info action for the given row
    *
    * @param {*} $event
@@ -163,42 +124,6 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   onInfo($event: Observation): void {
     window.open($event.url_source + '/' + $event.entity_source_pk_value, '_blank', 'noopener,noreferrer');
   }
-
-  /**
-   * Perform the edit action for the given row
-   *
-   * @param {*} $event
-   * @memberof ObservationsMapListComponent
-   */
-  // onEdit($event: any): void {
-  //   this._router.navigate(['form', $event.id_individual], { relativeTo: this._activatedRoute });
-  // }
-
-  /**
-   * Open the delete modal with Individual properties
-   *
-   * @param {Individual} $event The selected Individual to delete
-   * @memberof ObservationsMapListComponent
-   */
-
-  // public openDeleteModal($event: Individual) {
-  //   this.selectedRows = [$event];
-  //   const modalRef = this._ngbModal.open(ModalComponent);
-
-  //   modalRef.componentInstance.title = this._translate.instant(
-  //     'Individuals.Individuals.Titles.Delete',
-  //     { id: this.selectedRows[0].id_individual }
-  //   );
-  //   modalRef.componentInstance.bodyHTML = `
-  //       ${this._translate.instant('Individuals.Individuals.Fields.individual_name')} : ${this.selectedRows[0].individual_name}<br>
-  //       ${this._translate.instant('Individuals.Individuals.Fields.taxref_nom_vern')} : ${this.selectedRows[0].taxref_nom_vern}<br>
-  //       ${this._translate.instant('Individuals.Individuals.Fields.nomenclature_sex_name')} : ${this.selectedRows[0].nomenclature_sex_name}<br>
-  //     `;
-  //   modalRef.componentInstance.validateButtonType = 'delete';
-  //   modalRef.componentInstance.validate.subscribe((id: number) => {
-  //     this._onDelete();
-  //   });
-  // }
 
   /**
    * Call API with given filter value
@@ -215,27 +140,6 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     }
     this._loadData();
   }
-
-  // private _onDelete(): void {
-  //   if (this.selectedRows.length > 0) {
-  //     const selectedId = this.selectedRows[0].id_individual;
-  //     this._individualsService.deleteIndividual(selectedId).subscribe({
-  //       next: (res) => {
-  //         this._commonService.translateToaster('info', 'Individuals.Individuals.Messages.Deleted', {
-  //           id: selectedId,
-  //         });
-  //         this._loadData();
-  //       },
-  //       error: (err) => {
-  //         this._errorHandler.handleHttpError(
-  //           err,
-  //           { id: selectedId },
-  //           'Individuals.Individuals.ApiErrors'
-  //         );
-  //       },
-  //     });
-  //   }
-  // }
 
   /**
    * API call to get the page corresponding to the given id and reload data with this page.
@@ -292,66 +196,4 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this._destroy$))
       .subscribe((data) => (this.mapData$ = of(data)));
   }
-
-  /**
-   * Set the allowToDelete, allowToEdit and allowToAdd variables considering the item cruved or object cruved
-   * 
-   * For each item id, if a deployment or observation exists
-   * set the corresponding array entry to false, else to true
-   *
-   * @private
-   * @param {PaginatedItemCollection<Individual>} data
-   * @memberof ObservationsMapListComponent
-   */
-  // private _setPermissions(datatable: PaginatedItemCollection<Individual>): void {
-  //   if (datatable.items) {
-  //     this.allowedToDelete = {};
-  //     this.allowedToEdit = {};
-
-  //     // Add access
-  //     const currentObject = this._module.currentModule.module_objects['INDIVIDUALS'];
-  //     this.allowedToAdd = {
-  //       id: 0,
-  //       access: currentObject?.cruved?.C == 0 ? false : true,
-  //       message: currentObject?.cruved?.C == 0 ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') : null,
-  //     };
-
-  //     datatable.items.forEach((item: Individual) => {
-  //       // Edit access
-  //       this.allowedToEdit[item.id_individual] = { 
-  //         id: item.id_individual, 
-  //         access: item.cruved?.U ?? false, 
-  //         message: item.cruved?.U ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
-  //       };
-
-  //       // Delete access
-  //        this.allowedToDelete[item.id_individual] = { 
-  //         id: item.id_individual, 
-  //         access: item.cruved?.D ?? false, 
-  //         message: item.cruved?.D ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
-  //       };
-
-  //       if (this.allowedToDelete[item.id_individual].access) {
-  //         // Not allowed to delete if deployments exists
-  //         if (item.last_observation_date) {
-  //           this.allowedToDelete[item.id_individual].access = false;
-  //           this.allowedToDelete[item.id_individual].message = this._translate.instant('Individuals.ApiErrors.HasObservation');
-  //         }
-  //         // Not Allowed to delete if observations exists
-  //         else if (
-  //           Object.keys(item.deployed_devices).length > 0 ||
-  //           Object.keys(item.deployed_markings).length > 0
-  //         ) {
-  //           this.allowedToDelete[item.id_individual].access = false;
-  //           this.allowedToDelete[item.id_individual].message = this._translate.instant('Individuals.ApiErrors.HasDeployment');
-  //         }
-  //       }
-  //     });
-  //     this.allowedToEdit[28] = { 
-  //       id: 28, 
-  //       access: false, 
-  //       message: this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') 
-  //     };
-  //   }
-  // }
 }

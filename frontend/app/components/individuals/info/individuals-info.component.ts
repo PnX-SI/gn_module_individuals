@@ -1,7 +1,7 @@
 import { ViewEncapsulation, Component, OnInit, HostListener, TemplateRef, ViewChild} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
-import { takeUntil, tap, filter } from 'rxjs/operators';
+import { takeUntil, tap, filter, map } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
 
@@ -15,7 +15,7 @@ import { SyntheseDataService } from '@geonature/GN2CommonModule/form/synthese-fo
 import { MapService } from '@geonature/GN2CommonModule/map/map.service';
 
 import { CONTENT_CONFIG, DATATABLE_CONFIG, MAP_CONFIG } from '../../../utils/constants.util';
-import { calcContentHeight, dateFormat, timeFormat, getValuesLabels, getRatio } from '../../../utils/functions.util';
+import { calcContentHeight, dateFormat, timeFormat, getValuesLabels } from '../../../utils/functions.util';
 
 import { Individual } from '../../../models/individuals.models';
 import { DEPLOYMENT_MODEL, Deployment } from '../../../models/deployments.models';
@@ -68,12 +68,14 @@ export class IndividualsInfoComponent implements OnInit {
   mapData$: Observable<FeatureCollection<unknown>> = new Observable<
     FeatureCollection<unknown>
   >();
+  private _map!: L.Map;
   private _mapLayersById: {id: number, layer: L.Layer | null}[] = [];
   private _mapMoveHandler: (() => void) | null = null;
   private _ignoreNextMapMoveEnd = false;
   private _selectedLayer: L.Layer | null = null;
   private _selectedFeature: Feature<any> | null = null;
-  private _selectedObservation!: number;
+  private _trajectoryCoordinates: Array<[number, number]> = [];
+  private _trajectoryLayer: L.Layer | null = null;
 
   public dateFormat = dateFormat;
   public getValuesLabels = getValuesLabels;
@@ -152,25 +154,48 @@ export class IndividualsInfoComponent implements OnInit {
         individuals: [this.datatable.id_individual]
       },
       { "format": "ungrouped_geom" },
-    ).subscribe((mapData) => {
+    )
+    .pipe(
+      filter((mapData) => mapData.features.length > 0)
+    )
+    .subscribe((mapData) => {
       this.mapData$ = of(mapData);
+      this._map = this._mapService.getMap();
       this._zoomOnFeatures();
 
       mapData.features
         // Copy befor change
-        .slice()
-        // To have a table sorted in descending order of observation date, used for display
+        // .slice()
+        // To have a table sorted in descending order of observation date: used for display
         // .reverse() 
         .forEach((feature: any) => {
           this._mapLayersById.push({id: feature.properties.id_synthese, layer: null});
+
+          // Get all coordinates
+          // Reverse the coordinates : Leaflet use lat long
+          this._trajectoryCoordinates.push([
+            feature.geometry.coordinates[1],
+            feature.geometry.coordinates[0],
+          ]);
         });
     });
+    
+    if (!this._map) {
+      this.noGeometry = true;
+    }
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => { // Usefull to wait the DOM build before calculation
       this.contentHeight = calcContentHeight();
+
       this._bindMapMove();
+
+      // Create the trajectory layer
+      if (this._map) {
+        this._trajectoryLayer = this._createTrajectoryLayer();
+        this._trajectoryLayer.addTo(this._map);
+      }
     }, 0);
   }
 
@@ -315,30 +340,22 @@ export class IndividualsInfoComponent implements OnInit {
     // Access the identifier dynamically. `idFieldName` is configured by the parent,
     // so TypeScript cannot verify the property at compile time. The identifier field
     // is guaranteed by the component contract to be a number.
-    
+    layer.options.pane = 'individuals';
     const id = (feature.properties as Record<string, unknown>)["id_synthese"] as number;
-    let nbFeatures = 0;
     const item = this._mapLayersById.find(item => item.id === id);
 
     if (item) {
       item.layer = layer;
     }
-
-    this.mapData$.subscribe((featuresCollection) => nbFeatures = featuresCollection.features.length)
     
     // Set layer style
-    this._setLayerStyle(layer, id === this._selectedObservation, id);
-    layer.on('click', () => this.onMapFeatureClick(feature, layer));
+    this._setLayerStyle(layer, false, id);
+    layer.on('click', () => this._highlightLayer(feature, layer));
 
     // Prepare popup
     if (feature.properties) {
+      // Link the popup to the layer and add the popup opening to the click eent
       layer.bindPopup(this._buildPopupContent(feature));
-    }
-
-    if (id === this._selectedObservation) {
-      this._selectedLayer = layer;
-      this._selectedFeature = feature;
-      this._openLayerPopup(layer);
     }
   }
 
@@ -350,8 +367,7 @@ export class IndividualsInfoComponent implements OnInit {
    * @memberof IndividualsInfoComponent
    */
   private _bindMapMove(): void {
-    const map = this._mapService.getMap();
-    if (!map) {
+    if (!this._map) {
       return;
     }
     // Store the map move function in a property so we can remove it later if needed
@@ -361,10 +377,20 @@ export class IndividualsInfoComponent implements OnInit {
         this._ignoreNextMapMoveEnd = false;
         return;
       }
+
+      // Remove and create the trajectory after move to
+      // adapt the chevrons size to the new zoom level
+      if (!this._trajectoryCoordinates.length) {
+        return;
+      }
+
+      this._trajectoryLayer?.removeFrom(this._map);
+      this._trajectoryLayer = this._createTrajectoryLayer();
+      this._trajectoryLayer.addTo(this._map);
     };
 
     // Install a listner on the moveend event
-    map.on('moveend', this._mapMoveHandler);
+    this._map.on('moveend', this._mapMoveHandler);
   }
 
   /**
@@ -376,18 +402,23 @@ export class IndividualsInfoComponent implements OnInit {
   private _zoomOnFeatures(): void {
     this.mapData$.subscribe((mapData) => {
       const layer = L.geoJSON(mapData);
-      const map = this._mapService.getMap();
 
-      if (!map) {
+      if (!this._map) {
         return;
       }
 
       if (layer.getBounds().isValid()) {
         this._ignoreNextMapMoveEnd = true;
-        map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+        this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
       }
       else {
-        this._showNoGeometryMessage();
+        // this.noGeometry = true;
+      }
+
+      // Create a pane for the layers : Ensure that the layers will be on the top
+      if (!this._map.getPane('individuals')) {
+        const pane = this._map.createPane('individuals');
+        pane.style.zIndex = '500';
       }
 
       this.mapReady = true;
@@ -402,7 +433,6 @@ export class IndividualsInfoComponent implements OnInit {
    * @return {*}  {void}
    * @memberof IndividualsInfoComponent
    */
-  // private _setLayerStyle(layer: L.Layer, selected: boolean, position: number | null = null, coeffForDisplay: number | null = null): void {
   private _setLayerStyle(layer: L.Layer, selected: boolean, id: number | null = null): void {
     if (!(layer as any).setStyle) {
       return;
@@ -421,31 +451,28 @@ export class IndividualsInfoComponent implements OnInit {
     });
 
     let layerRank = this._mapLayersById.findIndex(item => item.id === id) + 1;
-    let coeffForDisplay = getRatio(
-      Math.ceil(layerRank / this._config.INDIVIDUALS.INDIVIDUALS.OPACITY_RANGE),
-      Math.ceil(nbFeatures / this._config.INDIVIDUALS.INDIVIDUALS.OPACITY_RANGE)
-    );
 
     let layerSelected = {
       color: this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR,
       fillColor: this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_COLOR ?? MAP_CONFIG.SELECTED_LAYER_COLOR,
-      fillOpacity: this._config.INDIVIDUALS.GLOBAL.SELECTED_LAYER_OPACITY ?? MAP_CONFIG.SELECTED_LAYER_OPACITY,
+      fillOpacity: MAP_CONFIG.SELECTED_LAYER_OPACITY,
       radius: MAP_CONFIG.SELECTED_LAYER_RADIUS,
       weight: MAP_CONFIG.SELECTED_LAYER_WEIGHT
     };
 
     let layerUnselected = {
       fillColor: layerRank && layerRank == 1 
-        ? (this._config.INDIVIDUALS.GLOBAL.FIRST_LAYER_COLOR ?? MAP_CONFIG.FIRST_LAYER_COLOR)
+        ? (this._config.INDIVIDUALS.INDIVIDUALS.FIRST_LAYER_COLOR ?? MAP_CONFIG.FIRST_LAYER_COLOR)
         : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR),
       color: this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
-      fillOpacity: coeffForDisplay ?? this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_OPACITY ?? MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
+      fillOpacity: MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
       radius: MAP_CONFIG.UNSELECTED_LAYER_RADIUS,
       weight: MAP_CONFIG.UNSELECTED_LAYER_WEIGHT
     };
 
     (layer as any).setStyle(selected ? layerSelected : layerUnselected);
   }
+
 
   /**
    * Toggle the layers colors (selected or not) and the layer position (bring to front or not)
@@ -470,10 +497,6 @@ export class IndividualsInfoComponent implements OnInit {
     }
   }
 
-  public onMapFeatureClick(feature: Feature<unknown>, layer: L.Layer): void {
-    this._selectedObservation = (feature.properties as Record<string, unknown>)["id_synthese"] as number;
-    this._highlightLayer(feature, layer);
-  }
 
   /**
    * Build popup content from the parent-provided template.
@@ -510,26 +533,72 @@ export class IndividualsInfoComponent implements OnInit {
     return HTMLDom;
   }
 
-  /**
-   * Open the given layer popup
-   *
-   * @private
-   * @param {L.Layer} layer
-   * @memberof IndividualsInfoComponent
-   */
-  private _openLayerPopup(layer: L.Layer): void {
-    if ((layer as any).openPopup) {
-      (layer as any).openPopup();
+  private _createTrajectoryLayer(): L.Layer {
+    const layerGroup = L.layerGroup();
+
+    // Create the polyline and add it to the layer group
+    L.polyline(this._trajectoryCoordinates, {
+      weight: 3,
+      dashArray: '6 6',
+      interactive: false,
+      color: '#ffffff'
+    }).addTo(layerGroup);
+   
+    // Directional arrows on the polyline
+    for (let i = 0; i < this._trajectoryCoordinates.length - 1; i++) {
+      this._addChevron(
+        layerGroup,
+        L.latLng(this._trajectoryCoordinates[i][0], this._trajectoryCoordinates[i][1]),
+        L.latLng(this._trajectoryCoordinates[i + 1][0], this._trajectoryCoordinates[i + 1][1])
+      );
     }
+    return layerGroup;  
   }
 
-  /**
-   * Show a message explaining that the selected list element as no corresponding geometry
-   *
-   * @private
-   * @memberof MapListComponent
-   */
-  private _showNoGeometryMessage(): void {
-    this.noGeometry = true;
+  private _addChevron(
+    layerGroup: L.LayerGroup,
+    start: L.LatLng,
+    end: L.LatLng,
+  ): void {
+    const zoom = this._map.getZoom() ?? 0;
+    const startPoint = this._map.project(start, zoom);
+    const endPoint = this._map.project(end, zoom);
+
+    // Middle = chevron stitch point
+    const tip = startPoint.add(endPoint).divideBy(2);
+
+    // Segment direction
+    const angle = Math.atan2(
+      startPoint.y - endPoint.y,
+      startPoint.x - endPoint.x
+    );
+
+    const size = 8;
+    const spread = Math.PI / 4;
+
+    // chevron left and right base points
+    const left = L.point(
+      tip.x - size * Math.cos(angle - spread),
+      tip.y - size * Math.sin(angle - spread)
+    );
+
+    const right = L.point(
+      tip.x - size * Math.cos(angle + spread),
+      tip.y - size * Math.sin(angle + spread)
+    );
+
+    L.polyline(
+      [
+        this._map.unproject(left, zoom),
+        this._map.unproject(tip, zoom),
+        this._map.unproject(right, zoom),
+      ],
+      {
+        weight: 2.5,
+        interactive: false,
+        color: '#ffffff',
+      }
+    ).addTo(layerGroup);
   }
+
 }

@@ -16,7 +16,6 @@ class GlobalSchema(Schema):
     SELECTED_LAYER_COLOR = fields.String(load_default="#d7191c")
     UNSELECTED_LAYER_COLOR = fields.String(load_default="#007bff")
 
-
 class IndividualsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
     LIST_COLUMNS = fields.List(
@@ -40,8 +39,8 @@ class IndividualsSchema(Schema):
         ],
     )
     TAXON_DATASET = fields.List(fields.Nested(AdditionalFieldSchema), load_default=list)
-    OPACITY_RANGE = fields.Integer(load_default=10)
     MAX_OBS_NB = fields.Integer(load_default=20)
+    FIRST_LAYER_COLOR = fields.String(load_default="#fa9a00")
     EXPORT_FORMAT = fields.List(
         fields.String(),
         load_default=["csv", "geojson", "gpkg"],

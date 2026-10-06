@@ -125,6 +125,7 @@ export class IndividualsService {
     }
 
     if (formAction === 'ADD') {
+      console.log('Creating individual with payload', payload);
       return this._http.post<Individual>(`${this._OBJECT_API}`, payload, {
         params: params,
         headers: this._headers,
@@ -134,7 +135,8 @@ export class IndividualsService {
         ...payload,
         id_individual: individual.id_individual,
       };
-
+      
+      console.log('Creating individual with payload', payload);
       return this._http.put<Individual>(`${this._OBJECT_API}/${individual.id_individual}`, payload, {
         params: params,
         headers: this._headers,
