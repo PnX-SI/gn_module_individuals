@@ -54,7 +54,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     PaginatedItemCollection<unknown>
   >();
   @Input() nbRowsToDisplay!: number;
-  @Input() usePagination!: boolean;
+  @Input() usePagination: boolean = true;
   @Input() fieldsTranslation: string = '';
   @Input() sorts: Array<Object> = [];
   @Input() displayFilterButton: boolean = true;

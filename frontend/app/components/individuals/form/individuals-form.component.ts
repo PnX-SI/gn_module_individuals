@@ -174,11 +174,10 @@ export class IndividualsFormComponent implements OnInit {
         }),
         // Patch form and additional fields
         tap(({ datatable, additionalFields }) => {
-          this.patchForm(datatable);
-
-          this.additionalFields = additionalFields;
-
           if (this.formAction === 'EDIT') {
+            this.patchForm(datatable);
+
+            this.additionalFields = additionalFields;
             this.patchAdditionalFieldsForm(
               datatable,
               additionalFields
