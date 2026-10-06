@@ -1,4 +1,7 @@
-<div *ngIf="title" class="modal-header">
+<div
+  *ngIf="title"
+  class="modal-header"
+>
   <h5 class="modal-title">
     {{ title }}
   </h5>
@@ -14,7 +17,10 @@
   </ng-template>
 </div>
 
-<div *ngIf="validateButtonType" class="modal-footer">
+<div
+  *ngIf="validateButtonType"
+  class="modal-footer"
+>
   <button
     type="button"
     mat-stroked-button
@@ -24,7 +30,8 @@
     {{ 'Actions.Cancel' | translate }}
   </button>
 
-  <button *ngIf="validateButtonType === 'delete'"
+  <button
+    *ngIf="validateButtonType === 'delete'"
     type="button"
     mat-raised-button
     color="warn"
@@ -34,7 +41,8 @@
     {{ 'Actions.Delete' | translate }}
   </button>
 
-  <button *ngIf="validateButtonType === 'save'"
+  <button
+    *ngIf="validateButtonType === 'save'"
     type="button"
     mat-raised-button
     color="primary"

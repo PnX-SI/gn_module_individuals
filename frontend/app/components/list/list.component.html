@@ -205,7 +205,7 @@
         maxWidth="columnMaxWidth"
       >
         <span *ngIf="getColumnLink(column.prop) as columnLink; else withoutLink">
-          <a 
+          <a
             [routerLink]="[columnLink.link_prefix, row[columnLink.id_field_name]]"
             [target]="columnLink.target"
           >

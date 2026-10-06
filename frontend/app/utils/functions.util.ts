@@ -25,7 +25,7 @@ export function convertDateTimeToDateStr(string: string): string | null {
     const [year, month, day] = datePart.split('-');
     return dateFormat({ day: parseInt(day), month: parseInt(month), year: parseInt(year) });
   }
-  return null
+  return null;
 }
 
 /**
@@ -73,12 +73,12 @@ export function timeFormat(time: string): string | null {
 
   return new Intl.DateTimeFormat(navigator.language, {
     hour: 'numeric',
-    minute: '2-digit'
+    minute: '2-digit',
   }).format(dateObject);
 }
 
 /**
- * Return the label corresponding to the given value found in the 
+ * Return the label corresponding to the given value found in the
  * given objects array
  *
  * @export
@@ -88,14 +88,15 @@ export function timeFormat(time: string): string | null {
  */
 export function getValuesLabels(
   objectsArray: { label: string; value: number }[],
-  values: number | number[]): string | null {
+  values: number | number[]
+): string | null {
   if (!objectsArray || values == null) {
     return null;
   }
 
   const valuesArray = Array.isArray(values) ? values : [values];
   const labels = valuesArray
-    .map(value => objectsArray.find(v => v.value === value)?.label)
+    .map((value) => objectsArray.find((v) => v.value === value)?.label)
     .filter((label): label is string => !!label);
 
   return labels.length > 0 ? labels.join(', ') : null;

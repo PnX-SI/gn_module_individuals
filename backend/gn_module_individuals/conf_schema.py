@@ -16,6 +16,7 @@ class GlobalSchema(Schema):
     SELECTED_LAYER_COLOR = fields.String(load_default="#d7191c")
     UNSELECTED_LAYER_COLOR = fields.String(load_default="#007bff")
 
+
 class IndividualsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
     LIST_COLUMNS = fields.List(

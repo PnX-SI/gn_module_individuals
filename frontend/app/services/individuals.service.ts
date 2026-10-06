@@ -120,9 +120,8 @@ export class IndividualsService {
       active: individual.active,
       comment: individual.comment,
       additional_data: individual.additional_data,
-      deployments: individual.deployments,
-      modules: individual.modules.map((id: number) => ({"id_module": id}))
-    }
+      modules: individual.modules.map((id: number) => ({ id_module: id })),
+    };
 
     if (formAction === 'ADD') {
       console.log('Creating individual with payload', payload);
@@ -135,12 +134,16 @@ export class IndividualsService {
         ...payload,
         id_individual: individual.id_individual,
       };
-      
+
       console.log('Creating individual with payload', payload);
-      return this._http.put<Individual>(`${this._OBJECT_API}/${individual.id_individual}`, payload, {
-        params: params,
-        headers: this._headers,
-      });
+      return this._http.put<Individual>(
+        `${this._OBJECT_API}/${individual.id_individual}`,
+        payload,
+        {
+          params: params,
+          headers: this._headers,
+        }
+      );
     }
   }
 

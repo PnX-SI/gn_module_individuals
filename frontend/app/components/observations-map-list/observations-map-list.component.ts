@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
 import { takeUntil, tap, filter } from 'rxjs/operators';
 
-
 import { ConfigService } from '@geonature/services/config.service';
 
 import {
@@ -37,10 +36,10 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   );
   private _destroy$ = new Subject<void>();
   // private _APIPaginationParams: APIPaginationParams = {
-    // page: 1,
-    // per_page: this.nbRowsToDisplay,
-    // prop: INDIVIDUALS_DEFAULT_SORT.prop,
-    // dir: INDIVIDUALS_DEFAULT_SORT.dir,
+  // page: 1,
+  // per_page: this.nbRowsToDisplay,
+  // prop: INDIVIDUALS_DEFAULT_SORT.prop,
+  // dir: INDIVIDUALS_DEFAULT_SORT.dir,
   // };
   private _APIFiltersParams: APIObservationFiltersParams = { active: 'true' };
   private _selectedId: number | null = null;
@@ -56,18 +55,18 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   >();
   public defaultFilters: APIObservationFiltersParams = {};
   public datatableColumnsLink: DatatableColumnLink[] = [
-    { 
-      column_name: "dataset_name",
-      link_prefix: "/metadata/dataset_detail/",
-      id_field_name: "id_dataset",
-      target: "_blank"
-    }
-  ]
+    {
+      column_name: 'dataset_name',
+      link_prefix: '/metadata/dataset_detail/',
+      id_field_name: 'id_dataset',
+      target: '_blank',
+    },
+  ];
   public convertDateTimeToDateStr = convertDateTimeToDateStr;
 
   constructor(
     private _config: ConfigService,
-    private _observationsService: ObservationsService,
+    private _observationsService: ObservationsService
   ) {}
 
   ngOnInit(): void {
@@ -122,7 +121,11 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    * @memberof ObservationsMapListComponent
    */
   onInfo($event: Observation): void {
-    window.open($event.url_source + '/' + $event.entity_source_pk_value, '_blank', 'noopener,noreferrer');
+    window.open(
+      $event.url_source + '/' + $event.entity_source_pk_value,
+      '_blank',
+      'noopener,noreferrer'
+    );
   }
 
   /**
@@ -175,7 +178,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
       .pipe(
         tap((datatable) => {
           this.selectedRows = this._selectedId
-            ? datatable.items.filter(item => item.id_synthese === this._selectedId)
+            ? datatable.items.filter((item) => item.id_synthese === this._selectedId)
             : [];
         }),
         takeUntil(this._destroy$)
@@ -185,10 +188,10 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
           this._datatable$.next(datatable); // Met à jour le BehaviorSubject
         },
         error: (err) => {
-          console.error("Erreur lors du chargement des observations :", err);
+          console.error('Erreur lors du chargement des observations :', err);
           // Optionnel : émettre une valeur par défaut ou null pour gérer l'erreur dans le template
           this._datatable$.next(null);
-        }
+        },
       });
 
     this._observationsService

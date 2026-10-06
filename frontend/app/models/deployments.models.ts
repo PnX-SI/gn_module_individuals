@@ -21,7 +21,7 @@ export const DEPLOYMENT_MODEL = {
   tracking_device_info: '',
 };
 
-export type Deployment  = typeof DEPLOYMENT_MODEL & { cruved: Cruved };
+export type Deployment = typeof DEPLOYMENT_MODEL & { cruved: Cruved };
 
 // This model is only used to POST data to the API (dto = data transfer object)
 export interface CreateDeploymentDto {

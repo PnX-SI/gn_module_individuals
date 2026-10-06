@@ -29,9 +29,7 @@ export class FormComponent implements OnInit, AfterViewInit {
   @Input() formAction: string = '';
   @Input() allowedToSave: AccessResult = { id: 0, access: false, message: null };
 
-  constructor(
-    public config: ConfigService,
-  ) {}
+  constructor(public config: ConfigService) {}
 
   ngOnInit(): void {}
 

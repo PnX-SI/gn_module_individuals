@@ -49,10 +49,9 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() exportFormats: string[] = [];
   @Input() availableColumnsParams!: Record<string, unknown>;
   @Input() displayedColumnsParams: string[] = [];
-   @Input() datatableColumnsLink: DatatableColumnLink[] = [];
-  @Input() datatable$: Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>> = new Observable<
-    PaginatedItemCollection<unknown>
-  >();
+  @Input() datatableColumnsLink: DatatableColumnLink[] = [];
+  @Input() datatable$: Observable<PaginatedItemCollection<unknown> | ItemCollection<unknown>> =
+    new Observable<PaginatedItemCollection<unknown>>();
   @Input() nbRowsToDisplay!: number;
   @Input() usePagination: boolean = true;
   @Input() fieldsTranslation: string = '';
@@ -206,11 +205,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
         : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ??
           MAP_CONFIG.UNSELECTED_LAYER_COLOR),
       fillOpacity: selected
-        ? MAP_CONFIG.SELECTED_LAYER_OPACITY : MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
-      radius: selected
-        ? MAP_CONFIG.SELECTED_LAYER_RADIUS : MAP_CONFIG.UNSELECTED_LAYER_RADIUS,
-      weight: selected
-        ? MAP_CONFIG.SELECTED_LAYER_WEIGHT : MAP_CONFIG.UNSELECTED_LAYER_WEIGHT,
+        ? MAP_CONFIG.SELECTED_LAYER_OPACITY
+        : MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
+      radius: selected ? MAP_CONFIG.SELECTED_LAYER_RADIUS : MAP_CONFIG.UNSELECTED_LAYER_RADIUS,
+      weight: selected ? MAP_CONFIG.SELECTED_LAYER_WEIGHT : MAP_CONFIG.UNSELECTED_LAYER_WEIGHT,
     });
   }
 

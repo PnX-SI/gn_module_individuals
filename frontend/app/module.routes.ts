@@ -12,7 +12,6 @@ import {
 import { IndividualsInfoComponent } from './components/individuals/info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals/form/individuals-form.component';
 
-
 import { ObservationsMapListComponent } from './components/observations-map-list/observations-map-list.component';
 
 import { DevicesListComponent } from './components/devices/list/devices-list.component';
@@ -41,7 +40,7 @@ export const routes: Routes = [
       {
         path: 'individuals/info/:id_individual',
         component: IndividualsInfoComponent,
-        resolve: { datatable: IndividualResolver }
+        resolve: { datatable: IndividualResolver },
       },
       {
         path: 'individuals/form',
@@ -50,7 +49,7 @@ export const routes: Routes = [
       {
         path: 'individuals/form/:id_individual',
         component: IndividualsFormComponent,
-        resolve: { datatable: IndividualResolver},
+        resolve: { datatable: IndividualResolver },
       },
       {
         path: 'observations',

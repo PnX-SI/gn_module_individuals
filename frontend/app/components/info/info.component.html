@@ -5,7 +5,7 @@
       {{ infoTitle }}
     </div>
     <div>
-      <span 
+      <span
         [matTooltip]="allowedToEdit?.message ?? ('Individuals.Actions.Edit' | translate)"
         [class.cursor-not-allowed]="!allowedToEdit.access"
       >
@@ -19,7 +19,7 @@
           <mat-icon>edit</mat-icon>
         </button>
       </span>
-      <span 
+      <span
         [matTooltip]="allowedToDelete?.message ?? ('Individuals.Actions.Delete' | translate)"
         [class.cursor-not-allowed]="!allowedToDelete.access"
       >
