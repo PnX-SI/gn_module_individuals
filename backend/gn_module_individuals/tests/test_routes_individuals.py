@@ -976,8 +976,13 @@ class TestIndividualModulesIntegration:
 
 
 # ===========================================================================
-# _sync_deployments (invoked from create_individual / update_individual)
+# deployments in POST/PUT /individuals/individuals payloads
+# (create_individual, update_individual)
 # ===========================================================================
+#
+# Deployments are no longer managed through the individual write routes: a
+# `deployments` key in the payload is ignored (IndividualWriteSchema uses
+# unknown=EXCLUDE) and deployments go through the dedicated deployments routes.
 
 
 def _deployment_item(**overrides):
@@ -994,12 +999,18 @@ def _deployment_item(**overrides):
     return payload
 
 
+def _count_deployments(id_individual):
+    return db.session.scalar(
+        select(func.count())
+        .select_from(IndividualDeployments)
+        .where(IndividualDeployments.id_individual == id_individual)
+    )
+
+
 @pytest.mark.usefixtures("client_class", "temporary_transaction")
-class TestSyncDeployments:
+class TestIndividualWriteIgnoresDeployments:
 
-    # --- via create_individual (no pre-existing deployment) --------------
-
-    def test_create_with_deployments_creates_attached_deployment(self, users):
+    def test_create_ignores_deployments_in_payload(self, users):
         set_logged_user(self.client, users["admin_user"])
         cd_nom = db.session.scalar(select(Taxref.cd_nom).limit(1))
         r = self.client.post(
@@ -1012,114 +1023,29 @@ class TestSyncDeployments:
         )
         assert r.status_code == 201
         data = r.get_json()
-        assert len(data["deployments"]) == 1
-        assert data["deployments"][0]["marking_code"] == "MC-NEW"
-        assert data["deployments"][0]["id_individual"] == data["id_individual"]
+        assert "deployments" not in data
+        assert _count_deployments(data["id_individual"]) == 0
 
-    # --- payload validation ------------------------------------------------
+    def test_create_with_invalid_deployments_does_not_fail(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        cd_nom = db.session.scalar(select(Taxref.cd_nom).limit(1))
+        r = self.client.post(
+            url_for("individuals.create_individual"),
+            json={"individual_name": "X", "cd_nom": cd_nom, "deployments": "not-a-list"},
+        )
+        assert r.status_code == 201
 
-    def test_deployments_not_a_list_returns_400(self, users, individual):
+    def test_update_response_has_no_deployments(self, users, individual, deployment):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_individual", id_individual=individual.id_individual),
-            json={
-                "individual_name": individual.individual_name,
-                "cd_nom": individual.cd_nom,
-                "deployments": "not-a-list",
-            },
+            json={"individual_name": individual.individual_name, "cd_nom": individual.cd_nom},
         )
-        assert r.status_code == 400
-        assert r.get_json().get("name") == ApiErrorCode.VALIDATION_ERROR
+        assert r.status_code == 200
+        assert "deployments" not in r.get_json()
 
-    def test_deployment_item_not_a_dict_returns_400(self, users, individual):
+    def test_update_with_empty_deployments_keeps_existing(self, users, individual, deployment):
         set_logged_user(self.client, users["admin_user"])
-        r = self.client.put(
-            url_for("individuals.update_individual", id_individual=individual.id_individual),
-            json={
-                "individual_name": individual.individual_name,
-                "cd_nom": individual.cd_nom,
-                "deployments": ["not-a-dict"],
-            },
-        )
-        assert r.status_code == 400
-        assert r.get_json().get("name") == ApiErrorCode.VALIDATION_ERROR
-
-    def test_deployment_item_validation_error_returns_400(self, users, individual):
-        set_logged_user(self.client, users["admin_user"])
-        r = self.client.put(
-            url_for("individuals.update_individual", id_individual=individual.id_individual),
-            json={
-                "individual_name": individual.individual_name,
-                "cd_nom": individual.cd_nom,
-                "deployments": [_deployment_item(id_nomenclature_deployment_type=-999)],
-            },
-        )
-        assert r.status_code == 400
-        body = r.get_json()
-        assert body.get("name") == ApiErrorCode.VALIDATION_ERROR
-        assert "deployments[0]" in body["description"]
-
-    # --- id_deployment resolution -------------------------------------------
-
-    def test_unknown_id_deployment_returns_404(self, users, individual):
-        set_logged_user(self.client, users["admin_user"])
-        r = self.client.put(
-            url_for("individuals.update_individual", id_individual=individual.id_individual),
-            json={
-                "individual_name": individual.individual_name,
-                "cd_nom": individual.cd_nom,
-                "deployments": [_deployment_item(id_deployment=-1)],
-            },
-        )
-        assert r.status_code == 404
-        assert r.get_json().get("name") == ApiErrorCode.NOT_FOUND
-
-    def test_id_deployment_belonging_to_other_individual_returns_404(
-        self, users, deployment, individuals
-    ):
-        """`deployment` belongs to the `individual` fixture; referencing it while
-        updating a different individual must be rejected."""
-        other = individuals[0]
-        assert other.id_individual != deployment.id_individual
-        set_logged_user(self.client, users["admin_user"])
-        r = self.client.put(
-            url_for("individuals.update_individual", id_individual=other.id_individual),
-            json={
-                "individual_name": other.individual_name,
-                "cd_nom": other.cd_nom,
-                "deployments": [_deployment_item(id_deployment=deployment.id_deployment)],
-            },
-        )
-        assert r.status_code == 404
-        assert r.get_json().get("name") == ApiErrorCode.NOT_FOUND
-
-    # --- permissions on existing deployments --------------------------------
-
-    def test_forbidden_scope_on_deployment_update_returns_403(self, users, individual, deployment):
-        """`deployment` is digitised by admin_user; self_user only has scope=1
-        (own data) on deployments, so updating it through the sync is forbidden."""
-        individual.id_digitiser = users["self_user"].id_role
-        db.session.flush()
-        set_logged_user(self.client, users["self_user"])
-        r = self.client.put(
-            url_for("individuals.update_individual", id_individual=individual.id_individual),
-            json={
-                "individual_name": individual.individual_name,
-                "cd_nom": individual.cd_nom,
-                "deployments": [_deployment_item(id_deployment=deployment.id_deployment)],
-            },
-        )
-        assert r.status_code == 403
-        assert r.get_json().get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
-
-    def test_forbidden_scope_on_deployment_deletion_returns_403(
-        self, users, individual, deployment
-    ):
-        """Omitting `deployment` (digitised by admin_user) from the payload deletes
-        it; self_user lacks permission to do so."""
-        individual.id_digitiser = users["self_user"].id_role
-        db.session.flush()
-        set_logged_user(self.client, users["self_user"])
         r = self.client.put(
             url_for("individuals.update_individual", id_individual=individual.id_individual),
             json={
@@ -1128,12 +1054,11 @@ class TestSyncDeployments:
                 "deployments": [],
             },
         )
-        assert r.status_code == 403
-        assert r.get_json().get("name") == ApiErrorCode.INSUFFICIENT_PERMISSIONS
+        assert r.status_code == 200
+        assert db.session.get(IndividualDeployments, deployment.id_deployment) is not None
 
-    # --- functional sync: create / update / delete --------------------------
-
-    def test_update_existing_deployment_reflects_changes(self, users, individual, deployment):
+    def test_update_does_not_modify_existing_deployment(self, users, individual, deployment):
+        original_marking_code = deployment.marking_code
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_individual", id_individual=individual.id_individual),
@@ -1146,12 +1071,10 @@ class TestSyncDeployments:
             },
         )
         assert r.status_code == 200
-        data = r.get_json()
-        assert len(data["deployments"]) == 1
-        assert data["deployments"][0]["id_deployment"] == deployment.id_deployment
-        assert data["deployments"][0]["marking_code"] == "MC-UPD"
+        db.session.refresh(deployment)
+        assert deployment.marking_code == original_marking_code
 
-    def test_item_without_id_creates_new_deployment(self, users, individual):
+    def test_update_does_not_create_deployment(self, users, individual):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_individual", id_individual=individual.id_individual),
@@ -1162,15 +1085,16 @@ class TestSyncDeployments:
             },
         )
         assert r.status_code == 200
-        data = r.get_json()
-        assert len(data["deployments"]) == 1
-        assert data["deployments"][0]["marking_code"] == "MC-CREATED"
-        assert data["deployments"][0]["id_individual"] == individual.id_individual
+        assert _count_deployments(individual.id_individual) == 0
 
-    def test_existing_deployment_omitted_from_payload_is_deleted(
+    def test_self_user_can_update_own_individual_with_others_deployment(
         self, users, individual, deployment
     ):
-        set_logged_user(self.client, users["admin_user"])
+        """`deployment` is digitised by admin_user; since deployments are no longer
+        synced, self_user can update its own individual without a 403."""
+        individual.id_digitiser = users["self_user"].id_role
+        db.session.flush()
+        set_logged_user(self.client, users["self_user"])
         r = self.client.put(
             url_for("individuals.update_individual", id_individual=individual.id_individual),
             json={
@@ -1180,48 +1104,7 @@ class TestSyncDeployments:
             },
         )
         assert r.status_code == 200
-        assert r.get_json()["deployments"] == []
-        assert db.session.get(IndividualDeployments, deployment.id_deployment) is None
-
-    def test_sync_combines_update_create_and_delete_in_one_request(
-        self, users, individual, deployment
-    ):
-        """`deployment` is kept (and updated), a second pre-existing deployment is
-        omitted (deleted), and a third item without an id is created."""
-        to_delete = IndividualDeployments(
-            id_individual=individual.id_individual,
-            id_nomenclature_deployment_type=get_id_nomenclature(
-                nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
-            ),
-            id_nomenclature_deployment_location=get_id_nomenclature(
-                nomenclature_type_mnemonique="LOC_MARQUAGE", cd_nomenclature="3"
-            ),
-            install_date=datetime.datetime(2024, 2, 1),
-            id_digitiser=users["admin_user"].id_role,
-        )
-        with db.session.begin_nested():
-            db.session.add(to_delete)
-            db.session.flush()
-        to_delete_id = to_delete.id_deployment
-
-        set_logged_user(self.client, users["admin_user"])
-        r = self.client.put(
-            url_for("individuals.update_individual", id_individual=individual.id_individual),
-            json={
-                "individual_name": individual.individual_name,
-                "cd_nom": individual.cd_nom,
-                "deployments": [
-                    _deployment_item(
-                        id_deployment=deployment.id_deployment, marking_code="MC-KEPT"
-                    ),
-                    _deployment_item(marking_code="MC-CREATED"),
-                ],
-            },
-        )
-        assert r.status_code == 200
-        marking_codes = {dep["marking_code"] for dep in r.get_json()["deployments"]}
-        assert marking_codes == {"MC-KEPT", "MC-CREATED"}
-        assert db.session.get(IndividualDeployments, to_delete_id) is None
+        assert db.session.get(IndividualDeployments, deployment.id_deployment) is not None
 
 
 # ===========================================================================

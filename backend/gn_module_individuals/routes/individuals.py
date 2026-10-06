@@ -21,7 +21,6 @@ from ..models.individuals import (
     individual_last_observation_geom_expression,
     individual_last_observation_observers_expression,
 )
-from ..schemas.deployments import IndividualDeploymentWriteSchema
 from ..schemas.individuals import (
     IndividualDetailSchema,
     IndividualExportSchema,
@@ -367,7 +366,7 @@ def create_individual(scope):
 @json_resp
 def update_individual(id_individual, scope):
     """
-    Update one individual ans linked modules
+    Update one individual and linked modules
 
     .. :quickref: Individuals;
 

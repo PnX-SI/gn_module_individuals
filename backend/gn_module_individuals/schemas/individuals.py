@@ -6,7 +6,6 @@ from datetime import datetime
 from apptax.taxonomie.models import Taxref
 from geonature.utils.env import db, ma
 from geonature.utils.schema import CruvedSchemaMixin
-from geonature.core.gn_permissions.tools import get_scopes_by_action
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
@@ -287,11 +286,6 @@ class IndividualWriteSchema(IndividualBaseSchema):
             if module not in modules:
                 modules.append(module)
         return modules
-
-    def get_deployments(self, obj):
-        deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
-        # individual_name is redundant here: we are already on that individual's page.
-        return DeploymentSchema(many=True, exclude=("individual_name",)).dump(deployments)
 
     # Validators
 
