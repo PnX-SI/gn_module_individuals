@@ -99,7 +99,7 @@ export class DevicesFormComponent implements OnInit {
 
   patchForm(device: any): void {
     /// Modifier par : Device au lieu de any et faire le mapping si besoin
-    this.form.patchValue(device,{ emitEvent: false });
+    this.form.patchValue(device, { emitEvent: false });
 
     this.form.patchValue(
       {
@@ -150,36 +150,38 @@ export class DevicesFormComponent implements OnInit {
    * @memberof DevicesFormComponent
    */
   private _setPermissions(datatable: Device): void {
-      // Save Access
-      if (datatable) {
-        // Edit mode
-        this.allowedToSave = { 
-          id: datatable.id_tracking_device? datatable.id_tracking_device : 0, 
-          access: datatable.cruved?.U ?? false, 
-          message: datatable.cruved?.U ?? false ? null : this._translate.instant(
-            'Individuals.ApiErrors.InsufficientPermissions'
-          )
-        };
-      }
-      else {
-        // Add mode
-        const currentObject = this._module.currentModule.module_objects['DEVICES'];
-        this.allowedToSave = {
-          id: 0,
-          access: currentObject?.cruved?.C == 0 ? false : true,
-          message: currentObject?.cruved?.C == 0 ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') : null
-        };
-      }
+    // Save Access
+    if (datatable) {
+      // Edit mode
+      this.allowedToSave = {
+        id: datatable.id_tracking_device ? datatable.id_tracking_device : 0,
+        access: datatable.cruved?.U ?? false,
+        message:
+          (datatable.cruved?.U ?? false)
+            ? null
+            : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
+      };
+    } else {
+      // Add mode
+      const currentObject = this._module.currentModule.module_objects['DEVICES'];
+      this.allowedToSave = {
+        id: 0,
+        access: currentObject?.cruved?.C == 0 ? false : true,
+        message:
+          currentObject?.cruved?.C == 0
+            ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+            : null,
+      };
+    }
 
-      if (this.allowedToSave.access) {
-        if (!this.form.valid) {
-          this.allowedToSave.access = false;
-          this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormInvalid');
-        }
-        else if (this.formAction === 'EDIT' && !this.form.dirty) {
-          this.allowedToSave.access = false;
-          this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormNotModified');
-        }
+    if (this.allowedToSave.access) {
+      if (!this.form.valid) {
+        this.allowedToSave.access = false;
+        this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormInvalid');
+      } else if (this.formAction === 'EDIT' && !this.form.dirty) {
+        this.allowedToSave.access = false;
+        this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormNotModified');
       }
     }
+  }
 }

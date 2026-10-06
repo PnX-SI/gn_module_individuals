@@ -8,12 +8,15 @@
   >
     <label class="small">{{ 'Individuals.Individuals.Fields.active' | translate }}</label>
     <div class="form-check">
-      <div *ngFor="let option of [
-      { value: 'true', label: 'Individuals.Others.Yes' | translate },
-      { value: 'false', label: 'Individuals.Others.No' | translate },
-      { value: '', label: 'Individuals.Others.All' | translate }
-      ]
-      ">
+      <div
+        *ngFor="
+          let option of [
+            { value: 'true', label: 'Individuals.Others.Yes' | translate },
+            { value: 'false', label: 'Individuals.Others.No' | translate },
+            { value: '', label: 'Individuals.Others.All' | translate }
+          ]
+        "
+      >
         <input
           type="radio"
           class="form-check-input"

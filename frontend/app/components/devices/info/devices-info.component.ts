@@ -63,10 +63,7 @@ export class DevicesInfoComponent implements OnInit {
 
     // To be sure to wait translations before setting permissions
     this._translate
-      .get([
-        'Individuals.ApiErrors.InsufficientPermissions',
-        'Individuals.ApiErrors.HasDeployment'
-      ])
+      .get(['Individuals.ApiErrors.InsufficientPermissions', 'Individuals.ApiErrors.HasDeployment'])
       .subscribe(() => {
         this._setPermissions(this.datatable);
       });
@@ -78,7 +75,7 @@ export class DevicesInfoComponent implements OnInit {
         this._commonService.translateToaster('info', 'Individuals.Devices.Messages.Deleted', {
           id: this._deviceId,
         });
-        this._router.navigate(['/individuals/devices'])
+        this._router.navigate(['/individuals/devices']);
       },
       error: (err) => {
         const msg = err.name + ':' + err.message || JSON.stringify(err);
@@ -99,17 +96,23 @@ export class DevicesInfoComponent implements OnInit {
    */
   private _setPermissions(datatable: Device) {
     // Edit Access
-    this.allowedToEdit = { 
-      id: datatable.id_tracking_device, 
+    this.allowedToEdit = {
+      id: datatable.id_tracking_device,
       access: datatable.cruved?.U ?? false,
-      message: datatable.cruved?.U ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+      message:
+        (datatable.cruved?.U ?? false)
+          ? null
+          : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
     };
 
     // Delete access
-    this.allowedToDelete = { 
-      id: datatable.id_tracking_device, 
+    this.allowedToDelete = {
+      id: datatable.id_tracking_device,
       access: datatable.cruved?.D ?? false,
-      message: datatable.cruved?.D ?? false ? null : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+      message:
+        (datatable.cruved?.D ?? false)
+          ? null
+          : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
     };
 
     // Check if device has deployments, if yes : no access

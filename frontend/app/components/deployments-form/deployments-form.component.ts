@@ -1,5 +1,12 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
+} from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { CommonService } from '@geonature_common/service/common.service';
@@ -36,10 +43,9 @@ export class DeploymentsFormComponent implements OnInit {
     const dateMax = removalDate ? new Date(removalDate) : null;
     const today = new Date();
 
-    if (dateMin && (dateMin > today || dateMax && dateMin >= dateMax)) {
+    if (dateMin && (dateMin > today || (dateMax && dateMin >= dateMax))) {
       return { invalidStartDate: true };
-    }
-    else if (dateMax && (dateMax > today || dateMin && dateMax <= dateMin)) {
+    } else if (dateMax && (dateMax > today || (dateMin && dateMax <= dateMin))) {
       return { invalidEndDate: true };
     }
     return null;
@@ -54,9 +60,9 @@ export class DeploymentsFormComponent implements OnInit {
     private _deploymentsService: DeploymentsService,
     private _errorHandler: ErrorHandlerService,
     private _activeModal: NgbActiveModal,
-    // Tells Angular to inject the value 
+    // Tells Angular to inject the value
     // associated with the MODAL_BODY_DATA de the datatable property
-    @Inject(MODAL_BODY_DATA) public datatable: Deployment,
+    @Inject(MODAL_BODY_DATA) public datatable: Deployment
   ) {}
 
   ngOnInit(): void {
@@ -74,7 +80,7 @@ export class DeploymentsFormComponent implements OnInit {
           null,
           [
             Validators.maxLength(this.formConstraints.marking_code.maxLength),
-            Validators.pattern(this.formConstraints.marking_code.pattern)
+            Validators.pattern(this.formConstraints.marking_code.pattern),
           ],
         ],
         install_date: [null],
@@ -104,10 +110,8 @@ export class DeploymentsFormComponent implements OnInit {
 
     // Get tracking device
     if (this.form.value.id_tracking_device) {
-      this._devicesService
-        .getDevice(this.form.value.id_tracking_device)
-        .subscribe((device) => {
-          this.form.patchValue({ id_tracking_device: device });
+      this._devicesService.getDevice(this.form.value.id_tracking_device).subscribe((device) => {
+        this.form.patchValue({ id_tracking_device: device });
       });
     }
   }
@@ -137,7 +141,9 @@ export class DeploymentsFormComponent implements OnInit {
           this.formAction === 'ADD'
             ? 'Individuals.Deployments.Messages.Added'
             : 'Individuals.Deployments.Messages.Edited';
-        this._commonService.translateToaster('info', successKey, { id: this.datatable.id_deployment });
+        this._commonService.translateToaster('info', successKey, {
+          id: this.datatable.id_deployment,
+        });
         this.form.markAsPristine();
         // The close method emits the value true to the modalRef.result promise in the parent component
         this._activeModal.close(true);

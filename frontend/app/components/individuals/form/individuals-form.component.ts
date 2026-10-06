@@ -13,14 +13,18 @@ import { DataFormService } from '@geonature_common/form/data-form.service';
 import { ErrorHandlerService } from '../../../services/errors-handler.service';
 import { Individual } from '../../../models/individuals.models';
 import { DEPLOYMENT_MODEL, Deployment } from '../../../models/deployments.models';
-import { FormConstraint, ItemCollection, DatatableColumnLink, AccessResult } from '../../../models/common.models';
+import {
+  FormConstraint,
+  ItemCollection,
+  DatatableColumnLink,
+  AccessResult,
+} from '../../../models/common.models';
 import { INDIVIDUALS_FORM_CONSTRAINTS } from '../../../utils/constants.util';
 import { IndividualsService } from '../../../services/individuals.service';
 import { DeploymentsService } from '../../../services/deployments.service';
-import { ModalComponent } from '../../modal/modal.component'
+import { ModalComponent } from '../../modal/modal.component';
 import { DeploymentsFormComponent } from '../../deployments-form/deployments-form.component';
 import { DatasetsComponent } from '@geonature/GN2CommonModule/form/datasets/datasets.component';
-;
 @Component({
   selector: 'gn-individuals-individuals-form',
   templateUrl: 'individuals-form.component.html',
@@ -34,27 +38,29 @@ export class IndividualsFormComponent implements OnInit {
   public datatable!: Individual;
   public additionalFields: Array<any> = [];
   public availableDeploymentsColumnsParams = DEPLOYMENT_MODEL;
-  public displayedDeploymentsColumnsParams: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
+  public displayedDeploymentsColumnsParams: string[] =
+    this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
   private _dataTable_deployments$ = new BehaviorSubject<ItemCollection<Deployment> | null>(null);
-  public dataTable_deployments$: Observable<ItemCollection<Deployment>> = this._dataTable_deployments$.pipe(
-    filter((data): data is ItemCollection<Deployment> => data !== null)
-  );
+  public dataTable_deployments$: Observable<ItemCollection<Deployment>> =
+    this._dataTable_deployments$.pipe(
+      filter((data): data is ItemCollection<Deployment> => data !== null)
+    );
   private _destroy$ = new Subject<void>();
   public datatableColumnsLink: DatatableColumnLink[] = [
-    { 
-      column_name: "tracking_device_info",
-      link_prefix: "/individuals/devices/info",
-      id_field_name: "id_tracking_device",
-      target: undefined
-    }
-  ]
+    {
+      column_name: 'tracking_device_info',
+      link_prefix: '/individuals/devices/info',
+      id_field_name: 'id_tracking_device',
+      target: undefined,
+    },
+  ];
   public allowedToSave: AccessResult = { id: 0, access: false, message: null };
   public allowedToChangeDeployments: Record<number, AccessResult> = {};
   public allowedToAddDeployments: AccessResult = { id: 0, access: false, message: null };
   private _currentModule!: any;
   private _currentModuleObjectCode = 'INDIVIDUALS';
   public individualsObjectModules: any[] = [];
-  private _currentDataset = "";
+  private _currentDataset = '';
 
   constructor(
     private _route: ActivatedRoute,
@@ -73,21 +79,18 @@ export class IndividualsFormComponent implements OnInit {
 
   ngOnInit(): void {
     this._currentModule = this._module.currentModule;
-    this.individualsObjectModules = this._module.getModules()
-      .filter(module => !!(module as any).module_objects?.INDIVIDUALS)
-      .map(module => ({
-            label: (module as any).module_code,
-            value: (module as any).id_module
-        })
-      );
+    this.individualsObjectModules = this._module
+      .getModules()
+      .filter((module) => !!(module as any).module_objects?.INDIVIDUALS)
+      .map((module) => ({
+        label: (module as any).module_code,
+        value: (module as any).id_module,
+      }));
 
     // Form initialization
     this.form = this._fb.group({
       id_individual: [null],
-      modules: [
-        [this._currentModule.id_module],
-        Validators.required
-      ],
+      modules: [[this._currentModule.id_module], Validators.required],
       individual_name: [
         null,
         [
@@ -121,16 +124,21 @@ export class IndividualsFormComponent implements OnInit {
       });
 
     // Update additionalFields whend cd_nom change
-    this.form.get('cd_nom')?.valueChanges
-      .pipe(
+    this.form
+      .get('cd_nom')
+      ?.valueChanges.pipe(
         filter(() => this.form.get('cd_nom')?.dirty ?? false),
         filter((taxon) => taxon !== null && typeof taxon === 'object'),
         tap((taxon) => {
           // Get the temporaly configured dataset for the curent cd_nom
-          this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === taxon.cd_nom)?.ID_DATASET;
+          this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find(
+            (taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) =>
+              taxonDataset.CD_NOM === taxon.cd_nom
+          )?.ID_DATASET;
         }),
         switchMap(() => this._getAdditionalFields()),
-        takeUntil(this._destroy$))
+        takeUntil(this._destroy$)
+      )
       .subscribe((additionalFields) => {
         if (this.formAction === 'EDIT') {
           this.patchAdditionalFieldsForm(this.datatable, additionalFields);
@@ -143,46 +151,44 @@ export class IndividualsFormComponent implements OnInit {
     this._route.data
       .pipe(
         takeUntil(this._destroy$),
-        tap (({datatable}: Data) => {
+        tap(({ datatable }: Data) => {
           this.datatable = datatable;
           this.formAction = datatable?.id_individual ? 'EDIT' : 'ADD';
 
-          // If they're deployments to display, create and ItemCollection for 
+          // If they're deployments to display, create and ItemCollection for
           // the ListComponent
           this._dataTable_deployments$.next({
-            items: Object.values(datatable?.deployments ?? {})
+            items: Object.values(datatable?.deployments ?? {}),
           });
         }),
         // Get additional data if exists and init additionalFields variable
         switchMap(({ datatable }) => {
-          if (this.formAction == 'EDIT' && datatable?.id_individual) { 
+          if (this.formAction == 'EDIT' && datatable?.id_individual) {
             // Get the temporaly configured dataset for the curent cd_nom
-            this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find((taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) => taxonDataset.CD_NOM === datatable.cd_nom)?.ID_DATASET;
+            this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find(
+              (taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) =>
+                taxonDataset.CD_NOM === datatable.cd_nom
+            )?.ID_DATASET;
 
-            return this._getAdditionalFields()
-              .pipe(
-                map((additionalFields) => ({
-                  datatable,
-                  additionalFields
-                }))
-              );
+            return this._getAdditionalFields().pipe(
+              map((additionalFields) => ({
+                datatable,
+                additionalFields,
+              }))
+            );
           }
           return of({
             datatable,
-            additionalFields: []
+            additionalFields: [],
           });
         }),
         // Patch form and additional fields
         tap(({ datatable, additionalFields }) => {
-          this.patchForm(datatable);
-
-          this.additionalFields = additionalFields;
-
           if (this.formAction === 'EDIT') {
-            this.patchAdditionalFieldsForm(
-              datatable,
-              additionalFields
-            );
+            this.patchForm(datatable);
+
+            this.additionalFields = additionalFields;
+            this.patchAdditionalFieldsForm(datatable, additionalFields);
           }
 
           this.form.markAsPristine();
@@ -266,7 +272,7 @@ export class IndividualsFormComponent implements OnInit {
       {
         cd_nom: { cd_nom: individual.cd_nom, nom_vern: individual.nom_vern },
         id_nomenclature_sex: individual.nomenclature_sex.id_nomenclature,
-        modules: individual.modules.map((module: any) => module.id_module)
+        modules: individual.modules.map((module: any) => module.id_module),
       },
       { emitEvent: false }
     );
@@ -279,7 +285,7 @@ export class IndividualsFormComponent implements OnInit {
   }
 
   /**
-   * Save the individual after edit or add action. Called when 
+   * Save the individual after edit or add action. Called when
    * the save button is clicked
    *
    * @memberof IndividualsFormComponent
@@ -287,26 +293,31 @@ export class IndividualsFormComponent implements OnInit {
   onSave(): void {
     let individual = this.form.getRawValue();
 
-    this._service
-      .createOrUpdateIndividual(individual, this.formAction)
-      .subscribe({
-        next: (result: Individual) => {
-          const successKey =
-            this.formAction === 'ADD'
-              ? 'Individuals.Individuals.Messages.Added'
-              : 'Individuals.Individuals.Messages.Edited';
-          this._commonService.translateToaster('info', successKey, { name: result.individual_name, id: result.id_individual });
-          this.form.markAsPristine();
-          this._router.navigate(['/individuals/individuals/info',result.id_individual])
-        },
-        error: (err) => {
-          this._errorHandler.handleHttpError(
-            err,
-            this.formAction === 'EDIT' ? { id: this.datatable.id_individual, name: this.datatable.individual_name } : {},
-            this.formAction === 'ADD' ? 'Individuals.Individuals.Errors.AddedNOK' : 'Individuals.Individuals.Errors.EditedNOK'
-          );
-        },
-      });
+    this._service.createOrUpdateIndividual(individual, this.formAction).subscribe({
+      next: (result: Individual) => {
+        const successKey =
+          this.formAction === 'ADD'
+            ? 'Individuals.Individuals.Messages.Added'
+            : 'Individuals.Individuals.Messages.Edited';
+        this._commonService.translateToaster('info', successKey, {
+          name: result.individual_name,
+          id: result.id_individual,
+        });
+        this.form.markAsPristine();
+        this._router.navigate(['/individuals/individuals/info', result.id_individual]);
+      },
+      error: (err) => {
+        this._errorHandler.handleHttpError(
+          err,
+          this.formAction === 'EDIT'
+            ? { id: this.datatable.id_individual, name: this.datatable.individual_name }
+            : {},
+          this.formAction === 'ADD'
+            ? 'Individuals.Individuals.Errors.AddedNOK'
+            : 'Individuals.Individuals.Errors.EditedNOK'
+        );
+      },
+    });
   }
 
   /**
@@ -322,11 +333,11 @@ export class IndividualsFormComponent implements OnInit {
         tap((data) => this._setPermissions(data)),
         takeUntil(this._destroy$)
       )
-      .subscribe((data) => this._dataTable_deployments$.next(
-        data.deployments ? 
-          { items: Object.values(data.deployments) } : 
-          { items: [] }
-      ));
+      .subscribe((data) =>
+        this._dataTable_deployments$.next(
+          data.deployments ? { items: Object.values(data.deployments) } : { items: [] }
+        )
+      );
   }
 
   /**
@@ -352,21 +363,24 @@ export class IndividualsFormComponent implements OnInit {
     // Save Access
     if (datatable) {
       // Edit mode
-      this.allowedToSave = { 
-        id: datatable.id_individual? datatable.id_individual : 0, 
-        access: datatable.cruved?.U ?? false, 
-        message: datatable.cruved?.U ?? false ? null : this._translate.instant(
-          'Individuals.ApiErrors.InsufficientPermissions'
-        )
+      this.allowedToSave = {
+        id: datatable.id_individual ? datatable.id_individual : 0,
+        access: datatable.cruved?.U ?? false,
+        message:
+          (datatable.cruved?.U ?? false)
+            ? null
+            : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
       };
-    }
-    else {
+    } else {
       // Add mode
       const currentObject = this._currentModule.module_objects[this._currentModuleObjectCode];
       this.allowedToSave = {
         id: 0,
         access: currentObject?.cruved?.C == 0 ? false : true,
-        message: currentObject?.cruved?.C == 0 ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') : null
+        message:
+          currentObject?.cruved?.C == 0
+            ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+            : null,
       };
     }
 
@@ -374,8 +388,7 @@ export class IndividualsFormComponent implements OnInit {
       if (!this.form.valid) {
         this.allowedToSave.access = false;
         this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormInvalid');
-      }
-      else if (this.formAction === 'EDIT' && !this.form.dirty) {
+      } else if (this.formAction === 'EDIT' && !this.form.dirty) {
         this.allowedToSave.access = false;
         this.allowedToSave.message = this._translate.instant('Individuals.Errors.FormNotModified');
       }
@@ -383,33 +396,36 @@ export class IndividualsFormComponent implements OnInit {
 
     // Edit mode : Deployment access rights are the same as the individual edit access rights
     if (datatable) {
-      this.allowedToAddDeployments = { 
-        id: datatable.id_individual? datatable.id_individual : 0, 
-        access: datatable.cruved?.U ?? false, 
-        message: datatable.cruved?.U ?? false ? null : this._translate.instant(
-          'Individuals.ApiErrors.InsufficientPermissions'
-        )
+      this.allowedToAddDeployments = {
+        id: datatable.id_individual ? datatable.id_individual : 0,
+        access: datatable.cruved?.U ?? false,
+        message:
+          (datatable.cruved?.U ?? false)
+            ? null
+            : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
       };
 
       this.allowedToChangeDeployments = {};
       datatable.deployments?.forEach((deployment: Deployment) => {
         // Edit and delete deployment actions have the same access rights
-        // of the individual 
+        // of the individual
         this.allowedToChangeDeployments[deployment.id_deployment] = {
           id: deployment.id_deployment,
           access: datatable.cruved?.U ?? false,
-          message: datatable.cruved?.U ?? false ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions') : null
+          message:
+            (datatable.cruved?.U ?? false)
+              ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+              : null,
         };
       });
     }
   }
 
   private _getAdditionalFields(): Observable<any> {
-    return this._dataFormService
-      .getadditionalFields({
-        module_code: this._currentModule.module_code,
-        object_code: this._currentModuleObjectCode,
-        id_dataset: this._currentDataset,
-      });
+    return this._dataFormService.getadditionalFields({
+      module_code: this._currentModule.module_code,
+      object_code: this._currentModuleObjectCode,
+      id_dataset: this._currentDataset,
+    });
   }
 }

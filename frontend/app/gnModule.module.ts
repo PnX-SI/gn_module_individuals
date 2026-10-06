@@ -43,7 +43,6 @@ import { DevicesFiltersComponent } from './components/devices/list/devices-filte
 import { DevicesFormComponent } from './components/devices/form/devices-form.component';
 import { DevicesInfoComponent } from './components/devices/info/devices-info.component';
 
-
 import { DeploymentsService } from './services/deployments.service';
 import { DeploymentsFormComponent } from './components/deployments-form/deployments-form.component';
 
@@ -68,7 +67,7 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
     IndividualsInfoComponent,
     IndividualsFormComponent,
     DeploymentsFormComponent,
-    ObservationsMapListComponent
+    ObservationsMapListComponent,
   ],
   imports: [
     HttpClientXsrfModule.withOptions({

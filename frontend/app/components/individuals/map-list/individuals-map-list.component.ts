@@ -187,7 +187,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
 
     modalRef.componentInstance.title = this._translate.instant(
       'Individuals.Individuals.Titles.Delete',
-      { id: this.selectedRows[0].id_individual }
+      { id: this.selectedRows[0].id_individual, name: this.selectedRows[0].individual_name }
     );
     modalRef.componentInstance.bodyHTML = `
         ${this._translate.instant('Individuals.Individuals.Fields.individual_name')} : ${this.selectedRows[0].individual_name}<br>

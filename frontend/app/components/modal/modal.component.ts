@@ -1,4 +1,12 @@
-import { Component, EventEmitter, Input, Output, Type, Injector, InjectionToken } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  Type,
+  Injector,
+  InjectionToken,
+} from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 export const MODAL_BODY_DATA = new InjectionToken<any>('MODAL_BODY_DATA');

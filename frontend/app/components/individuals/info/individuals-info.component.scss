@@ -42,13 +42,17 @@
   pointer-events: none;
 }
 
+#info-container {
+  overflow-y: auto; // To have the scroll bar
+}
+
 @media (max-width: 992px) {
   .map-list-container {
     grid-template-columns: 1fr;
   }
 }
 
-.modal-body .card.card-custom { 
-    margin-right: 0px; 
-    margin-left: 0px;
+.modal-body .card.card-custom {
+  margin-right: 0px;
+  margin-left: 0px;
 }

@@ -5,10 +5,10 @@
     # ID_TAXON_LIST=101
 
     # Color used for the selected map layer (default #d7191c)
-    # SELECTED_LAYER_COLOR=#d7191c
+    # SELECTED_LAYER_COLOR="#d7191c"
 
     # Color used for the unselected map layers (default #007bff)
-    # UNSELECTED_LAYER_COLOR=#007bff
+    # UNSELECTED_LAYER_COLOR="#007bff"
 
 # Individuals object configuration
 [INDIVIDUALS]
@@ -25,24 +25,16 @@
 
     # This param is usefull until the possibility to link directly additional data to cd_nom
     # in the additional fields configuration
-    # TAXON_DATASET = [
-    #    {
-    #        CD_NOM=61098,
-    #        DATASET_SHORT_NAME="CAPTURES_INDIVIDUS_BOUQUETIN",
-    #        ID_DATASET=35
-    #    },
-    #    {
-    #        CD_NOM=2962,
-    #        DATASET_SHORT_NAME="CAPTURES_INDIVIDUS_TETRAS",
-    #        ID_DATASET=36
-    #    }
+    # TAXON_DATASET=[
+    #     { CD_NOM=61098, DATASET_SHORT_NAME="CAPTURES_BOUQUETIN_TEST", ID_DATASET=48 },
+    #     { CD_NOM=2962, DATASET_SHORT_NAME="CAPTURES_TETRAS_TEST", ID_DATASET=49 }
     # ]
-
-    # Range used for change the layer opacity (default 10)
-    # OPACITY_RANGE=10
     
     # Max last observations to display (default 20)
     # MAX_OBS_NB=20
+
+    # Color used for the first observation (default #fa9a00)
+    # FIRST_LAYER_COLOR="#fa9a00"
 
 # Observations object configuration
 [OBSERVATIONS]

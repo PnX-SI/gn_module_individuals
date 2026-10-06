@@ -49,30 +49,57 @@
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.comment' | translate }}</h3>
-      <p style="white-space: pre-line;">
+      <p style="white-space: pre-line">
         {{ datatable['comment'] ?? '-' }}
       </p>
     </div>
   </div>
 
-  <div *ngIf="additionalFields.length > 0" class="content row">
-    <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
+  <div
+    *ngIf="additionalFields.length > 0"
+    class="content row"
+  >
+    <div
+      class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-sm"
       *ngFor="let field of additionalFields"
     >
       <h3 class="text-muted">
         {{ field.attribut_label }}
       </h3>
-      <p *ngIf="field.type_widget == 'date'" style="white-space: pre-line;">
-        {{ dateFormat(datatable['additional_data']?.[field.attribut_name]) ?? "-" }}
+      <p
+        *ngIf="field.type_widget == 'date'"
+        style="white-space: pre-line"
+      >
+        {{ dateFormat(datatable['additional_data']?.[field.attribut_name]) ?? '-' }}
       </p>
-      <p *ngIf="field.type_widget == 'time'" style="white-space: pre-line;">
-        {{ timeFormat(datatable['additional_data']?.[field.attribut_name]) ?? "-" }}
+      <p
+        *ngIf="field.type_widget == 'time'"
+        style="white-space: pre-line"
+      >
+        {{ timeFormat(datatable['additional_data']?.[field.attribut_name]) ?? '-' }}
       </p>
-      <p *ngIf="field.type_widget == 'select' || field.type_widget == 'radio' || field.type_widget == 'checkbox' || field.type_widget == 'multiselect'" style="white-space: pre-line;">
-        {{ getValuesLabels(field.values,datatable['additional_data']?.[field.attribut_name]) ?? "-" }}
+      <p
+        *ngIf="
+          field.type_widget == 'select' ||
+          field.type_widget == 'radio' ||
+          field.type_widget == 'checkbox' ||
+          field.type_widget == 'multiselect'
+        "
+        style="white-space: pre-line"
+      >
+        {{
+          getValuesLabels(field.values, datatable['additional_data']?.[field.attribut_name]) ?? '-'
+        }}
       </p>
-      <p *ngIf="field.type_widget == 'number' || field.type_widget == 'text' || field.type_widget == 'textarea'" style="white-space: pre-line;">
-        {{ datatable['additional_data']?.[field.attribut_name] ?? "-" }}
+      <p
+        *ngIf="
+          field.type_widget == 'number' ||
+          field.type_widget == 'text' ||
+          field.type_widget == 'textarea'
+        "
+        style="white-space: pre-line"
+      >
+        {{ datatable['additional_data']?.[field.attribut_name] ?? '-' }}
       </p>
     </div>
   </div>
@@ -82,8 +109,8 @@
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.modules' | translate }}</h3>
       <p>
         <span *ngFor="let module of datatable['modules']; let last = last">
-          {{ module.module_code}}
-          <span *ngIf="!last">,</span>  
+          {{ module.module_code }}
+          <span *ngIf="!last">,</span>
         </span>
         <span *ngIf="datatable['modules'].length == 0">-</span>
       </p>
@@ -91,9 +118,7 @@
   </div>
 
   <div class="content row one-per-row">
-    <div
-      class="col-12 padding-sm"
-    >
+    <div class="col-12 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.deployments' | translate }}</h3>
       <p class="list-component">
         <gn-individuals-list
@@ -157,9 +182,7 @@
     </span>
     <br />
     <span>
-      <strong>
-        {{ 'Observers?' | translate }} :
-      </strong>
+      <strong>{{ 'Observers?' | translate }} :</strong>
       {{ feature.properties.observers }}
     </span>
     <br />
@@ -167,7 +190,6 @@
       <strong>{{ 'MetaData.DatasetName' | translate }} :</strong>
       {{ feature.properties.dataset_name }}
     </span>
-
   </div>
 </ng-template>
 
@@ -193,12 +215,17 @@
       [onEachFeature]="onEachFeature.bind(this)"
     ></pnx-geojson>
   </div>
-  
-  <div id="info-container">
+
+  <div
+    id="info-container"
+    [ngStyle]="{ height: +contentHeight + 'px' }"
+  >
     <gn-individuals-info
       [infoTemplate]="infoTemplate"
       [datatable]="datatable"
-      [infoTitle]="'Individuals.Individuals.Titles.Info' | translate: { id: datatable.id_individual }"
+      [infoTitle]="
+        'Individuals.Individuals.Titles.Info' | translate: { id: datatable.id_individual }
+      "
       [objectName]="'individuals'"
       [objectId]="datatable.id_individual"
       [allowedToEdit]="allowedToEdit"

@@ -28,7 +28,9 @@
   <div class="col-12 padding-sm">
     <!-- INPUT TEXT : individual_name -->
     <div class="form-group w-50">
-      <label class="small">{{ 'Individuals.Individuals.Fields.individual_name' | translate }}</label>
+      <label class="small">
+        {{ 'Individuals.Individuals.Fields.individual_name' | translate }}
+      </label>
       <input
         type="text"
         class="form-control form-control-sm"
@@ -48,7 +50,7 @@
     <!-- TAXONOMY : cd_nom -->
     <pnx-taxonomy
       class="form-group"
-      [ngStyle]="{'max-width': '300px'}"
+      [ngStyle]="{ 'max-width': '300px' }"
       [label]="'Individuals.Individuals.Filters.cd_nom' | translate"
       [parentFormControl]="$any(form.get('cd_nom'))"
       [idList]="taxonListId"
@@ -74,11 +76,14 @@
     >
       <label class="small">{{ 'Individuals.Individuals.Fields.active' | translate }}</label>
       <div class="form-check">
-        <div *ngFor="let option of [
-          { value: true, label: 'Individuals.Others.Yes' | translate },
-          { value: false, label: 'Individuals.Others.No' | translate }
-        ]
-        ">
+        <div
+          *ngFor="
+            let option of [
+              { value: true, label: 'Individuals.Others.Yes' | translate },
+              { value: false, label: 'Individuals.Others.No' | translate }
+            ]
+          "
+        >
           <input
             type="radio"
             class="form-check-input"
@@ -106,13 +111,15 @@
         [class.is-invalid]="form.get('comment')?.invalid"
       ></textarea>
       <small class="d-flex text-muted">
-        {{ $any(form.get('comment'))?.value?.length || 0 }}/{{ formConstraints['comment'].maxLength }}
+        {{ $any(form.get('comment'))?.value?.length || 0 }}/{{
+          formConstraints['comment'].maxLength
+        }}
       </small>
       <small
-          class="text-danger d-block d-flex"
-          *ngIf="form.get('comment')?.errors?.['pattern']"
-        >
-          {{ 'Individuals.Errors.' + [formConstraints['comment'].help] | translate }}
+        class="text-danger d-block d-flex"
+        *ngIf="form.get('comment')?.errors?.['pattern']"
+      >
+        {{ 'Individuals.Errors.' + [formConstraints['comment'].help] | translate }}
       </small>
     </div>
 
@@ -123,7 +130,7 @@
       [formsDefinition]="additionalFields"
     ></pnx-dynamic-form-generator>
 
-  <!-- MULTISELECT : MODULES -->
+    <!-- MULTISELECT : MODULES -->
     <pnx-multiselect
       class="form-group"
       label="{{ 'Individuals.Individuals.Fields.modules' | translate }}"
@@ -135,7 +142,9 @@
 
     <!-- LIST : deployment data -->
     <ng-container *ngIf="formAction == 'EDIT'">
-      <small class="deployment-title">{{ 'Individuals.Individuals.Fields.deployments' | translate }}</small>
+      <small class="deployment-title">
+        {{ 'Individuals.Individuals.Fields.deployments' | translate }}
+      </small>
       <div class="col-12 padding-sm">
         <p class="list-component">
           <gn-individuals-list
@@ -177,7 +186,10 @@
 
 <ng-template #editMode>
   <gn-individuals-form
-    [formTitle]="'Individuals.Individuals.Titles.Edit' | translate: { id: datatable.id_individual, name: datatable.individual_name }"
+    [formTitle]="
+      'Individuals.Individuals.Titles.Edit'
+        | translate: { id: datatable.id_individual, name: datatable.individual_name }
+    "
     [formTemplate]="formTemplate"
     [formAction]="formAction"
     [allowedToSave]="allowedToSave"

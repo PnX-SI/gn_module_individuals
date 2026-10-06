@@ -58,10 +58,7 @@
         type="date"
         [formControl]="$any(form.get('install_date'))"
         [placeholder]="!form.get('install_date')?.value"
-        [class.is-invalid]="
-          form.get('install_date')?.invalid ||
-          form.hasError('invalidStartDate')
-        "
+        [class.is-invalid]="form.get('install_date')?.invalid || form.hasError('invalidStartDate')"
       />
       <small
         class="text-danger d-block d-flex"
@@ -79,10 +76,7 @@
         type="date"
         [formControl]="$any(form.get('removal_date'))"
         [class.placeholder]="!form.get('removal_date')?.value"
-        [class.is-invalid]="
-          form.get('removal_date')?.invalid ||
-          form.hasError('invalidEndDate')
-        "
+        [class.is-invalid]="form.get('removal_date')?.invalid || form.hasError('invalidEndDate')"
       />
       <small
         class="text-danger d-block d-flex"
@@ -104,13 +98,15 @@
         [class.is-invalid]="form.get('comment')?.invalid"
       ></textarea>
       <small class="d-flex text-muted">
-        {{ $any(form.get('comment'))?.value?.length || 0 }}/{{ formConstraints['comment'].maxLength }}
+        {{ $any(form.get('comment'))?.value?.length || 0 }}/{{
+          formConstraints['comment'].maxLength
+        }}
       </small>
       <small
-          class="text-danger d-block d-flex"
-          *ngIf="form.get('comment')?.errors?.['pattern']"
-        >
-          {{ 'Individuals.Errors.' + [formConstraints['comment'].help] | translate }}
+        class="text-danger d-block d-flex"
+        *ngIf="form.get('comment')?.errors?.['pattern']"
+      >
+        {{ 'Individuals.Errors.' + [formConstraints['comment'].help] | translate }}
       </small>
     </div>
   </div>
@@ -121,7 +117,11 @@
   [formTitle]="'Individuals.Deployments.Titles.Add' | translate"
   [formTemplate]="formTemplate"
   [formAction]="formAction"
-  [allowedToSave]="{id:0, access:form.valid, message: form.valid ? true : 'Individuals.Errors.FormInvalid' | translate}"
+  [allowedToSave]="{
+    id: 0,
+    access: form.valid,
+    message: form.valid ? true : ('Individuals.Errors.FormInvalid' | translate)
+  }"
   (save)="onSave()"
   (cancel)="onCancel()"
 ></gn-individuals-form>
@@ -131,7 +131,15 @@
     [formTitle]="'Individuals.Deployments.Titles.Edit' | translate: { id: datatable.id_deployment }"
     [formTemplate]="formTemplate"
     [formAction]="formAction"
-    [allowedToSave]="{id:this.datatable.id_deployment, access:form.valid && form.dirty, message: form.dirty ? (form.valid ? null : 'Individuals.Errors.FormInvalid' | translate) : 'Individuals.Errors.FormNotModified' | translate}"
+    [allowedToSave]="{
+      id: this.datatable.id_deployment,
+      access: form.valid && form.dirty,
+      message: form.dirty
+        ? form.valid
+          ? null
+          : ('Individuals.Errors.FormInvalid' | translate)
+        : ('Individuals.Errors.FormNotModified' | translate)
+    }"
     (save)="onSave()"
     (cancel)="onCancel()"
   ></gn-individuals-form>

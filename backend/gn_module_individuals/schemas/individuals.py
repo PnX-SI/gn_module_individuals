@@ -6,11 +6,10 @@ from datetime import datetime
 from apptax.taxonomie.models import Taxref
 from geonature.utils.env import db, ma
 from geonature.utils.schema import CruvedSchemaMixin
-from geonature.core.gn_permissions.tools import get_scopes_by_action
 from pypnnomenclature.utils import NomenclaturesConverter
 from pypnnomenclature.models import TNomenclatures
 from pypnnomenclature.schemas import NomenclatureSchema
-from pypnusershub.schemas import UserSchema
+from pypnusershub.schemas import UserSafeSchema
 from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_commons.models import TAdditionalFields, TModules
 
@@ -211,7 +210,7 @@ class IndividualDetailSchema(IndividualBaseSchema):
     nomenclature_sex = ma.Nested(NomenclatureSchema, dump_only=True)
     # The exclusion of max_level_profil avoid to load the relationship User.groups
     # thanks to that no error "Internal Server Error 'User.groups' is not available due to lazy='raise'"
-    digitiser = ma.Nested(UserSchema(exclude=("max_level_profil",)), dump_only=True)
+    digitiser = ma.Nested(UserSafeSchema, dump_only=True)
     # Named differently from the model's `deployments` relationship: SmartRelationshipsMixin
     # would otherwise try to read `.deferred` off that RelationshipProperty and crash, since
     # only ColumnProperty supports it. data_key keeps the JSON output key as "deployments".
@@ -256,8 +255,7 @@ class IndividualWriteSchema(IndividualBaseSchema):
     __object_code__ = "INDIVIDUALS"
 
     uuid_individual = fields.UUID(dump_only=True)
-    # See IndividualDetailSchema for why this can't be named `deployments`.
-    deployments_list = fields.Method("get_deployments", dump_only=True, data_key="deployments")
+
     # Only `id_module` is accepted on write: each entry is resolved to the existing
     # TModules row (never modified), and assigning the list to TIndividuals.modules
     # makes SQLAlchemy insert/delete the cor_individual_module rows on commit. There is
@@ -288,11 +286,6 @@ class IndividualWriteSchema(IndividualBaseSchema):
             if module not in modules:
                 modules.append(module)
         return modules
-
-    def get_deployments(self, obj):
-        deployments = sorted(obj.deployments, key=lambda d: d.install_date, reverse=True)
-        # individual_name is redundant here: we are already on that individual's page.
-        return DeploymentSchema(many=True, exclude=("individual_name",)).dump(deployments)
 
     # Validators
 
