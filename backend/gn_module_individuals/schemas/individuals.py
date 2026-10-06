@@ -256,8 +256,7 @@ class IndividualWriteSchema(IndividualBaseSchema):
     __object_code__ = "INDIVIDUALS"
 
     uuid_individual = fields.UUID(dump_only=True)
-    # See IndividualDetailSchema for why this can't be named `deployments`.
-    # deployments_list = fields.Method("get_deployments", dump_only=True, data_key="deployments")
+
     # Only `id_module` is accepted on write: each entry is resolved to the existing
     # TModules row (never modified), and assigning the list to TIndividuals.modules
     # makes SQLAlchemy insert/delete the cor_individual_module rows on commit. There is
