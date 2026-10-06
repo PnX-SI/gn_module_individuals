@@ -47,11 +47,11 @@
     [label]="'Individuals.Individuals.Fields.nomenclature_sex_name' | translate"
     [parentFormControl]="$any(filtersForm.get('id_nomenclature_sex'))"
     [codeNomenclatureType]="'SEXE'"
-    [cdNomenclatures]="[2, 3]"
+    [cdNomenclatures]="['2', '3']"
   ></pnx-nomenclature>
 
   <!-- INPUT TEXT : individual_name -->
-  <div class="form-group w-50">
+  <div class="form-group">
     <label class="small">{{ 'Individuals.Individuals.Fields.individual_name' | translate }}</label>
     <input
       type="text"
@@ -71,7 +71,7 @@
 
   <button
     mat-mini-fab
-    [matTooltip]="'Actions.Reset' | translate"
+    [matTooltip]="'Individuals.Actions.Reset' | translate"
     class="custom-mini-fab mr-1 bg-secondary text-white border-0"
     (click)="onResetFilters()"
   >

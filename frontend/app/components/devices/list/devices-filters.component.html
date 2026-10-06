@@ -18,7 +18,7 @@
   ></pnx-nomenclature>
 
   <!-- INPUT TEXT : provider_name -->
-  <div class="form-group w-50">
+  <div class="form-group">
     <label class="small">{{ 'Individuals.Devices.Fields.provider_name' | translate }}</label>
     <input
       type="text"
@@ -38,7 +38,7 @@
 
   <!-- OBSERVERS : referer_name -->
   <pnx-observers
-    [ngClass]="'form-group w-25'"
+    [ngClass]="'form-group'"
     [label]="'Individuals.Devices.Fields.id_referer' | translate"
     [parentFormControl]="$any(filtersForm.get('id_referer'))"
     [bindAllItem]="true"
@@ -47,7 +47,7 @@
 
   <button
     mat-mini-fab
-    [matTooltip]="'Actions.Reset' | translate"
+    [matTooltip]="'Individuals.Actions.Reset' | translate"
     class="custom-mini-fab mr-1 bg-secondary text-white border-0"
     (click)="onResetFilters()"
   >
