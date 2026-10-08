@@ -101,17 +101,18 @@ export class MapListComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.contentHeight = calcContentHeight();
-      this._zoomOnFeatures();
+      this._resizeMap();
       this._bindMapMove();
       this.mapReady = true;
+      // Delay the zoom on features to ensure that the map is fully initialized
+      requestAnimationFrame(() => this._zoomOnFeatures());
     }, 0);
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
   @HostListener('window:resize', ['$event'])
   onWindowResize($event: any): void {
-    this.contentHeight = calcContentHeight();
+    this._resizeMap();
   }
 
   onTableSelect($event: any): void {
@@ -154,6 +155,21 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this.export.emit($event);
   }
 
+  /**
+   * Map resize
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  private _resizeMap(): void {
+    this.contentHeight = calcContentHeight();
+    requestAnimationFrame(() => {
+      // Get the map from the map service, if it exists, and ask
+      // Leaflet to recalculate its size without panning the map
+      this._mapService.getMap()?.invalidateSize({ pan: false });
+    });
+  }
+  
   /**
    * Prepare each feature display: Style, actions on event, popup information, etc.
    *

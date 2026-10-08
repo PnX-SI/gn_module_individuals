@@ -81,7 +81,7 @@ export class IndividualsFormComponent implements OnInit {
     this._currentModule = this._module.currentModule;
     this.individualsObjectModules = this._module
       .getModules()
-      .filter((module) => !!(module as any).module_objects?.INDIVIDUALS)
+      .filter((module) => !!(module as any).module_objects?.INDIVIDUALS) // !! convert to boolea
       .map((module) => ({
         label: (module as any).module_code,
         value: (module as any).id_module,
