@@ -67,7 +67,13 @@ class ObservationsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
     LIST_COLUMNS = fields.List(
         fields.String(),
-        load_default=["nom_vern_or_lb_nom", "date_min", "observers", "dataset_name"],
+        load_default=[
+            "individual_name",
+            "nom_vern_or_lb_nom",
+            "date_min",
+            "observers",
+            "dataset_name"
+        ],
     )
     # Max number of observations returned on the map and by the unpaginated list
     NB_MAX_OBS = fields.Integer(load_default=50000)
