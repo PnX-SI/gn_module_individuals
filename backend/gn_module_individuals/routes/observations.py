@@ -44,7 +44,9 @@ def _column_expressions(column_names):
     plus id_individual and individual_name."""
     expressions = {}
     for column in dict.fromkeys([*column_names, "id_individual"]):  # dedupe, keep order
-        if column == "nom_vern_or_lb_nom":
+        if column == "individual_name":
+            expressions[column] = _individual_name_expression()
+        elif column == "nom_vern_or_lb_nom":
             # Same computed column as /synthese/for_web
             expressions[column] = func.coalesce(
                 func.nullif(VSyntheseForWebApp.nom_vern, ""), VSyntheseForWebApp.lb_nom
@@ -54,7 +56,10 @@ def _column_expressions(column_names):
             if expression is None:
                 raise BadRequest(f"Unknown observation column '{column}'")
             expressions[column] = expression
-    expressions["individual_name"] = _individual_name_expression()
+
+    if "individual_name" not in expressions:
+        expressions["individual_name"] = _individual_name_expression()
+
     return expressions
 
 
