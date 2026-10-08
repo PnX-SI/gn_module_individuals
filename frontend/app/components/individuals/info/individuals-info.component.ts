@@ -181,7 +181,6 @@ export class IndividualsInfoComponent implements OnInit {
       .subscribe((mapData) => {
         this.mapData$ = of(mapData);
         this._map = this._mapService.getMap();
-        this._zoomOnFeatures();
 
         mapData.features.forEach((feature: any) => {
           this._mapLayersById.push({ id: feature.properties.id_synthese, layer: null });
@@ -195,16 +194,15 @@ export class IndividualsInfoComponent implements OnInit {
         });
       });
 
-    if (!this._map) {
-      this.noGeometry = true;
-    }
+    // if (!this._map) {
+    //   this.noGeometry = true;
+    // }
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       // Usefull to wait the DOM build before calculation
-      this.contentHeight = calcContentHeight();
-
+      this._resizeMap();
       this._bindMapMove();
 
       // Create the trajectory layer
@@ -212,18 +210,39 @@ export class IndividualsInfoComponent implements OnInit {
         this._trajectoryLayer = this._createTrajectoryLayer();
         this._trajectoryLayer.addTo(this._map);
       }
+      else {
+        this.noGeometry = true;
+      }
+
+      // Delay the zoom on features to ensure that the map is fully initialized
+      requestAnimationFrame(() => this._zoomOnFeatures());
     }, 0);
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
   @HostListener('window:resize', ['$event'])
   onWindowResize($event: any): void {
-    this.contentHeight = calcContentHeight();
+    this._resizeMap();
   }
 
   ngOnDestroy() {
     this._destroy$.next();
     this._destroy$.complete();
+  }
+
+  /**
+   * Map resize
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  private _resizeMap(): void {
+    this.contentHeight = calcContentHeight();
+    requestAnimationFrame(() => {
+      // Get the map from the map service, if it exists, and ask
+      // Leaflet to recalculate its size without panning the map
+      this._mapService.getMap()?.invalidateSize({ pan: false });
+    });
   }
 
   addOrEditDeployment(deployment: Deployment | { id_individual: number }) {
@@ -464,19 +483,17 @@ export class IndividualsInfoComponent implements OnInit {
       return;
     }
 
-    let nbFeatures = 0;
-    let date = '';
-    this.mapData$.subscribe((featuresCollection) => {
-      nbFeatures = featuresCollection.features.length;
-
-      featuresCollection.features.forEach((feature: any) => {
-        if (feature.properties.id_synthese === id) {
-          date = feature.properties.date_min;
-        }
-      });
-    });
-
     let layerRank = this._mapLayersById.findIndex((item) => item.id === id) + 1;
+
+    if (layerRank && layerRank == 1) {
+      const map = this._mapService.getMap();
+      if (map) {
+        const paneName = 'firstObservation';
+        const pane = map.getPane(paneName) ?? map.createPane(paneName);
+        pane.style.zIndex = '500';
+        (layer as L.Path).options.pane = paneName;
+      }
+    }
 
     let layerSelected = {
       color:
@@ -490,10 +507,7 @@ export class IndividualsInfoComponent implements OnInit {
 
     let layerUnselected = {
       fillColor:
-        layerRank && layerRank == 1
-          ? (this._config.INDIVIDUALS.INDIVIDUALS.FIRST_LAYER_COLOR ?? MAP_CONFIG.FIRST_LAYER_COLOR)
-          : (this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ??
-            MAP_CONFIG.UNSELECTED_LAYER_COLOR),
+        this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
       color:
         this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
       fillOpacity: MAP_CONFIG.UNSELECTED_LAYER_OPACITY,
@@ -501,7 +515,17 @@ export class IndividualsInfoComponent implements OnInit {
       weight: MAP_CONFIG.UNSELECTED_LAYER_WEIGHT,
     };
 
-    (layer as any).setStyle(selected ? layerSelected : layerUnselected);
+    let firstLayerUnselected = {
+      fillColor: 
+        this._config.INDIVIDUALS.INDIVIDUALS.FIRST_LAYER_COLOR ?? MAP_CONFIG.FIRST_LAYER_COLOR,
+      color:
+        this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
+      fillOpacity: MAP_CONFIG.FIRST_LAYER_OPACITY,
+      radius: MAP_CONFIG.FIRST_LAYER_RADIUS,
+      weight: MAP_CONFIG.FIRST_LAYER_WEIGHT,
+    };
+
+    (layer as any).setStyle(selected ? layerSelected : ( layerRank && layerRank == 1 ? firstLayerUnselected : layerUnselected));
   }
 
   /**
@@ -567,10 +591,11 @@ export class IndividualsInfoComponent implements OnInit {
 
     // Create the polyline and add it to the layer group
     L.polyline(this._trajectoryCoordinates, {
-      weight: 3,
-      dashArray: '6 6',
+      color: MAP_CONFIG.TRAJECTORY_LAYER_COLOR,
+      weight: MAP_CONFIG.TRAJECTORY_LAYER_WEIGHT,
+      opacity: MAP_CONFIG.TRAJECTORY_LAYER_OPACITY,
+      dashArray: MAP_CONFIG.TRAJECTORY_DASH_ARRAY,
       interactive: false,
-      color: '#ffffff',
     }).addTo(layerGroup);
 
     // Directional arrows on the polyline
@@ -616,9 +641,11 @@ export class IndividualsInfoComponent implements OnInit {
         this._map.unproject(right, zoom),
       ],
       {
-        weight: 2.5,
+        color: MAP_CONFIG.TRAJECTORY_LAYER_COLOR,
+        weight: MAP_CONFIG.TRAJECTORY_LAYER_WEIGHT,
+        opacity: MAP_CONFIG.TRAJECTORY_LAYER_OPACITY,
+        dashArray: MAP_CONFIG.TRAJECTORY_DASH_ARRAY,
         interactive: false,
-        color: '#ffffff',
       }
     ).addTo(layerGroup);
   }
