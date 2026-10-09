@@ -68,7 +68,6 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() allowedToAdd: AccessResult = { id: 0, access: false, message: null };
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
-  @Input() selectedRows: unknown[] = [];
   @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<
     FeatureCollection<unknown>
   >();
@@ -77,6 +76,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
 
   public mapReady: boolean = false;
   public noGeometry: boolean = false;
+  public selectedRows: unknown[] = [];
   private _selectedId: number | null = null;
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
@@ -125,6 +125,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (this._selectedId) {
       this._selectMapFeature(this._selectedId, true);
     }
+    console.log("onTable,Select",this.selectedRows)
   }
 
   onPage($event: any): void {

@@ -75,8 +75,11 @@ class ObservationsSchema(Schema):
             "dataset_name"
         ],
     )
-    # Max number of observations returned on the map and by the unpaginated list
     NB_MAX_OBS = fields.Integer(load_default=50000)
+    EXPORT_FORMAT = fields.List(
+        fields.String(),
+        load_default=["csv", "geojson", "gpkg"],
+    )
 
 
 class DevicesSchema(Schema):

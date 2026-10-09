@@ -28,6 +28,37 @@ export const MAP_CONFIG = {
   TRAJECTORY_DASH_ARRAY: '5 5'
 };
 
+export const INDIVIDUALS_DEFAULT_SORT = { prop: 'last_observation_date', dir: 'desc' };
+
+export const INDIVIDUALS_FORM_CONSTRAINTS = {
+  individual_name: {
+    maxLength: 50,
+    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
+    help: 'PatternText1', // Refer to i18n files
+  },
+  comment: {
+    maxLength: 255,
+    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
+    help: 'PatternText3',
+  },
+};
+
+
+export const DEPLOYMENTS_FORM_CONSTRAINTS = {
+  marking_code: {
+    maxLength: 50,
+    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9_-]*$',
+    help: 'PatternText4', // Refer to i18n files
+  },
+  comment: {
+    maxLength: 255,
+    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
+    help: 'PatternText3',
+  },
+};
+
+export const OBSERVATIONS_DEFAULT_SORT = { prop: 'date_min', dir: 'asc' };
+
 export const DEVICE_FORM_CONSTRAINTS = {
   provider_name: {
     maxLength: 50,
@@ -47,31 +78,3 @@ export const DEVICE_FORM_CONSTRAINTS = {
 };
 
 export const DEVICES_DEFAULT_SORT = { prop: 'meta_create_date', dir: 'desc' };
-
-export const INDIVIDUALS_DEFAULT_SORT = { prop: 'last_observation_date', dir: 'desc' };
-
-export const INDIVIDUALS_FORM_CONSTRAINTS = {
-  individual_name: {
-    maxLength: 50,
-    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
-    help: 'PatternText1', // Refer to i18n files
-  },
-  comment: {
-    maxLength: 255,
-    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
-    help: 'PatternText3',
-  },
-};
-
-export const DEPLOYMENTS_FORM_CONSTRAINTS = {
-  marking_code: {
-    maxLength: 50,
-    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9_-]*$',
-    help: 'PatternText4', // Refer to i18n files
-  },
-  comment: {
-    maxLength: 255,
-    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
-    help: 'PatternText3',
-  },
-};

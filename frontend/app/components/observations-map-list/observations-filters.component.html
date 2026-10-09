@@ -1,0 +1,67 @@
+<div class="d-flex flex-wrap filters-form">
+  <!-- INPUT TEXT : individual_name -->
+  <div class="form-group">
+    <label class="small">{{ 'Individuals.Observations.Fields.individual_name' | translate }}</label>
+    <input
+      type="text"
+      class="form-control form-control-sm"
+      [formControl]="$any(filtersForm.get('individual_name'))"
+      [maxlength]="formConstraints['individual_name'].maxLength"
+      [placeholder]="'Individuals.PlaceHolder.firstLetters' | translate"
+      [class.is-invalid]="filtersForm.get('individual_name')?.invalid"
+    />
+    <small
+      class="text-danger d-block d-flex justify-content-end"
+      *ngIf="filtersForm.get('individual_name')?.errors?.['pattern']"
+    >
+      {{ 'Individuals.Errors.' + [formConstraints['individual_name'].help] | translate }}
+    </small>
+  </div>  
+
+  <!-- TAXONOMY : cd_nom -->
+  <pnx-taxonomy
+    [ngClass]="'form-group w-25'"
+    [label]="'Individuals.Observations.Fields.cd_nom' | translate"
+    [parentFormControl]="$any(filtersForm.get('cd_nom'))"
+    [idList]="taxonListId"
+    [charNumber]="3"
+  ></pnx-taxonomy>
+
+  <!-- DATE : date_min -->
+  <div class="form-group">
+    <small>{{ 'Individuals.Observations.Filters.date_min' | translate }}</small>
+    <input
+      class="form-control form-control-sm"
+      type="date"
+      [formControl]="$any(filtersForm.get('date_min'))"
+      [placeholder]="!filtersForm.get('date_min')?.value"
+    />
+  </div>
+
+  <!-- DATE : date_max -->
+  <div class="form-group">
+    <small>{{ 'Individuals.Observations.Filters.date_max' | translate }}</small>
+    <input
+      class="form-control form-control-sm"
+      type="date"
+      [formControl]="$any(filtersForm.get('date_max'))"
+      [placeholder]="!filtersForm.get('date_max')?.value"
+    />
+  </div>
+
+    <!-- DATASETS : id_dataset-->
+  <pnx-datasets
+    [ngClass]="'form-group'"
+    [label]="'Individuals.Observations.Fields.dataset_name' | translate"
+    [parentFormControl]="$any(filtersForm.get('id_dataset'))"
+  ></pnx-datasets>
+    
+  <button
+    mat-mini-fab
+    [matTooltip]="'Individuals.Actions.Reset' | translate"
+    class="custom-mini-fab mr-1 bg-secondary text-white border-0"
+    (click)="onResetFilters()"
+  >
+    <mat-icon>restart_alt</mat-icon>
+  </button>
+</div>

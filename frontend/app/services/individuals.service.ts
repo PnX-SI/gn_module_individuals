@@ -36,6 +36,13 @@ export class IndividualsService {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/individuals`;
   }
 
+  /**
+   * Return on observable with an items collection of individuals
+   *
+   * @param {(APIPaginationParams & APIIndividualFiltersParams)} params : pagination params, sort params and filter params
+   * @return {*}  {Observable<PaginatedItemCollection<Individual>>}
+   * @memberof IndividualsService
+   */
   getIndividuals(
     params: APIPaginationParams & APIIndividualFiltersParams
   ): Observable<PaginatedItemCollection<Individual>> {
@@ -90,12 +97,7 @@ export class IndividualsService {
         httpParams = httpParams.set(key, String(params[key]));
       }
     });
-    console.log(
-      'Parameters sent to API (Individual Rank and Page)',
-      params,
-      'for individual id',
-      id
-    );
+
     return this._http.get<IndividualRankAndPage>(`${this._OBJECT_API}/${id}/page`, {
       params: httpParams,
     });

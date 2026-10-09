@@ -43,7 +43,6 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   private _datatable!: PaginatedItemCollection<Individual>;
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
-  public fieldsTranslation = 'Individuals.Individuals.Fields';
   public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
   public allowedToAdd: AccessResult = { id: 0, access: false, message: null };
   public allowedToEdit: Record<number, AccessResult> = {};
