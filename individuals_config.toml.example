@@ -55,7 +55,7 @@
 
     # Columns to display in the devices list. 
     # Have to be those of the corresponding API response /individuals/devices
-    # LIST_COLUMNS=["provider_name", "provider_device_id", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
+    # LIST_COLUMNS=["provider_name", "code", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
 
     # Columns to display in the device detail page, in the section "Deployments" 
     # Have to be those of the corresponding API response /individuals/devices/:id

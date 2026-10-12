@@ -43,20 +43,19 @@ export class DevicesFormComponent implements OnInit {
     this.form = this._fb.group({
       id_tracking_device: [null],
       id_nomenclature_device_type: [null, Validators.required],
+      code: [
+        null,
+        [
+          Validators.required,
+          Validators.maxLength(this.formConstraints.code.maxLength),
+          Validators.pattern(this.formConstraints.code.pattern),
+        ],
+      ],
       provider_name: [
         null,
         [
-          Validators.required,
           Validators.maxLength(this.formConstraints.provider_name.maxLength),
           Validators.pattern(this.formConstraints.provider_name.pattern),
-        ],
-      ],
-      provider_device_id: [
-        null,
-        [
-          Validators.required,
-          Validators.maxLength(this.formConstraints.provider_device_id.maxLength),
-          Validators.pattern(this.formConstraints.provider_device_id.pattern),
         ],
       ],
       id_referer: [null, Validators.required],

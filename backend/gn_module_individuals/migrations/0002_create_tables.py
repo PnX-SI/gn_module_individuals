@@ -32,15 +32,15 @@ def upgrade():
             "id_nomenclature_device_type",
             sa.Integer(),
             sa.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-            nullable=True,
+            nullable=False,
+        ),
+        sa.Column(
+            "code",
+            sa.Text(),
+            nullable=False,
         ),
         sa.Column(
             "provider_name",
-            sa.Text(),
-            nullable=True,
-        ),
-        sa.Column(
-            "provider_device_id",
             sa.Text(),
             nullable=True,
         ),
@@ -59,12 +59,12 @@ def upgrade():
             "id_digitiser",
             sa.Integer(),
             sa.ForeignKey("utilisateurs.t_roles.id_role"),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_create_date",
             sa.DateTime(),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_update_date",
@@ -130,12 +130,12 @@ def upgrade():
             "id_digitiser",
             sa.Integer(),
             sa.ForeignKey("utilisateurs.t_roles.id_role"),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_create_date",
             sa.DateTime(),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_update_date",

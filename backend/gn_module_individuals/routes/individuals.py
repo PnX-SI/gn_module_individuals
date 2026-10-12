@@ -168,7 +168,7 @@ def individuals_geometry(scope):
     :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
     :query string individual_name: filter on the individual name (partial match)
     :query string search: filter on individuals having a deployment on a device
-        whose label (``provider_name-provider_device_id``) matches (partial match)
+        whose label (``provider_name-code``) matches (partial match)
     :query int id_nomenclature_sex: filter on the sex nomenclature
 
     :returns: a GeoJSON FeatureCollection of individuals
@@ -489,7 +489,7 @@ def list_individuals(scope):
         based on the last known observation
     :query string individual_name: filter on the individual name (partial match)
     :query string search: filter on individuals having a deployment on a device
-        whose label (``provider_name-provider_device_id``) matches (partial match)
+        whose label (``provider_name-code``) matches (partial match)
     :query int id_nomenclature_sex: filter on the sex nomenclature
     :query string prop: column to sort on (default: last_observation_date)
     :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
@@ -539,7 +539,7 @@ def individual_page(id_individual, scope):
     :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
     :query string individual_name: filter on the individual name (partial match)
     :query string search: filter on individuals having a deployment on a device
-        whose label (``provider_name-provider_device_id``) matches (partial match)
+        whose label (``provider_name-code``) matches (partial match)
     :query int id_nomenclature_sex: filter on the sex nomenclature
     :query string prop: column to sort on (default: last_observation_date)
     :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)

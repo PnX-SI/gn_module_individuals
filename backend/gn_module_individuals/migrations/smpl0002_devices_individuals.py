@@ -21,7 +21,7 @@ def upgrade():
         INSERT INTO gn_individual.t_tracking_devices (
             id_nomenclature_device_type,
             provider_name,
-            provider_device_id,
+            code,
             id_referer,
             comment,
             id_digitiser
@@ -29,7 +29,7 @@ def upgrade():
         SELECT
             n.id_nomenclature,
             v.provider_name,
-            v.provider_device_id,
+            v.code,
             v.id_referer,
             v.comment,
             v.id_digitiser
@@ -55,7 +55,7 @@ def upgrade():
                 ('VHF', 'Ornitela', '210710', 6, 'Test balise VHF', 5),     
                 ('VHF', 'Ornitela', '210721', 4, 'Test balise VHF/Ornitela', 3),     
                 ('VHF', 'Garmin', '182A256POM', 3, 'Test balise VHF/GSM', 6)
-        ) AS v(mnemonique, provider_name, provider_device_id, id_referer, comment, id_digitiser)
+        ) AS v(mnemonique, provider_name, code, id_referer, comment, id_digitiser)
         JOIN ref_nomenclatures.t_nomenclatures n
             ON n.mnemonique = v.mnemonique;
     """))
@@ -96,7 +96,7 @@ def upgrade():
             FROM gn_monitoring.t_individuals
         ),
         devices AS (
-            SELECT id_tracking_device, provider_device_id
+            SELECT id_tracking_device, code
             FROM gn_individual.t_tracking_devices
         ),
         n_type AS (
@@ -130,7 +130,7 @@ def upgrade():
                 ('Quechua', '182A256POM', NULL, '2024-02-20', NULL, 'Suivi classique', 3),
                 ('Kalinka', '210710', NULL, '2023-01-01', '2023-07-01', 'Retrait été', 4),
                 ('Pavot', '210721', NULL, '2024-03-01', NULL, 'Nouveau suivi', 4)
-            ) AS t(individual_name, provider_device_id, marking_code, install_date, removal_date, comment, id_digitiser)
+            ) AS t(individual_name, code, marking_code, install_date, removal_date, comment, id_digitiser)
         )
         SELECT
             i.id_individual,
@@ -144,7 +144,7 @@ def upgrade():
             d.id_digitiser
         FROM data d
         JOIN individuals i ON i.individual_name = d.individual_name
-        JOIN devices dev ON dev.provider_device_id = d.provider_device_id
+        JOIN devices dev ON dev.code = d.code
         CROSS JOIN n_type
         CROSS JOIN n_loc
     """))

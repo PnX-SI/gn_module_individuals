@@ -109,8 +109,8 @@ class TestExportDevices:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(url_for("individuals.export_devices", export_format="csv"))
         rows = list(csv.DictReader(io.StringIO(r.get_data(as_text=True)), delimiter=";"))
-        provider_ids = {row["provider_device_id"] for row in rows}
-        assert {d.provider_device_id for d in devices} <= provider_ids
+        provider_ids = {row["code"] for row in rows}
+        assert {d.code for d in devices} <= provider_ids
 
     def test_csv_respects_provider_name_filter(self, users, devices):
         set_logged_user(self.client, users["admin_user"])
@@ -120,4 +120,4 @@ class TestExportDevices:
         rows = list(csv.DictReader(io.StringIO(r.get_data(as_text=True)), delimiter=";"))
         provider_names = {row["provider_name"] for row in rows}
         assert provider_names <= {"Lotek"}
-        assert "Balise 57" in {row["provider_device_id"] for row in rows}
+        assert "Balise 57" in {row["code"] for row in rows}

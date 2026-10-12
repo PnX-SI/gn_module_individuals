@@ -75,7 +75,7 @@
                 "tracking_device_info" : "Dispositif de suivi",
                 "install_date" : "Date de déploiement",
                 "removal_date" : "Date de retrait",
-                "deployment_type_name" : "Type",
+                "deployment_type_name" : "Type de dispositif",
                 "deployment_location_name" : "Localisation",
                 "marking_code" : "Marquage",
                 "comment" : "Commentaire",
@@ -106,7 +106,7 @@
                 "id_tracking_device" : "Identifiant",
                 "id_nomenclature_device_type" : "Type de dispositif",
                 "provider_name" : "Fournisseur",
-                "provider_device_id" : "Code",
+                "code" : "Code",
                 "id_referer" : "Référent",
                 "comment" : "Commentaire",
                 "meta_create_date" : "Date de création",
@@ -120,7 +120,7 @@
             },
             "PlaceHolder": {
                 "provider_name": "Nom du fournisseur",
-                "provider_device_id": "Identifiant/n° série",
+                "code": "Code, n°",
                 "id_referer": "Référent",
                 "device_label" : "Dispositif de suivi"
             },

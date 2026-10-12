@@ -30,8 +30,8 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         DB.Text,
     )
 
-    provider_device_id = DB.Column(
-        "provider_device_id",
+    code = DB.Column(
+        "code",
         DB.Text,
     )
 
@@ -100,11 +100,11 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         the individual's deployment display, and usable as a SQL expression
         (``TrackingDevices.device_label``) to filter/sort at the DB level.
         """
-        return f"{self.provider_name}-{self.provider_device_id}"
+        return f"{self.provider_name}-{self.code}"
 
     @device_label.expression
     def device_label(cls):
-        return func.concat(cls.provider_name, "-", cls.provider_device_id)
+        return func.concat(cls.provider_name, "-", cls.code)
 
     @hybrid_property
     def organism_actors(self):

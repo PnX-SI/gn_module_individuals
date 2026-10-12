@@ -88,7 +88,7 @@ class DevicesSchema(Schema):
         fields.String(),
         load_default=[
             "provider_name",
-            "provider_device_id",
+            "code",
             "nomenclature_device_type_name",
             "referer_name",
             "last_individual_equipped_name",
@@ -109,7 +109,7 @@ class DevicesSchema(Schema):
         load_default=[
             "id_tracking_device",
             "provider_name",
-            "provider_device_id",
+            "code",
             "nomenclature_device_type_name",
             "referer_name",
             "last_individual_equipped_name",

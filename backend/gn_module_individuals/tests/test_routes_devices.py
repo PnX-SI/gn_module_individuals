@@ -52,7 +52,7 @@ class TestListDevices:
     EXPECTED_FIELDS = {
         "id_tracking_device",
         "provider_name",
-        "provider_device_id",
+        "code",
         "id_nomenclature_device_type",
         "nomenclature_device_type_name",
         "digitiser_name",
@@ -308,7 +308,7 @@ class TestCreateDevice:
 
     VALID_PAYLOAD = {
         "provider_name": "Ornitela",
-        "provider_device_id": "TEST_POST_001",
+        "code": "TEST_POST_001",
     }
 
     def test_unauthenticated_returns_401(self):
@@ -354,15 +354,15 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            json={"provider_name": "   ", "provider_device_id": "X"},
+            json={"provider_name": "   ", "code": "X"},
         )
         assert r.status_code == 400
 
-    def test_empty_provider_device_id_returns_400(self, users):
+    def test_empty_code_returns_400(self, users):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            json={"provider_name": "Ornitela", "provider_device_id": ""},
+            json={"provider_name": "Ornitela", "code": ""},
         )
         assert r.status_code == 400
 
@@ -432,7 +432,7 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            json={"provider_name": "   ", "provider_device_id": "X"},
+            json={"provider_name": "   ", "code": "X"},
         )
         assert r.status_code == 400
         payload = r.get_json()
@@ -451,7 +451,7 @@ class TestUpdateDevice:
     def test_unauthenticated_returns_401(self, device):
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         assert r.status_code == 401
 
@@ -459,7 +459,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["noright_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         assert r.status_code == 403
 
@@ -472,7 +472,7 @@ class TestUpdateDevice:
                 "individuals.update_device",
                 id_tracking_device=devices[0].id_tracking_device,
             ),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         assert r.status_code == 403
 
@@ -480,7 +480,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=-1),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         assert r.status_code == 404
 
@@ -488,7 +488,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=-1),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         payload = r.get_json()
         assert payload.get("name") == ApiErrorCode.NOT_FOUND
@@ -501,7 +501,7 @@ class TestUpdateDevice:
                 "individuals.update_device",
                 id_tracking_device=devices[0].id_tracking_device,
             ),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         assert r.status_code == 403
         payload = r.get_json()
@@ -512,7 +512,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "Ornitela Updated", "provider_device_id": "UPD_001"},
+            json={"provider_name": "Ornitela Updated", "code": "UPD_001"},
         )
         assert r.status_code == 200
 
@@ -520,7 +520,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         assert r.status_code == 200
         data = r.get_json()
@@ -532,17 +532,17 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "NewProvider", "provider_device_id": "UPD_002"},
+            json={"provider_name": "NewProvider", "code": "UPD_002"},
         )
         data = r.get_json()
         assert data["provider_name"] == "NewProvider"
-        assert data["provider_device_id"] == "UPD_002"
+        assert data["code"] == "UPD_002"
 
     def test_digitiser_is_set_from_authenticated_user(self, users, device):
         set_logged_user(self.client, users["admin_user"])
         self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "provider_device_id": "Y"},
+            json={"provider_name": "X", "code": "Y"},
         )
         detail = self.client.get(
             url_for("individuals.device", id_tracking_device=device.id_tracking_device)
@@ -555,7 +555,7 @@ class TestUpdateDevice:
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
             json={
                 "provider_name": "X",
-                "provider_device_id": "Y",
+                "code": "Y",
                 "nomenclature_device_type_name": "Balise GPS",
                 "digitiser_name": "Test Agent",
             },
@@ -566,7 +566,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "", "provider_device_id": "X"},
+            json={"provider_name": "", "code": "X"},
         )
         assert r.status_code == 400
 
@@ -576,7 +576,7 @@ class TestUpdateDevice:
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
             json={
                 "provider_name": "X",
-                "provider_device_id": "Y",
+                "code": "Y",
                 "id_nomenclature_device_type": -999,
             },
         )
@@ -588,7 +588,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "provider_device_id": "Y", "id_referer": "not-an-integer"},
+            json={"provider_name": "X", "code": "Y", "id_referer": "not-an-integer"},
         )
         assert r.status_code == 400
 
@@ -596,7 +596,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "provider_device_id": "Y", "id_referer": "not-an-integer"},
+            json={"provider_name": "X", "code": "Y", "id_referer": "not-an-integer"},
         )
         payload = r.get_json()
         assert payload.get("name") == ApiErrorCode.VALIDATION_ERROR

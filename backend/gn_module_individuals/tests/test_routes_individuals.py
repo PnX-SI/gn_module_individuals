@@ -321,7 +321,7 @@ class TestListIndividuals:
         }
 
     def test_filter_search_matches_device_label_case_insensitive(self, users, individual):
-        device = TrackingDevices(provider_name="Ornitela", provider_device_id="Balise 56")
+        device = TrackingDevices(provider_name="Ornitela", code="Balise 56")
         with db.session.begin_nested():
             db.session.add(device)
             db.session.flush()
@@ -596,7 +596,7 @@ class TestGetIndividual:
         assert dep["id_nomenclature_deployment_type"] is not None
         assert dep["id_nomenclature_deployment_location"] is not None
         assert dep["tracking_device_info"] == (
-            f"{device_with_deployment.provider_name}-{device_with_deployment.provider_device_id}"
+            f"{device_with_deployment.provider_name}-{device_with_deployment.code}"
         )
         assert dep["install_date"] == "2024-01-01"
         assert dep["marking_code"] is None

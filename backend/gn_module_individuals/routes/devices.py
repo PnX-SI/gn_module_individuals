@@ -211,7 +211,7 @@ def list_devices(scope):
     :query int id_nomenclature_device_type: filter on the device type
     :query string provider_name: filter on the provider name (partial match)
     :query string search: filter on the device label (``provider_name-
-       provider_device_id``), partial match, for autocomplete
+       code``), partial match, for autocomplete
     :query int id_referer: filter on the referer role
     :query boolean available: filter on device availability
     :query int page: page number, requires per_page to enable pagination

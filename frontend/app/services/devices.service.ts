@@ -63,7 +63,7 @@ export class DevicesService {
     let payload: CreateDeviceDto | UpdateDeviceDto = {
       id_nomenclature_device_type: device.id_nomenclature_device_type,
       provider_name: device.provider_name,
-      provider_device_id: device.provider_device_id,
+      code: device.code,
       id_referer: device.id_referer.id_role,
       comment: device.comment,
     };

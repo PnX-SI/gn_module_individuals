@@ -60,12 +60,12 @@ class TrackingDeviceBaseSchema(
             )
         return value
 
-    @validates("provider_device_id")
-    def validate_provider_device_id(self, value, **kwargs):
+    @validates("code")
+    def validate_code(self, value, **kwargs):
         if not value or not value.strip():
             raise APIError(
                 ApiErrorCode.VALIDATION_ERROR,
-                "The provider device id can't be empty",
+                "The code can't be empty",
                 400,
             )
         return value

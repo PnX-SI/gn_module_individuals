@@ -5,7 +5,7 @@ export const DEVICE_MODEL = {
   id_tracking_device: 0,
   id_nomenclature_device_type: 0,
   provider_name: '',
-  provider_device_id: '',
+  code: '',
   id_referer: 0,
   comment: '',
   id_digitiser: 0,
@@ -39,7 +39,7 @@ export interface APIDeviceFiltersParams {
 export interface CreateDeviceDto {
   id_nomenclature_device_type: number;
   provider_name: string;
-  provider_device_id: string;
+  code: string;
   id_referer: number;
   comment: string;
 }

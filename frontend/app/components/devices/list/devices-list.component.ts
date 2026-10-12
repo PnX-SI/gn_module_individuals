@@ -76,7 +76,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
       .get([
         'Individuals.Individuals.Titles.Delete',
         'Individuals.Devices.Fields.provider_name',
-        'Individuals.Devices.Fields.provider_device_id',
+        'Individuals.Devices.Fields.code',
         'Individuals.ApiErrors.InsufficientPermissions',
         'Individuals.ApiErrors.HasDeployment',
       ])
@@ -162,7 +162,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     );
     modalRef.componentInstance.bodyHTML = `
       ${this._translate.instant('Individuals.Devices.Fields.provider_name')} : ${this.selectedRow.provider_name}<br>
-      ${this._translate.instant('Individuals.Devices.Fields.provider_device_id')} : ${this.selectedRow.provider_device_id}
+      ${this._translate.instant('Individuals.Devices.Fields.code')} : ${this.selectedRow.code}
     `;
     modalRef.componentInstance.validateButtonType = 'delete';
     modalRef.componentInstance.validate.subscribe((id: number) => {
