@@ -104,13 +104,13 @@ def upgrade():
             SELECT n.id_nomenclature
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'TYPE_MARQUAGE' AND n.mnemonique = 'DISPO_SUIVI'
+            WHERE t.mnemonique = 'TYPE_DISPO_SUIVI' AND n.mnemonique = 'GPS'
         ),
         n_loc AS (
             SELECT n.id_nomenclature
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'LOC_MARQUAGE' AND n.mnemonique = 'ENCOLURE'
+            WHERE t.mnemonique = 'LOC_DISPO_SUIVI' AND n.mnemonique = 'ENCOLURE'
         ),
         data AS (
             SELECT *
@@ -166,13 +166,13 @@ def upgrade():
             SELECT n.id_nomenclature, n.mnemonique
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'TYPE_MARQUAGE'
+            WHERE t.mnemonique = 'TYPE_DISPO_SUIVI'
         ),
         n_loc AS (
             SELECT n.id_nomenclature, n.mnemonique
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'LOC_MARQUAGE'
+            WHERE t.mnemonique = 'LOC_DISPO_SUIVI'
         ),
         data AS (
             SELECT * FROM (VALUES

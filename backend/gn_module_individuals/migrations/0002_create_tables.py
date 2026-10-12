@@ -182,13 +182,13 @@ def upgrade():
     op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT check_t_individual_deployments_deployment_type
-        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_type, 'TYPE_MARQUAGE'::character varying)) NOT VALID;
+        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_type, 'TYPE_DISPO_SUIVI'::character varying)) NOT VALID;
     """)
 
     op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT check_t_individual_deployments_deployment_location
-        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_location, 'LOC_MARQUAGE'::character varying)) NOT VALID;
+        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_location, 'LOC_DISPO_SUIVI'::character varying)) NOT VALID;
     """)
 
 
