@@ -25,7 +25,7 @@ from geonature.utils.env import db
 from utils_flask_sqla.response import json_resp
 
 from ..blueprint import blueprint
-from .utils import pagination_payload, parse_sort
+from .utils import pagination_payload, parse_bbox, parse_sort
 
 # Properties of the map features (the datatable gets OBSERVATIONS.LIST_COLUMNS)
 MAP_COLUMNS = ["id_synthese", "nom_vern_or_lb_nom", "date_min", "observers"]
@@ -84,7 +84,10 @@ def _parse_filters(args):
     }
     # SyntheseQuery applies every key it gets: drop the empty ones
     synthese_filters = {k: v for k, v in synthese_filters.items() if v not in (None, [])}
-    return synthese_filters, {"individual_name": args.get("individual_name")}
+    return synthese_filters, {
+        "individual_name": args.get("individual_name"),
+        "bbox": parse_bbox(args.get("bbox")),
+    }
 
 
 def _filtered_ids_query(permissions, synthese_filters, module_filters):
@@ -102,6 +105,9 @@ def _filtered_ids_query(permissions, synthese_filters, module_filters):
         query = query.where(
             _individual_name_expression().ilike(f"%{module_filters['individual_name']}%")
         )
+    if module_filters["bbox"] is not None:
+        envelope = func.ST_MakeEnvelope(*module_filters["bbox"], 4326)
+        query = query.where(func.ST_Intersects(VSyntheseForWebApp.the_geom_4326, envelope))
     synthese_query = SyntheseQuery(VSyntheseForWebApp, query, synthese_filters)
     synthese_query.apply_all_filters(g.current_user, permissions)
     return synthese_query.build_query()
@@ -148,6 +154,7 @@ def list_observations(permissions):
     :query int id_dataset: filter on a dataset (repeatable)
     :query string date_min: observations from this date (``YYYY-MM-DD``)
     :query string date_max: observations until this date (``YYYY-MM-DD``)
+    :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
     :query string prop: column to sort on (default: date_min)
     :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
     :query int page: page number, requires per_page to enable pagination
