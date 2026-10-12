@@ -125,7 +125,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (this._selectedId) {
       this._selectMapFeature(this._selectedId, true);
     }
-    console.log("onTable,Select",this.selectedRows)
+    console.log('onTable,Select', this.selectedRows);
   }
 
   onPage($event: any): void {
@@ -170,7 +170,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
       this._mapService.getMap()?.invalidateSize({ pan: false });
     });
   }
-  
+
   /**
    * Prepare each feature display: Style, actions on event, popup information, etc.
    *

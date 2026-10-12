@@ -25,7 +25,7 @@ export const MAP_CONFIG = {
   TRAJECTORY_LAYER_COLOR: '#007bff',
   TRAJECTORY_LAYER_OPACITY: 1,
   TRAJECTORY_LAYER_WEIGHT: 2,
-  TRAJECTORY_DASH_ARRAY: '5 5'
+  TRAJECTORY_DASH_ARRAY: '5 5',
 };
 
 export const INDIVIDUALS_DEFAULT_SORT = { prop: 'last_observation_date', dir: 'desc' };
@@ -42,7 +42,6 @@ export const INDIVIDUALS_FORM_CONSTRAINTS = {
     help: 'PatternText3',
   },
 };
-
 
 export const DEPLOYMENTS_FORM_CONSTRAINTS = {
   marking_code: {

@@ -49,6 +49,7 @@ def _device_available_expression():
     )
     return db.or_(~has_deployment, last_removal_date.isnot(None))
 
+
 def _parse_device_filters(args):
     return {
         "cd_nom": args.get("cd_nom", type=int),
@@ -87,6 +88,7 @@ _DEVICE_VIRTUAL_SORT_COLS = {
     ),
 }
 
+
 def _apply_filters(query, filters):
     if filters["device_type"] is not None:
         query = query.where(TrackingDevices.id_nomenclature_device_type == filters["device_type"])
@@ -111,6 +113,7 @@ def _apply_filters(query, filters):
         )
     return query
 
+
 def _build_devices_query(scope, filters, *, prop="meta_create_date", dir="desc", eager_load=True):
     sort_col = _DEVICE_VIRTUAL_SORT_COLS.get(prop)
     if sort_col is None:
@@ -127,7 +130,7 @@ def _build_devices_query(scope, filters, *, prop="meta_create_date", dir="desc",
             joinedload(TrackingDevices.deployments).joinedload(IndividualDeployments.individual),
         )
 
-    query = _apply_filters(query,filters)
+    query = _apply_filters(query, filters)
 
     # Requested sort, then id_tracking_device desc as a mandatory tie-breaker
     # (same convention as occtax.repositories) for stable pagination when
@@ -138,6 +141,7 @@ def _build_devices_query(scope, filters, *, prop="meta_create_date", dir="desc",
     )
 
     return TrackingDevices.filter_by_scope(query, scope)
+
 
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
 @login_required

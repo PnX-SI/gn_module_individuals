@@ -9,14 +9,6 @@
       ($currentCdNomenclature)="toogleTrakingDevice($event)"
     ></pnx-nomenclature>
 
-    <!-- NOMENCLATURE : id_nomenclature_deployment_location -->
-    <pnx-nomenclature
-      class="form-group"
-      [label]="'Individuals.Deployments.Fields.deployment_location_name' | translate"
-      [parentFormControl]="$any(form.get('id_nomenclature_deployment_location'))"
-      [codeNomenclatureType]="'LOC_DISPO_SUIVI'"
-    ></pnx-nomenclature>
-
     <!-- AUTOCOMPLETE : id_tracking_device -->
     <pnx-autocomplete
       [apiEndPoint]="devicesApiEndPoint + '?id_nomenclature_device_type=' + currentDeviceType"
@@ -48,6 +40,14 @@
         {{ 'Individuals.Errors.' + [formConstraints['marking_code'].help] | translate }}
       </small>
     </div>
+
+    <!-- NOMENCLATURE : id_nomenclature_deployment_location -->
+    <pnx-nomenclature
+      class="form-group"
+      [label]="'Individuals.Deployments.Fields.deployment_location_name' | translate"
+      [parentFormControl]="$any(form.get('id_nomenclature_deployment_location'))"
+      [codeNomenclatureType]="'LOC_DISPO_SUIVI'"
+    ></pnx-nomenclature>
 
     <!-- INPUT DATE : install_date -->
     <div class="form-group">

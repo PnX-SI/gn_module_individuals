@@ -35,7 +35,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     filter((data): data is ItemCollection<Observation> => data !== null)
   );
   private _destroy$ = new Subject<void>();
-  public nbRowsToDisplay = 
+  public nbRowsToDisplay =
     this._config.INDIVIDUALS?.OBSERVATIONS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
   public sorts: Array<Sort> = [OBSERVATIONS_DEFAULT_SORT];
   private _APIPaginationParams: APIPaginationParams = {
@@ -110,8 +110,8 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    */
   onBbox($event: string): void {
     this._APIFiltersParams = {
-      bbox: $event
-    }
+      bbox: $event,
+    };
     this._loadData();
   }
 
@@ -169,7 +169,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     }
   }
 
-    /**
+  /**
    * Export the observations list in the given format, with the filters and
    * sort currently applied to the list/map (not the pagination: the export
    * always covers the whole filtered list).

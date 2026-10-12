@@ -47,8 +47,8 @@ export class ObservationsFiltersComponent implements OnInit, OnDestroy {
       cd_nom: [null, null],
       individual_name: [null, [Validators.pattern(this.formConstraints.individual_name.pattern)]],
       id_dataset: [null, null],
-      date_min: [null,null],
-      date_max: [null,null]
+      date_min: [null, null],
+      date_max: [null, null],
     });
 
     // Call API on change event

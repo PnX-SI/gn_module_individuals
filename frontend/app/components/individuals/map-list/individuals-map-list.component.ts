@@ -138,9 +138,9 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @memberof IndividualsMapListComponent
    */
   onBbox($event: string): void {
-    // this._APIFiltersParams = {
-    //   bbox: $event
-    // }
+    this._APIFiltersParams = {
+      bbox: $event
+    }
     this._loadData();
   }
 

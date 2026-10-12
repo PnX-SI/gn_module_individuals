@@ -106,7 +106,7 @@
                 "id_tracking_device" : "Identifiant",
                 "id_nomenclature_device_type" : "Type de dispositif",
                 "provider_name" : "Fournisseur",
-                "provider_device_id" : "ID chez le fournisseur",
+                "provider_device_id" : "Code",
                 "id_referer" : "Référent",
                 "comment" : "Commentaire",
                 "meta_create_date" : "Date de création",

@@ -72,7 +72,7 @@ class ObservationsSchema(Schema):
             "nom_vern_or_lb_nom",
             "date_min",
             "observers",
-            "dataset_name"
+            "dataset_name",
         ],
     )
     NB_MAX_OBS = fields.Integer(load_default=50000)

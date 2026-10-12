@@ -209,8 +209,7 @@ export class IndividualsInfoComponent implements OnInit {
       if (this._map) {
         this._trajectoryLayer = this._createTrajectoryLayer();
         this._trajectoryLayer.addTo(this._map);
-      }
-      else {
+      } else {
         this.noGeometry = true;
       }
 
@@ -516,7 +515,7 @@ export class IndividualsInfoComponent implements OnInit {
     };
 
     let firstLayerUnselected = {
-      fillColor: 
+      fillColor:
         this._config.INDIVIDUALS.INDIVIDUALS.FIRST_LAYER_COLOR ?? MAP_CONFIG.FIRST_LAYER_COLOR,
       color:
         this._config.INDIVIDUALS.GLOBAL.UNSELECTED_LAYER_COLOR ?? MAP_CONFIG.UNSELECTED_LAYER_COLOR,
@@ -525,7 +524,13 @@ export class IndividualsInfoComponent implements OnInit {
       weight: MAP_CONFIG.FIRST_LAYER_WEIGHT,
     };
 
-    (layer as any).setStyle(selected ? layerSelected : ( layerRank && layerRank == 1 ? firstLayerUnselected : layerUnselected));
+    (layer as any).setStyle(
+      selected
+        ? layerSelected
+        : layerRank && layerRank == 1
+          ? firstLayerUnselected
+          : layerUnselected
+    );
   }
 
   /**

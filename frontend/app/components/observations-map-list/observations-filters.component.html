@@ -16,7 +16,7 @@
     >
       {{ 'Individuals.Errors.' + [formConstraints['individual_name'].help] | translate }}
     </small>
-  </div>  
+  </div>
 
   <!-- TAXONOMY : cd_nom -->
   <pnx-taxonomy
@@ -49,13 +49,13 @@
     />
   </div>
 
-    <!-- DATASETS : id_dataset-->
+  <!-- DATASETS : id_dataset-->
   <pnx-datasets
     [ngClass]="'form-group'"
     [label]="'Individuals.Observations.Fields.dataset_name' | translate"
     [parentFormControl]="$any(filtersForm.get('id_dataset'))"
   ></pnx-datasets>
-    
+
   <button
     mat-mini-fab
     [matTooltip]="'Individuals.Actions.Reset' | translate"

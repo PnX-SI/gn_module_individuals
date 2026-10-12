@@ -35,7 +35,7 @@ import { IndividualsFormComponent } from './components/individuals/form/individu
 
 import { ObservationsService } from './services/observations.service';
 import { ObservationsMapListComponent } from './components/observations-map-list/observations-map-list.component';
-import { ObservationsFiltersComponent} from './components/observations-map-list/observations-filters.component';
+import { ObservationsFiltersComponent } from './components/observations-map-list/observations-filters.component';
 
 import { DevicesService } from './services/devices.service';
 import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';

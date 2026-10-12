@@ -24,7 +24,6 @@ import { DeploymentsService } from '../../services/deployments.service';
 import { MODAL_BODY_DATA } from '../modal/modal.component';
 import { Deployment } from '../../models/deployments.models';
 
-
 @Component({
   selector: 'gn-individuals-deployments-form',
   templateUrl: 'deployments-form.component.html',
@@ -120,14 +119,12 @@ export class DeploymentsFormComponent implements OnInit {
   }
 
   devicesFormatter(item: Device) {
-
     return item.device_label;
   }
 
   toogleTrakingDevice($event: string) {
     if ($event) {
-      this._dataFormService.getNomenclature('TYPE_DISPO_SUIVI')
-      .subscribe((nomenclature)=> {
+      this._dataFormService.getNomenclature('TYPE_DISPO_SUIVI').subscribe((nomenclature) => {
         this.currentDeviceType = nomenclature.values.find(
           (value: any) => value.cd_nomenclature === $event
         )?.id_nomenclature;
