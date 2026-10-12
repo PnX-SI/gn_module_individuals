@@ -36,26 +36,25 @@ def upgrade():
         FROM (
             VALUES
                 ('GPS', 'Ornitela', '182243', 4, 'Test balise GPS', 4),
+                ('GPS', 'Lotek', '18256-9P', 4, 'Test balise GPS/Lotek', 5),
+                ('GPS', 'Lotek', '182PO0256ARG', 3, 'Test balise GPS/GSM', 4),
+                ('GPS', 'Lotek', '121256-AZ', 4, 'Test balise GPS/Lotek', 5),
+                ('GPS', 'Ornitela', '182248', 4, 'Test balise GPS', 4),
+                ('GPS', 'Lotek', '182A256ATXG', 3, 'Test balise GPS/GSM', 4),
                 ('GSM', 'GSM Provider', '182A289POw', 4, 'Test balise GSM', 6),
+                ('GSM', 'GSM Provider', '18256-19Z', 3, 'Test balise GSM/Lotek', 6),
+                ('GSM', 'GSM Provider', '182A87ARG', 6, 'Test balise GSM/Ornitela', 4),
+                ('GSM', 'GSM Provider', '182A256POX', 4, 'Test balise GSM', 6),
+                ('GSM', 'GSM Provider', '18256-9G', 3, 'Test balise GSM/Lotek', 6),
+                ('GSM', 'GSM Provider', '182A9P6ARP-6', 6, 'Test balise GSM/Ornitela', 4),
                 ('VHF', 'Lotek', '182A25POX5', 6, 'Test balise VHF/UHF', 3),
                 ('VHF', 'Ornitela', '210709', 6, 'Test balise VHF', 5),
-                ('GPS', 'GSM Provider', '182PO0256ARG', 3, 'Test balise GPS/GSM', 4),
-                ('GSM', 'Lotek', '18256-19Z', 3, 'Test balise GSM/Lotek', 6),
                 ('VHF', 'Ornitela', '210719', 4, 'Test balise VHF/Ornitela', 3),
-                ('GPS', 'Lotek', '121256-AZ', 4, 'Test balise GPS/Lotek', 5),
-                ('GSM', 'Ornitela', '182A87ARG', 6, 'Test balise GSM/Ornitela', 4),
-                ('VHF', 'GSM Provider', '1887Y56ZA8', 3, 'Test balise VHF/GSM', 6),
-                ('GPS', 'Ornitela', '182248', 4, 'Test balise GPS', 4),
-                ('GSM', 'GSM Provider', '182A256POX', 4, 'Test balise GSM', 6),
+                ('VHF', 'Lotek', '1887Y56ZA8', 3, 'Test balise VHF/GSM', 6),
                 ('VHF', 'Lotek', '182A256ARG', 6, 'Test balise VHF/UHF', 3),
-                ('VHF', 'Ornitela', '210710', 6, 'Test balise VHF', 5),
-                ('GPS', 'GSM Provider', '182A256ATXG', 3, 'Test balise GPS/GSM', 4),
-                ('GSM', 'Lotek', '18256-9G', 3, 'Test balise GSM/Lotek', 6),
-                ('VHF', 'Ornitela', '210721', 4, 'Test balise VHF/Ornitela', 3),
-                ('GPS', 'Lotek', '18256-9P', 4, 'Test balise GPS/Lotek', 5),
-                ('GSM', 'Ornitela', '182A9P6ARP-6', 6, 'Test balise GSM/Ornitela', 4),
-                ('VHF', 'GSM Provider', '182A256POM', 3, 'Test balise VHF/GSM', 6)
-
+                ('VHF', 'Ornitela', '210710', 6, 'Test balise VHF', 5),     
+                ('VHF', 'Ornitela', '210721', 4, 'Test balise VHF/Ornitela', 3),     
+                ('VHF', 'Garmin', '182A256POM', 3, 'Test balise VHF/GSM', 6)
         ) AS v(mnemonique, provider_name, provider_device_id, id_referer, comment, id_digitiser)
         JOIN ref_nomenclatures.t_nomenclatures n
             ON n.mnemonique = v.mnemonique;
