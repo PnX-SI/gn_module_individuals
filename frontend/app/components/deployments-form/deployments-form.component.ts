@@ -12,6 +12,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CommonService } from '@geonature_common/service/common.service';
 import { ModuleService } from '@geonature/services/module.service';
 import { ConfigService } from '@geonature/services/config.service';
+import { DataFormService } from '@geonature/GN2CommonModule/form/data-form.service';
 
 import { ErrorHandlerService } from '../../services/errors-handler.service';
 
@@ -23,6 +24,7 @@ import { DeploymentsService } from '../../services/deployments.service';
 import { MODAL_BODY_DATA } from '../modal/modal.component';
 import { Deployment } from '../../models/deployments.models';
 
+
 @Component({
   selector: 'gn-individuals-deployments-form',
   templateUrl: 'deployments-form.component.html',
@@ -33,7 +35,7 @@ export class DeploymentsFormComponent implements OnInit {
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = DEPLOYMENTS_FORM_CONSTRAINTS;
   public devicesApiEndPoint: string = '';
-  public showDevice: boolean = true;
+  public currentDeviceType!: number;
 
   private dateRangeValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
     const installDate = control.get('install_date')?.value;
@@ -60,6 +62,7 @@ export class DeploymentsFormComponent implements OnInit {
     private _deploymentsService: DeploymentsService,
     private _errorHandler: ErrorHandlerService,
     private _activeModal: NgbActiveModal,
+    private _dataFormService: DataFormService,
     // Tells Angular to inject the value
     // associated with the MODAL_BODY_DATA de the datatable property
     @Inject(MODAL_BODY_DATA) public datatable: Deployment
@@ -117,18 +120,18 @@ export class DeploymentsFormComponent implements OnInit {
   }
 
   devicesFormatter(item: Device) {
+
     return item.device_label;
   }
 
   toogleTrakingDevice($event: string) {
-    const control = this.form.get('id_tracking_device');
-    if ($event === '4') {
-      control?.setValidators([Validators.required]);
-      this.showDevice = true;
-    } else {
-      control?.clearValidators();
-      control?.setValue(null);
-      this.showDevice = false;
+    if ($event) {
+      this._dataFormService.getNomenclature('TYPE_DISPO_SUIVI')
+      .subscribe((nomenclature)=> {
+        this.currentDeviceType = nomenclature.values.find(
+          (value: any) => value.cd_nomenclature === $event
+        )?.id_nomenclature;
+      });
     }
   }
 
