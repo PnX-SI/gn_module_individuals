@@ -192,8 +192,6 @@ export class IndividualsInfoComponent implements OnInit {
           ]);
         });
       });
-
-
   }
 
   ngAfterViewInit(): void {
@@ -453,8 +451,7 @@ export class IndividualsInfoComponent implements OnInit {
 
       if (layer.getBounds().isValid()) {
         this._ignoreNextMapMoveEnd = true;
-        this._map
-          .fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+        this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
       } else {
         this.noGeometry = true;
       }

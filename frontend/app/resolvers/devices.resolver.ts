@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { DevicesService } from '../services/devices.service';
 import { Device } from '../models/devices.models';
 
-
 @Injectable({
   providedIn: 'root',
 })

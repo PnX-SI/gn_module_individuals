@@ -164,10 +164,7 @@ export class IndividualsService {
    * @param {APIIndividualFiltersParams & APISortParams} params Currently applied filters and sort params
    * @memberof IndividualsService
    */
-  exportIndividuals(
-    format: string,
-    params: APIIndividualFiltersParams & APISortParams,
-  ): void {
+  exportIndividuals(format: string, params: APIIndividualFiltersParams & APISortParams): void {
     let httpParams = new HttpParams();
     Object.keys(params).forEach((key) => {
       if (params[key] != null && params[key] !== '') {

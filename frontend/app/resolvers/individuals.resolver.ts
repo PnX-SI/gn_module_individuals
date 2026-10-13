@@ -5,7 +5,6 @@ import { Observable } from 'rxjs';
 import { IndividualsService } from '../services/individuals.service';
 import { Individual } from '../models/individuals.models';
 
-
 @Injectable({
   providedIn: 'root',
 })

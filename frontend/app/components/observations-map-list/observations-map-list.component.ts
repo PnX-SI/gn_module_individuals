@@ -97,7 +97,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     this.APISortParams = {
       prop: $event.sorts[0].prop,
       dir: $event.sorts[0].dir,
-    }
+    };
 
     this._loadData();
   }
@@ -180,10 +180,10 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    * @memberof ObservationsMapListComponent
    */
   public onExport(format: string): void {
-      const APIParams = {
+    const APIParams = {
       ...this._APIFiltersParams,
-      ...this.APISortParams
-    }
+      ...this.APISortParams,
+    };
     this._observationsService.exportObservations(format, APIParams);
   }
 

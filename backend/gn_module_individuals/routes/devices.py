@@ -433,7 +433,7 @@ def export_devices(export_format, scope):
     :returns: a file attachment
     """
     entity_config = blueprint.config["DEVICES"]
-    check_export_format(export_format, ['csv'])
+    check_export_format(export_format, ["csv"])
 
     filters = _parse_device_filters(request.args)
     # eager_load=True (the default): TrackingDeviceListSchema reads the same

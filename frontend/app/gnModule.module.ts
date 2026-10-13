@@ -23,9 +23,7 @@ import { ModalComponent } from './components/modal/modal.component';
 import { FormComponent } from './components/form/form.component';
 
 import { IndividualsService } from './services/individuals.service';
-import {
-  IndividualResolver,
-} from './resolvers/individuals.resolver';
+import { IndividualResolver } from './resolvers/individuals.resolver';
 import { IndividualsMapListComponent } from './components/individuals/map-list/individuals-map-list.component';
 import { IndividualsFiltersComponent } from './components/individuals/map-list/individuals-filters.component';
 import { IndividualsInfoComponent } from './components/individuals/info/individuals-info.component';

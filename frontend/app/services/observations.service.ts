@@ -11,7 +11,12 @@ import {
   ObservationRankAndPage,
   APIObservationFiltersParams,
 } from '../models/observations.models';
-import { ItemCollection, APIPaginationParams, APISortParams, FeatureCollection } from '../models/common.models';
+import {
+  ItemCollection,
+  APIPaginationParams,
+  APISortParams,
+  FeatureCollection,
+} from '../models/common.models';
 import { OBSERVATIONS_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
@@ -97,10 +102,7 @@ export class ObservationsService {
    * @param {APIObservationFiltersParams & APISortParams} params Currently applied filters and sorts
    * @memberof IndividualsService
    */
-  exportObservations(
-    format: string,
-    params: APIObservationFiltersParams & APISortParams,
-  ): void {
+  exportObservations(format: string, params: APIObservationFiltersParams & APISortParams): void {
     let httpParams = new HttpParams();
     Object.keys(params).forEach((key) => {
       if (params[key] != null && params[key] !== '') {

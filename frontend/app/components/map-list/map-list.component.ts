@@ -201,7 +201,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     this._setLayerStyle(layer, id === this._selectedId);
 
     // Affect the layer to the pane, like that it will be
-    // displayed according to the pane properties 
+    // displayed according to the pane properties
     if (layer instanceof L.Path) {
       layer.options.pane = 'points';
     }
@@ -300,8 +300,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
         if (!this._hasZoomedToFeatures) {
           this._hasZoomedToFeatures = true;
           this._ignoreNextMapMoveEnd = true;
-          this._map
-            .fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+          this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
         }
       } else {
         this.noGeometry = true;

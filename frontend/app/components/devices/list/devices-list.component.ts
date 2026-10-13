@@ -101,7 +101,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     this.APISortParams = {
       prop: $event.sorts[0].prop,
       dir: $event.sorts[0].dir,
-    }
+    };
 
     this._loadData();
   }
@@ -187,10 +187,10 @@ export class DevicesListComponent implements OnInit, OnDestroy {
    * @memberof DevicesListComponent
    */
   onExport(format: string): void {
-      const APIParams = {
+    const APIParams = {
       ...this._APIFiltersParams,
-      ...this.APISortParams
-    }
+      ...this.APISortParams,
+    };
     this._devicesService.exportDevices(format, APIParams);
   }
 
@@ -222,9 +222,7 @@ export class DevicesListComponent implements OnInit, OnDestroy {
     };
     this._devicesService
       .getDevices(APIParams)
-      .pipe(
-        takeUntil(this._destroy$)
-      )
+      .pipe(takeUntil(this._destroy$))
       .subscribe((data) => {
         this._datatable$.next(data);
         this._setPermissions();
@@ -241,58 +239,56 @@ export class DevicesListComponent implements OnInit, OnDestroy {
    * @memberof DevicesListComponent
    */
   private _setPermissions(): void {
-    this.datatable$
-      .subscribe((datatable) => {
-        if (!datatable.items) {
-          return
-        }
-        this.allowedToDelete = {};
-        this.allowedToEdit = {};
+    this.datatable$.subscribe((datatable) => {
+      if (!datatable.items) {
+        return;
+      }
+      this.allowedToDelete = {};
+      this.allowedToEdit = {};
 
-        // Add access
-        const currentObject = this._module.currentModule.module_objects['DEVICES'];
-        this.allowedToAdd = {
-          id: 0,
-          access: currentObject?.cruved?.C == 0 ? false : true,
+      // Add access
+      const currentObject = this._module.currentModule.module_objects['DEVICES'];
+      this.allowedToAdd = {
+        id: 0,
+        access: currentObject?.cruved?.C == 0 ? false : true,
+        message:
+          currentObject?.cruved?.C == 0
+            ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
+            : null,
+      };
+
+      datatable.items.forEach((item: Device) => {
+        // Edit access
+        this.allowedToEdit[item.id_tracking_device] = {
+          id: item.id_tracking_device,
+          access: item.cruved?.U ?? false,
           message:
-            currentObject?.cruved?.C == 0
-              ? this._translate.instant('Individuals.ApiErrors.InsufficientPermissions')
-              : null,
+            (item.cruved?.U ?? false)
+              ? null
+              : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
         };
 
-        datatable.items.forEach((item: Device) => {
-          // Edit access
-          this.allowedToEdit[item.id_tracking_device] = {
-            id: item.id_tracking_device,
-            access: item.cruved?.U ?? false,
-            message:
-              (item.cruved?.U ?? false)
-                ? null
-                : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
-          };
+        // Delete access
+        this.allowedToDelete[item.id_tracking_device] = {
+          id: item.id_tracking_device,
+          access: item.cruved?.D ?? false,
+          message:
+            (item.cruved?.D ?? false)
+              ? null
+              : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
+        };
 
-          // Delete access
-          this.allowedToDelete[item.id_tracking_device] = {
-            id: item.id_tracking_device,
-            access: item.cruved?.D ?? false,
-            message:
-              (item.cruved?.D ?? false)
-                ? null
-                : this._translate.instant('Individuals.ApiErrors.InsufficientPermissions'),
-          };
-
-          // Not allowed to delete if deployments exists
-          if (
-            this.allowedToDelete[item.id_tracking_device].access &&
-            item.last_individual_equipped_name != null
-          ) {
-            this.allowedToDelete[item.id_tracking_device].access = false;
-            this.allowedToDelete[item.id_tracking_device].message = this._translate.instant(
-              'Individuals.ApiErrors.HasDeployment'
-            );
-          }
-        });
+        // Not allowed to delete if deployments exists
+        if (
+          this.allowedToDelete[item.id_tracking_device].access &&
+          item.last_individual_equipped_name != null
+        ) {
+          this.allowedToDelete[item.id_tracking_device].access = false;
+          this.allowedToDelete[item.id_tracking_device].message = this._translate.instant(
+            'Individuals.ApiErrors.HasDeployment'
+          );
+        }
       });
-    
+    });
   }
 }

@@ -12,7 +12,11 @@ import {
   UpdateDeviceDto,
   APIDeviceFiltersParams,
 } from '../models/devices.models';
-import { PaginatedItemCollection, APIPaginationParams, APISortParams } from '../models/common.models';
+import {
+  PaginatedItemCollection,
+  APIPaginationParams,
+  APISortParams,
+} from '../models/common.models';
 import { DEVICES_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
@@ -99,10 +103,7 @@ export class DevicesService {
    * @param {APIDeviceFiltersParams & APISortParams} params Currently applied filters and sorts
    * @memberof DevicesService
    */
-  exportDevices(
-    format: string,
-    params: APIDeviceFiltersParams & APISortParams
-  ): void {
+  exportDevices(format: string, params: APIDeviceFiltersParams & APISortParams): void {
     let httpParams = new HttpParams();
     Object.keys(params).forEach((key) => {
       if (params[key] != null && params[key] !== '') {

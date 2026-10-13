@@ -4,9 +4,7 @@ import { MainComponent } from './components/main/main.component';
 import { MapListComponent } from './components/map-list/map-list.component';
 
 import { IndividualsMapListComponent } from './components/individuals/map-list/individuals-map-list.component';
-import {
-  IndividualResolver,
-} from './resolvers/individuals.resolver';
+import { IndividualResolver } from './resolvers/individuals.resolver';
 import { IndividualsInfoComponent } from './components/individuals/info/individuals-info.component';
 import { IndividualsFormComponent } from './components/individuals/form/individuals-form.component';
 
