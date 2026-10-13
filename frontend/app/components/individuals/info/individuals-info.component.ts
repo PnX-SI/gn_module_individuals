@@ -180,7 +180,6 @@ export class IndividualsInfoComponent implements OnInit {
       .pipe(filter((mapData) => mapData.features.length > 0))
       .subscribe((mapData) => {
         this.mapData$ = of(mapData);
-        this._map = this._mapService.getMap();
 
         mapData.features.forEach((feature: any) => {
           this._mapLayersById.push({ id: feature.properties.id_synthese, layer: null });
@@ -194,14 +193,14 @@ export class IndividualsInfoComponent implements OnInit {
         });
       });
 
-    // if (!this._map) {
-    //   this.noGeometry = true;
-    // }
+
   }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
       // Usefull to wait the DOM build before calculation
+      this._map = this._mapService.getMap();
+      this.mapReady = true;
       this._resizeMap();
       this._bindMapMove();
 
@@ -454,9 +453,10 @@ export class IndividualsInfoComponent implements OnInit {
 
       if (layer.getBounds().isValid()) {
         this._ignoreNextMapMoveEnd = true;
-        this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+        this._map
+          .fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
       } else {
-        // this.noGeometry = true;
+        this.noGeometry = true;
       }
 
       // Create a pane for the layers : Ensure that the layers will be on the top
@@ -464,8 +464,6 @@ export class IndividualsInfoComponent implements OnInit {
         const pane = this._map.createPane('individuals');
         pane.style.zIndex = '500';
       }
-
-      this.mapReady = true;
     });
   }
 

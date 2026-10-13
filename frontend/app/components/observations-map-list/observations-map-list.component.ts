@@ -10,7 +10,7 @@ import {
   APIObservationFiltersParams,
 } from '../../models/observations.models';
 import {
-  Sort,
+  APISortParams,
   ItemCollection,
   APIPaginationParams,
   FeatureCollection,
@@ -37,22 +37,21 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   private _destroy$ = new Subject<void>();
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.OBSERVATIONS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
-  public sorts: Array<Sort> = [OBSERVATIONS_DEFAULT_SORT];
   private _APIPaginationParams: APIPaginationParams = {
     page: 1,
     per_page: this.nbRowsToDisplay,
-    prop: OBSERVATIONS_DEFAULT_SORT.prop,
-    dir: OBSERVATIONS_DEFAULT_SORT.dir,
   };
+  public APISortParams: APISortParams = OBSERVATIONS_DEFAULT_SORT;
   private _APIFiltersParams: APIObservationFiltersParams = {};
   private _selectedId: number | null = null;
   public allowedToAdd: AccessResult = { id: 0, access: false, message: null };
   public allowedToEdit: Record<number, AccessResult> = {};
   public allowedToDelete: Record<number, AccessResult> = {};
   public selectedRows: Observation[] = [];
-  public mapData$: Observable<FeatureCollection<Observation>> = new Observable<
-    FeatureCollection<Observation>
-  >();
+  private _mapData$ = new BehaviorSubject<FeatureCollection<Observation> | null>(null);
+  public mapData$: Observable<FeatureCollection<Observation>> = this._mapData$.pipe(
+    filter((data): data is FeatureCollection<Observation> => data !== null)
+  );
   public defaultFilters: APIObservationFiltersParams = {};
   public exportFormats: string[] = this._config.INDIVIDUALS?.OBSERVATIONS?.EXPORT_FORMAT ?? [];
   public datatableColumnsLink: DatatableColumnLink[] = [
@@ -78,15 +77,15 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
+    this._mapData$.complete();
   }
 
   onPage($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: Number($event.limit),
-      prop: this.sorts[0].prop,
-      dir: this.sorts[0].dir,
     };
+
     this._loadData();
   }
 
@@ -94,10 +93,11 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: this.nbRowsToDisplay,
+    };
+    this.APISortParams = {
       prop: $event.sorts[0].prop,
       dir: $event.sorts[0].dir,
-    };
-    this.sorts = $event.sorts;
+    }
 
     this._loadData();
   }
@@ -110,6 +110,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    */
   onBbox($event: string): void {
     this._APIFiltersParams = {
+      ...this._APIFiltersParams,
       bbox: $event,
     };
     this._loadData();
@@ -156,6 +157,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     this._selectedId = $event;
     const APIParams = {
       ...this._APIPaginationParams,
+      ...this.APISortParams,
       ...this._APIFiltersParams,
     };
 
@@ -178,10 +180,11 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    * @memberof ObservationsMapListComponent
    */
   public onExport(format: string): void {
-    this._observationsService.exportObservations(format, this._APIFiltersParams, {
-      prop: this._APIPaginationParams.prop,
-      dir: this._APIPaginationParams.dir,
-    });
+      const APIParams = {
+      ...this._APIFiltersParams,
+      ...this.APISortParams
+    }
+    this._observationsService.exportObservations(format, APIParams);
   }
 
   /**
@@ -193,6 +196,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   private _loadData(): void {
     const APIParams = {
       ...this._APIPaginationParams,
+      ...this.APISortParams,
       ...this._APIFiltersParams,
     };
     this._observationsService
@@ -219,6 +223,6 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     this._observationsService
       .getObservationsForMap(APIParams)
       .pipe(takeUntil(this._destroy$))
-      .subscribe((data) => (this.mapData$ = of(data)));
+      .subscribe((data) => this._mapData$.next(data));
   }
 }

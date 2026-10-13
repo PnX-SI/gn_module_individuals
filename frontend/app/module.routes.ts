@@ -5,8 +5,6 @@ import { MapListComponent } from './components/map-list/map-list.component';
 
 import { IndividualsMapListComponent } from './components/individuals/map-list/individuals-map-list.component';
 import {
-  IndividualsResolver,
-  IndividualsMapResolver,
   IndividualResolver,
 } from './resolvers/individuals.resolver';
 import { IndividualsInfoComponent } from './components/individuals/info/individuals-info.component';
@@ -17,7 +15,7 @@ import { ObservationsMapListComponent } from './components/observations-map-list
 import { DevicesListComponent } from './components/devices/list/devices-list.component';
 import { DevicesInfoComponent } from './components/devices/info/devices-info.component';
 import { DevicesFormComponent } from './components/devices/form/devices-form.component';
-import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+import { DeviceResolver } from './resolvers/devices.resolver';
 
 export const routes: Routes = [
   {
@@ -32,10 +30,6 @@ export const routes: Routes = [
       {
         path: 'individuals',
         component: IndividualsMapListComponent,
-        resolve: {
-          datatable: IndividualsResolver,
-          mapData: IndividualsMapResolver,
-        },
       },
       {
         path: 'individuals/info/:id_individual',
@@ -58,7 +52,6 @@ export const routes: Routes = [
       {
         path: 'devices',
         component: DevicesListComponent,
-        resolve: { datatable: DevicesResolver },
       },
       {
         path: 'devices/form',

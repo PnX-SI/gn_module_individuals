@@ -24,8 +24,6 @@ import { FormComponent } from './components/form/form.component';
 
 import { IndividualsService } from './services/individuals.service';
 import {
-  IndividualsMapResolver,
-  IndividualsResolver,
   IndividualResolver,
 } from './resolvers/individuals.resolver';
 import { IndividualsMapListComponent } from './components/individuals/map-list/individuals-map-list.component';
@@ -38,7 +36,7 @@ import { ObservationsMapListComponent } from './components/observations-map-list
 import { ObservationsFiltersComponent } from './components/observations-map-list/observations-filters.component';
 
 import { DevicesService } from './services/devices.service';
-import { DevicesResolver, DeviceResolver } from './resolvers/devices.resolver';
+import { DeviceResolver } from './resolvers/devices.resolver';
 import { DevicesListComponent } from './components/devices/list/devices-list.component';
 import { DevicesFiltersComponent } from './components/devices/list/devices-filters.component';
 import { DevicesFormComponent } from './components/devices/form/devices-form.component';
@@ -92,11 +90,8 @@ export function createTranslateLoader(http: HttpClient, config: cs) {
   providers: [
     ErrorHandlerService,
     DevicesService,
-    DevicesResolver,
     DeviceResolver,
     IndividualsService,
-    IndividualsResolver,
-    IndividualsMapResolver,
     IndividualResolver,
     DeploymentsService,
     ObservationsService,

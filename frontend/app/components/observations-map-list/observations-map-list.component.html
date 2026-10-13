@@ -17,7 +17,7 @@
     </span>
     <span>
       <strong>{{ 'Individuals.Observations.Fields.individual_name' | translate }} :</strong>
-      &lt;nom individu&gt;
+      {{ feature.properties.individual_name }}
       <br />
     </span>
     <span>
@@ -40,7 +40,7 @@
   [datatableColumnsLink]="datatableColumnsLink"
   [nbRowsToDisplay]="nbRowsToDisplay"
   [fieldsTranslation]="'Individuals.Observations.Fields'"
-  [sorts]="sorts"
+  [sorts]="[APISortParams]"
   [displayAddButton]="false"
   [displayInfoButtons]="true"
   [displaySummaryButtons]="false"

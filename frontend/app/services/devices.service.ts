@@ -12,7 +12,7 @@ import {
   UpdateDeviceDto,
   APIDeviceFiltersParams,
 } from '../models/devices.models';
-import { PaginatedItemCollection, APIPaginationParams } from '../models/common.models';
+import { PaginatedItemCollection, APIPaginationParams, APISortParams } from '../models/common.models';
 import { DEVICES_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
@@ -92,21 +92,18 @@ export class DevicesService {
   /**
    * Export the devices list in the given format, with the same filters and
    * sort currently applied to the list (no pagination: the backend exports
-   * the whole filtered list, bounded by its own NB_MAX_EXPORT). Triggers a
+   * the whole filtered and sorted list, bounded by its own NB_MAX_EXPORT). Triggers a
    * browser download once the file is received.
    *
    * @param {string} format One of config.INDIVIDUALS.DEVICES.EXPORT_FORMAT
-   * @param {APIDeviceFiltersParams} filters Currently applied filters
-   * @param {{ prop?: string; dir?: string }} [sort] Currently applied sort
+   * @param {APIDeviceFiltersParams & APISortParams} params Currently applied filters and sorts
    * @memberof DevicesService
    */
   exportDevices(
     format: string,
-    filters: APIDeviceFiltersParams,
-    sort?: { prop?: string; dir?: string }
+    params: APIDeviceFiltersParams & APISortParams
   ): void {
     let httpParams = new HttpParams();
-    const params: Record<string, string | number | undefined> = { ...filters, ...sort };
     Object.keys(params).forEach((key) => {
       if (params[key] != null && params[key] !== '') {
         httpParams = httpParams.set(key, String(params[key]));
