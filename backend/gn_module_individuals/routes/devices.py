@@ -427,13 +427,13 @@ def export_devices(export_format, scope):
     an overly long query string. Exports the whole filtered/sorted/scoped
     list (not a selection of checked rows), bounded by DEVICES.NB_MAX_EXPORT.
 
-    :param export_format: ``csv`` (see the DEVICES.EXPORT_FORMAT module config)
+    :param export_format: ``csv``
     :type export_format: str
 
     :returns: a file attachment
     """
     entity_config = blueprint.config["DEVICES"]
-    check_export_format(export_format, entity_config)
+    check_export_format(export_format, ['csv'])
 
     filters = _parse_device_filters(request.args)
     # eager_load=True (the default): TrackingDeviceListSchema reads the same

@@ -42,10 +42,6 @@ class IndividualsSchema(Schema):
     TAXON_DATASET = fields.List(fields.Nested(AdditionalFieldSchema), load_default=list)
     MAX_OBS_NB = fields.Integer(load_default=20)
     FIRST_LAYER_COLOR = fields.String(load_default="#fa9a00")
-    EXPORT_FORMAT = fields.List(
-        fields.String(),
-        load_default=["csv", "geojson", "gpkg"],
-    )
     NB_MAX_EXPORT = fields.Integer(load_default=50000)
     EXPORT_COLUMNS = fields.List(
         fields.String(),
@@ -76,10 +72,6 @@ class ObservationsSchema(Schema):
         ],
     )
     NB_MAX_OBS = fields.Integer(load_default=50000)
-    EXPORT_FORMAT = fields.List(
-        fields.String(),
-        load_default=["csv", "geojson", "gpkg"],
-    )
 
 
 class DevicesSchema(Schema):
@@ -98,10 +90,6 @@ class DevicesSchema(Schema):
     DEPLOYMENT_LIST_COLUMNS = fields.List(
         fields.String(),
         load_default=["individual_name", "install_date", "removal_date", "comment"],
-    )
-    EXPORT_FORMAT = fields.List(
-        fields.String(),
-        load_default=["csv"],
     )
     NB_MAX_EXPORT = fields.Integer(load_default=50000)
     EXPORT_COLUMNS = fields.List(

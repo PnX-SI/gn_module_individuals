@@ -94,7 +94,7 @@ class TestExportDevices:
         assert r.status_code == 403
 
     def test_unsupported_format_returns_400(self, users):
-        # geojson/gpkg are not in DevicesSchema.EXPORT_FORMAT (devices have no geometry).
+        # geojson/gpkg are not allowed
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(url_for("individuals.export_devices", export_format="geojson"))
         assert r.status_code == 400

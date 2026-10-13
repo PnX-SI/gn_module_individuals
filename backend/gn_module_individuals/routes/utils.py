@@ -87,8 +87,8 @@ def export_filename(prefix):
     return filemanager.removeDisallowedFilenameChars(f"{prefix}_{timestamp}")
 
 
-def check_export_format(export_format, entity_config):
-    if export_format not in entity_config["EXPORT_FORMAT"]:
+def check_export_format(export_format, format_list):
+    if export_format not in format_list:
         raise APIError(
             ApiErrorCode.INVALID_FILTER,
             f"Unsupported export format '{export_format}'.",
