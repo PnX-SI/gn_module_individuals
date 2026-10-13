@@ -168,7 +168,7 @@ def individuals_geometry(scope):
     :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
     :query string individual_name: filter on the individual name (partial match)
     :query string search: filter on individuals having a deployment on a device
-        whose label (``provider_name-provider_device_id``) matches (partial match)
+        whose label (``provider_name-code``) matches (partial match)
     :query int id_nomenclature_sex: filter on the sex nomenclature
 
     :returns: a GeoJSON FeatureCollection of individuals
@@ -489,7 +489,7 @@ def list_individuals(scope):
         based on the last known observation
     :query string individual_name: filter on the individual name (partial match)
     :query string search: filter on individuals having a deployment on a device
-        whose label (``provider_name-provider_device_id``) matches (partial match)
+        whose label (``provider_name-code``) matches (partial match)
     :query int id_nomenclature_sex: filter on the sex nomenclature
     :query string prop: column to sort on (default: last_observation_date)
     :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
@@ -539,7 +539,7 @@ def individual_page(id_individual, scope):
     :query string bbox: filter on ``west,south,east,north`` (EPSG:4326)
     :query string individual_name: filter on the individual name (partial match)
     :query string search: filter on individuals having a deployment on a device
-        whose label (``provider_name-provider_device_id``) matches (partial match)
+        whose label (``provider_name-code``) matches (partial match)
     :query int id_nomenclature_sex: filter on the sex nomenclature
     :query string prop: column to sort on (default: last_observation_date)
     :query string dir: sort direction, ``asc`` or ``desc`` (default: desc)
@@ -601,21 +601,20 @@ def export_individuals(export_format, scope):
     The route is in POST to accept the same filters as GET /individuals
     without an overly long query string.
 
-    Exports the whole filtered/sorted/scoped list (not a selection of checked
-    rows), bounded by INDIVIDUALS.NB_MAX_EXPORT. GeoJSON/GeoPackage use the
-    individual's last known observation position (gn_synthese.synthese, see
-    models/individuals.py): since that position is a Python attribute
-    assigned after the fact by _assign_last_observation() rather than a
-    mapped column, the list is fully materialized before being serialized.
+    Exports the whole filtered/sorted/scoped list bounded by INDIVIDUALS.NB_MAX_EXPORT.
+    GeoJSON/GeoPackage use the individual's last known observation position
+    (gn_synthese.synthese, see models/individuals.py): since that position
+    is a Python attribute assigned after the fact by _assign_last_observation()
+    rather than a mapped column, the list is fully materialized before being
+    serialized.
 
-    :param export_format: ``csv``, ``geojson`` or ``gpkg`` (see the
-        INDIVIDUALS.EXPORT_FORMAT module config)
+    :param export_format: ``csv``, ``geojson`` or ``gpkg``
     :type export_format: str
 
     :returns: a file attachment
     """
     entity_config = blueprint.config["INDIVIDUALS"]
-    check_export_format(export_format, entity_config)
+    check_export_format(export_format, ["csv", "geojson", "gpkg"])
 
     filters = _parse_filters(request.args)
     sort = parse_sort(request.args, "last_observation_date")

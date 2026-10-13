@@ -41,9 +41,12 @@
     # Pagination : Nb max of lines displayed per page (default 10)
     # DEFAULT_PAGE_SIZE=10
 
+    # Maximal number of observations in the API response
+    # NB_MAX_OBS=50000
+    
     # Columns to display in the observations list. 
     # Have to be those of the corresponding API response /synthese/for_web
-    # LIST_COLUMNS=["nom_vern_or_lb_nom", "date_min", "observers", "dataset_name"]
+    # LIST_COLUMNS=["individual_name","nom_vern_or_lb_nom", "date_min", "observers", "dataset_name"]
 
 # Tracking devices configuration
 [DEVICES]
@@ -52,7 +55,7 @@
 
     # Columns to display in the devices list. 
     # Have to be those of the corresponding API response /individuals/devices
-    # LIST_COLUMNS=["provider_name", "provider_device_id", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
+    # LIST_COLUMNS=["provider_name", "code", "nomenclature_device_type_name", "referer_name", "last_individual_equipped_name", "meta_create_date"]
 
     # Columns to display in the device detail page, in the section "Deployments" 
     # Have to be those of the corresponding API response /individuals/devices/:id

@@ -5,22 +5,13 @@
       class="form-group"
       [label]="'Individuals.Deployments.Fields.deployment_type_name' | translate"
       [parentFormControl]="$any(form.get('id_nomenclature_deployment_type'))"
-      [codeNomenclatureType]="'TYPE_MARQUAGE'"
+      [codeNomenclatureType]="'TYPE_DISPO_SUIVI'"
       ($currentCdNomenclature)="toogleTrakingDevice($event)"
-    ></pnx-nomenclature>
-
-    <!-- NOMENCLATURE : id_nomenclature_deployment_location -->
-    <pnx-nomenclature
-      class="form-group"
-      [label]="'Individuals.Deployments.Fields.deployment_location_name' | translate"
-      [parentFormControl]="$any(form.get('id_nomenclature_deployment_location'))"
-      [codeNomenclatureType]="'LOC_MARQUAGE'"
     ></pnx-nomenclature>
 
     <!-- AUTOCOMPLETE : id_tracking_device -->
     <pnx-autocomplete
-      *ngIf="showDevice"
-      [apiEndPoint]="devicesApiEndPoint"
+      [apiEndPoint]="devicesApiEndPoint + '?id_nomenclature_device_type=' + currentDeviceType"
       [queryParamSearch]="'search'"
       [parentFormControl]="$any(form.get('id_tracking_device'))"
       [formatter]="devicesFormatter"
@@ -49,6 +40,14 @@
         {{ 'Individuals.Errors.' + [formConstraints['marking_code'].help] | translate }}
       </small>
     </div>
+
+    <!-- NOMENCLATURE : id_nomenclature_deployment_location -->
+    <pnx-nomenclature
+      class="form-group"
+      [label]="'Individuals.Deployments.Fields.deployment_location_name' | translate"
+      [parentFormControl]="$any(form.get('id_nomenclature_deployment_location'))"
+      [codeNomenclatureType]="'LOC_DISPO_SUIVI'"
+    ></pnx-nomenclature>
 
     <!-- INPUT DATE : install_date -->
     <div class="form-group">

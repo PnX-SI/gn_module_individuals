@@ -50,6 +50,99 @@ def _device_available_expression():
     return db.or_(~has_deployment, last_removal_date.isnot(None))
 
 
+def _parse_device_filters(args):
+    return {
+        "cd_nom": args.get("cd_nom", type=int),
+        "device_type": args.get("id_nomenclature_device_type", type=int),
+        "provider_name": args.get("provider_name", type=str),
+        "search": args.get("search", type=str),
+        "id_referer": args.get("id_referer", type=int),
+        "available": parse_bool(args.get("available"), "available"),
+    }
+
+
+_DEVICE_VIRTUAL_SORT_COLS = {
+    "referer_name": (
+        db.select(func.concat(User.prenom_role, " ", User.nom_role))
+        .where(User.id_role == TrackingDevices.id_referer)
+        .correlate(TrackingDevices)
+        .scalar_subquery()
+    ),
+    "nomenclature_device_type_name": (
+        db.select(TNomenclatures.label_default)
+        .where(TNomenclatures.id_nomenclature == TrackingDevices.id_nomenclature_device_type)
+        .correlate(TrackingDevices)
+        .scalar_subquery()
+    ),
+    "last_individual_equipped_name": (
+        db.select(TIndividuals.individual_name)
+        .join(
+            IndividualDeployments,
+            IndividualDeployments.id_individual == TIndividuals.id_individual,
+        )
+        .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
+        .order_by(IndividualDeployments.install_date.desc())
+        .limit(1)
+        .correlate(TrackingDevices)
+        .scalar_subquery()
+    ),
+}
+
+
+def _apply_filters(query, filters):
+    if filters["device_type"] is not None:
+        query = query.where(TrackingDevices.id_nomenclature_device_type == filters["device_type"])
+    if filters["provider_name"]:
+        query = query.where(TrackingDevices.provider_name.ilike(f"%{filters['provider_name']}%"))
+    if filters["search"]:
+        query = query.where(TrackingDevices.device_label.ilike(f"%{filters['search']}%"))
+    if filters["id_referer"] is not None:
+        query = query.where(TrackingDevices.id_referer == filters["id_referer"])
+    if filters["available"] is not None:
+        available_expr = _device_available_expression()
+        query = query.where(available_expr if filters["available"] else ~available_expr)
+    if filters["cd_nom"] is not None:
+        query = query.where(
+            db.select(IndividualDeployments.id_deployment)
+            .join(TIndividuals, TIndividuals.id_individual == IndividualDeployments.id_individual)
+            .where(
+                IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device,
+                TIndividuals.cd_nom == filters["cd_nom"],
+            )
+            .exists()
+        )
+    return query
+
+
+def _build_devices_query(scope, filters, *, prop="meta_create_date", dir="desc", eager_load=True):
+    sort_col = _DEVICE_VIRTUAL_SORT_COLS.get(prop)
+    if sort_col is None:
+        sort_col = getattr(TrackingDevices, prop, None)
+    if sort_col is None:
+        sort_col = TrackingDevices.meta_create_date
+
+    query = db.select(TrackingDevices)
+    if eager_load:
+        query = query.options(
+            joinedload(TrackingDevices.nomenclature_device_type),
+            selectinload(TrackingDevices.digitiser),
+            selectinload(TrackingDevices.referer),
+            joinedload(TrackingDevices.deployments).joinedload(IndividualDeployments.individual),
+        )
+
+    query = _apply_filters(query, filters)
+
+    # Requested sort, then id_tracking_device desc as a mandatory tie-breaker
+    # (same convention as occtax.repositories) for stable pagination when
+    # the sort column has ties.
+    query = query.order_by(
+        sort_col.desc() if dir == "desc" else sort_col.asc(),
+        TrackingDevices.id_tracking_device.desc(),
+    )
+
+    return TrackingDevices.filter_by_scope(query, scope)
+
+
 @blueprint.route("/devices/<int(signed=True):id_tracking_device>", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope(
@@ -101,93 +194,6 @@ def device(id_tracking_device, scope):
     return schema.dump(device)
 
 
-def _parse_device_filters(args):
-    return {
-        "cd_nom": args.get("cd_nom", type=int),
-        "device_type": args.get("id_nomenclature_device_type", type=int),
-        "provider_name": args.get("provider_name", type=str),
-        "search": args.get("search", type=str),
-        "id_referer": args.get("id_referer", type=int),
-        "available": parse_bool(args.get("available"), "available"),
-    }
-
-
-_DEVICE_VIRTUAL_SORT_COLS = {
-    "referer_name": (
-        db.select(func.concat(User.prenom_role, " ", User.nom_role))
-        .where(User.id_role == TrackingDevices.id_referer)
-        .correlate(TrackingDevices)
-        .scalar_subquery()
-    ),
-    "nomenclature_device_type_name": (
-        db.select(TNomenclatures.label_default)
-        .where(TNomenclatures.id_nomenclature == TrackingDevices.id_nomenclature_device_type)
-        .correlate(TrackingDevices)
-        .scalar_subquery()
-    ),
-    "last_individual_equipped_name": (
-        db.select(TIndividuals.individual_name)
-        .join(
-            IndividualDeployments,
-            IndividualDeployments.id_individual == TIndividuals.id_individual,
-        )
-        .where(IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device)
-        .order_by(IndividualDeployments.install_date.desc())
-        .limit(1)
-        .correlate(TrackingDevices)
-        .scalar_subquery()
-    ),
-}
-
-
-def _build_devices_query(scope, filters, *, prop="meta_create_date", dir="desc", eager_load=True):
-    sort_col = _DEVICE_VIRTUAL_SORT_COLS.get(prop)
-    if sort_col is None:
-        sort_col = getattr(TrackingDevices, prop, None)
-    if sort_col is None:
-        sort_col = TrackingDevices.meta_create_date
-
-    query = db.select(TrackingDevices)
-    if eager_load:
-        query = query.options(
-            joinedload(TrackingDevices.nomenclature_device_type),
-            selectinload(TrackingDevices.digitiser),
-            selectinload(TrackingDevices.referer),
-            joinedload(TrackingDevices.deployments).joinedload(IndividualDeployments.individual),
-        )
-    # Requested sort, then id_tracking_device desc as a mandatory tie-breaker
-    # (same convention as occtax.repositories) for stable pagination when
-    # the sort column has ties.
-    query = query.order_by(
-        sort_col.desc() if dir == "desc" else sort_col.asc(),
-        TrackingDevices.id_tracking_device.desc(),
-    )
-
-    if filters["device_type"] is not None:
-        query = query.where(TrackingDevices.id_nomenclature_device_type == filters["device_type"])
-    if filters["provider_name"]:
-        query = query.where(TrackingDevices.provider_name.ilike(f"%{filters['provider_name']}%"))
-    if filters["search"]:
-        query = query.where(TrackingDevices.device_label.ilike(f"%{filters['search']}%"))
-    if filters["id_referer"] is not None:
-        query = query.where(TrackingDevices.id_referer == filters["id_referer"])
-    if filters["available"] is not None:
-        available_expr = _device_available_expression()
-        query = query.where(available_expr if filters["available"] else ~available_expr)
-    if filters["cd_nom"] is not None:
-        query = query.where(
-            db.select(IndividualDeployments.id_deployment)
-            .join(TIndividuals, TIndividuals.id_individual == IndividualDeployments.id_individual)
-            .where(
-                IndividualDeployments.id_tracking_device == TrackingDevices.id_tracking_device,
-                TIndividuals.cd_nom == filters["cd_nom"],
-            )
-            .exists()
-        )
-
-    return TrackingDevices.filter_by_scope(query, scope)
-
-
 @blueprint.route("/devices", methods=["GET"])
 @login_required
 @permissions.check_cruved_scope(
@@ -205,7 +211,7 @@ def list_devices(scope):
     :query int id_nomenclature_device_type: filter on the device type
     :query string provider_name: filter on the provider name (partial match)
     :query string search: filter on the device label (``provider_name-
-       provider_device_id``), partial match, for autocomplete
+       code``), partial match, for autocomplete
     :query int id_referer: filter on the referer role
     :query boolean available: filter on device availability
     :query int page: page number, requires per_page to enable pagination
@@ -421,13 +427,13 @@ def export_devices(export_format, scope):
     an overly long query string. Exports the whole filtered/sorted/scoped
     list (not a selection of checked rows), bounded by DEVICES.NB_MAX_EXPORT.
 
-    :param export_format: ``csv`` (see the DEVICES.EXPORT_FORMAT module config)
+    :param export_format: ``csv``
     :type export_format: str
 
     :returns: a file attachment
     """
     entity_config = blueprint.config["DEVICES"]
-    check_export_format(export_format, entity_config)
+    check_export_format(export_format, ["csv"])
 
     filters = _parse_device_filters(request.args)
     # eager_load=True (the default): TrackingDeviceListSchema reads the same

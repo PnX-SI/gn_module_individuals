@@ -8,6 +8,25 @@
       [codeNomenclatureType]="'TYPE_DISPO_SUIVI'"
     ></pnx-nomenclature>
 
+    <!-- INPUT TEXT : code -->
+    <div class="form-group w-50">
+      <label class="small">{{ 'Individuals.Devices.Fields.code' | translate }}</label>
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        [formControl]="$any(form.get('code'))"
+        [maxlength]="formConstraints['code'].maxLength"
+        [placeholder]="'Individuals.Devices.PlaceHolder.code' | translate"
+        [class.is-invalid]="form.get('code')?.invalid"
+      />
+      <small
+        class="text-danger d-block d-flex"
+        *ngIf="form.get('code')?.errors?.['pattern']"
+      >
+        {{ 'Individuals.Errors.' + [formConstraints['code'].help] | translate }}
+      </small>
+    </div>
+
     <!-- INPUT TEXT : provider_name -->
     <div class="form-group w-50">
       <label class="small">{{ 'Individuals.Devices.Fields.provider_name' | translate }}</label>
@@ -24,25 +43,6 @@
         *ngIf="form.get('provider_name')?.errors?.['pattern']"
       >
         {{ 'Individuals.Errors.' + [formConstraints['provider_name'].help] | translate }}
-      </small>
-    </div>
-
-    <!-- INPUT TEXT : provider_device_id -->
-    <div class="form-group w-50">
-      <label class="small">{{ 'Individuals.Devices.Fields.provider_device_id' | translate }}</label>
-      <input
-        type="text"
-        class="form-control form-control-sm"
-        [formControl]="$any(form.get('provider_device_id'))"
-        [maxlength]="formConstraints['provider_device_id'].maxLength"
-        [placeholder]="'Individuals.Devices.PlaceHolder.provider_device_id' | translate"
-        [class.is-invalid]="form.get('provider_device_id')?.invalid"
-      />
-      <small
-        class="text-danger d-block d-flex"
-        *ngIf="form.get('provider_device_id')?.errors?.['pattern']"
-      >
-        {{ 'Individuals.Errors.' + [formConstraints['provider_device_id'].help] | translate }}
       </small>
     </div>
 

@@ -32,15 +32,15 @@ def upgrade():
             "id_nomenclature_device_type",
             sa.Integer(),
             sa.ForeignKey("ref_nomenclatures.t_nomenclatures.id_nomenclature"),
-            nullable=True,
+            nullable=False,
+        ),
+        sa.Column(
+            "code",
+            sa.Text(),
+            nullable=False,
         ),
         sa.Column(
             "provider_name",
-            sa.Text(),
-            nullable=True,
-        ),
-        sa.Column(
-            "provider_device_id",
             sa.Text(),
             nullable=True,
         ),
@@ -59,12 +59,12 @@ def upgrade():
             "id_digitiser",
             sa.Integer(),
             sa.ForeignKey("utilisateurs.t_roles.id_role"),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_create_date",
             sa.DateTime(),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_update_date",
@@ -130,12 +130,12 @@ def upgrade():
             "id_digitiser",
             sa.Integer(),
             sa.ForeignKey("utilisateurs.t_roles.id_role"),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_create_date",
             sa.DateTime(),
-            nullable=True,
+            nullable=False,
         ),
         sa.Column(
             "meta_update_date",
@@ -182,13 +182,13 @@ def upgrade():
     op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT check_t_individual_deployments_deployment_type
-        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_type, 'TYPE_MARQUAGE'::character varying)) NOT VALID;
+        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_type, 'TYPE_DISPO_SUIVI'::character varying)) NOT VALID;
     """)
 
     op.execute(f"""
         ALTER TABLE ONLY {SCHEMA_NAME}.t_individual_deployments
         ADD CONSTRAINT check_t_individual_deployments_deployment_location
-        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_location, 'LOC_MARQUAGE'::character varying)) NOT VALID;
+        CHECK (ref_nomenclatures.check_nomenclature_type_by_mnemonique(id_nomenclature_deployment_location, 'LOC_DISPO_SUIVI'::character varying)) NOT VALID;
     """)
 
 

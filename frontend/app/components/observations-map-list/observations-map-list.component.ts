@@ -10,7 +10,7 @@ import {
   APIObservationFiltersParams,
 } from '../../models/observations.models';
 import {
-  Sort,
+  APISortParams,
   ItemCollection,
   APIPaginationParams,
   FeatureCollection,
@@ -18,7 +18,7 @@ import {
   DatatableColumnLink,
 } from '../../models/common.models';
 import { ObservationsService } from '../../services/observations.service';
-import { INDIVIDUALS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
+import { OBSERVATIONS_DEFAULT_SORT, DATATABLE_CONFIG } from '../../utils/constants.util';
 import { convertDateTimeToDateStr } from '../../utils/functions.util';
 
 @Component({
@@ -35,25 +35,25 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     filter((data): data is ItemCollection<Observation> => data !== null)
   );
   private _destroy$ = new Subject<void>();
-  // private _APIPaginationParams: APIPaginationParams = {
-  // page: 1,
-  // per_page: this.nbRowsToDisplay,
-  // prop: INDIVIDUALS_DEFAULT_SORT.prop,
-  // dir: INDIVIDUALS_DEFAULT_SORT.dir,
-  // };
-  private _APIFiltersParams: APIObservationFiltersParams = { active: 'true' };
-  private _selectedId: number | null = null;
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.OBSERVATIONS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
-  public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
+  private _APIPaginationParams: APIPaginationParams = {
+    page: 1,
+    per_page: this.nbRowsToDisplay,
+  };
+  public APISortParams: APISortParams = OBSERVATIONS_DEFAULT_SORT;
+  private _APIFiltersParams: APIObservationFiltersParams = {};
+  private _selectedId: number | null = null;
   public allowedToAdd: AccessResult = { id: 0, access: false, message: null };
   public allowedToEdit: Record<number, AccessResult> = {};
   public allowedToDelete: Record<number, AccessResult> = {};
   public selectedRows: Observation[] = [];
-  public mapData$: Observable<FeatureCollection<Observation>> = new Observable<
-    FeatureCollection<Observation>
-  >();
+  private _mapData$ = new BehaviorSubject<FeatureCollection<Observation> | null>(null);
+  public mapData$: Observable<FeatureCollection<Observation>> = this._mapData$.pipe(
+    filter((data): data is FeatureCollection<Observation> => data !== null)
+  );
   public defaultFilters: APIObservationFiltersParams = {};
+  public exportFormats: string[] = this._config.INDIVIDUALS?.OBSERVATIONS?.EXPORT_FORMAT ?? [];
   public datatableColumnsLink: DatatableColumnLink[] = [
     {
       column_name: 'dataset_name',
@@ -77,26 +77,27 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
+    this._mapData$.complete();
   }
 
-  // onPage($event: any): void {
-  //   this._APIPaginationParams = {
-  //     page: Number($event.offset ?? 0) + 1,
-  //     per_page: Number($event.limit),
-  //     prop: this.sorts[0].prop,
-  //     dir: this.sorts[0].dir,
-  //   };
-  //   this._loadData();
-  // }
+  onPage($event: any): void {
+    this._APIPaginationParams = {
+      page: Number($event.offset ?? 0) + 1,
+      per_page: Number($event.limit),
+    };
+
+    this._loadData();
+  }
 
   onSort($event: any): void {
-    // this._APIPaginationParams = {
-    //   page: Number($event.offset ?? 0) + 1,
-    //   per_page: this.nbRowsToDisplay,
-    //   prop: $event.sorts[0].prop,
-    //   dir: $event.sorts[0].dir,
-    // };
-    this.sorts = $event.sorts;
+    this._APIPaginationParams = {
+      page: Number($event.offset ?? 0) + 1,
+      per_page: this.nbRowsToDisplay,
+    };
+    this.APISortParams = {
+      prop: $event.sorts[0].prop,
+      dir: $event.sorts[0].dir,
+    };
 
     this._loadData();
   }
@@ -108,9 +109,10 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    * @memberof ObservationsMapListComponent
    */
   onBbox($event: string): void {
-    // this._APIFiltersParams = {
-    //   bbox: $event
-    // }
+    this._APIFiltersParams = {
+      ...this._APIFiltersParams,
+      bbox: $event,
+    };
     this._loadData();
   }
 
@@ -139,7 +141,7 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
       this._APIFiltersParams = {};
     } else {
       this._APIFiltersParams[$event.key] = $event.value;
-      // this._APIPaginationParams['page'] = 1;
+      this._APIPaginationParams['page'] = 1;
     }
     this._loadData();
   }
@@ -151,26 +153,50 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
    * @param {*} $event
    * @memberof ObservationsMapListComponent
    */
-  // public onIdPage($event: any): void {
-  //   this._selectedId = $event;
-  //   const APIParams = {
-  //     ...this._APIPaginationParams,
-  //     ...this._APIFiltersParams,
-  //   };
+  public onIdPage($event: any): void {
+    this._selectedId = $event;
+    const APIParams = {
+      ...this._APIPaginationParams,
+      ...this.APISortParams,
+      ...this._APIFiltersParams,
+    };
 
-  //   if ($event) {
-  //     const IdRankAndPage$ = this._individualsService.getIndividualRankAndPage($event, APIParams);
+    if ($event) {
+      const IdRankAndPage$ = this._observationsService.getObservationRankAndPage($event, APIParams);
 
-  //     IdRankAndPage$.subscribe((rankAndPage) => {
-  //       this._APIPaginationParams.page = rankAndPage.page;
-  //       this._loadData();
-  //     });
-  //   }
-  // }
+      IdRankAndPage$.subscribe((rankAndPage) => {
+        this._APIPaginationParams.page = rankAndPage.page;
+        this._loadData();
+      });
+    }
+  }
 
+  /**
+   * Export the observations list in the given format, with the filters and
+   * sort currently applied to the list/map (not the pagination: the export
+   * always covers the whole filtered list).
+   *
+   * @param {string} format
+   * @memberof ObservationsMapListComponent
+   */
+  public onExport(format: string): void {
+    const APIParams = {
+      ...this._APIFiltersParams,
+      ...this.APISortParams,
+    };
+    this._observationsService.exportObservations(format, APIParams);
+  }
+
+  /**
+   * API Call true ObservationsService to get/refresh and store list and map data
+   *
+   * @private
+   * @memberof ObservationsMapListComponent
+   */
   private _loadData(): void {
     const APIParams = {
-      // ...this._APIPaginationParams,
+      ...this._APIPaginationParams,
+      ...this.APISortParams,
       ...this._APIFiltersParams,
     };
     this._observationsService
@@ -185,11 +211,11 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (datatable) => {
-          this._datatable$.next(datatable); // Met à jour le BehaviorSubject
+          this._datatable$.next(datatable); // Update the BehaviorSubject
         },
         error: (err) => {
           console.error('Erreur lors du chargement des observations :', err);
-          // Optionnel : émettre une valeur par défaut ou null pour gérer l'erreur dans le template
+          // Optionnal : Emit a null value to manage the error in the template
           this._datatable$.next(null);
         },
       });
@@ -197,6 +223,6 @@ export class ObservationsMapListComponent implements OnInit, OnDestroy {
     this._observationsService
       .getObservationsForMap(APIParams)
       .pipe(takeUntil(this._destroy$))
-      .subscribe((data) => (this.mapData$ = of(data)));
+      .subscribe((data) => this._mapData$.next(data));
   }
 }

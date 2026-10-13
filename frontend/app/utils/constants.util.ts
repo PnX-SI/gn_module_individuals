@@ -11,35 +11,22 @@ export const DATATABLE_CONFIG = {
 
 export const MAP_CONFIG = {
   SELECTED_LAYER_COLOR: '#d7191c',
-  UNSELECTED_LAYER_COLOR: '#007bff',
-  FIRST_LAYER_COLOR: '#fa9a00',
   SELECTED_LAYER_OPACITY: 1,
+  SELECTED_LAYER_RADIUS: 7,
+  SELECTED_LAYER_WEIGHT: 2,
+  UNSELECTED_LAYER_COLOR: '#007bff',
   UNSELECTED_LAYER_OPACITY: 0.8,
-  SELECTED_LAYER_RADIUS: 6,
   UNSELECTED_LAYER_RADIUS: 5,
-  SELECTED_LAYER_WEIGHT: 3,
   UNSELECTED_LAYER_WEIGHT: 2,
+  FIRST_LAYER_COLOR: '#fa9a00',
+  FIRST_LAYER_OPACITY: 1,
+  FIRST_LAYER_RADIUS: 7,
+  FIRST_LAYER_WEIGHT: 2,
+  TRAJECTORY_LAYER_COLOR: '#007bff',
+  TRAJECTORY_LAYER_OPACITY: 1,
+  TRAJECTORY_LAYER_WEIGHT: 2,
+  TRAJECTORY_DASH_ARRAY: '5 5',
 };
-
-export const DEVICE_FORM_CONSTRAINTS = {
-  provider_name: {
-    maxLength: 50,
-    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
-    help: 'PatternText1', // Refer to i18n files
-  },
-  provider_device_id: {
-    maxLength: 50,
-    pattern: '^[a-zA-Z0-9_-]*$',
-    help: 'PatternText2',
-  },
-  comment: {
-    maxLength: 255,
-    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
-    help: 'PatternText3',
-  },
-};
-
-export const DEVICES_DEFAULT_SORT = { prop: 'meta_create_date', dir: 'desc' };
 
 export const INDIVIDUALS_DEFAULT_SORT = { prop: 'last_observation_date', dir: 'desc' };
 
@@ -68,3 +55,25 @@ export const DEPLOYMENTS_FORM_CONSTRAINTS = {
     help: 'PatternText3',
   },
 };
+
+export const OBSERVATIONS_DEFAULT_SORT = { prop: 'date_min', dir: 'asc' };
+
+export const DEVICE_FORM_CONSTRAINTS = {
+  provider_name: {
+    maxLength: 50,
+    pattern: '^[a-zA-ZÀ-ÖØ-öø-ÿ0-9 _-]*$',
+    help: 'PatternText1', // Refer to i18n files
+  },
+  code: {
+    maxLength: 50,
+    pattern: '^[a-zA-Z0-9_-]*$',
+    help: 'PatternText2',
+  },
+  comment: {
+    maxLength: 255,
+    pattern: '^[^<>]*$', // or /^[a-zA-Z0-9À-ÿ\s.,!?'"()_-]*$/ to test
+    help: 'PatternText3',
+  },
+};
+
+export const DEVICES_DEFAULT_SORT = { prop: 'meta_create_date', dir: 'desc' };

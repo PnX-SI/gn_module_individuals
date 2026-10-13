@@ -59,9 +59,9 @@ class DeploymentSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
         nomenclature = db.session.get(TNomenclatures, value)
         if nomenclature is None:
             raise ValidationError(f"The nomenclature {value} (deployment type) does not exist.")
-        if not is_nomenclature_of_type(nomenclature, "TYPE_MARQUAGE"):
+        if not is_nomenclature_of_type(nomenclature, "TYPE_DISPO_SUIVI"):
             raise ValidationError(
-                f"The nomenclature {value} is not of the expected type (TYPE_MARQUAGE)."
+                f"The nomenclature {value} is not of the expected type (TYPE_DISPO_SUIVI)."
             )
         return value
 
@@ -72,9 +72,9 @@ class DeploymentSchema(SmartRelationshipsMixin, ma.SQLAlchemyAutoSchema):
             raise ValidationError(
                 f"The nomenclature {value} (deployment location) does not exist."
             )
-        if not is_nomenclature_of_type(nomenclature, "LOC_MARQUAGE"):
+        if not is_nomenclature_of_type(nomenclature, "LOC_DISPO_SUIVI"):
             raise ValidationError(
-                f"The nomenclature {value} is not of the expected type (LOC_MARQUAGE)."
+                f"The nomenclature {value} is not of the expected type (LOC_DISPO_SUIVI)."
             )
         return value
 

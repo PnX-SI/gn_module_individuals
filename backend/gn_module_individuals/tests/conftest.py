@@ -36,10 +36,10 @@ def device_with_deployment(device, individual):
         id_tracking_device=device.id_tracking_device,
         id_individual=individual.id_individual,
         id_nomenclature_deployment_type=get_id_nomenclature(
-            nomenclature_type_mnemonique="TYPE_MARQUAGE", cd_nomenclature="4"
+            nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="5"
         ),
         id_nomenclature_deployment_location=get_id_nomenclature(
-            nomenclature_type_mnemonique="LOC_MARQUAGE", cd_nomenclature="3"
+            nomenclature_type_mnemonique="LOC_DISPO_SUIVI", cd_nomenclature="3"
         ),
         install_date=dt.datetime(2024, 1, 1),
     )

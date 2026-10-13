@@ -16,6 +16,7 @@ import {
 import {
   PaginatedItemCollection,
   APIPaginationParams,
+  APISortParams,
   FeatureCollection,
 } from '../models/common.models';
 import { DATATABLE_CONFIG, INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
@@ -36,6 +37,13 @@ export class IndividualsService {
     this._OBJECT_API = `${this._config.API_ENDPOINT}/${this._moduleService.currentModule.module_url}/individuals`;
   }
 
+  /**
+   * Return on observable with an items collection of individuals
+   *
+   * @param {(APIPaginationParams & APIIndividualFiltersParams)} params : pagination params, sort params and filter params
+   * @return {*}  {Observable<PaginatedItemCollection<Individual>>}
+   * @memberof IndividualsService
+   */
   getIndividuals(
     params: APIPaginationParams & APIIndividualFiltersParams
   ): Observable<PaginatedItemCollection<Individual>> {
@@ -90,12 +98,7 @@ export class IndividualsService {
         httpParams = httpParams.set(key, String(params[key]));
       }
     });
-    console.log(
-      'Parameters sent to API (Individual Rank and Page)',
-      params,
-      'for individual id',
-      id
-    );
+
     return this._http.get<IndividualRankAndPage>(`${this._OBJECT_API}/${id}/page`, {
       params: httpParams,
     });
@@ -154,21 +157,15 @@ export class IndividualsService {
   /**
    * Export the individuals list in the given format, with the same filters
    * and sort currently applied to the list/map (no pagination: the backend
-   * exports the whole filtered list, bounded by its own NB_MAX_EXPORT).
+   * exports the whole filtered ans sorted list, bounded by its own NB_MAX_EXPORT).
    * Triggers a browser download once the file is received.
    *
    * @param {string} format One of config.INDIVIDUALS.INDIVIDUALS.EXPORT_FORMAT
-   * @param {APIIndividualFiltersParams} filters Currently applied filters
-   * @param {{ prop?: string; dir?: string }} [sort] Currently applied sort
+   * @param {APIIndividualFiltersParams & APISortParams} params Currently applied filters and sort params
    * @memberof IndividualsService
    */
-  exportIndividuals(
-    format: string,
-    filters: APIIndividualFiltersParams,
-    sort?: { prop?: string; dir?: string }
-  ): void {
+  exportIndividuals(format: string, params: APIIndividualFiltersParams & APISortParams): void {
     let httpParams = new HttpParams();
-    const params: Record<string, string | number | undefined> = { ...filters, ...sort };
     Object.keys(params).forEach((key) => {
       if (params[key] != null && params[key] !== '') {
         httpParams = httpParams.set(key, String(params[key]));

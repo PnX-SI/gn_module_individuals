@@ -11,7 +11,7 @@
         "id_tracking_device": "ID",
         "id_nomenclature_device_type": "Device type",
         "provider_name": "Provider",
-        "provider_device_id": "Provider ID",
+        "code": "Code",
         "id_referer": "Referer",
         "comment": "Comment",
         "meta_create_date": "Creation date",
@@ -25,7 +25,7 @@
       },
       "PlaceHolder": {
         "provider_name": "Provider name",
-        "provider_device_id": "ID/serial number",
+        "code": "Code, number",
         "id_referer": "Referer",
         "comment": "Tell us more ...",
         "device_label": "Tracking device"

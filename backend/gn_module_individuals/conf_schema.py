@@ -42,10 +42,6 @@ class IndividualsSchema(Schema):
     TAXON_DATASET = fields.List(fields.Nested(AdditionalFieldSchema), load_default=list)
     MAX_OBS_NB = fields.Integer(load_default=20)
     FIRST_LAYER_COLOR = fields.String(load_default="#fa9a00")
-    EXPORT_FORMAT = fields.List(
-        fields.String(),
-        load_default=["csv", "geojson", "gpkg"],
-    )
     NB_MAX_EXPORT = fields.Integer(load_default=50000)
     EXPORT_COLUMNS = fields.List(
         fields.String(),
@@ -67,9 +63,14 @@ class ObservationsSchema(Schema):
     DEFAULT_PAGE_SIZE = fields.Integer(load_default=10)
     LIST_COLUMNS = fields.List(
         fields.String(),
-        load_default=["nom_vern_or_lb_nom", "date_min", "observers", "dataset_name"],
+        load_default=[
+            "individual_name",
+            "nom_vern_or_lb_nom",
+            "date_min",
+            "observers",
+            "dataset_name",
+        ],
     )
-    # Max number of observations returned on the map and by the unpaginated list
     NB_MAX_OBS = fields.Integer(load_default=50000)
 
 
@@ -79,7 +80,7 @@ class DevicesSchema(Schema):
         fields.String(),
         load_default=[
             "provider_name",
-            "provider_device_id",
+            "code",
             "nomenclature_device_type_name",
             "referer_name",
             "last_individual_equipped_name",
@@ -90,17 +91,13 @@ class DevicesSchema(Schema):
         fields.String(),
         load_default=["individual_name", "install_date", "removal_date", "comment"],
     )
-    EXPORT_FORMAT = fields.List(
-        fields.String(),
-        load_default=["csv"],
-    )
     NB_MAX_EXPORT = fields.Integer(load_default=50000)
     EXPORT_COLUMNS = fields.List(
         fields.String(),
         load_default=[
             "id_tracking_device",
             "provider_name",
-            "provider_device_id",
+            "code",
             "nomenclature_device_type_name",
             "referer_name",
             "last_individual_equipped_name",

@@ -16,7 +16,7 @@ import {
   APIIndividualFiltersParams,
 } from '../../../models/individuals.models';
 import {
-  Sort,
+  APISortParams,
   PaginatedItemCollection,
   APIPaginationParams,
   FeatureCollection,
@@ -43,24 +43,22 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   private _datatable!: PaginatedItemCollection<Individual>;
   public nbRowsToDisplay =
     this._config.INDIVIDUALS?.INDIVIDUALS?.DEFAULT_PAGE_SIZE ?? DATATABLE_CONFIG.PER_PAGE_OPTION;
-  public fieldsTranslation = 'Individuals.Individuals.Fields';
-  public sorts: Array<Sort> = [INDIVIDUALS_DEFAULT_SORT];
   public allowedToAdd: AccessResult = { id: 0, access: false, message: null };
   public allowedToEdit: Record<number, AccessResult> = {};
   public allowedToDelete: Record<number, AccessResult> = {};
   public selectedRows: Individual[] = [];
-  public mapData$: Observable<FeatureCollection<Individual>> = new Observable<
-    FeatureCollection<Individual>
-  >();
+  private _mapData$ = new BehaviorSubject<FeatureCollection<Individual> | null>(null);
+  public mapData$: Observable<FeatureCollection<Individual>> = this._mapData$.pipe(
+    filter((data): data is FeatureCollection<Individual> => data !== null)
+  );
   public defaultFilters: APIIndividualFiltersParams = {};
   public exportFormats: string[] = this._config.INDIVIDUALS?.INDIVIDUALS?.EXPORT_FORMAT ?? [];
   private _destroy$ = new Subject<void>();
   private _APIPaginationParams: APIPaginationParams = {
     page: 1,
     per_page: this.nbRowsToDisplay,
-    prop: INDIVIDUALS_DEFAULT_SORT.prop,
-    dir: INDIVIDUALS_DEFAULT_SORT.dir,
   };
+  public APISortParams: APISortParams = INDIVIDUALS_DEFAULT_SORT;
   private _APIFiltersParams: APIIndividualFiltersParams = { active: 'true' };
   private _selectedId: number | null = null;
 
@@ -77,15 +75,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Resolver : First initialisation of the table
-    this._activatedRoute.data
-      .pipe(takeUntil(this._destroy$))
-      .subscribe(({ datatable, mapData }) => {
-        this._datatable = datatable;
-        this._datatable$.next(datatable);
-        this.mapData$ = of(mapData);
-        this._setPermissions(datatable);
-      });
+    this._loadData();
 
     // To be sure to wait translations before setting permissions
     this._translate
@@ -99,7 +89,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
         'Individuals.ApiErrors.HasDeployment',
       ])
       .subscribe(() => {
-        this._setPermissions(this._datatable);
+        this._setPermissions();
       });
 
     this.defaultFilters = this._APIFiltersParams;
@@ -108,15 +98,15 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this._destroy$.next();
     this._destroy$.complete();
+    this._mapData$.complete();
   }
 
   onPage($event: any): void {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: Number($event.limit),
-      prop: this.sorts[0].prop,
-      dir: this.sorts[0].dir,
     };
+
     this._loadData();
   }
 
@@ -124,10 +114,11 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._APIPaginationParams = {
       page: Number($event.offset ?? 0) + 1,
       per_page: this.nbRowsToDisplay,
+    };
+    this.APISortParams = {
       prop: $event.sorts[0].prop,
       dir: $event.sorts[0].dir,
     };
-    this.sorts = $event.sorts;
 
     this._loadData();
   }
@@ -139,9 +130,10 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @memberof IndividualsMapListComponent
    */
   onBbox($event: string): void {
-    // this._APIFiltersParams = {
-    //   bbox: $event
-    // }
+    this._APIFiltersParams = {
+      ...this._APIFiltersParams,
+      bbox: $event,
+    };
     this._loadData();
   }
 
@@ -225,10 +217,11 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
    * @memberof IndividualsMapListComponent
    */
   public onExport(format: string): void {
-    this._individualsService.exportIndividuals(format, this._APIFiltersParams, {
-      prop: this._APIPaginationParams.prop,
-      dir: this._APIPaginationParams.dir,
-    });
+    const APIParams = {
+      ...this._APIFiltersParams,
+      ...this.APISortParams,
+    };
+    this._individualsService.exportIndividuals(format, APIParams);
   }
 
   private _onDelete(): void {
@@ -263,6 +256,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
     this._selectedId = $event;
     const APIParams = {
       ...this._APIPaginationParams,
+      ...this.APISortParams,
       ...this._APIFiltersParams,
     };
 
@@ -279,6 +273,7 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
   private _loadData(): void {
     const APIParams = {
       ...this._APIPaginationParams,
+      ...this.APISortParams,
       ...this._APIFiltersParams,
     };
     this._individualsService
@@ -291,25 +286,36 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
           } else {
             this.selectedRows = [];
           }
-          this._setPermissions(data);
         }),
         takeUntil(this._destroy$)
       )
-      .subscribe((data) => this._datatable$.next(data));
+      .subscribe((data) => {
+        this._datatable$.next(data);
+        this._setPermissions();
+      });
+
+    this._individualsService
+      .getIndividualsForMap(APIParams)
+      .pipe(takeUntil(this._destroy$))
+      .subscribe((data) => this._mapData$.next(data));
   }
 
   /**
-   * Set the allowToDelete, allowToEdit and allowToAdd variables considering the item cruved or object cruved
+   * Set the allowToDelete, allowToEdit and allowToAdd variables
+   * considering the item cruved or object cruved
    *
    * For each item id, if a deployment or observation exists
    * set the corresponding array entry to false, else to true
    *
    * @private
-   * @param {PaginatedItemCollection<Individual>} data
    * @memberof IndividualsMapListComponent
    */
-  private _setPermissions(datatable: PaginatedItemCollection<Individual>): void {
-    if (datatable.items) {
+  private _setPermissions(): void {
+    this.datatable$.subscribe((datatable) => {
+      if (!datatable.items) {
+        return;
+      }
+
       this.allowedToDelete = {};
       this.allowedToEdit = {};
 
@@ -365,6 +371,6 @@ export class IndividualsMapListComponent implements OnInit, OnDestroy {
           }
         }
       });
-    }
+    });
   }
 }

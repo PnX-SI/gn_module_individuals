@@ -7,13 +7,14 @@ export interface Column<T = Record<string, unknown>> {
   prop: keyof T | string;
   name: string;
 }
-export interface Sort {
-  prop: string;
-  dir: string;
+
+export interface APISortParams {
+  prop?: string;
+  dir?: string;
 }
 
 // Partial : Sort attributes not mandatory
-export interface APIPaginationParams extends Partial<Sort> {
+export interface APIPaginationParams {
   // A CORRIGER : Retirer les ? dès que possible
   page?: number;
   per_page?: number;

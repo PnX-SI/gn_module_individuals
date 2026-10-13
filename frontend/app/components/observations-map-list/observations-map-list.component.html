@@ -1,8 +1,8 @@
 <ng-template #filtersTemplate>
-  <gn-individuals-individuals-filters
+  <gn-individuals-observations-filters
     [defaultValues]="defaultFilters"
     (filters)="onFilters($event)"
-  ></gn-individuals-individuals-filters>
+  ></gn-individuals-observations-filters>
 </ng-template>
 
 <ng-template
@@ -17,7 +17,7 @@
     </span>
     <span>
       <strong>{{ 'Individuals.Observations.Fields.individual_name' | translate }} :</strong>
-      &lt;nom individu&gt;
+      {{ feature.properties.individual_name }}
       <br />
     </span>
     <span>
@@ -38,20 +38,23 @@
   [availableColumnsParams]="availableColumnsParams"
   [datatable$]="datatable$"
   [datatableColumnsLink]="datatableColumnsLink"
+  [nbRowsToDisplay]="nbRowsToDisplay"
   [fieldsTranslation]="'Individuals.Observations.Fields'"
-  [usePagination]="false"
-  [displayFilterButton]="false"
-  [displayExportButton]="false"
+  [sorts]="[APISortParams]"
   [displayAddButton]="false"
   [displayInfoButtons]="true"
   [displaySummaryButtons]="false"
   [displayEditButtons]="false"
   [displayDeleteButtons]="false"
-  [sorts]="sorts"
-  [mapData$]="mapData$"
-  [featurePopupTemplate]="featurePopupTemplate"
   [filtersTemplate]="filtersTemplate"
+  [featurePopupTemplate]="featurePopupTemplate"
+  [mapData$]="mapData$"
+  [noGeometryMessage]="'Individuals.Messages.NoGeometry' | translate"
+  [exportFormats]="exportFormats"
+  (pagination)="onPage($event)"
   (info)="onInfo($event)"
+  (idPage)="onIdPage($event)"
   (sort)="onSort($event)"
   (bbox)="onBbox($event)"
+  (export)="onExport($event)"
 ></gn-individuals-map-list>

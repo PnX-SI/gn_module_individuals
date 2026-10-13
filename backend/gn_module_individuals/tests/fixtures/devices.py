@@ -59,7 +59,7 @@ def devices(users):
     for (
         nomenclature,
         provider_name,
-        provider_device_id,
+        code,
         meta_create_date,
         meta_update_date,
         id_digitiser,
@@ -73,7 +73,7 @@ def devices(users):
             TrackingDevices(
                 id_nomenclature_device_type=id_nomenclature_device_type,
                 provider_name=provider_name,
-                provider_device_id=provider_device_id,
+                code=code,
                 meta_create_date=meta_create_date,
                 meta_update_date=meta_update_date,
                 id_digitiser=users[id_digitiser].id_role,

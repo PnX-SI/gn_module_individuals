@@ -21,7 +21,7 @@ def upgrade():
         INSERT INTO gn_individual.t_tracking_devices (
             id_nomenclature_device_type,
             provider_name,
-            provider_device_id,
+            code,
             id_referer,
             comment,
             id_digitiser
@@ -29,34 +29,33 @@ def upgrade():
         SELECT
             n.id_nomenclature,
             v.provider_name,
-            v.provider_device_id,
+            v.code,
             v.id_referer,
             v.comment,
             v.id_digitiser
         FROM (
             VALUES
                 ('GPS', 'Ornitela', '182243', 4, 'Test balise GPS', 4),
+                ('GPS', 'Lotek', '18256-9P', 4, 'Test balise GPS/Lotek', 5),
+                ('GPS', 'Lotek', '182PO0256ARG', 3, 'Test balise GPS/GSM', 4),
+                ('GPS', 'Lotek', '121256-AZ', 4, 'Test balise GPS/Lotek', 5),
+                ('GPS', 'Ornitela', '182248', 4, 'Test balise GPS', 4),
+                ('GPS', 'Lotek', '182A256ATXG', 3, 'Test balise GPS/GSM', 4),
                 ('GSM', 'GSM Provider', '182A289POw', 4, 'Test balise GSM', 6),
+                ('GSM', 'GSM Provider', '18256-19Z', 3, 'Test balise GSM/Lotek', 6),
+                ('GSM', 'GSM Provider', '182A87ARG', 6, 'Test balise GSM/Ornitela', 4),
+                ('GSM', 'GSM Provider', '182A256POX', 4, 'Test balise GSM', 6),
+                ('GSM', 'GSM Provider', '18256-9G', 3, 'Test balise GSM/Lotek', 6),
+                ('GSM', 'GSM Provider', '182A9P6ARP-6', 6, 'Test balise GSM/Ornitela', 4),
                 ('VHF', 'Lotek', '182A25POX5', 6, 'Test balise VHF/UHF', 3),
                 ('VHF', 'Ornitela', '210709', 6, 'Test balise VHF', 5),
-                ('GPS', 'GSM Provider', '182PO0256ARG', 3, 'Test balise GPS/GSM', 4),
-                ('GSM', 'Lotek', '18256-19Z', 3, 'Test balise GSM/Lotek', 6),
                 ('VHF', 'Ornitela', '210719', 4, 'Test balise VHF/Ornitela', 3),
-                ('GPS', 'Lotek', '121256-AZ', 4, 'Test balise GPS/Lotek', 5),
-                ('GSM', 'Ornitela', '182A87ARG', 6, 'Test balise GSM/Ornitela', 4),
-                ('VHF', 'GSM Provider', '1887Y56ZA8', 3, 'Test balise VHF/GSM', 6),
-                ('GPS', 'Ornitela', '182248', 4, 'Test balise GPS', 4),
-                ('GSM', 'GSM Provider', '182A256POX', 4, 'Test balise GSM', 6),
+                ('VHF', 'Lotek', '1887Y56ZA8', 3, 'Test balise VHF/GSM', 6),
                 ('VHF', 'Lotek', '182A256ARG', 6, 'Test balise VHF/UHF', 3),
-                ('VHF', 'Ornitela', '210710', 6, 'Test balise VHF', 5),
-                ('GPS', 'GSM Provider', '182A256ATXG', 3, 'Test balise GPS/GSM', 4),
-                ('GSM', 'Lotek', '18256-9G', 3, 'Test balise GSM/Lotek', 6),
-                ('VHF', 'Ornitela', '210721', 4, 'Test balise VHF/Ornitela', 3),
-                ('GPS', 'Lotek', '18256-9P', 4, 'Test balise GPS/Lotek', 5),
-                ('GSM', 'Ornitela', '182A9P6ARP-6', 6, 'Test balise GSM/Ornitela', 4),
-                ('VHF', 'GSM Provider', '182A256POM', 3, 'Test balise VHF/GSM', 6)
-
-        ) AS v(mnemonique, provider_name, provider_device_id, id_referer, comment, id_digitiser)
+                ('VHF', 'Ornitela', '210710', 6, 'Test balise VHF', 5),     
+                ('VHF', 'Ornitela', '210721', 4, 'Test balise VHF/Ornitela', 3),     
+                ('VHF', 'Garmin', '182A256POM', 3, 'Test balise VHF/GSM', 6)
+        ) AS v(mnemonique, provider_name, code, id_referer, comment, id_digitiser)
         JOIN ref_nomenclatures.t_nomenclatures n
             ON n.mnemonique = v.mnemonique;
     """))
@@ -97,20 +96,20 @@ def upgrade():
             FROM gn_monitoring.t_individuals
         ),
         devices AS (
-            SELECT id_tracking_device, provider_device_id
+            SELECT id_tracking_device, code
             FROM gn_individual.t_tracking_devices
         ),
         n_type AS (
             SELECT n.id_nomenclature
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'TYPE_MARQUAGE' AND n.mnemonique = 'DISPO_SUIVI'
+            WHERE t.mnemonique = 'TYPE_DISPO_SUIVI' AND n.mnemonique = 'GPS'
         ),
         n_loc AS (
             SELECT n.id_nomenclature
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'LOC_MARQUAGE' AND n.mnemonique = 'ENCOLURE'
+            WHERE t.mnemonique = 'LOC_DISPO_SUIVI' AND n.mnemonique = 'ENCOLURE'
         ),
         data AS (
             SELECT *
@@ -131,7 +130,7 @@ def upgrade():
                 ('Quechua', '182A256POM', NULL, '2024-02-20', NULL, 'Suivi classique', 3),
                 ('Kalinka', '210710', NULL, '2023-01-01', '2023-07-01', 'Retrait été', 4),
                 ('Pavot', '210721', NULL, '2024-03-01', NULL, 'Nouveau suivi', 4)
-            ) AS t(individual_name, provider_device_id, marking_code, install_date, removal_date, comment, id_digitiser)
+            ) AS t(individual_name, code, marking_code, install_date, removal_date, comment, id_digitiser)
         )
         SELECT
             i.id_individual,
@@ -145,7 +144,7 @@ def upgrade():
             d.id_digitiser
         FROM data d
         JOIN individuals i ON i.individual_name = d.individual_name
-        JOIN devices dev ON dev.provider_device_id = d.provider_device_id
+        JOIN devices dev ON dev.code = d.code
         CROSS JOIN n_type
         CROSS JOIN n_loc
     """))
@@ -166,13 +165,13 @@ def upgrade():
             SELECT n.id_nomenclature, n.mnemonique
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'TYPE_MARQUAGE'
+            WHERE t.mnemonique = 'TYPE_DISPO_SUIVI'
         ),
         n_loc AS (
             SELECT n.id_nomenclature, n.mnemonique
             FROM ref_nomenclatures.t_nomenclatures n
             JOIN ref_nomenclatures.bib_nomenclatures_types t ON t.id_type = n.id_type
-            WHERE t.mnemonique = 'LOC_MARQUAGE'
+            WHERE t.mnemonique = 'LOC_DISPO_SUIVI'
         ),
         data AS (
             SELECT * FROM (VALUES

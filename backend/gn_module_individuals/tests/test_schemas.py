@@ -161,7 +161,7 @@ class TestDeploymentSchema:
             DeploymentSchema().validate_nomenclature_deployment_type(None)
 
     def test_validate_nomenclature_deployment_type_accepts_valid_id(self, app):
-        valid_id = get_id_nomenclature("TYPE_MARQUAGE", "1")
+        valid_id = get_id_nomenclature("TYPE_DISPO_SUIVI", "5")
         result = DeploymentSchema().validate_nomenclature_deployment_type(valid_id)
         assert result == valid_id
 
@@ -176,7 +176,7 @@ class TestDeploymentSchema:
             DeploymentSchema().validate_nomenclature_deployment_location(None)
 
     def test_validate_nomenclature_deployment_location_accepts_valid_id(self, app):
-        valid_id = get_id_nomenclature("LOC_MARQUAGE", "1")
+        valid_id = get_id_nomenclature("LOC_DISPO_SUIVI", "5")
         result = DeploymentSchema().validate_nomenclature_deployment_location(valid_id)
         assert result == valid_id
 
@@ -366,8 +366,8 @@ class TestIndividualListSchema:
     def test_get_deployed_devices_excludes_marking_only_deployments(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
-            id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
+            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_DISPO_SUIVI", "5"),
+            id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "5"),
             marking_code="Vert",
             install_date=datetime(2024, 1, 1),
         )
@@ -387,8 +387,8 @@ class TestIndividualListSchema:
         dep = IndividualDeployments(
             id_tracking_device=devices[0].id_tracking_device,
             id_individual=individual.id_individual,
-            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "4"),
-            id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "3"),
+            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_DISPO_SUIVI", "6"),
+            id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "3"),
             install_date=datetime(2024, 1, 1),
         )
         with db.session.begin_nested():
@@ -410,8 +410,8 @@ class TestIndividualListSchema:
     def test_get_deployed_markings_returns_active_physical_markings(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
-            id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
+            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_DISPO_SUIVI", "5"),
+            id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "1"),
             marking_code="Vert",
             install_date=datetime(2024, 1, 1),
         )
@@ -427,8 +427,8 @@ class TestIndividualListSchema:
     def test_get_deployed_markings_excludes_removed_marking(self, app, individual):
         dep = IndividualDeployments(
             id_individual=individual.id_individual,
-            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_MARQUAGE", "1"),
-            id_nomenclature_deployment_location=get_id_nomenclature("LOC_MARQUAGE", "1"),
+            id_nomenclature_deployment_type=get_id_nomenclature("TYPE_DISPO_SUIVI", "5"),
+            id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "1"),
             marking_code="Vert",
             install_date=datetime(2024, 1, 1),
             removal_date=datetime(2024, 6, 1),

@@ -68,21 +68,22 @@ export class MapListComponent implements OnInit, AfterViewInit {
   @Input() allowedToAdd: AccessResult = { id: 0, access: false, message: null };
   @Input() summaryTemplate!: TemplateRef<any>;
   @Input() filtersTemplate!: TemplateRef<any>;
-  @Input() selectedRows: unknown[] = [];
   @Input() mapData$: Observable<FeatureCollection<unknown>> = new Observable<
     FeatureCollection<unknown>
   >();
   @Input() featurePopupTemplate!: TemplateRef<{ feature: Feature<unknown> }>;
   @Input() noGeometryMessage: string | null = null;
 
+  private _map!: L.Map;
   public mapReady: boolean = false;
   public noGeometry: boolean = false;
+  public selectedRows: unknown[] = [];
   private _selectedId: number | null = null;
   private _selectedLayer: L.Layer | null = null;
   private _mapLayersById: Record<number, L.Layer> = {};
-  // private _lastBbox: string | null = null;
   private _mapMoveHandler: (() => void) | null = null;
   private _ignoreNextMapMoveEnd = false;
+  private _hasZoomedToFeatures = false;
 
   constructor(
     private _mapService: MapService,
@@ -100,18 +101,29 @@ export class MapListComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
+    // Usefull to wait the DOM build before calculation
     setTimeout(() => {
-      this.contentHeight = calcContentHeight();
-      this._zoomOnFeatures();
-      this._bindMapMove();
+      this._map = this._mapService.getMap();
+
+      // Create a pane for the layers : Ensure that the layers will be on the top
+      if (!this._map.getPane('points')) {
+        const pane = this._map.createPane('points');
+        pane.style.zIndex = '650';
+      }
+
       this.mapReady = true;
+      this._resizeMap();
+      this._bindMapMove();
+
+      // Delay the zoom on features to ensure that the map is fully initialized
+      requestAnimationFrame(() => this._zoomOnFeatures());
     }, 0);
   }
 
   // Listen to window resize event to recalculate the content height and resize the map
   @HostListener('window:resize', ['$event'])
   onWindowResize($event: any): void {
-    this.contentHeight = calcContentHeight();
+    this._resizeMap();
   }
 
   onTableSelect($event: any): void {
@@ -119,8 +131,10 @@ export class MapListComponent implements OnInit, AfterViewInit {
     if (!selected) {
       return;
     }
+
     this.selectedRows = [selected];
     this._selectedId = selected[this.idFieldName];
+
     if (this._selectedId) {
       this._selectMapFeature(this._selectedId, true);
     }
@@ -155,6 +169,21 @@ export class MapListComponent implements OnInit, AfterViewInit {
   }
 
   /**
+   * Map resize
+   *
+   * @private
+   * @memberof MapListComponent
+   */
+  private _resizeMap(): void {
+    this.contentHeight = calcContentHeight();
+    requestAnimationFrame(() => {
+      // Get the map from the map service, if it exists, and ask
+      // Leaflet to recalculate its size without panning the map
+      this._map?.invalidateSize({ pan: false });
+    });
+  }
+
+  /**
    * Prepare each feature display: Style, actions on event, popup information, etc.
    *
    * @param {Feature<Individual>} feature
@@ -168,7 +197,14 @@ export class MapListComponent implements OnInit, AfterViewInit {
     // is guaranteed by the component contract to be a number.
     const id = (feature.properties as Record<string, unknown>)[this.idFieldName] as number;
     this._mapLayersById[id] = layer;
+
     this._setLayerStyle(layer, id === this._selectedId);
+
+    // Affect the layer to the pane, like that it will be
+    // displayed according to the pane properties
+    if (layer instanceof L.Path) {
+      layer.options.pane = 'points';
+    }
     layer.on('click', () => this.onMapFeatureClick(feature, layer));
 
     if (feature.properties) {
@@ -251,13 +287,23 @@ export class MapListComponent implements OnInit, AfterViewInit {
    */
   private _zoomOnFeatures(): void {
     this.mapData$.subscribe((mapData) => {
-      const layer = L.geoJSON(mapData);
+      if (!this._map) {
+        return;
+      }
 
-      if (layer.getBounds().isValid()) {
-        this._ignoreNextMapMoveEnd = true;
-        this._mapService
-          .getMap()
-          ?.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+      const layer = L.geoJSON(mapData);
+      const bounds = layer.getBounds();
+
+      if (bounds.isValid()) {
+        this.noGeometry = false;
+
+        if (!this._hasZoomedToFeatures) {
+          this._hasZoomedToFeatures = true;
+          this._ignoreNextMapMoveEnd = true;
+          this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+        }
+      } else {
+        this.noGeometry = true;
       }
     });
   }
@@ -270,8 +316,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
    * @memberof MapListComponent
    */
   private _bindMapMove(): void {
-    const map = this._mapService.getMap();
-    if (!map) {
+    if (!this._map) {
       return;
     }
     // Store the map move function in a property so we can remove it later if needed
@@ -289,7 +334,7 @@ export class MapListComponent implements OnInit, AfterViewInit {
     };
 
     // Install a listner on the moveend event
-    map.on('moveend', this._mapMoveHandler);
+    this._map.on('moveend', this._mapMoveHandler);
   }
 
   /**
@@ -383,30 +428,12 @@ export class MapListComponent implements OnInit, AfterViewInit {
    * @memberof MapListComponent
    */
   private _getMapBbox(): string | undefined {
-    const map = this._mapService.getMap();
-    if (!map) {
+    if (!this._map) {
       return undefined;
     }
-    const bounds = map.getBounds();
+    const bounds = this._map.getBounds();
     return [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()]
       .map((value) => value.toFixed(6))
       .join(',');
   }
-
-  /**
-   * Ask leaflet to recalculate the size of the map
-   *
-   * @private
-   * @memberof MapListComponent
-   */
-  // private _resizeMap(): void {
-  //   setTimeout(() => {
-  //     const map = this._mapService.getMap();
-  //     if (map) {
-  //       // Wait for the view to finish rendering, then force Leaflet to recalculate
-  //       // the map size in case the container dimensions have changed.
-  //       map.invalidateSize();
-  //     }
-  //   }, 10);
-  // }
 }
