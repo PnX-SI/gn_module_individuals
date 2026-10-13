@@ -118,6 +118,19 @@ class TestListObservations:
         items = self._get(date_min="2024-01-15", date_max="2024-02-28")["items"]
         assert _ids(items, observations) == [observations["ind2"].id_synthese]
 
+    def test_filter_bbox(self, users, observations):
+        set_logged_user(self.client, users["admin_user"])
+        # The fixture observations are all at (6.9, 45.4)
+        items = self._get(bbox="6.8,45.3,7.0,45.5")["items"]
+        assert len(_ids(items, observations)) == 3
+        assert _ids(self._get(bbox="-10,-10,-9,-9")["items"], observations) == []
+
+    def test_bad_bbox_returns_400(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        for bbox in ["not-a-bbox", "7.0,45.3,6.8,45.5"]:
+            r = self.client.get(url_for("individuals.list_observations", bbox=bbox))
+            assert r.status_code == 400
+
     def test_bad_date_returns_400(self, users):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.list_observations", date_min="01/02/2024"))
@@ -218,3 +231,15 @@ class TestObservationsGeometry:
         assert _ids([f["properties"] for f in features], observations) == [
             observations["ind2"].id_synthese
         ]
+
+    def test_filter_bbox(self, users, observations):
+        set_logged_user(self.client, users["admin_user"])
+        features = self._features(bbox="6.8,45.3,7.0,45.5")
+        assert len(_ids([f["properties"] for f in features], observations)) == 3
+        features = self._features(bbox="-10,-10,-9,-9")
+        assert _ids([f["properties"] for f in features], observations) == []
+
+    def test_bad_bbox_returns_400(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.observations_geometry", bbox="not-a-bbox"))
+        assert r.status_code == 400
