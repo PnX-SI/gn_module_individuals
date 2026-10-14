@@ -1,3 +1,5 @@
+import datetime as dt
+
 import pytest
 from flask import url_for
 
@@ -7,6 +9,7 @@ from geonature.utils.env import db
 
 from gn_module_individuals.schemas import DeploymentWriteSchema
 from gn_module_individuals.models import IndividualDeployments
+from gn_module_individuals.tests.fixtures.deployments import _make_deployment
 from gn_module_individuals.utils.errors import ApiErrorCode
 
 
@@ -400,3 +403,35 @@ class TestDeleteDeployment:
         set_logged_user(self.client, users["admin_user"])
         self.client.delete(url_for("individuals.delete_deployment", id_deployment=deployment_id))
         assert db.session.get(IndividualDeployments, deployment_id) is None
+
+
+# ===========================================================================
+# GET /deployments/marking_codes  (list_marking_codes)
+# ===========================================================================
+
+
+@pytest.fixture
+def autocomplete_deployments(individual, users):
+    for code in ["Zzbleu", " Zzbleu ", "zzbleues", "Anneau zzbleu", None]:
+        _make_deployment(
+            individual, users["admin_user"], dt.datetime(2024, 1, 1), marking_code=code
+        )
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestListMarkingCodes:
+
+    def test_unauthenticated_returns_401(self):
+        r = self.client.get(url_for("individuals.list_marking_codes"))
+        assert r.status_code == 401
+
+    def test_forbidden_without_rights(self, users):
+        set_logged_user(self.client, users["noright_user"])
+        r = self.client.get(url_for("individuals.list_marking_codes"))
+        assert r.status_code == 403
+
+    def test_returns_distinct_trimmed_values(self, users, autocomplete_deployments):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_marking_codes", search="zzbleu"))
+        assert r.status_code == 200
+        assert r.get_json() == ["Zzbleu", "zzbleues", "Anneau zzbleu"]

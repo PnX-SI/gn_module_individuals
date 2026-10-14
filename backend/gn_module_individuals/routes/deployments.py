@@ -13,6 +13,30 @@ from ..blueprint import blueprint
 from ..models import IndividualDeployments
 from ..schemas import DeploymentWriteSchema
 from ..utils.errors import APIError, ApiErrorCode
+from .utils import distinct_values
+
+
+@blueprint.route("/deployments/marking_codes", methods=["GET"])
+@login_required
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
+@json_resp
+def list_marking_codes(scope):
+    """
+    List the distinct marking codes already used, for autocomplete
+
+    .. :quickref: Deployments;
+
+    Not restricted by scope: the goal is to reuse existing spellings.
+
+    :query string search: filter on the marking code (partial match)
+    :query int limit: max number of values (default 20, max 100)
+
+    :returns: `list<string>`
+    :rtype: list
+    """
+    return distinct_values(IndividualDeployments.marking_code, request.args)
 
 
 @blueprint.route("/deployments", methods=["POST"])

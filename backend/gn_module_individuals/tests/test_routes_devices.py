@@ -4,7 +4,10 @@ import pytest
 from flask import url_for, g
 
 from pypnusershub.tests.utils import set_logged_user
+from geonature.tests.utils import get_id_nomenclature
+from geonature.utils.env import db
 
+from gn_module_individuals.models import TrackingDevices
 from gn_module_individuals.schemas import TrackingDeviceDetailSchema, TrackingDeviceWriteSchema
 from gn_module_individuals.utils.errors import ApiErrorCode
 
@@ -725,3 +728,69 @@ class TestDeleteDevice:
         assert "description" in payload
         assert payload.get("params", {}).get("id") == device_with_deployment.id_tracking_device
         assert payload.get("params", {}).get("nb") == 1
+
+
+# ===========================================================================
+# GET /devices/provider_names  (list_provider_names)
+# ===========================================================================
+
+
+@pytest.fixture
+def autocomplete_devices(users):
+    names = ["Zzprov Alpha", "  Zzprov Alpha ", "Zzprov alpha", "Prefix Zzprov", "", None]
+    id_type = get_id_nomenclature(
+        nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="1"
+    )
+    with db.session.begin_nested():
+        db.session.add_all(
+            [
+                TrackingDevices(
+                    provider_name=name,
+                    code=f"zzcode{i}",
+                    id_nomenclature_device_type=id_type,
+                    id_digitiser=users["admin_user"].id_role,
+                )
+                for i, name in enumerate(names)
+            ]
+        )
+        db.session.flush()
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestListProviderNames:
+
+    def test_unauthenticated_returns_401(self):
+        r = self.client.get(url_for("individuals.list_provider_names"))
+        assert r.status_code == 401
+
+    def test_forbidden_without_rights(self, users):
+        set_logged_user(self.client, users["noright_user"])
+        r = self.client.get(url_for("individuals.list_provider_names"))
+        assert r.status_code == 403
+
+    def test_returns_distinct_trimmed_values(self, users, autocomplete_devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", search="zzprov"))
+        assert r.status_code == 200
+        values = r.get_json()
+        # Case variants are kept so that the user sees them
+        assert sorted(values) == sorted(["Zzprov Alpha", "Zzprov alpha", "Prefix Zzprov"])
+        # Prefix matches come first
+        assert values[-1] == "Prefix Zzprov"
+
+    def test_empty_values_are_excluded(self, users, autocomplete_devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", limit=100))
+        assert "" not in r.get_json()
+        assert None not in r.get_json()
+
+    def test_limit(self, users, autocomplete_devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", search="zzprov", limit=1))
+        assert len(r.get_json()) == 1
+
+    def test_invalid_limit_returns_400(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", limit=0))
+        assert r.status_code == 400
+        assert r.get_json().get("name") == ApiErrorCode.INVALID_FILTER

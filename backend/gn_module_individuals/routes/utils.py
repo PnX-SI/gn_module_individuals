@@ -9,8 +9,13 @@ from fiona.crs import from_epsg
 from flask import current_app
 
 from geonature.utils import filemanager
+from geonature.utils.env import db
+from sqlalchemy import func
 
 from ..utils.errors import APIError, ApiErrorCode
+
+DISTINCT_VALUES_DEFAULT_LIMIT = 20
+DISTINCT_VALUES_MAX_LIMIT = 100
 
 
 def parse_bool(value, field_name):
@@ -80,6 +85,35 @@ def pagination_payload(paginated, items, sort):
         "prop": sort["prop"],
         "dir": sort["dir"],
     }
+
+
+def distinct_values(column, args):
+    """Distinct non-empty values of a text column, for autocomplete.
+
+    Values are trimmed before deduplication. Values starting with ``search``
+    come first, then alphabetical order.
+
+    :param column: text column to read the values from
+    :param args: request query args (``search``, ``limit``)
+    :return: list of strings
+    """
+    search = args.get("search", "", type=str).strip()
+    limit = args.get("limit", DISTINCT_VALUES_DEFAULT_LIMIT, type=int)
+    if limit < 1:
+        raise APIError(ApiErrorCode.INVALID_FILTER, "limit must be a positive integer", 400)
+    limit = min(limit, DISTINCT_VALUES_MAX_LIMIT)
+
+    value = func.trim(column)
+    values = db.select(value.label("value")).where(value != "").distinct()
+    if search:
+        values = values.where(value.ilike(f"%{search}%"))
+    values = values.subquery()
+
+    query = db.select(values.c.value)
+    if search:
+        query = query.order_by(values.c.value.ilike(f"{search}%").desc())
+    query = query.order_by(values.c.value).limit(limit)
+    return db.session.scalars(query).all()
 
 
 def export_filename(prefix):
