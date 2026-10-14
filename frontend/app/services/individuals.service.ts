@@ -19,7 +19,7 @@ import {
   APISortParams,
   FeatureCollection,
 } from '../models/common.models';
-import { DATATABLE_CONFIG, INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
+import { INDIVIDUALS_DEFAULT_SORT } from '../utils/constants.util';
 
 @Injectable()
 export class IndividualsService {
@@ -124,10 +124,10 @@ export class IndividualsService {
       comment: individual.comment,
       additional_data: individual.additional_data,
       modules: individual.modules.map((id: number) => ({ id_module: id })),
+      medias: individual.medias
     };
 
     if (formAction === 'ADD') {
-      console.log('Creating individual with payload', payload);
       return this._http.post<Individual>(`${this._OBJECT_API}`, payload, {
         params: params,
         headers: this._headers,
@@ -138,7 +138,6 @@ export class IndividualsService {
         id_individual: individual.id_individual,
       };
 
-      console.log('Creating individual with payload', payload);
       return this._http.put<Individual>(
         `${this._OBJECT_API}/${individual.id_individual}`,
         payload,

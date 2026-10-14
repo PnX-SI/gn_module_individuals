@@ -202,7 +202,9 @@
         "Others" : {
             "Yes" : "Oui",
             "No" : "Non",
-            "All" : "Tout"
+            "All" : "Tout",
+            "true" : "Oui",
+            "false" : "Non"
         },
         "Export": {
           "Title": "Format d'export",

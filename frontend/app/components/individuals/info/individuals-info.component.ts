@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, BehaviorSubject, Observable, of } from 'rxjs';
-import { takeUntil, tap, filter, map } from 'rxjs/operators';
+import { takeUntil, filter } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 import * as L from 'leaflet';
 
@@ -28,7 +28,6 @@ import {
   timeFormat,
   getValuesLabels,
 } from '../../../utils/functions.util';
-
 import { Individual } from '../../../models/individuals.models';
 import { DEPLOYMENT_MODEL, Deployment } from '../../../models/deployments.models';
 import {
@@ -96,10 +95,12 @@ export class IndividualsInfoComponent implements OnInit {
   private _selectedFeature: Feature<any> | null = null;
   private _trajectoryCoordinates: Array<[number, number]> = [];
   private _trajectoryLayer: L.Layer | null = null;
+  private _hasZoomedToFeatures = false;
 
   public dateFormat = dateFormat;
   public getValuesLabels = getValuesLabels;
   public timeFormat = timeFormat;
+
 
   constructor(
     private _config: ConfigService,
@@ -114,7 +115,7 @@ export class IndividualsInfoComponent implements OnInit {
     private _module: ModuleService,
     private _dataFormService: DataFormService,
     private _syntheseService: SyntheseDataService,
-    private _mapService: MapService
+    private _mapService: MapService,
   ) {}
 
   ngOnInit(): void {
@@ -198,17 +199,20 @@ export class IndividualsInfoComponent implements OnInit {
     setTimeout(() => {
       // Usefull to wait the DOM build before calculation
       this._map = this._mapService.getMap();
+
+      // Create a pane for the layers : Ensure that the layers will be on the top
+      if (!this._map.getPane('points')) {
+        const pane = this._map.createPane('points');
+        pane.style.zIndex = '650';
+      }
+
       this.mapReady = true;
       this._resizeMap();
       this._bindMapMove();
 
       // Create the trajectory layer
-      if (this._map) {
-        this._trajectoryLayer = this._createTrajectoryLayer();
-        this._trajectoryLayer.addTo(this._map);
-      } else {
-        this.noGeometry = true;
-      }
+      this._trajectoryLayer = this._createTrajectoryLayer();
+      this._trajectoryLayer.addTo(this._map);
 
       // Delay the zoom on features to ensure that the map is fully initialized
       requestAnimationFrame(() => this._zoomOnFeatures());
@@ -382,7 +386,6 @@ export class IndividualsInfoComponent implements OnInit {
     // Access the identifier dynamically. `idFieldName` is configured by the parent,
     // so TypeScript cannot verify the property at compile time. The identifier field
     // is guaranteed by the component contract to be a number.
-    layer.options.pane = 'individuals';
     const id = (feature.properties as Record<string, unknown>)['id_synthese'] as number;
     const item = this._mapLayersById.find((item) => item.id === id);
 
@@ -392,6 +395,12 @@ export class IndividualsInfoComponent implements OnInit {
 
     // Set layer style
     this._setLayerStyle(layer, false, id);
+
+    // Affect the layer to the pane, like that it will be
+    // displayed according to the pane properties
+    if (layer instanceof L.Path) {
+      layer.options.pane = 'points';
+    }
     layer.on('click', () => this._highlightLayer(feature, layer));
 
     // Prepare popup
@@ -443,23 +452,23 @@ export class IndividualsInfoComponent implements OnInit {
    */
   private _zoomOnFeatures(): void {
     this.mapData$.subscribe((mapData) => {
-      const layer = L.geoJSON(mapData);
-
       if (!this._map) {
         return;
       }
 
-      if (layer.getBounds().isValid()) {
-        this._ignoreNextMapMoveEnd = true;
-        this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+      const layer = L.geoJSON(mapData);
+      const bounds = layer.getBounds();
+
+      if (bounds.isValid()) {
+        this.noGeometry = false;
+
+        if (!this._hasZoomedToFeatures) {
+          this._hasZoomedToFeatures = true;
+          this._ignoreNextMapMoveEnd = true;
+          this._map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false });
+        }
       } else {
         this.noGeometry = true;
-      }
-
-      // Create a pane for the layers : Ensure that the layers will be on the top
-      if (!this._map.getPane('individuals')) {
-        const pane = this._map.createPane('individuals');
-        pane.style.zIndex = '500';
       }
     });
   }

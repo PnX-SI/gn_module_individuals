@@ -171,6 +171,15 @@
         </p>
       </div>
     </ng-container>
+
+    <!-- MEDIAS: medias -->
+    <label class="small">{{ 'Media.Medias' | translate }}</label>
+    <pnx-medias
+      schemaDotTable="gn_monitoring.t_individuals"
+      [parentFormControl]="$any(form.get('medias'))"
+      [sizeMax]="config.MEDIAS.MEDIAS_SIZE_MAX"
+      [default]="defaultMediaConfig"
+    ></pnx-medias>
   </div>
 </ng-template>
 
