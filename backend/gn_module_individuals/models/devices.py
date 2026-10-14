@@ -23,6 +23,7 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         "id_nomenclature_device_type",
         DB.Integer,
         DB.ForeignKey(TNomenclatures.id_nomenclature),
+        nullable=False,
     )
 
     provider_name = DB.Column(
@@ -33,6 +34,7 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
     code = DB.Column(
         "code",
         DB.Text,
+        nullable=False,
     )
 
     id_referer = DB.Column(
@@ -50,6 +52,7 @@ class TrackingDevices(NomenclaturesMixin, DB.Model):
         "id_digitiser",
         DB.Integer,
         DB.ForeignKey("utilisateurs.t_roles.id_role"),
+        nullable=False,
     )
 
     meta_create_date = DB.Column(

@@ -89,13 +89,20 @@ def devices(users):
 
 
 @pytest.fixture
-def device():
+def device(users):
     next_id = (
         db.session.scalar(select(func.coalesce(func.max(TrackingDevices.id_tracking_device), 0)))
         + 1
     )
     with db.session.begin_nested():
-        instance = TrackingDevices(id_tracking_device=next_id)
+        instance = TrackingDevices(
+            id_tracking_device=next_id,
+            id_nomenclature_device_type=get_id_nomenclature(
+                nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="1"
+            ),
+            code=f"Balise test {next_id}",
+            id_digitiser=users["admin_user"].id_role,
+        )
         db.session.add(instance)
         db.session.flush()
     return instance

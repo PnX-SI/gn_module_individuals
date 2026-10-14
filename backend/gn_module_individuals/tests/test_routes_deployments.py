@@ -20,7 +20,7 @@ def _valid_payload(individual, **overrides):
             nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="4"
         ),
         "id_nomenclature_deployment_location": get_id_nomenclature(
-            nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="3"
+            nomenclature_type_mnemonique="LOC_DISPO_SUIVI", cd_nomenclature="3"
         ),
         "install_date": "2024-01-01",
     }
