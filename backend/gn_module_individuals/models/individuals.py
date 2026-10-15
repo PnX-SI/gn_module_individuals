@@ -2,6 +2,7 @@ from apptax.taxonomie.models import Taxref
 from geonature.core.gn_monitoring.models import TIndividuals
 from geonature.core.gn_synthese.models import Synthese
 from geonature.utils.env import DB
+from geonature.core.gn_commons.models import TMedias
 from pypnnomenclature.models import TNomenclatures as Nomenclature
 from sqlalchemy import select, inspect, func
 
@@ -36,6 +37,17 @@ def register_individual_extensions():
             foreign_keys=[TIndividuals.cd_nom],
             lazy="select",
             viewonly=True,
+        ),
+    )
+    _add_mapper_property(
+        "medias",
+        DB.relationship(
+            TMedias,
+            primaryjoin=TIndividuals.uuid_individual == TMedias.uuid_attached_row,
+            foreign_keys=[TMedias.uuid_attached_row],
+            cascade="all",
+            lazy="select",
+            overlaps="medias",
         ),
     )
     _register_nomenclatures_attribute()
@@ -81,3 +93,4 @@ def individual_last_observation_date_expression():
 
 def individual_last_observation_observers_expression():
     return _individual_last_synthese_column(Synthese.observers)
+
