@@ -110,6 +110,29 @@
     </div>
   </div>
 
+  <ng-container *ngFor="let media of datatable.medias">
+  <div>
+    <h3 class="text-muted">{{ 'Media.Medias' | translate }}</h3>
+    <div class="value">
+      <a
+        [href]="mediaService.href(media)"
+        target="blank"
+      >
+        {{ media.title_fr }}
+      </a>
+      <i>({{ mediaService.typeMedia(media) }}, {{ media.author }})</i>
+      <span *ngIf="media.title_fr"> {{ media.title_fr }}</span>
+    </div>
+  </div>
+  <div>
+    <pnx-media-item
+      [inputMedia]="media"
+      [diaporamaMedia]="datatable.medias"
+      display="icon"
+    />
+  </div>
+</ng-container>
+
   <div class="content row one-per-row">
     <div class="col-12 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.deployments' | translate }}</h3>

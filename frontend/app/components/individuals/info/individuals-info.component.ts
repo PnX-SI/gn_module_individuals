@@ -41,6 +41,7 @@ import { ModalComponent } from '../../modal/modal.component';
 import { IndividualsService } from '../../../services/individuals.service';
 import { DeploymentsService } from '../../../services/deployments.service';
 import { DeploymentsFormComponent } from '../../deployments-form/deployments-form.component';
+import { MediaService } from '@geonature/GN2CommonModule/service/media.service';
 
 @Component({
   selector: 'gn-individuals-individuals-info',
@@ -116,6 +117,7 @@ export class IndividualsInfoComponent implements OnInit {
     private _dataFormService: DataFormService,
     private _syntheseService: SyntheseDataService,
     private _mapService: MapService,
+    public mediaService: MediaService,
   ) {}
 
   ngOnInit(): void {
