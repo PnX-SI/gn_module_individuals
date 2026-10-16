@@ -97,7 +97,8 @@ export class IndividualsInfoComponent implements OnInit {
   private _trajectoryCoordinates: Array<[number, number]> = [];
   private _trajectoryLayer: L.Layer | null = null;
   private _hasZoomedToFeatures = false;
-
+  public mediaNomenclaturesLoaded = false;
+  
   public dateFormat = dateFormat;
   public getValuesLabels = getValuesLabels;
   public timeFormat = timeFormat;
@@ -154,6 +155,14 @@ export class IndividualsInfoComponent implements OnInit {
         .pipe(takeUntil(this._destroy$))
         .subscribe((additionalFields) => {
           this.additionalFields = additionalFields;
+        });
+
+      this.mediaService
+        .getNomenclatures()
+        .pipe(takeUntil(this._destroy$))
+        .subscribe(() => {
+          // Wait that TYPE_MEDIA nomenclture is loaded
+          this.mediaNomenclaturesLoaded = true;
         });
     });
 
@@ -335,7 +344,6 @@ export class IndividualsInfoComponent implements OnInit {
     this.allowedToChangeDeployments = {};
     this.datatable_deployments$.subscribe((deployments) => {
       deployments.items.forEach((deployment: Deployment) => {
-        console.log('datatable loop on deployments');
         // Edit and delete deployment actions have the same access rights
         // of the individual
         this.allowedToChangeDeployments[deployment.id_deployment] = {

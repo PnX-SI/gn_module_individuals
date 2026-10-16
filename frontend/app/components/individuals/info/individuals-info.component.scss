@@ -56,3 +56,27 @@
   margin-right: 0px;
   margin-left: 0px;
 }
+
+// Medias
+
+.media-item {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: row;
+  min-width: 0;
+  gap: 10px;
+}
+
+.media-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  a,
+  span {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
