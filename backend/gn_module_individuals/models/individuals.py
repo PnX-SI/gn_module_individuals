@@ -93,4 +93,3 @@ def individual_last_observation_date_expression():
 
 def individual_last_observation_observers_expression():
     return _individual_last_synthese_column(Synthese.observers)
-

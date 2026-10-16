@@ -110,33 +110,40 @@
     </div>
   </div>
 
-  <ng-container *ngFor="let media of datatable.medias">
-  <div>
-    <h3 class="text-muted">{{ 'Media.Medias' | translate }}</h3>
-    <div class="value">
-      <a
-        [href]="mediaService.href(media)"
-        target="blank"
-      >
-        {{ media.title_fr }}
-      </a>
-      <i>({{ mediaService.typeMedia(media) }}, {{ media.author }})</i>
-      <span *ngIf="media.title_fr"> {{ media.title_fr }}</span>
+  <div *ngIf="datatable.medias?.length > 0 && mediaNomenclaturesLoaded"
+    class="content row"
+  >
+    <div class="col-12 padding-sm">
+      <h3 class="text-muted">{{ 'Media.Medias' | translate }}</h3>
+    </div>
+    <div 
+      *ngFor="let media of datatable.medias;"
+      class="col-xs-12 col-sm-6 col-md-4 padding-sm"
+    >
+      <div class="media-item">
+        <pnx-media-item
+          [inputMedia]="media"
+          [diaporamaMedia]="datatable.medias"
+          [display]="'icon'"
+        />
+        <div class="media-content">
+          <a
+            [href]="mediaService.href(media)"
+            target="_blank"
+          >
+            {{ media['title_' + defaultLang] }}
+          </a>
+          <i>({{ mediaService.typeMedia(media) }}{{ media.author ? ", " + media.author : "" }})</i>
+          <span *ngIf="media['description_' + defaultLang]"> {{ media['description_' + defaultLang] }}</span>
+        </div>
+      </div>
     </div>
   </div>
-  <div>
-    <pnx-media-item
-      [inputMedia]="media"
-      [diaporamaMedia]="datatable.medias"
-      display="icon"
-    />
-  </div>
-</ng-container>
 
   <div class="content row one-per-row">
     <div class="col-12 padding-sm">
       <h3 class="text-muted">{{ 'Individuals.Individuals.Fields.deployments' | translate }}</h3>
-      <p class="list-component">
+      <p>
         <gn-individuals-list
           [idFieldName]="'id_deployment'"
           [displayedColumnsParams]="displayedDeploymentsColumnsParams"

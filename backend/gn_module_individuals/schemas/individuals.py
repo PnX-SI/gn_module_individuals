@@ -51,10 +51,11 @@ class IndividualComputedFieldsMixin:
     def get_last_observation_observers_name(self, obj):
         return obj.last_obs_observers
 
+
 class IndividualModulesFieldMixin:
     def get_modules(self, obj):
         return IndividualModuleSchema(many=True).dump(obj.modules)
-    
+
     def load_modules(self, value):
         if not isinstance(value, list):
             raise ValidationError("modules must be a list.")
@@ -70,7 +71,7 @@ class IndividualModulesFieldMixin:
                 modules.append(module)
         return modules
 
-    
+
 class IndividualMediasFieldMixin:
     def get_medias(self, obj):
         return MediaSchema(many=True).dump(obj.medias)
@@ -82,15 +83,15 @@ class IndividualMediasFieldMixin:
         for index, item in enumerate(value):
             if not isinstance(item, dict):
                 raise ValidationError(f"medias[{index}] must be an object.")
-            
+
             id_media = item.get("id_media") if isinstance(item, dict) else None
             if not isinstance(id_media, int) or isinstance(id_media, bool):
                 raise ValidationError(f"modules[{index}].id_module must be an integer.")
-            
+
             media = db.session.get(TMedias, id_media)
             if media is None:
                 raise ValidationError(f"The media {id_media} does not exist.")
-            
+
             if media not in medias:
                 medias.append(media)
 
@@ -243,7 +244,9 @@ class IndividualExportSchema(
     )
 
 
-class IndividualDetailSchema(IndividualBaseSchema, IndividualMediasFieldMixin, IndividualModulesFieldMixin):
+class IndividualDetailSchema(
+    IndividualBaseSchema, IndividualMediasFieldMixin, IndividualModulesFieldMixin
+):
     """All of the model's relationships, in addition to the base fields."""
 
     class Meta(IndividualBaseSchema.Meta):
@@ -267,7 +270,7 @@ class IndividualDetailSchema(IndividualBaseSchema, IndividualMediasFieldMixin, I
     modules_list = fields.Method("get_modules", dump_only=True, data_key="modules")
     # Same comment as modules
     medias_list = fields.Method("get_medias", dump_only=True, data_key="medias")
-    
+
     last_observation_date = fields.Method("get_last_observation_date", dump_only=True)
     last_observation_observers = fields.Method("get_last_observation_observers", dump_only=True)
 
@@ -293,7 +296,9 @@ class IndividualDetailSchema(IndividualBaseSchema, IndividualMediasFieldMixin, I
         return DeploymentSchema(many=True, exclude=("individual_name",)).dump(deployments)
 
 
-class IndividualWriteSchema(IndividualBaseSchema, IndividualMediasFieldMixin, IndividualModulesFieldMixin):
+class IndividualWriteSchema(
+    IndividualBaseSchema, IndividualMediasFieldMixin, IndividualModulesFieldMixin
+):
     """Used to create/update an individual. id_digitiser is always set by the
     route from the current user, regardless of what is submitted here."""
 
