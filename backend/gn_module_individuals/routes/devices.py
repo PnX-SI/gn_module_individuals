@@ -27,7 +27,13 @@ from ..schemas import (
 from ..models import TrackingDevices, IndividualDeployments
 
 from ..blueprint import blueprint
-from .utils import check_export_format, export_filename, parse_bool, parse_sort
+from .utils import (
+    check_export_format,
+    distinct_values,
+    export_filename,
+    parse_bool,
+    parse_sort,
+)
 
 
 def _device_available_expression():
@@ -253,6 +259,29 @@ def list_devices(scope):
     else:
         items = db.session.execute(query).unique().scalars().all()
         return schema.dump(items, many=True)
+
+
+@blueprint.route("/devices/provider_names", methods=["GET"])
+@login_required
+@permissions.check_cruved_scope(
+    "R", get_scope=True, module_code=MODULE_CODE, object_code="INDIVIDUALS"
+)
+@json_resp
+def list_provider_names(scope):
+    """
+    List the distinct provider names already used, for autocomplete
+
+    .. :quickref: Devices;
+
+    Not restricted by scope: the goal is to reuse existing spellings.
+
+    :query string search: filter on the provider name (partial match)
+    :query int limit: max number of values (default 20, max 100)
+
+    :returns: `list<string>`
+    :rtype: list
+    """
+    return distinct_values(TrackingDevices.provider_name, request.args)
 
 
 @blueprint.route("/devices", methods=["POST"])

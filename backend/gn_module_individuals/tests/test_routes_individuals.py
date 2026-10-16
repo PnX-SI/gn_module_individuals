@@ -315,13 +315,19 @@ class TestListIndividuals:
         items = r.get_json()["items"]
         item = next(i for i in items if i["id_individual"] == individual.id_individual)
         assert item["deployed_markings"] == {}
-        # device_with_deployment uses a device without id_nomenclature_device_type set
         assert item["deployed_devices"] == {
-            "device_1": {"location_name": "Encolure", "name": None}
+            "device_1": {"location_name": "Encolure", "name": "Balise GPS"}
         }
 
     def test_filter_search_matches_device_label_case_insensitive(self, users, individual):
-        device = TrackingDevices(provider_name="Ornitela", code="Balise 56")
+        device = TrackingDevices(
+            provider_name="Ornitela",
+            code="Balise 56",
+            id_nomenclature_device_type=get_id_nomenclature(
+                nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="1"
+            ),
+            id_digitiser=individual.id_digitiser,
+        )
         with db.session.begin_nested():
             db.session.add(device)
             db.session.flush()
@@ -336,6 +342,7 @@ class TestListIndividuals:
                         nomenclature_type_mnemonique="LOC_DISPO_SUIVI", cd_nomenclature="3"
                     ),
                     install_date=datetime.datetime(2024, 1, 1),
+                    id_digitiser=individual.id_digitiser,
                 )
             )
 
@@ -601,8 +608,8 @@ class TestGetIndividual:
         assert dep["install_date"] == "2024-01-01"
         assert dep["marking_code"] is None
         assert dep["removal_date"] is None
-        assert dep["digitiser_name"] is None
-        assert dep["deployment_type_name"] == "Dispositif de suivi"
+        assert dep["digitiser_name"] is not None
+        assert dep["deployment_type_name"] == "Balise GPS"
         assert dep["deployment_location_name"] == "Encolure"
         assert "individual_name" not in dep
 
@@ -618,6 +625,7 @@ class TestGetIndividual:
             id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
             id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
             install_date=datetime.datetime(2020, 1, 1),
+            id_digitiser=individual.id_digitiser,
         )
         later = IndividualDeployments(
             id_tracking_device=existing.id_tracking_device,
@@ -625,6 +633,7 @@ class TestGetIndividual:
             id_nomenclature_deployment_type=existing.id_nomenclature_deployment_type,
             id_nomenclature_deployment_location=existing.id_nomenclature_deployment_location,
             install_date=datetime.datetime(2025, 1, 1),
+            id_digitiser=individual.id_digitiser,
         )
         db.session.add_all([earlier, later])
         db.session.flush()

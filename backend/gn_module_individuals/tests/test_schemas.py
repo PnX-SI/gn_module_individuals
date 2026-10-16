@@ -221,7 +221,7 @@ class TestDeploymentSchema:
         deployment = device_with_deployment.deployments[0]
         only = [f"+{n}" for n in IndividualDeployments.__nomenclatures__]
         dumped = DeploymentSchema(only=only).dump(deployment)
-        assert dumped["nomenclature_deployment_type"]["cd_nomenclature"] == "4"
+        assert dumped["nomenclature_deployment_type"]["cd_nomenclature"] == "1"
 
     def test_dump_nomenclature_deployment_location_returns_nomenclature(
         self, app, device_with_deployment
@@ -231,17 +231,20 @@ class TestDeploymentSchema:
         dumped = DeploymentSchema(only=only).dump(deployment)
         assert dumped["nomenclature_deployment_location"]["cd_nomenclature"] == "3"
 
-    def test_get_digitiser_returns_none_when_unset(self, app, device_with_deployment):
+    def test_get_digitiser_returns_full_name(self, app, device_with_deployment):
         deployment = device_with_deployment.deployments[0]
-        assert DeploymentSchema().get_digitiser(deployment) is None
+        digitiser = deployment.digitiser
+        assert DeploymentSchema().get_digitiser(deployment) == (
+            f"{digitiser.prenom_role} {digitiser.nom_role}"
+        )
 
     def test_get_deployment_type_name_returns_nomenclature_label(
         self, app, device_with_deployment, individual
     ):
         deployment = individual.deployments[0]
-        # device_with_deployment sets id_nomenclature_deployment_type to DISPO_SUIVI
+        # device_with_deployment sets id_nomenclature_deployment_type to Balise GPS
         result = DeploymentSchema().get_deployment_type_name(deployment)
-        assert result == "Dispositif de suivi"
+        assert result == "Balise GPS"
 
     def test_get_deployment_location_name_returns_nomenclature_label(
         self, app, device_with_deployment, individual
@@ -370,6 +373,7 @@ class TestIndividualListSchema:
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "5"),
             marking_code="Vert",
             install_date=datetime(2024, 1, 1),
+            id_digitiser=individual.id_digitiser,
         )
         with db.session.begin_nested():
             db.session.add(dep)
@@ -390,6 +394,7 @@ class TestIndividualListSchema:
             id_nomenclature_deployment_type=get_id_nomenclature("TYPE_DISPO_SUIVI", "6"),
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "3"),
             install_date=datetime(2024, 1, 1),
+            id_digitiser=individual.id_digitiser,
         )
         with db.session.begin_nested():
             db.session.add(dep)
@@ -414,6 +419,7 @@ class TestIndividualListSchema:
             id_nomenclature_deployment_location=get_id_nomenclature("LOC_DISPO_SUIVI", "1"),
             marking_code="Vert",
             install_date=datetime(2024, 1, 1),
+            id_digitiser=individual.id_digitiser,
         )
         with db.session.begin_nested():
             db.session.add(dep)
@@ -432,6 +438,7 @@ class TestIndividualListSchema:
             marking_code="Vert",
             install_date=datetime(2024, 1, 1),
             removal_date=datetime(2024, 6, 1),
+            id_digitiser=individual.id_digitiser,
         )
         with db.session.begin_nested():
             db.session.add(dep)

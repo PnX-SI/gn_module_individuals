@@ -4,9 +4,23 @@ import pytest
 from flask import url_for, g
 
 from pypnusershub.tests.utils import set_logged_user
+from geonature.tests.utils import get_id_nomenclature
+from geonature.utils.env import db
 
+from gn_module_individuals.models import TrackingDevices
 from gn_module_individuals.schemas import TrackingDeviceDetailSchema, TrackingDeviceWriteSchema
 from gn_module_individuals.utils.errors import ApiErrorCode
+
+
+def _device_payload(**fields):
+    """Device body with the required fields, overridden by ``fields``."""
+    return {
+        "id_nomenclature_device_type": get_id_nomenclature(
+            nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="1"
+        ),
+        **fields,
+    }
+
 
 # ===========================================================================
 # GET /devices  (list_devices)
@@ -160,16 +174,24 @@ class TestListDevices:
 
     # --- sorting -----------------------------------------------------
 
+    # PostgreSQL sorts with the DB collation, Python by code point: only compare names
+    # whose order is the same for both
+    FIXTURE_NAMES = {"Lotek", "Ornitela", "Vifly"}
+
     def test_sort_by_provider_name_asc(self, users, devices):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.list_devices", prop="provider_name", dir="asc"))
-        names = [item["provider_name"] for item in r.get_json()]
+        names = [
+            i["provider_name"] for i in r.get_json() if i["provider_name"] in self.FIXTURE_NAMES
+        ]
         assert names == sorted(names)
 
     def test_sort_by_provider_name_desc(self, users, devices):
         set_logged_user(self.client, users["admin_user"])
         r = self.client.get(url_for("individuals.list_devices", prop="provider_name", dir="desc"))
-        names = [item["provider_name"] for item in r.get_json()]
+        names = [
+            i["provider_name"] for i in r.get_json() if i["provider_name"] in self.FIXTURE_NAMES
+        ]
         assert names == sorted(names, reverse=True)
 
     @pytest.mark.parametrize(
@@ -306,10 +328,9 @@ class TestGetDevice:
 @pytest.mark.usefixtures("client_class", "temporary_transaction")
 class TestCreateDevice:
 
-    VALID_PAYLOAD = {
-        "provider_name": "Ornitela",
-        "code": "TEST_POST_001",
-    }
+    @property
+    def VALID_PAYLOAD(self):
+        return _device_payload(provider_name="Ornitela", code="TEST_POST_001")
 
     def test_unauthenticated_returns_401(self):
         r = self.client.post(url_for("individuals.create_device"), json=self.VALID_PAYLOAD)
@@ -354,7 +375,7 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            json={"provider_name": "   ", "code": "X"},
+            json=_device_payload(provider_name="   ", code="X"),
         )
         assert r.status_code == 400
 
@@ -362,7 +383,7 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            json={"provider_name": "Ornitela", "code": ""},
+            json=_device_payload(provider_name="Ornitela", code=""),
         )
         assert r.status_code == 400
 
@@ -432,7 +453,7 @@ class TestCreateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.post(
             url_for("individuals.create_device"),
-            json={"provider_name": "   ", "code": "X"},
+            json=_device_payload(provider_name="   ", code="X"),
         )
         assert r.status_code == 400
         payload = r.get_json()
@@ -451,7 +472,7 @@ class TestUpdateDevice:
     def test_unauthenticated_returns_401(self, device):
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         assert r.status_code == 401
 
@@ -459,7 +480,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["noright_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         assert r.status_code == 403
 
@@ -472,7 +493,7 @@ class TestUpdateDevice:
                 "individuals.update_device",
                 id_tracking_device=devices[0].id_tracking_device,
             ),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         assert r.status_code == 403
 
@@ -480,7 +501,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=-1),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         assert r.status_code == 404
 
@@ -488,7 +509,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=-1),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         payload = r.get_json()
         assert payload.get("name") == ApiErrorCode.NOT_FOUND
@@ -501,7 +522,7 @@ class TestUpdateDevice:
                 "individuals.update_device",
                 id_tracking_device=devices[0].id_tracking_device,
             ),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         assert r.status_code == 403
         payload = r.get_json()
@@ -512,7 +533,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "Ornitela Updated", "code": "UPD_001"},
+            json=_device_payload(provider_name="Ornitela Updated", code="UPD_001"),
         )
         assert r.status_code == 200
 
@@ -520,7 +541,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         assert r.status_code == 200
         data = r.get_json()
@@ -532,7 +553,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "NewProvider", "code": "UPD_002"},
+            json=_device_payload(provider_name="NewProvider", code="UPD_002"),
         )
         data = r.get_json()
         assert data["provider_name"] == "NewProvider"
@@ -542,7 +563,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "code": "Y"},
+            json=_device_payload(provider_name="X", code="Y"),
         )
         detail = self.client.get(
             url_for("individuals.device", id_tracking_device=device.id_tracking_device)
@@ -553,12 +574,12 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={
-                "provider_name": "X",
-                "code": "Y",
-                "nomenclature_device_type_name": "Balise GPS",
-                "digitiser_name": "Test Agent",
-            },
+            json=_device_payload(
+                provider_name="X",
+                code="Y",
+                nomenclature_device_type_name="Balise GPS",
+                digitiser_name="Test Agent",
+            ),
         )
         assert r.status_code == 200
 
@@ -566,7 +587,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "", "code": "X"},
+            json=_device_payload(provider_name="", code="X"),
         )
         assert r.status_code == 400
 
@@ -588,7 +609,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "code": "Y", "id_referer": "not-an-integer"},
+            json=_device_payload(provider_name="X", code="Y", id_referer="not-an-integer"),
         )
         assert r.status_code == 400
 
@@ -596,7 +617,7 @@ class TestUpdateDevice:
         set_logged_user(self.client, users["admin_user"])
         r = self.client.put(
             url_for("individuals.update_device", id_tracking_device=device.id_tracking_device),
-            json={"provider_name": "X", "code": "Y", "id_referer": "not-an-integer"},
+            json=_device_payload(provider_name="X", code="Y", id_referer="not-an-integer"),
         )
         payload = r.get_json()
         assert payload.get("name") == ApiErrorCode.VALIDATION_ERROR
@@ -725,3 +746,69 @@ class TestDeleteDevice:
         assert "description" in payload
         assert payload.get("params", {}).get("id") == device_with_deployment.id_tracking_device
         assert payload.get("params", {}).get("nb") == 1
+
+
+# ===========================================================================
+# GET /devices/provider_names  (list_provider_names)
+# ===========================================================================
+
+
+@pytest.fixture
+def autocomplete_devices(users):
+    names = ["Zzprov Alpha", "  Zzprov Alpha ", "Zzprov alpha", "Prefix Zzprov", "", None]
+    id_type = get_id_nomenclature(
+        nomenclature_type_mnemonique="TYPE_DISPO_SUIVI", cd_nomenclature="1"
+    )
+    with db.session.begin_nested():
+        db.session.add_all(
+            [
+                TrackingDevices(
+                    provider_name=name,
+                    code=f"zzcode{i}",
+                    id_nomenclature_device_type=id_type,
+                    id_digitiser=users["admin_user"].id_role,
+                )
+                for i, name in enumerate(names)
+            ]
+        )
+        db.session.flush()
+
+
+@pytest.mark.usefixtures("client_class", "temporary_transaction")
+class TestListProviderNames:
+
+    def test_unauthenticated_returns_401(self):
+        r = self.client.get(url_for("individuals.list_provider_names"))
+        assert r.status_code == 401
+
+    def test_forbidden_without_rights(self, users):
+        set_logged_user(self.client, users["noright_user"])
+        r = self.client.get(url_for("individuals.list_provider_names"))
+        assert r.status_code == 403
+
+    def test_returns_distinct_trimmed_values(self, users, autocomplete_devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", search="zzprov"))
+        assert r.status_code == 200
+        values = r.get_json()
+        # Case variants are kept so that the user sees them
+        assert sorted(values) == sorted(["Zzprov Alpha", "Zzprov alpha", "Prefix Zzprov"])
+        # Prefix matches come first
+        assert values[-1] == "Prefix Zzprov"
+
+    def test_empty_values_are_excluded(self, users, autocomplete_devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", limit=100))
+        assert "" not in r.get_json()
+        assert None not in r.get_json()
+
+    def test_limit(self, users, autocomplete_devices):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", search="zzprov", limit=1))
+        assert len(r.get_json()) == 1
+
+    def test_invalid_limit_returns_400(self, users):
+        set_logged_user(self.client, users["admin_user"])
+        r = self.client.get(url_for("individuals.list_provider_names", limit=0))
+        assert r.status_code == 400
+        assert r.get_json().get("name") == ApiErrorCode.INVALID_FILTER
