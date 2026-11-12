@@ -9,6 +9,7 @@ import { ModuleService } from '@geonature/services/module.service';
 import { CommonService } from '@geonature_common/service/common.service';
 import { ConfigService } from '@geonature/services/config.service';
 import { DataFormService } from '@geonature_common/form/data-form.service';
+import { MediaService } from '@geonature/GN2CommonModule/service/media.service';
 
 import { ErrorHandlerService } from '../../../services/errors-handler.service';
 import { Individual } from '../../../models/individuals.models';
@@ -34,12 +35,12 @@ export class IndividualsFormComponent implements OnInit {
   public formAction!: string;
   public form!: FormGroup;
   public formConstraints: Record<string, FormConstraint> = INDIVIDUALS_FORM_CONSTRAINTS;
-  public taxonListId: string = this._config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
+  public taxonListId: string = this.config.INDIVIDUALS.GLOBAL.ID_TAXON_LIST;
   public datatable!: Individual;
   public additionalFields: Array<any> = [];
   public availableDeploymentsColumnsParams = DEPLOYMENT_MODEL;
   public displayedDeploymentsColumnsParams: string[] =
-    this._config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
+    this.config.INDIVIDUALS?.INDIVIDUALS?.DEPLOYMENT_LIST_COLUMNS ?? [];
   private _dataTable_deployments$ = new BehaviorSubject<ItemCollection<Deployment> | null>(null);
   public dataTable_deployments$: Observable<ItemCollection<Deployment>> =
     this._dataTable_deployments$.pipe(
@@ -62,11 +63,13 @@ export class IndividualsFormComponent implements OnInit {
   public individualsObjectModules: any[] = [];
   private _currentDataset = '';
 
+  public defaultMediaConfig = {};
+
   constructor(
     private _route: ActivatedRoute,
     private _router: Router,
     private _translate: TranslateService,
-    private _config: ConfigService,
+    public config: ConfigService,
     private _commonService: CommonService,
     private _fb: FormBuilder,
     private _service: IndividualsService,
@@ -74,7 +77,8 @@ export class IndividualsFormComponent implements OnInit {
     private _module: ModuleService,
     public _deploymentsService: DeploymentsService,
     private _modalService: NgbModal,
-    private _dataFormService: DataFormService
+    private _dataFormService: DataFormService,
+    private _mediaService: MediaService
   ) {}
 
   ngOnInit(): void {
@@ -111,6 +115,7 @@ export class IndividualsFormComponent implements OnInit {
       ],
       deployments: this._fb.array<FormGroup>([]),
       additional_data: this._fb.group({}),
+      medias: [[], this._mediaService.mediasValidator()],
     });
 
     // Update permissions when form values change
@@ -131,7 +136,7 @@ export class IndividualsFormComponent implements OnInit {
         filter((taxon) => taxon !== null && typeof taxon === 'object'),
         tap((taxon) => {
           // Get the temporaly configured dataset for the curent cd_nom
-          this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find(
+          this._currentDataset = this.config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find(
             (taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) =>
               taxonDataset.CD_NOM === taxon.cd_nom
           )?.ID_DATASET;
@@ -165,7 +170,7 @@ export class IndividualsFormComponent implements OnInit {
         switchMap(({ datatable }) => {
           if (this.formAction == 'EDIT' && datatable?.id_individual) {
             // Get the temporaly configured dataset for the curent cd_nom
-            this._currentDataset = this._config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find(
+            this._currentDataset = this.config.INDIVIDUALS.INDIVIDUALS?.TAXON_DATASET?.find(
               (taxonDataset: { CD_NOM: number; DATASET_SHORT_NAME: string }) =>
                 taxonDataset.CD_NOM === datatable.cd_nom
             )?.ID_DATASET;
@@ -207,6 +212,12 @@ export class IndividualsFormComponent implements OnInit {
         })
       )
       .subscribe();
+
+    // Set default media configuration
+    this.defaultMediaConfig = {
+      title_fr: this.datatable.individual_name + '_xxxx-xx-xx',
+      author: this.datatable.id_digitiser
+    }
   }
 
   ngOnDestroy() {

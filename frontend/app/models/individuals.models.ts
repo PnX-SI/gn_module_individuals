@@ -57,6 +57,7 @@ export interface CreateIndividualDto {
   comment: string;
   additional_data: {};
   modules: [];
+  medias: [];
 }
 
 // This model is only used to PUT data to the API (dto = data transfer object)
