@@ -439,4 +439,12 @@ export class IndividualsFormComponent implements OnInit {
       id_dataset: this._currentDataset,
     });
   }
+
+  public onMediasChange($event: boolean) {
+    if ($event) {
+      console.log('Medias changed, mark form as dirty');
+      this.form.markAsDirty();
+      this._setPermissions(this.datatable);
+    }
+  }
 }
